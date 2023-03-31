@@ -8,7 +8,7 @@ import (
 	"github.com/bluet/syspkg/internal"
 )
 
-var pm string = "apt-get"
+var pm string = "apt"
 
 type PackageManager struct{}
 

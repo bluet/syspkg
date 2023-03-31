@@ -3,6 +3,7 @@ package snap
 import (
 	"os/exec"
 	"strings"
+	"os"
 
 	"github.com/bluet/syspkg/internal"
 )
@@ -20,6 +21,10 @@ func (s *PackageManager) Install(pkgs []string, opts *internal.Options) error {
 	// Snap package manager installs one package at a time
 	for _, pkg := range pkgs {
 		cmd := exec.Command(pm, "install", pkg)
+		if opts != nil && opts.Verbose {
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+		}
 		err := cmd.Run()
 		if err != nil {
 			return err
@@ -32,6 +37,10 @@ func (s *PackageManager) Uninstall(pkgs []string, opts *internal.Options) error 
 	// Snap package manager removes one package at a time
 	for _, pkg := range pkgs {
 		cmd := exec.Command(pm, "remove", pkg)
+		if opts != nil && opts.Verbose {
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+		}
 		err := cmd.Run()
 		if err != nil {
 			return err
@@ -43,6 +52,10 @@ func (s *PackageManager) Uninstall(pkgs []string, opts *internal.Options) error 
 // Implement Update function for Snap
 func (s *PackageManager) Update(opts *internal.Options) error {
 	cmd := exec.Command(pm, "refresh")
+	if opts != nil && opts.Verbose {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	}
 	err := cmd.Run()
 	return err
 }
@@ -77,6 +90,10 @@ func (s *PackageManager) ListUpgradable(opts *internal.Options) ([]internal.Pack
 
 func (s *PackageManager) Upgrade(opts *internal.Options) error {
 	cmd := exec.Command(pm, "refresh")
+	if opts != nil && opts.Verbose {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	}
 	err := cmd.Run()
 	return err
 }
