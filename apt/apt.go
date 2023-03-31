@@ -17,29 +17,39 @@ func (a *PackageManager) IsAvailable() bool {
 	return err == nil
 }
 
-func (a *PackageManager) Install(pkgs []string) error {
+func (a *PackageManager) Install(pkgs []string, opts *internal.Options) error {
 	args := append([]string{"install", "-y"}, pkgs...)
 	cmd := exec.Command(pm, args...)
+	if opts != nil && opts.Verbose {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	}
 	err := cmd.Run()
 	return err
 }
 
-func (a *PackageManager) Uninstall(pkgs []string) error {
+func (a *PackageManager) Uninstall(pkgs []string, opts *internal.Options) error {
 	args := append([]string{"remove", "-y", "--purge"}, pkgs...)
 	cmd := exec.Command(pm, args...)
+	if opts != nil && opts.Verbose {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	}
 	err := cmd.Run()
 	return err
 }
 
-func (a *PackageManager) Update() error {
+func (a *PackageManager) Update(opts *internal.Options) error {
 	cmd := exec.Command(pm, "update", "-qq")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	if opts != nil && opts.Verbose {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	}
 	err := cmd.Run()
 	return err
 }
 
-func (a *PackageManager) Search(keywords []string) ([]internal.PackageInfo, error) {
+func (a *PackageManager) Search(keywords []string, opts *internal.Options) ([]internal.PackageInfo, error) {
 	args := append([]string{"search"}, keywords...)
 	cmd := exec.Command("apt-cache", args...)
 	out, err := cmd.Output()
@@ -49,7 +59,7 @@ func (a *PackageManager) Search(keywords []string) ([]internal.PackageInfo, erro
 	return parseSearchOutput(string(out)), nil
 }
 
-func (a *PackageManager) ListInstalled() ([]internal.PackageInfo, error) {
+func (a *PackageManager) ListInstalled(opts *internal.Options) ([]internal.PackageInfo, error) {
 	cmd := exec.Command("dpkg-query", "-W", "-f", "${binary:Package} ${Version}\\n")
 	out, err := cmd.Output()
 	if err != nil {
@@ -58,7 +68,7 @@ func (a *PackageManager) ListInstalled() ([]internal.PackageInfo, error) {
 	return parseListInstalledOutput(string(out)), nil
 }
 
-func (a *PackageManager) ListUpgradable() ([]internal.PackageInfo, error) {
+func (a *PackageManager) ListUpgradable(opts *internal.Options) ([]internal.PackageInfo, error) {
 	cmd := exec.Command(pm, "upgrade", "-s")
 	out, err := cmd.Output()
 	if err != nil {
@@ -67,8 +77,12 @@ func (a *PackageManager) ListUpgradable() ([]internal.PackageInfo, error) {
 	return parseListUpgradableOutput(string(out)), nil
 }
 
-func (a *PackageManager) Upgrade() error {
+func (a *PackageManager) Upgrade(opts *internal.Options) error {
 	cmd := exec.Command(pm, "upgrade", "-y")
+	if opts != nil && opts.Verbose {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	}
 	err := cmd.Run()
 
 	return err

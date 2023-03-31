@@ -4,23 +4,25 @@ import (
 	"errors"
 
 	"github.com/bluet/syspkg/apt"
-	"github.com/bluet/syspkg/dnf"
 	"github.com/bluet/syspkg/snap"
-	"github.com/bluet/syspkg/zypper"
+	// "github.com/bluet/syspkg/dnf"
+	// "github.com/bluet/syspkg/zypper"
 
 	"github.com/bluet/syspkg/internal"
 )
 
 type PackageInfo = internal.PackageInfo
+type Options = internal.Options
 
 type PackageManager interface {
-	Install(pkgs []string) error
-	Uninstall(pkgs []string) error
-	Search(keywords []string) ([]internal.PackageInfo, error)
-	ListInstalled() ([]internal.PackageInfo, error)
-	ListUpgradable() ([]internal.PackageInfo, error)
-	Upgrade() error
-	Update() error
+	IsAvailable() bool
+	Install(pkgs []string, opts *internal.Options) error
+	Uninstall(pkgs []string, opts *internal.Options) error
+	Search(keywords []string, opts *internal.Options) ([]internal.PackageInfo, error)
+	ListInstalled(opts *internal.Options) ([]internal.PackageInfo, error)
+	ListUpgradable(opts *internal.Options) ([]internal.PackageInfo, error)
+	Upgrade(opts *internal.Options) error
+	Update(opts *internal.Options) error
 }
 
 func NewPackageManager() ([]PackageManager, error) {
@@ -40,15 +42,15 @@ func NewPackageManager() ([]PackageManager, error) {
 		pms = append(pms, snapManager)
 	}
 
-	dnfManager := &dnf.PackageManager{}
-	if dnfManager.IsAvailable() {
-		pms = append(pms, dnfManager)
-	}
+	// dnfManager := &dnf.PackageManager{}
+	// if dnfManager.IsAvailable() {
+	// 	pms = append(pms, dnfManager)
+	// }
 
-	zypperManager := &zypper.PackageManager{}
-	if zypperManager.IsAvailable() {
-		pms = append(pms, zypperManager)
-	}
+	// zypperManager := &zypper.PackageManager{}
+	// if zypperManager.IsAvailable() {
+	// 	pms = append(pms, zypperManager)
+	// }
 
 	if len(pms) == 0 {
 		return nil, errors.New("no supported package manager found")

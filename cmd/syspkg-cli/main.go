@@ -17,7 +17,7 @@ func main() {
 
 	pms, err := syspkg.NewPackageManager()
 	if err != nil {
-		fmt.Errorf("Error while initializing package managers: %v", err)
+		fmt.Printf("Error while initializing package managers: %v", err)
 		// fmt.Println("Error:", err)
 		os.Exit(1)
 	}
@@ -33,7 +33,7 @@ func main() {
 				Action: func(c *cli.Context) error {
 					pkgNames := c.Args().Slice()
 					for _, pm := range pms {
-						err := pm.Install(pkgNames)
+						err := pm.Install(pkgNames, nil)
 						if err != nil {
 							fmt.Printf("Error while installing packages for %T: %v\n", pm, err)
 							// return err
@@ -49,7 +49,7 @@ func main() {
 				Action: func(c *cli.Context) error {
 					pkgNames := c.Args().Slice()
 					for _, pm := range pms {
-						err := pm.Uninstall(pkgNames)
+						err := pm.Uninstall(pkgNames, nil)
 						if err != nil {
 							fmt.Printf("Error while uninstalling packages for %T: %v\n", pm, err)
 							// return err
@@ -64,7 +64,7 @@ func main() {
 				Usage:   "Update package list",
 				Action: func(c *cli.Context) error {
 					for _, pm := range pms {
-						err := pm.Update()
+						err := pm.Update(nil)
 						if err != nil {
 							return fmt.Errorf("Error while updating package list for %T: %v", pm, err)
 						}
@@ -112,7 +112,7 @@ func main() {
 				Action: func(c *cli.Context) error {
 					keywords := c.Args().Slice()
 					for _, pm := range pms {
-						pkgs, err := pm.Search(keywords)
+						pkgs, err := pm.Search(keywords, nil)
 						if err != nil {
 							return err
 						}
@@ -137,7 +137,7 @@ func main() {
 
 func listUpgradablePackages(pms []syspkg.PackageManager) {
 	for _, pm := range pms {
-		upgradablePackages, err := pm.ListUpgradable()
+		upgradablePackages, err := pm.ListUpgradable(nil)
 		if err != nil {
 			fmt.Println("Error:", err)
 			os.Exit(1)
@@ -168,7 +168,7 @@ func performUpgrade(pms []syspkg.PackageManager, assumeYes bool) error {
 	fmt.Println("Performing package upgrade...")
 
 	for _, pm := range pms {
-		err := pm.Upgrade()
+		err := pm.Upgrade(nil)
 		if err != nil {
 			fmt.Printf("Error while upgrading packages for %T: %v\n", pm, err)
 			os.Exit(1)

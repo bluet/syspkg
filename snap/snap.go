@@ -16,7 +16,7 @@ func (s *PackageManager) IsAvailable() bool {
 	return err == nil
 }
 
-func (s *PackageManager) Install(pkgs []string) error {
+func (s *PackageManager) Install(pkgs []string, opts *internal.Options) error {
 	// Snap package manager installs one package at a time
 	for _, pkg := range pkgs {
 		cmd := exec.Command(pm, "install", pkg)
@@ -28,7 +28,7 @@ func (s *PackageManager) Install(pkgs []string) error {
 	return nil
 }
 
-func (s *PackageManager) Uninstall(pkgs []string) error {
+func (s *PackageManager) Uninstall(pkgs []string, opts *internal.Options) error {
 	// Snap package manager removes one package at a time
 	for _, pkg := range pkgs {
 		cmd := exec.Command(pm, "remove", pkg)
@@ -41,13 +41,13 @@ func (s *PackageManager) Uninstall(pkgs []string) error {
 }
 
 // Implement Update function for Snap
-func (s *PackageManager) Update() error {
+func (s *PackageManager) Update(opts *internal.Options) error {
 	cmd := exec.Command(pm, "refresh")
 	err := cmd.Run()
 	return err
 }
 
-func (s *PackageManager) Search(keywords []string) ([]internal.PackageInfo, error) {
+func (s *PackageManager) Search(keywords []string, opts *internal.Options) ([]internal.PackageInfo, error) {
 	args := append([]string{"find"}, keywords...)
 	cmd := exec.Command(pm, args...)
 	out, err := cmd.Output()
@@ -57,7 +57,7 @@ func (s *PackageManager) Search(keywords []string) ([]internal.PackageInfo, erro
 	return parseSearchOutput(string(out)), nil
 }
 
-func (s *PackageManager) ListInstalled() ([]internal.PackageInfo, error) {
+func (s *PackageManager) ListInstalled(opts *internal.Options) ([]internal.PackageInfo, error) {
 	cmd := exec.Command(pm, "list", "--all")
 	out, err := cmd.Output()
 	if err != nil {
@@ -66,7 +66,7 @@ func (s *PackageManager) ListInstalled() ([]internal.PackageInfo, error) {
 	return parseListInstalledOutput(string(out)), nil
 }
 
-func (s *PackageManager) ListUpgradable() ([]internal.PackageInfo, error) {
+func (s *PackageManager) ListUpgradable(opts *internal.Options) ([]internal.PackageInfo, error) {
 	cmd := exec.Command(pm, "list", "--all")
 	out, err := cmd.Output()
 	if err != nil {
@@ -75,7 +75,7 @@ func (s *PackageManager) ListUpgradable() ([]internal.PackageInfo, error) {
 	return parseListUpgradableOutput(string(out)), nil
 }
 
-func (s *PackageManager) Upgrade() error {
+func (s *PackageManager) Upgrade(opts *internal.Options) error {
 	cmd := exec.Command(pm, "refresh")
 	err := cmd.Run()
 	return err

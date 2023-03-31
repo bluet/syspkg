@@ -17,3 +17,8 @@ type PackageInfo struct {
 	Arch           string
 	PackageManager string
 }
+
+type Options struct {
+	Verbose     bool
+	Interactive bool
+}
