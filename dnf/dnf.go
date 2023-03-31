@@ -1,4 +1,4 @@
-package snap
+package dnf
 
 import (
 	"os/exec"
@@ -7,48 +7,37 @@ import (
 	"github.com/bluet/syspkg/internal"
 )
 
-var pm string = "snap"
+var pm string = "dnf"
 
 type PackageManager struct{}
 
-func (s *PackageManager) IsAvailable() bool {
+func (d *PackageManager) IsAvailable() bool {
 	_, err := exec.LookPath(pm)
 	return err == nil
 }
 
-func (s *PackageManager) Install(pkgs []string) error {
-	// Snap package manager installs one package at a time
-	for _, pkg := range pkgs {
-		cmd := exec.Command(pm, "install", pkg)
-		err := cmd.Run()
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (s *PackageManager) Uninstall(pkgs []string) error {
-	// Snap package manager removes one package at a time
-	for _, pkg := range pkgs {
-		cmd := exec.Command(pm, "remove", pkg)
-		err := cmd.Run()
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// Implement Update function for Snap
-func (s *PackageManager) Update() error {
-	cmd := exec.Command(pm, "refresh")
+func (d *PackageManager) Install(pkgs []string) error {
+	args := append([]string{"install", "-y"}, pkgs...)
+	cmd := exec.Command(pm, args...)
 	err := cmd.Run()
 	return err
 }
 
-func (s *PackageManager) Search(keyword string) ([]internal.PackageInfo, error) {
-	cmd := exec.Command(pm, "find", keyword)
+func (d *PackageManager) Uninstall(pkgs []string) error {
+	args := append([]string{"remove", "-y"}, pkgs...)
+	cmd := exec.Command(pm, args...)
+	err := cmd.Run()
+	return err
+}
+
+func (d *PackageManager) Update() error {
+	cmd := exec.Command(pm, "check-update")
+	err := cmd.Run()
+	return err
+}
+
+func (d *PackageManager) Search(keyword string) ([]internal.PackageInfo, error) {
+	cmd := exec.Command(pm, "search", keyword)
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, err
@@ -56,8 +45,8 @@ func (s *PackageManager) Search(keyword string) ([]internal.PackageInfo, error) 
 	return parseSearchOutput(string(out)), nil
 }
 
-func (s *PackageManager) ListInstalled() ([]internal.PackageInfo, error) {
-	cmd := exec.Command(pm, "list", "--all")
+func (d *PackageManager) ListInstalled() ([]internal.PackageInfo, error) {
+	cmd := exec.Command(pm, "list", "installed")
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, err
@@ -65,8 +54,8 @@ func (s *PackageManager) ListInstalled() ([]internal.PackageInfo, error) {
 	return parseListInstalledOutput(string(out)), nil
 }
 
-func (s *PackageManager) ListUpgradable() ([]internal.PackageInfo, error) {
-	cmd := exec.Command(pm, "list", "--all")
+func (d *PackageManager) ListUpgradable() ([]internal.PackageInfo, error) {
+	cmd := exec.Command(pm, "list", "updates")
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, err
@@ -74,8 +63,8 @@ func (s *PackageManager) ListUpgradable() ([]internal.PackageInfo, error) {
 	return parseListUpgradableOutput(string(out)), nil
 }
 
-func (s *PackageManager) Upgrade() error {
-	cmd := exec.Command(pm, "refresh")
+func (d *PackageManager) Upgrade() error {
+	cmd := exec.Command(pm, "upgrade", "-y")
 	err := cmd.Run()
 	return err
 }
@@ -104,7 +93,7 @@ func parseListInstalledOutput(output string) []internal.PackageInfo {
 	var packages []internal.PackageInfo
 
 	for _, line := range lines {
-		if len(line) > 0 {
+		if len(line) > 0 && !strings.HasPrefix(line, "Installed") {
 			parts := strings.Fields(line)
 			packageInfo := internal.PackageInfo{
 				Name:           parts[0],
@@ -124,18 +113,16 @@ func parseListUpgradableOutput(output string) []internal.PackageInfo {
 	var packages []internal.PackageInfo
 
 	for _, line := range lines {
-		if len(line) > 0 {
+		if strings.HasPrefix(line, "Upgrades") {
 			parts := strings.Fields(line)
-			if parts[3] == "upgrade" {
-				packageInfo := internal.PackageInfo{
-					Name:           parts[0],
-					Version:        parts[1],
-					NewVersion:     parts[2],
-					Status:         internal.Upgradable,
-					PackageManager: pm,
-				}
-				packages = append(packages, packageInfo)
+			packageInfo := internal.PackageInfo{
+				Name:           parts[1],
+				Version:        strings.Trim(parts[3], "[]"),
+				NewVersion:     strings.Trim(parts[5], "()"),
+				Status:         internal.Upgradable,
+				PackageManager: pm,
 			}
+			packages = append(packages, packageInfo)
 		}
 	}
 

@@ -4,18 +4,21 @@ import (
 	"errors"
 
 	"github.com/bluet/syspkg/apt"
+	"github.com/bluet/syspkg/dnf"
 	"github.com/bluet/syspkg/snap"
-	"github.com/bluet/syspkg/yum"
+	"github.com/bluet/syspkg/zypper"
 
 	"github.com/bluet/syspkg/internal"
 )
 
 type PackageManager interface {
-	Install(pkg string) error
-	Uninstall(pkg string) error
-	Search(pkg string) ([]internal.PackageInfo, error)
+	Install(pkgs []string) error
+	Uninstall(pkgs []string) error
+	Search(keyword string) ([]internal.PackageInfo, error)
 	ListInstalled() ([]internal.PackageInfo, error)
 	ListUpgradable() ([]internal.PackageInfo, error)
+	Upgrade() error
+	Update() error
 }
 
 func NewPackageManager() ([]PackageManager, error) {
@@ -30,14 +33,19 @@ func NewPackageManager() ([]PackageManager, error) {
 		pms = append(pms, aptManager)
 	}
 
-	yumManager := &yum.PackageManager{}
-	if yumManager.IsAvailable() {
-		pms = append(pms, yumManager)
-	}
-
 	snapManager := &snap.PackageManager{}
 	if snapManager.IsAvailable() {
 		pms = append(pms, snapManager)
+	}
+
+	dnfManager := &dnf.PackageManager{}
+	if dnfManager.IsAvailable() {
+		pms = append(pms, dnfManager)
+	}
+
+	zypperManager := &zypper.PackageManager{}
+	if zypperManager.IsAvailable() {
+		pms = append(pms, zypperManager)
 	}
 
 	if len(pms) == 0 {

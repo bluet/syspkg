@@ -1,8 +1,7 @@
-// apt/apt.go
 package apt
 
 import (
-	"errors"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -18,48 +17,108 @@ func (a *PackageManager) IsAvailable() bool {
 	return err == nil
 }
 
-func (a *PackageManager) Install(pkg string) error {
-	// Implement the installation logic for apt
-	return errors.New("Not implemented")
+func (a *PackageManager) Install(pkgs []string) error {
+	args := append([]string{"install", "-y"}, pkgs...)
+	cmd := exec.Command(pm, args...)
+	err := cmd.Run()
+	return err
 }
 
-func (a *PackageManager) Uninstall(pkg string) error {
-	// Implement the uninstallation logic for apt
-	return errors.New("Not implemented")
+func (a *PackageManager) Uninstall(pkgs []string) error {
+	args := append([]string{"remove", "-y"}, pkgs...)
+	cmd := exec.Command(pm, args...)
+	err := cmd.Run()
+	return err
 }
 
-func (a *PackageManager) Search(pkg string) ([]internal.PackageInfo, error) {
-	// Implement the search logic for apt
-	return nil, errors.New("Not implemented")
+func (a *PackageManager) Update() error {
+	cmd := exec.Command(pm, "update", "-qq")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	return err
 }
 
-func (a *PackageManager) ListInstalled() ([]internal.PackageInfo, error) {
-	// Implement the list installed packages logic for apt
-	return nil, errors.New("Not implemented")
-}
-
-func (a *PackageManager) ListUpgradable() ([]internal.PackageInfo, error) {
-	var cmd *exec.Cmd = exec.Command(pm, "upgrade", "-s")
-
+func (a *PackageManager) Search(keyword string) ([]internal.PackageInfo, error) {
+	cmd := exec.Command("apt-cache", "search", keyword)
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, err
 	}
-
-	return parseOutput(string(out)), nil
+	return parseSearchOutput(string(out)), nil
 }
 
-func parseOutput(output string) []internal.PackageInfo {
-	// raw string: Inst libpulse-dev [1:15.99.1+dfsg1-1ubuntu2] (1:15.99.1+dfsg1-1ubuntu2.1 Ubuntu:22.04/jammy-updates [amd64]) []
-	// format: STATUS NAME [VERSION] (NEW_VERSION CATEGORY [ARCHITECTURES]) [OTHER_INFO]
+func (a *PackageManager) ListInstalled() ([]internal.PackageInfo, error) {
+	cmd := exec.Command("dpkg-query", "-W", "-f", "${binary:Package} ${Version}\\n")
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+	return parseListInstalledOutput(string(out)), nil
+}
 
+func (a *PackageManager) ListUpgradable() ([]internal.PackageInfo, error) {
+	cmd := exec.Command(pm, "upgrade", "-s")
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+	return parseListUpgradableOutput(string(out)), nil
+}
+
+func (a *PackageManager) Upgrade() error {
+	cmd := exec.Command(pm, "upgrade", "-y")
+	err := cmd.Run()
+
+	return err
+}
+
+func parseSearchOutput(output string) []internal.PackageInfo {
+	lines := strings.Split(output, "\n")
+	var packages []internal.PackageInfo
+
+	for _, line := range lines {
+		if len(line) > 0 {
+			parts := strings.SplitN(line, " - ", 2)
+			packageInfo := internal.PackageInfo{
+				Name:           parts[0],
+				Status:         internal.Available,
+				PackageManager: pm,
+			}
+			packages = append(packages, packageInfo)
+		}
+	}
+
+	return packages
+}
+
+func parseListInstalledOutput(output string) []internal.PackageInfo {
+	lines := strings.Split(output, "\n")
+	var packages []internal.PackageInfo
+
+	for _, line := range lines {
+		if len(line) > 0 {
+			parts := strings.Fields(line)
+			packageInfo := internal.PackageInfo{
+				Name:           parts[0],
+				Version:        parts[1],
+				Status:         internal.Installed,
+				PackageManager: pm,
+			}
+			packages = append(packages, packageInfo)
+		}
+	}
+
+	return packages
+}
+
+func parseListUpgradableOutput(output string) []internal.PackageInfo {
 	lines := strings.Split(output, "\n")
 	var packages []internal.PackageInfo
 
 	for _, line := range lines {
 		if strings.HasPrefix(line, "Inst") {
 			parts := strings.Fields(line)
-
 			packageInfo := internal.PackageInfo{
 				Name:           parts[1],
 				Version:        strings.Trim(parts[2], "[]"),
@@ -69,7 +128,6 @@ func parseOutput(output string) []internal.PackageInfo {
 				Status:         internal.Upgradable,
 				PackageManager: pm,
 			}
-
 			packages = append(packages, packageInfo)
 		}
 	}
