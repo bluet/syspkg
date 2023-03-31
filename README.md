@@ -73,8 +73,28 @@ func main() {
 
 ```
 
-Contributing
+## Status
+- apt: Supported
+- snap: Partially supported
+- dnf: Partially supported (untested)
+- zypper: Partially supported (untested)
+- others: Please open an issue if you'd like to see support for a specific package manager
+
+| Package Manager | Install | Remove | Search | List | Upgrade |
+| --------------- | ------- | ------ | ------ | ---- | ------- |
+| APT             | ✅      | ✅     | ✅     | ✅   | ✅      |
+| SNAP            | ✅      | ✅     | ✅     | ✅   | ✅      |
+| DNF             | ❓      | ❓   | ❓     | ❓   | ❓      |
+| Zypper          | ❓      | ❓   | ❓     | ❓   | ❓      |
+
+### TODO
+- [ ] Add support for more package managers
+- [ ] Better error handling
+- [ ] Better return values and status codes
+
+
+## Contributing
 We welcome contributions to Go-SysPkg! Please read our CONTRIBUTING.md for more information on how to contribute.
 
-License
+## License
 This project is licensed under the MIT License. See the LICENSE file for details.

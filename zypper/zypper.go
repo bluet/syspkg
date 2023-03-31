@@ -36,8 +36,9 @@ func (z *PackageManager) Update() error {
 	return err
 }
 
-func (z *PackageManager) Search(keyword string) ([]internal.PackageInfo, error) {
-	cmd := exec.Command(pm, "search", keyword)
+func (z *PackageManager) Search(keywords []string) ([]internal.PackageInfo, error) {
+	args := append([]string{"search"}, keywords...)
+	cmd := exec.Command(pm, args...)
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, err

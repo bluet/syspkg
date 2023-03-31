@@ -25,7 +25,7 @@ func (a *PackageManager) Install(pkgs []string) error {
 }
 
 func (a *PackageManager) Uninstall(pkgs []string) error {
-	args := append([]string{"remove", "-y"}, pkgs...)
+	args := append([]string{"remove", "-y", "--purge"}, pkgs...)
 	cmd := exec.Command(pm, args...)
 	err := cmd.Run()
 	return err
@@ -39,8 +39,9 @@ func (a *PackageManager) Update() error {
 	return err
 }
 
-func (a *PackageManager) Search(keyword string) ([]internal.PackageInfo, error) {
-	cmd := exec.Command("apt-cache", "search", keyword)
+func (a *PackageManager) Search(keywords []string) ([]internal.PackageInfo, error) {
+	args := append([]string{"search"}, keywords...)
+	cmd := exec.Command("apt-cache", args...)
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, err

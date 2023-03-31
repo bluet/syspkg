@@ -14,7 +14,7 @@ import (
 type PackageManager interface {
 	Install(pkgs []string) error
 	Uninstall(pkgs []string) error
-	Search(keyword string) ([]internal.PackageInfo, error)
+	Search(keywords []string) ([]internal.PackageInfo, error)
 	ListInstalled() ([]internal.PackageInfo, error)
 	ListUpgradable() ([]internal.PackageInfo, error)
 	Upgrade() error

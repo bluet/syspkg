@@ -34,7 +34,8 @@ func main() {
 					for _, pm := range pms {
 						err := pm.Install(pkgNames)
 						if err != nil {
-							return err
+							fmt.Printf("Error while installing packages for %T: %v\n", pm, err)
+							// return err
 						}
 					}
 					return nil
@@ -49,7 +50,8 @@ func main() {
 					for _, pm := range pms {
 						err := pm.Uninstall(pkgNames)
 						if err != nil {
-							return err
+							fmt.Printf("Error while uninstalling packages for %T: %v\n", pm, err)
+							// return err
 						}
 					}
 					return nil
@@ -100,6 +102,26 @@ func main() {
 					}
 
 					return performUpgrade(pms, assumeYes)
+				},
+			},
+			{
+				Name:    "search",
+				Aliases: []string{"s"},
+				Usage:   "Search packages",
+				Action: func(c *cli.Context) error {
+					keywords := c.Args().Slice()
+					for _, pm := range pms {
+						pkgs, err := pm.Search(keywords)
+						if err != nil {
+							return err
+						}
+
+						fmt.Printf("Search results for %T:\n", pm)
+						for _, pkg := range pkgs {
+							fmt.Printf("%s: %s %s (%s)\n", pkg.PackageManager, pkg.Name, pkg.Version, pkg.Status)
+						}
+					}
+					return nil
 				},
 			},
 		},

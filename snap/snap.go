@@ -47,8 +47,9 @@ func (s *PackageManager) Update() error {
 	return err
 }
 
-func (s *PackageManager) Search(keyword string) ([]internal.PackageInfo, error) {
-	cmd := exec.Command(pm, "find", keyword)
+func (s *PackageManager) Search(keywords []string) ([]internal.PackageInfo, error) {
+	args := append([]string{"find"}, keywords...)
+	cmd := exec.Command(pm, args...)
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, err
@@ -87,6 +88,9 @@ func parseSearchOutput(output string) []internal.PackageInfo {
 	for _, line := range lines {
 		if len(line) > 0 {
 			parts := strings.Fields(line)
+			if parts[0] == "Name" {
+				continue
+			}
 			packageInfo := internal.PackageInfo{
 				Name:           parts[0],
 				Status:         internal.Available,
