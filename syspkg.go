@@ -11,6 +11,8 @@ import (
 	"github.com/bluet/syspkg/internal"
 )
 
+type PackageInfo = internal.PackageInfo
+
 type PackageManager interface {
 	Install(pkgs []string) error
 	Uninstall(pkgs []string) error

@@ -17,7 +17,8 @@ func main() {
 
 	pms, err := syspkg.NewPackageManager()
 	if err != nil {
-		fmt.Println("Error:", err)
+		fmt.Errorf("Error while initializing package managers: %v", err)
+		// fmt.Println("Error:", err)
 		os.Exit(1)
 	}
 
