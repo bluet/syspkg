@@ -141,6 +141,7 @@ func main() {
 				Usage:   "Search packages",
 				Action: func(c *cli.Context) error {
 					keywords := c.Args().Slice()
+					log.Printf("Searching packages: %v", keywords)
 					for _, pm := range pms {
 						pkgs, err := pm.Search(keywords, nil)
 						if err != nil {
@@ -150,7 +151,7 @@ func main() {
 
 						fmt.Printf("Search results for %T:\n", pm)
 						for _, pkg := range pkgs {
-							fmt.Printf("%s: %s %s (%s)\n", pkg.PackageManager, pkg.Name, pkg.Version, pkg.Status)
+							fmt.Printf("%s: %s [%s][%s] (%s)\n", pkg.PackageManager, pkg.Name, pkg.Version, pkg.NewVersion, pkg.Status)
 						}
 					}
 					return nil

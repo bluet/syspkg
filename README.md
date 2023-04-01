@@ -12,7 +12,7 @@ A unified Go library for managing system packages across different package manag
 
 ### Prerequisites
 
-- Go 1.16 or later
+- Go 1.16 or later (1.20+ preferred)
 
 ### Installation
 

@@ -3,9 +3,10 @@ package internal
 type PackageStatus string
 
 const (
-	Installed  PackageStatus = "installed"
-	Upgradable PackageStatus = "upgradable"
-	Available  PackageStatus = "available"
+	PackageStatusInstalled  PackageStatus = "installed"
+	PackageStatusUpgradable PackageStatus = "upgradable"
+	PackageStatusAvailable  PackageStatus = "available"
+	PackageStatusUnknown    PackageStatus = "unknown"
 )
 
 type PackageInfo struct {

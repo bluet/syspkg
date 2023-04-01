@@ -136,12 +136,14 @@ func (a *PackageManager) Refresh(opts *internal.Options) error {
 
 func (a *PackageManager) Search(keywords []string, opts *internal.Options) ([]internal.PackageInfo, error) {
 	args := append([]string{"search"}, keywords...)
-	cmd := exec.Command("apt-cache", args...)
+	cmd := exec.Command("apt", args...)
 	cmd.Env = ENV_NonInteractive
+
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, err
 	}
+
 	return parseSearchOutput(string(out), opts), nil
 }
 
