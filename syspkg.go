@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/bluet/syspkg/apt"
-	"github.com/bluet/syspkg/snap"
+	// "github.com/bluet/syspkg/snap"
 	// "github.com/bluet/syspkg/dnf"
 	// "github.com/bluet/syspkg/zypper"
 
@@ -16,13 +16,13 @@ type Options = internal.Options
 
 type PackageManager interface {
 	IsAvailable() bool
-	Install(pkgs []string, opts *internal.Options) error
-	Uninstall(pkgs []string, opts *internal.Options) error
+	Install(pkgs []string, opts *internal.Options) ([]internal.PackageInfo, error)
+	Uninstall(pkgs []string, opts *internal.Options) ([]internal.PackageInfo, error)
 	Search(keywords []string, opts *internal.Options) ([]internal.PackageInfo, error)
 	ListInstalled(opts *internal.Options) ([]internal.PackageInfo, error)
 	ListUpgradable(opts *internal.Options) ([]internal.PackageInfo, error)
-	Upgrade(opts *internal.Options) error
-	Update(opts *internal.Options) error
+	Upgrade(opts *internal.Options) ([]internal.PackageInfo, error)
+	Refresh(opts *internal.Options) error
 }
 
 func NewPackageManager() ([]PackageManager, error) {
@@ -37,10 +37,10 @@ func NewPackageManager() ([]PackageManager, error) {
 		pms = append(pms, aptManager)
 	}
 
-	snapManager := &snap.PackageManager{}
-	if snapManager.IsAvailable() {
-		pms = append(pms, snapManager)
-	}
+	// snapManager := &snap.PackageManager{}
+	// if snapManager.IsAvailable() {
+	// 	pms = append(pms, snapManager)
+	// }
 
 	// dnfManager := &dnf.PackageManager{}
 	// if dnfManager.IsAvailable() {

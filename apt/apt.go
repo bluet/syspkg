@@ -1,14 +1,27 @@
 package apt
 
 import (
+	"log"
 	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/bluet/syspkg/internal"
 )
 
 var pm string = "apt"
+
+const (
+	ArgsAssumeYes    string = "-y"
+	ArgsAssumeNo     string = "--assume-no"
+	ArgsDryRun       string = "--dry-run"
+	ArgsFixBroken    string = "-f"
+	ArgsQuiet        string = "-qq"
+	ArgsPurge        string = "--purge"
+	ArgsAutoRemove   string = "--autoremove"
+	ArgsShowProgress string = "--show-progress"
+)
+
+var ENV_NonInteractive []string = []string{"LC_ALL=C", "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true"}
 
 type PackageManager struct{}
 
@@ -17,135 +30,172 @@ func (a *PackageManager) IsAvailable() bool {
 	return err == nil
 }
 
-func (a *PackageManager) Install(pkgs []string, opts *internal.Options) error {
-	args := append([]string{"install", "-y"}, pkgs...)
-	cmd := exec.Command(pm, args...)
-	if opts != nil && opts.Verbose {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-	}
-	err := cmd.Run()
-	return err
+func (a *PackageManager) GetPackageManager() string {
+	return pm
 }
 
-func (a *PackageManager) Uninstall(pkgs []string, opts *internal.Options) error {
-	args := append([]string{"remove", "-y", "--purge"}, pkgs...)
+func (a *PackageManager) Install(pkgs []string, opts *internal.Options) ([]internal.PackageInfo, error) {
+	args := append([]string{"install", ArgsFixBroken}, pkgs...)
+
+	if opts == nil {
+		opts = &internal.Options{
+			DryRun:      false,
+			Interactive: false,
+			Verbose:     false,
+		}
+	}
+
+	if opts.DryRun {
+		args = append(args, ArgsDryRun)
+	}
+	if !opts.Interactive {
+		args = append(args, ArgsAssumeYes)
+	}
+
 	cmd := exec.Command(pm, args...)
-	if opts != nil && opts.Verbose {
+
+	if opts.Interactive {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
+		cmd.Stdin = os.Stdin
+		err := cmd.Run()
+		return nil, err
+	} else {
+		cmd.Env = ENV_NonInteractive
+		out, err := cmd.Output()
+		if err != nil {
+			return nil, err
+		}
+		return parseInstallOutput(string(out), opts), nil
 	}
-	err := cmd.Run()
-	return err
 }
 
-func (a *PackageManager) Update(opts *internal.Options) error {
-	cmd := exec.Command(pm, "update", "-qq")
-	if opts != nil && opts.Verbose {
+func (a *PackageManager) Uninstall(pkgs []string, opts *internal.Options) ([]internal.PackageInfo, error) {
+	args := append([]string{"remove", ArgsFixBroken, ArgsPurge, ArgsAutoRemove}, pkgs...)
+	if opts == nil {
+		opts = &internal.Options{
+			DryRun:      false,
+			Interactive: false,
+			Verbose:     false,
+		}
+	}
+
+	if opts.DryRun {
+		args = append(args, ArgsDryRun)
+	}
+	if !opts.Interactive {
+		args = append(args, ArgsAssumeYes)
+	}
+
+	cmd := exec.Command(pm, args...)
+
+	if opts.Interactive {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
+		cmd.Stdin = os.Stdin
+		err := cmd.Run()
+		return nil, err
+	} else {
+		cmd.Env = ENV_NonInteractive
+		out, err := cmd.Output()
+		if err != nil {
+			return nil, err
+		}
+		return parseInstallOutput(string(out), opts), nil
 	}
-	err := cmd.Run()
-	return err
+}
+
+func (a *PackageManager) Refresh(opts *internal.Options) error {
+	cmd := exec.Command(pm, "update")
+	cmd.Env = ENV_NonInteractive
+
+	if opts == nil {
+		opts = &internal.Options{
+			DryRun:      false,
+			Interactive: false,
+			Verbose:     false,
+		}
+	}
+	if opts.Interactive {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Stdin = os.Stdin
+		err := cmd.Run()
+		return err
+	} else {
+		out, err := cmd.Output()
+		if err != nil {
+			return err
+		}
+		if opts.Verbose {
+			log.Println(string(out))
+		}
+		return nil
+	}
 }
 
 func (a *PackageManager) Search(keywords []string, opts *internal.Options) ([]internal.PackageInfo, error) {
 	args := append([]string{"search"}, keywords...)
 	cmd := exec.Command("apt-cache", args...)
+	cmd.Env = ENV_NonInteractive
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, err
 	}
-	return parseSearchOutput(string(out)), nil
+	return parseSearchOutput(string(out), opts), nil
 }
 
 func (a *PackageManager) ListInstalled(opts *internal.Options) ([]internal.PackageInfo, error) {
 	cmd := exec.Command("dpkg-query", "-W", "-f", "${binary:Package} ${Version}\\n")
+	cmd.Env = ENV_NonInteractive
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, err
 	}
-	return parseListInstalledOutput(string(out)), nil
+	return parseListInstalledOutput(string(out), opts), nil
 }
 
 func (a *PackageManager) ListUpgradable(opts *internal.Options) ([]internal.PackageInfo, error) {
-	cmd := exec.Command(pm, "upgrade", "-s")
+	cmd := exec.Command(pm, "upgrade", ArgsDryRun)
+	cmd.Env = ENV_NonInteractive
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, err
 	}
-	return parseListUpgradableOutput(string(out)), nil
+	return parseListUpgradableOutput(string(out), opts), nil
 }
 
-func (a *PackageManager) Upgrade(opts *internal.Options) error {
-	cmd := exec.Command(pm, "upgrade", "-y")
-	if opts != nil && opts.Verbose {
+func (a *PackageManager) Upgrade(opts *internal.Options) ([]internal.PackageInfo, error) {
+	args := []string{"upgrade"}
+	if opts == nil {
+		opts = &internal.Options{
+			Verbose:     false,
+			DryRun:      false,
+			Interactive: false,
+		}
+	}
+
+	if opts.DryRun {
+		args = append(args, ArgsDryRun)
+	}
+	if !opts.Interactive {
+		args = append(args, ArgsAssumeYes)
+	}
+
+	cmd := exec.Command(pm, args...)
+
+	if opts.Interactive {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
-	}
-	err := cmd.Run()
-
-	return err
-}
-
-func parseSearchOutput(output string) []internal.PackageInfo {
-	lines := strings.Split(output, "\n")
-	var packages []internal.PackageInfo
-
-	for _, line := range lines {
-		if len(line) > 0 {
-			parts := strings.SplitN(line, " - ", 2)
-			packageInfo := internal.PackageInfo{
-				Name:           parts[0],
-				Status:         internal.Available,
-				PackageManager: pm,
-			}
-			packages = append(packages, packageInfo)
+		cmd.Stdin = os.Stdin
+		err := cmd.Run()
+		return nil, err
+	} else {
+		cmd.Env = ENV_NonInteractive
+		out, err := cmd.Output()
+		if err != nil {
+			return nil, err
 		}
+		return parseInstallOutput(string(out), opts), nil
 	}
-
-	return packages
-}
-
-func parseListInstalledOutput(output string) []internal.PackageInfo {
-	lines := strings.Split(output, "\n")
-	var packages []internal.PackageInfo
-
-	for _, line := range lines {
-		if len(line) > 0 {
-			parts := strings.Fields(line)
-			packageInfo := internal.PackageInfo{
-				Name:           parts[0],
-				Version:        parts[1],
-				Status:         internal.Installed,
-				PackageManager: pm,
-			}
-			packages = append(packages, packageInfo)
-		}
-	}
-
-	return packages
-}
-
-func parseListUpgradableOutput(output string) []internal.PackageInfo {
-	lines := strings.Split(output, "\n")
-	var packages []internal.PackageInfo
-
-	for _, line := range lines {
-		if strings.HasPrefix(line, "Inst") {
-			parts := strings.Fields(line)
-			packageInfo := internal.PackageInfo{
-				Name:           parts[1],
-				Version:        strings.Trim(parts[2], "[]"),
-				NewVersion:     strings.Trim(parts[3], "()"),
-				Category:       parts[4],
-				Arch:           strings.Trim(parts[5], "[]"),
-				Status:         internal.Upgradable,
-				PackageManager: pm,
-			}
-			packages = append(packages, packageInfo)
-		}
-	}
-
-	return packages
 }

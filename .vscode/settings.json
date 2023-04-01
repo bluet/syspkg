@@ -4,6 +4,7 @@
                 "dpkg",
                 "Fatalf",
                 "pkgs",
-                "syspkg"
+                "syspkg",
+                "urfave"
         ]
 }

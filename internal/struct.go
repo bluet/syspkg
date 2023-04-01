@@ -19,6 +19,7 @@ type PackageInfo struct {
 }
 
 type Options struct {
-	Verbose     bool
 	Interactive bool
+	DryRun      bool
+	Verbose     bool
 }
