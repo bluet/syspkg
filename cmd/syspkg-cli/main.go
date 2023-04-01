@@ -12,8 +12,7 @@ import (
 
 func main() {
 	if os.Geteuid() != 0 {
-		fmt.Println("Error: This program must be run with root privileges.")
-		// os.Exit(1)
+		fmt.Println("Error: This command must be run with root privileges. If you got exist codes 100 or 101, please run this command with sudo.")
 	}
 
 	pms, err := syspkg.NewPackageManager()
@@ -27,31 +26,17 @@ func main() {
 		Name:  "syspkg",
 		Usage: "A universal system package manager",
 		Action: func(c *cli.Context) error {
-			for _, pm := range pms {
-				packages, err := pm.ListUpgradable(nil)
-				if err != nil {
-					fmt.Printf("Error while listing upgradable packages for %T: %v", pm, err)
-					continue
-				}
-				log.Printf("Upgradable packages for %T:\n%v", pm, packages)
-			}
+			listUpgradablePackages(pms)
 			return nil
 		},
 		Commands: []*cli.Command{
 			{
 				// default command
-				Name:    "show-upgradable",
-				Aliases: []string{"show-upgrades", "su"},
+				Name:    "show-upgrade",
+				Aliases: []string{"su"},
 				Usage:   "Show upgradable packages",
 				Action: func(c *cli.Context) error {
-					for _, pm := range pms {
-						packages, err := pm.ListUpgradable(nil)
-						if err != nil {
-							fmt.Printf("Error while listing upgradable packages for %T: %v", pm, err)
-							continue
-						}
-						log.Printf("Upgradable packages for %T:\n%v", pm, packages)
-					}
+					listUpgradablePackages(pms)
 					return nil
 				},
 			},
