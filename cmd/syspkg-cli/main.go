@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/bluet/syspkg"
+	"github.com/bluet/syspkg/internal"
 	"github.com/urfave/cli/v2"
 )
 
@@ -26,28 +27,21 @@ func main() {
 		Name:  "syspkg",
 		Usage: "A universal system package manager",
 		Action: func(c *cli.Context) error {
-			listUpgradablePackages(pms)
+			var opts = getOptions(c)
+
+			listUpgradablePackages(pms, opts)
 			return nil
 		},
 		Commands: []*cli.Command{
-			{
-				// default command
-				Name:    "show-upgrade",
-				Aliases: []string{"su"},
-				Usage:   "Show upgradable packages",
-				Action: func(c *cli.Context) error {
-					listUpgradablePackages(pms)
-					return nil
-				},
-			},
 			{
 				Name:    "install",
 				Aliases: []string{"i"},
 				Usage:   "Install packages",
 				Action: func(c *cli.Context) error {
+					var opts = getOptions(c)
 					pkgNames := c.Args().Slice()
 					for _, pm := range pms {
-						packages, err := pm.Install(pkgNames, nil)
+						packages, err := pm.Install(pkgNames, opts)
 						if err != nil {
 							fmt.Printf("Error while installing packages for %T: %v\n%v", pm, err, packages)
 							continue
@@ -58,18 +52,19 @@ func main() {
 				},
 			},
 			{
-				Name:    "uninstall",
-				Aliases: []string{"remove", "un", "rm"},
-				Usage:   "Uninstall packages",
+				Name:    "delete",
+				Aliases: []string{"remove", "uninstall", "d", "rm", "un"},
+				Usage:   "Delete packages",
 				Action: func(c *cli.Context) error {
+					var opts = getOptions(c)
 					pkgNames := c.Args().Slice()
 					for _, pm := range pms {
-						packages, err := pm.Uninstall(pkgNames, nil)
+						packages, err := pm.Delete(pkgNames, opts)
 						if err != nil {
-							fmt.Printf("Error while uninstalling packages for %T: %v\n%v", pm, err, packages)
+							fmt.Printf("Error while deleting packages for %T: %v\n%v", pm, err, packages)
 							continue
 						}
-						log.Printf("Uninstalled packages for %T:\n%v", pm, packages)
+						log.Printf("Deleting packages for %T:\n%v", pm, packages)
 					}
 					return nil
 				},
@@ -79,8 +74,9 @@ func main() {
 				Aliases: []string{"update", "r", "re", "u", "up"},
 				Usage:   "Refresh package list",
 				Action: func(c *cli.Context) error {
+					var opts = getOptions(c)
 					for _, pm := range pms {
-						err := pm.Refresh(nil)
+						err := pm.Refresh(opts)
 						if err != nil {
 							fmt.Printf("Error while updating package list for %T: %v\n", pm, err)
 							continue
@@ -94,18 +90,11 @@ func main() {
 				Name:    "upgrade",
 				Aliases: []string{"U", "ug"},
 				Usage:   "Upgrade packages",
-				Flags: []cli.Flag{
-					&cli.BoolFlag{
-						Name:    "assume-yes",
-						Aliases: []string{"y", "yes", "non-interactive"},
-						Usage:   "Assume yes to all prompts",
-					},
-				},
 				Action: func(c *cli.Context) error {
-					autoYes := c.Bool("y")
+					var opts = getOptions(c)
 
-					listUpgradablePackages(pms)
-					if !autoYes {
+					listUpgradablePackages(pms, opts)
+					if opts.Interactive {
 						fmt.Print("\nDo you want to perform the system package upgrade? [Y/n]: ")
 						input := ""
 						_, _ = fmt.Scanln(&input)
@@ -117,18 +106,24 @@ func main() {
 						}
 					}
 
-					return performUpgrade(pms, autoYes)
+					return performUpgrade(pms, opts)
 				},
 			},
 			{
-				Name:    "search",
-				Aliases: []string{"find", "s"},
-				Usage:   "Search packages",
+				Name:    "find",
+				Aliases: []string{"search", "f"},
+				Usage:   "Find matching packages",
 				Action: func(c *cli.Context) error {
+					var opts = getOptions(c)
 					keywords := c.Args().Slice()
-					log.Printf("Searching packages: %v", keywords)
+					if len(keywords) == 0 {
+						fmt.Println("Please specify keywords to search.")
+						return nil
+					}
+					log.Printf("Finding packages: %v", keywords)
+
 					for _, pm := range pms {
-						pkgs, err := pm.Search(keywords, nil)
+						pkgs, err := pm.Search(keywords, opts)
 						if err != nil {
 							fmt.Printf("Error while searching packages for %T: %v\n", pm, err)
 							continue
@@ -142,6 +137,52 @@ func main() {
 					return nil
 				},
 			},
+			{
+				Name:        "show",
+				Aliases:     []string{"s"},
+				Usage:       "Please specify a subcommand. " + "Use `syspkg show --help` to see the subcommands.",
+				Description: `Show information. Please specify a subcommand. Use ` + "`syspkg show --help`" + ` to see the subcommands. Usage: ` + "`syspkg show [subcommand]`",
+				Subcommands: []*cli.Command{
+					{
+						Name:    "upgradable",
+						Aliases: []string{"u"},
+						Usage:   "Show upgradable packages",
+						Action: func(c *cli.Context) error {
+							var opts = getOptions(c)
+
+							listUpgradablePackages(pms, opts)
+							return nil
+						},
+					},
+				},
+			},
+		},
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:    "debug",
+				Aliases: []string{"dbg"},
+				Usage:   "Enable debug mode",
+			},
+			&cli.BoolFlag{
+				Name:    "assume-yes",
+				Aliases: []string{"y"},
+				Usage:   "Assume yes - Assume 'yes' as answer to all prompts. (if -i is not set, this is implied)",
+			},
+			&cli.BoolFlag{
+				Name:    "dry-run",
+				Aliases: []string{"dry"},
+				Usage:   "Dry run - Do not actually install anything, but show what would be done.",
+			},
+			&cli.BoolFlag{
+				Name:    "interactive",
+				Aliases: []string{"i"},
+				Usage:   "Interactive - Ask questions interactively.",
+			},
+			&cli.BoolFlag{
+				Name:    "verbose",
+				Aliases: []string{"v"},
+				Usage:   "Verbose - Show more information.",
+			},
 		},
 	}
 
@@ -152,9 +193,23 @@ func main() {
 	}
 }
 
-func listUpgradablePackages(pms []syspkg.PackageManager) {
+func getOptions(c *cli.Context) *internal.Options {
+	var opts internal.Options
+	opts.Verbose = c.Bool("verbose")
+	opts.DryRun = c.Bool("dry-run")
+	opts.Interactive = c.Bool("interactive")
+	opts.Debug = c.Bool("debug")
+
+	if !opts.Interactive {
+		opts.AssumeYes = true
+	}
+
+	return &opts
+}
+
+func listUpgradablePackages(pms []syspkg.PackageManager, opts *internal.Options) {
 	for _, pm := range pms {
-		upgradablePackages, err := pm.ListUpgradable(nil)
+		upgradablePackages, err := pm.ListUpgradable(opts)
 		if err != nil {
 			fmt.Printf("Error while listing upgradable packages for %T: %v\n", pm, err)
 			continue
@@ -167,16 +222,20 @@ func listUpgradablePackages(pms []syspkg.PackageManager) {
 	}
 }
 
-func performUpgrade(pms []syspkg.PackageManager, autoYes bool) error {
+func performUpgrade(pms []syspkg.PackageManager, opts *internal.Options) error {
 	fmt.Println("Performing package upgrade...")
 
 	for _, pm := range pms {
-		packages, err := pm.Upgrade(&syspkg.Options{Interactive: !autoYes})
+		packages, err := pm.Upgrade(opts)
 		if err != nil {
 			fmt.Printf("Error while upgrading packages for %T: %v\n%v", pm, err, packages)
 			continue
 		}
-		log.Printf("Upgraded packages for %T: %v", pm, packages)
+		// log.Printf("Upgraded packages for %T: %v", pm, packages)
+		log.Println("Packages upgraded:")
+		for _, pkg := range packages {
+			fmt.Printf("%s: %s -> %s (%s)\n", pkg.PackageManager, pkg.Name, pkg.NewVersion, pkg.Status)
+		}
 	}
 
 	fmt.Println("Upgrade completed.")

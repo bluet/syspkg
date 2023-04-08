@@ -5,6 +5,8 @@
                 "Fatalf",
                 "pkgs",
                 "syspkg",
-                "urfave"
+                "urfave",
+                "zutty",
+                "zvbi"
         ]
 }

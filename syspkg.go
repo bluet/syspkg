@@ -17,7 +17,7 @@ type Options = internal.Options
 type PackageManager interface {
 	IsAvailable() bool
 	Install(pkgs []string, opts *internal.Options) ([]internal.PackageInfo, error)
-	Uninstall(pkgs []string, opts *internal.Options) ([]internal.PackageInfo, error)
+	Delete(pkgs []string, opts *internal.Options) ([]internal.PackageInfo, error)
 	Search(keywords []string, opts *internal.Options) ([]internal.PackageInfo, error)
 	ListInstalled(opts *internal.Options) ([]internal.PackageInfo, error)
 	ListUpgradable(opts *internal.Options) ([]internal.PackageInfo, error)
