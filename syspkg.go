@@ -18,9 +18,10 @@ type PackageManager interface {
 	IsAvailable() bool
 	Install(pkgs []string, opts *internal.Options) ([]internal.PackageInfo, error)
 	Delete(pkgs []string, opts *internal.Options) ([]internal.PackageInfo, error)
-	Search(keywords []string, opts *internal.Options) ([]internal.PackageInfo, error)
+	Find(keywords []string, opts *internal.Options) ([]internal.PackageInfo, error)
 	ListInstalled(opts *internal.Options) ([]internal.PackageInfo, error)
 	ListUpgradable(opts *internal.Options) ([]internal.PackageInfo, error)
+	GetPackageInfo(pkg string, opts *internal.Options) (internal.PackageInfo, error)
 	Upgrade(opts *internal.Options) ([]internal.PackageInfo, error)
 	Refresh(opts *internal.Options) error
 }

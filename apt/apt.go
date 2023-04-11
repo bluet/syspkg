@@ -136,7 +136,7 @@ func (a *PackageManager) Refresh(opts *internal.Options) error {
 	}
 }
 
-func (a *PackageManager) Search(keywords []string, opts *internal.Options) ([]internal.PackageInfo, error) {
+func (a *PackageManager) Find(keywords []string, opts *internal.Options) ([]internal.PackageInfo, error) {
 	args := append([]string{"search"}, keywords...)
 	cmd := exec.Command("apt", args...)
 	cmd.Env = ENV_NonInteractive
@@ -146,11 +146,11 @@ func (a *PackageManager) Search(keywords []string, opts *internal.Options) ([]in
 		return nil, err
 	}
 
-	return ParseSearchOutput(string(out), opts), nil
+	return ParseFindOutput(string(out), opts), nil
 }
 
 func (a *PackageManager) ListInstalled(opts *internal.Options) ([]internal.PackageInfo, error) {
-	cmd := exec.Command("dpkg-query", "-W", "-f", "${binary:Package} ${Version}\\n")
+	cmd := exec.Command("dpkg-query", "-W", "-f", "${binary:Package} ${Version}\n")
 	cmd.Env = ENV_NonInteractive
 	out, err := cmd.Output()
 	if err != nil {
@@ -160,7 +160,7 @@ func (a *PackageManager) ListInstalled(opts *internal.Options) ([]internal.Packa
 }
 
 func (a *PackageManager) ListUpgradable(opts *internal.Options) ([]internal.PackageInfo, error) {
-	cmd := exec.Command(pm, "upgrade", ArgsDryRun)
+	cmd := exec.Command(pm, "list", "--upgradable")
 	cmd.Env = ENV_NonInteractive
 	out, err := cmd.Output()
 	if err != nil {

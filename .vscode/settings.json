@@ -1,8 +1,11 @@
 {
         "cSpell.words": [
+                "binfmt",
                 "dfsg",
                 "dpkg",
                 "Fatalf",
+                "libllvm",
+                "libslf",
                 "pkgs",
                 "syspkg",
                 "urfave",

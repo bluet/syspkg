@@ -13,13 +13,12 @@ import (
 
 func main() {
 	if os.Geteuid() != 0 {
-		fmt.Println("Error: This command must be run with root privileges. If you got exist codes 100 or 101, please run this command with sudo.")
+		fmt.Println("(This command must be run with root privileges. If you got exist codes 100 or 101, please run this command with sudo.)")
 	}
 
 	pms, err := syspkg.NewPackageManager()
 	if err != nil {
-		fmt.Printf("Error while initializing package managers: %v", err)
-		// fmt.Println("Error:", err)
+		fmt.Printf("Error while initializing package managers: %+v", err)
 		os.Exit(1)
 	}
 
@@ -29,6 +28,7 @@ func main() {
 		Action: func(c *cli.Context) error {
 			var opts = getOptions(c)
 
+			log.Println("Listing upgradable packages...")
 			listUpgradablePackages(pms, opts)
 			return nil
 		},
@@ -39,14 +39,18 @@ func main() {
 				Usage:   "Install packages",
 				Action: func(c *cli.Context) error {
 					var opts = getOptions(c)
+
+					log.Panicln("Installing packages...")
+
 					pkgNames := c.Args().Slice()
 					for _, pm := range pms {
+						log.Printf("Installing packages for %T...", pm)
 						packages, err := pm.Install(pkgNames, opts)
 						if err != nil {
-							fmt.Printf("Error while installing packages for %T: %v\n%v", pm, err, packages)
+							fmt.Printf("Error while installing packages for %T: %+v\n%+v", pm, err, packages)
 							continue
 						}
-						log.Printf("Installed packages for %T:\n%v", pm, packages)
+						log.Printf("Installed packages for %T:\n%+v", pm, packages)
 					}
 					return nil
 				},
@@ -58,13 +62,17 @@ func main() {
 				Action: func(c *cli.Context) error {
 					var opts = getOptions(c)
 					pkgNames := c.Args().Slice()
+
+					log.Println("Deleting packages...")
+
 					for _, pm := range pms {
+						log.Printf("Deleting packages for %T...", pm)
 						packages, err := pm.Delete(pkgNames, opts)
 						if err != nil {
-							fmt.Printf("Error while deleting packages for %T: %v\n%v", pm, err, packages)
+							fmt.Printf("Error while deleting packages for %T: %+v\n%+v", pm, err, packages)
 							continue
 						}
-						log.Printf("Deleting packages for %T:\n%v", pm, packages)
+						log.Printf("Deleted packages for %T:\n%+v", pm, packages)
 					}
 					return nil
 				},
@@ -75,10 +83,12 @@ func main() {
 				Usage:   "Refresh package list",
 				Action: func(c *cli.Context) error {
 					var opts = getOptions(c)
+					log.Println("Refreshing package list...")
 					for _, pm := range pms {
+						log.Printf("Refreshing package list for %T...", pm)
 						err := pm.Refresh(opts)
 						if err != nil {
-							fmt.Printf("Error while updating package list for %T: %v\n", pm, err)
+							fmt.Printf("Error while updating package list for %T: %+v\n", pm, err)
 							continue
 						}
 						log.Printf("Refreshed package list for %T", pm)
@@ -93,6 +103,8 @@ func main() {
 				Action: func(c *cli.Context) error {
 					var opts = getOptions(c)
 
+					log.Println("Upgrading packages...")
+
 					listUpgradablePackages(pms, opts)
 					if opts.Interactive {
 						fmt.Print("\nDo you want to perform the system package upgrade? [Y/n]: ")
@@ -104,6 +116,7 @@ func main() {
 							fmt.Println("Upgrade cancelled.")
 							return nil
 						}
+						log.Printf("User confirmed upgrade.")
 					}
 
 					return performUpgrade(pms, opts)
@@ -120,16 +133,16 @@ func main() {
 						fmt.Println("Please specify keywords to search.")
 						return nil
 					}
-					log.Printf("Finding packages: %v", keywords)
+					log.Printf("Finding packages: %+v", keywords)
 
 					for _, pm := range pms {
-						pkgs, err := pm.Search(keywords, opts)
+						pkgs, err := pm.Find(keywords, opts)
 						if err != nil {
-							fmt.Printf("Error while searching packages for %T: %v\n", pm, err)
+							fmt.Printf("Error while searching packages for %T: %+v\n", pm, err)
 							continue
 						}
 
-						fmt.Printf("Search results for %T:\n", pm)
+						fmt.Printf("Found results for %T:\n", pm)
 						for _, pkg := range pkgs {
 							fmt.Printf("%s: %s [%s][%s] (%s)\n", pkg.PackageManager, pkg.Name, pkg.Version, pkg.NewVersion, pkg.Status)
 						}
@@ -150,7 +163,62 @@ func main() {
 						Action: func(c *cli.Context) error {
 							var opts = getOptions(c)
 
+							log.Println("Showing upgradable packages...")
+
 							listUpgradablePackages(pms, opts)
+							return nil
+						},
+					},
+					{
+						Name:    "package",
+						Aliases: []string{"p"},
+						Usage:   "Show package information",
+						Action: func(c *cli.Context) error {
+							var opts = getOptions(c)
+							pkgName := c.Args().Slice()[0]
+							if len(pkgName) == 0 {
+								fmt.Println("Please specify package name.")
+								return nil
+							}
+
+							log.Println("Showing package information...")
+
+							for _, pm := range pms {
+								log.Printf("Showing package information for %T...", pm)
+								pkg, err := pm.GetPackageInfo(pkgName, opts)
+								if err != nil {
+									fmt.Printf("Error while showing package info for %T: %+v\n", pm, err)
+									continue
+								}
+
+								fmt.Printf("Search results for %T:\n", pm)
+								fmt.Printf("%s: %s [%s][%s] (%s) %s:%s\n", pkg.PackageManager, pkg.Name, pkg.Version, pkg.NewVersion, pkg.Status, pkg.Category, pkg.Arch)
+							}
+							return nil
+						},
+					},
+					{
+						Name:    "installed",
+						Aliases: []string{"i"},
+						Usage:   "Show installed packages",
+						Action: func(c *cli.Context) error {
+							var opts = getOptions(c)
+
+							log.Println("Showing installed packages...")
+
+							for _, pm := range pms {
+								log.Printf("Showing installed packages for %T...", pm)
+								pkgs, err := pm.ListInstalled(opts)
+								if err != nil {
+									fmt.Printf("Error while showing installed packages for %T: %+v\n", pm, err)
+									continue
+								}
+
+								fmt.Printf("Search results for %T:\n", pm)
+								for _, pkg := range pkgs {
+									fmt.Printf("%s: %s [%s][%s] (%s)\n", pkg.PackageManager, pkg.Name, pkg.Version, pkg.NewVersion, pkg.Status)
+								}
+							}
 							return nil
 						},
 					},
@@ -209,9 +277,10 @@ func getOptions(c *cli.Context) *internal.Options {
 
 func listUpgradablePackages(pms []syspkg.PackageManager, opts *internal.Options) {
 	for _, pm := range pms {
+		log.Printf("Listing upgradable packages for %T...\n", pm)
 		upgradablePackages, err := pm.ListUpgradable(opts)
 		if err != nil {
-			fmt.Printf("Error while listing upgradable packages for %T: %v\n", pm, err)
+			fmt.Printf("Error while listing upgradable packages for %T: %+v\n", pm, err)
 			continue
 		}
 
@@ -228,10 +297,10 @@ func performUpgrade(pms []syspkg.PackageManager, opts *internal.Options) error {
 	for _, pm := range pms {
 		packages, err := pm.Upgrade(opts)
 		if err != nil {
-			fmt.Printf("Error while upgrading packages for %T: %v\n%v", pm, err, packages)
+			fmt.Printf("Error while upgrading packages for %T: %+v\n%+v", pm, err, packages)
 			continue
 		}
-		// log.Printf("Upgraded packages for %T: %v", pm, packages)
+		// log.Printf("Upgraded packages for %T: %+v", pm, packages)
 		log.Println("Packages upgraded:")
 		for _, pkg := range packages {
 			fmt.Printf("%s: %s -> %s (%s)\n", pkg.PackageManager, pkg.Name, pkg.NewVersion, pkg.Status)

@@ -10,7 +10,7 @@ import (
 func TestNewPackageManager(t *testing.T) {
 	manager, err := syspkg.NewPackageManager()
 	if err != nil {
-		t.Fatalf("NewPackageManager() error: %v", err)
+		t.Fatalf("NewPackageManager() error: %+v", err)
 	}
 
 	if manager == nil {

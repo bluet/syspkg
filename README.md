@@ -39,13 +39,13 @@ import (
 func main() {
  manager, err := syspkg.NewPackageManager()
  if err != nil {
-  log.Fatalf("Error initializing package manager: %v", err)
+  log.Fatalf("Error initializing package manager: %+v", err)
  }
 
  // List installed packages
  installedPackages, err := manager.ListInstalled()
  if err != nil {
-  log.Fatalf("Error listing installed packages: %v", err)
+  log.Fatalf("Error listing installed packages: %+v", err)
  }
 
  fmt.Println("Installed packages:")
@@ -56,7 +56,7 @@ func main() {
  // List upgradable packages
  upgradablePackages, err := manager.ListUpgradable()
  if err != nil {
-  log.Fatalf("Error listing upgradable packages: %v", err)
+  log.Fatalf("Error listing upgradable packages: %+v", err)
  }
 
  fmt.Println("Upgradable packages:")
@@ -67,7 +67,7 @@ func main() {
  // Upgrade system packages
  err = manager.UpgradeSystem(true)
  if err != nil {
-  log.Fatalf("Error upgrading system packages: %v", err)
+  log.Fatalf("Error upgrading system packages: %+v", err)
  }
 }
 
