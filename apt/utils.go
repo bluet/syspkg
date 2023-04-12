@@ -15,11 +15,11 @@ import (
 )
 
 func ParseInstallOutput(output string, opts *internal.Options) []internal.PackageInfo {
+	var packages []internal.PackageInfo
+
 	// remove the last empty line
 	output = strings.TrimSuffix(output, "\n")
-	lines := strings.Split(string(output), "\n")
-	// lines := strings.Split(output, "\n")
-	var packages []internal.PackageInfo
+	var lines []string = strings.Split(string(output), "\n")
 
 	for _, line := range lines {
 		if opts.Verbose {
@@ -57,9 +57,10 @@ func ParseInstallOutput(output string, opts *internal.Options) []internal.Packag
 
 func ParseDeletedOutput(output string, opts *internal.Options) []internal.PackageInfo {
 	var packages []internal.PackageInfo
+
 	// remove the last empty line
 	output = strings.TrimSuffix(output, "\n")
-	lines := strings.Split(string(output), "\n")
+	var lines []string = strings.Split(string(output), "\n")
 
 	for _, line := range lines {
 		if opts.Verbose {
@@ -100,6 +101,9 @@ func ParseDeletedOutput(output string, opts *internal.Options) []internal.Packag
 }
 
 func ParseFindOutput(output string, opts *internal.Options) []internal.PackageInfo {
+	var packages []internal.PackageInfo
+	var packagesDict = make(map[string]internal.PackageInfo)
+
 	// Sorting...
 	// Full Text Search...
 	// zutty/jammy 0.11.2.20220109.192032+dfsg1-1 amd64
@@ -114,10 +118,7 @@ func ParseFindOutput(output string, opts *internal.Options) []internal.PackageIn
 	output = strings.TrimSuffix(output, "\n")
 
 	// split output by empty lines
-	lines := strings.Split(output, "\n\n")
-
-	var packages []internal.PackageInfo
-	var packagesDict = make(map[string]internal.PackageInfo)
+	var lines []string = strings.Split(output, "\n\n")
 
 	for _, line := range lines {
 		if regexp.MustCompile(`^[\w\d-]+/[\w\d-,]+`).MatchString(line) {
@@ -160,6 +161,7 @@ func ParseFindOutput(output string, opts *internal.Options) []internal.PackageIn
 
 func ParseListInstalledOutput(output string, opts *internal.Options) []internal.PackageInfo {
 	var packages []internal.PackageInfo
+
 	// remove the last empty line
 	output = strings.TrimSuffix(output, "\n")
 	lines := strings.Split(string(output), "\n")
@@ -195,12 +197,13 @@ func ParseListInstalledOutput(output string, opts *internal.Options) []internal.
 }
 
 func ParseListUpgradableOutput(output string, opts *internal.Options) []internal.PackageInfo {
+	var packages []internal.PackageInfo
+
 	// Listing...
 	// cloudflared/unknown 2023.4.0 amd64 [upgradable from: 2023.3.1]
 	// libllvm15/jammy-updates 1:15.0.7-0ubuntu0.22.04.1 amd64 [upgradable from: 1:15.0.6-3~ubuntu0.22.04.2]
 	// libllvm15/jammy-updates 1:15.0.7-0ubuntu0.22.04.1 i386 [upgradable from: 1:15.0.6-3~ubuntu0.22.04.2]
 
-	var packages []internal.PackageInfo
 	// remove the last empty line
 	output = strings.TrimSuffix(output, "\n")
 	lines := strings.Split(string(output), "\n")
@@ -285,7 +288,6 @@ func ParseDpkgQueryOutput(output []byte, packages map[string]internal.PackageInf
 
 	// remove the last empty line
 	output = bytes.TrimSuffix(output, []byte("\n"))
-	output = bytes.TrimSuffix(output, []byte("\n"))
 	lines := bytes.Split(output, []byte("\n"))
 
 	for _, line := range lines {
@@ -356,11 +358,11 @@ func ParseDpkgQueryOutput(output []byte, packages map[string]internal.PackageInf
 }
 
 func ParsePackageInfoOutput(output string, opts *internal.Options) internal.PackageInfo {
+	var pkg internal.PackageInfo
+
 	// remove the last empty line
 	output = strings.TrimSuffix(output, "\n")
 	lines := strings.Split(string(output), "\n")
-
-	var pkg internal.PackageInfo
 
 	for _, line := range lines {
 		if len(line) > 0 {
