@@ -6,6 +6,8 @@ import (
 	"os"
 	"strings"
 
+	// "github.com/rs/zerolog/log"
+
 	"github.com/bluet/syspkg"
 	"github.com/bluet/syspkg/internal"
 	"github.com/urfave/cli/v2"

@@ -7,7 +7,6 @@ import (
 	// "github.com/bluet/syspkg/snap"
 	// "github.com/bluet/syspkg/dnf"
 	// "github.com/bluet/syspkg/zypper"
-
 	"github.com/bluet/syspkg/internal"
 )
 

@@ -267,3 +267,54 @@ Description: Cloudflare Tunnel daemon
 		t.Errorf("ParsePackageInfoOutput() = %+v, want %+v", actualPackageInfo, expectedPackageInfo)
 	}
 }
+
+func TestParseDpkgQueryOutput(t *testing.T) {
+	type args struct {
+		output   []byte
+		packages map[string]internal.PackageInfo
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []internal.PackageInfo
+		wantErr bool
+	}{
+		{
+			name: "ParseDpkgQueryOutput",
+			args: args{
+				output: []byte(`bash install ok installed 5.1-6ubuntu1
+cloudflared install ok installed 2023.3.1
+qemu-kvm deinstall ok config-files 1:4.2-3ubuntu6.23
+dpkg-query: no packages found matching ajsdjsks
+dpkg-query: no packages found matching byobu`),
+				packages: map[string]internal.PackageInfo{
+					"bash":        {Name: "bash"},
+					"cloudflared": {Name: "cloudflared"},
+					"qemu-kvm":    {Name: "qemu-kvm"},
+					"ajsdjsks":   {Name: "ajsdjsks"},
+					"byobu":       {Name: "byobu"},
+				},
+			},
+			want: []internal.PackageInfo{
+				{Name: "bash", Status: internal.PackageStatusInstalled, Version: "5.1-6ubuntu1"},
+				{Name: "cloudflared", Status: internal.PackageStatusInstalled, Version: "2023.3.1"},
+				{Name: "qemu-kvm", Status: internal.PackageStatusConfigFiles, Version: "1:4.2-3ubuntu6.23"},
+				{Name: "ajsdjsks", Status: internal.PackageStatusUnknown, Version: ""},
+				{Name: "byobu", Status: internal.PackageStatusUnknown, Version: ""},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := apt.ParseDpkgQueryOutput(tt.args.output, tt.args.packages)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ParseDpkgQueryOutput() error = %+v, wantErr %+v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ParseDpkgQueryOutput() = %+v, want %+v", got, tt.want)
+			}
+		})
+	}
+}

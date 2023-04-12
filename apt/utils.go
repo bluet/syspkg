@@ -1,11 +1,15 @@
 package apt
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"os/exec"
 	"regexp"
 	"strings"
+
+	// "github.com/rs/zerolog"
+	// "github.com/rs/zerolog/log"
 
 	"github.com/bluet/syspkg/internal"
 )
@@ -146,7 +150,7 @@ func ParseFindOutput(output string, opts *internal.Options) []internal.PackageIn
 		return packages
 	}
 
-	packages, err := getPackageStatus(&packagesDict)
+	packages, err := getPackageStatus(packagesDict)
 	if err != nil {
 		log.Printf("apt: getPackageStatus error: %s\n", err)
 	}
@@ -234,15 +238,15 @@ func ParseListUpgradableOutput(output string, opts *internal.Options) []internal
 	return packages
 }
 
-func getPackageStatus(packages *map[string]internal.PackageInfo) ([]internal.PackageInfo, error) {
+func getPackageStatus(packages map[string]internal.PackageInfo) ([]internal.PackageInfo, error) {
 	var packageNames []string
 	var packagesList []internal.PackageInfo
 
-	if len(*packages) == 0 {
+	if len(packages) == 0 {
 		return packagesList, nil
 	}
 
-	for name := range *packages {
+	for name := range packages {
 		packageNames = append(packageNames, name)
 	}
 
@@ -261,13 +265,13 @@ func getPackageStatus(packages *map[string]internal.PackageInfo) ([]internal.Pac
 		}
 	}
 
-	packagesList, err = ParseDpkgQueryOutput(string(out), packages)
+	packagesList, err = ParseDpkgQueryOutput(out, packages)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse dpkg-query output: %+v", err)
 	}
 
 	// for all the packages that are not found, set their status to unknown, if any
-	for _, pkg := range *packages {
+	for _, pkg := range packages {
 		fmt.Printf("apt: package not found by dpkg-query: %s", pkg.Name)
 		pkg.Status = internal.PackageStatusUnknown
 		packagesList = append(packagesList, pkg)
@@ -276,54 +280,75 @@ func getPackageStatus(packages *map[string]internal.PackageInfo) ([]internal.Pac
 	return packagesList, nil
 }
 
-func ParseDpkgQueryOutput(output string, packages *map[string]internal.PackageInfo) ([]internal.PackageInfo, error) {
+func ParseDpkgQueryOutput(output []byte, packages map[string]internal.PackageInfo) ([]internal.PackageInfo, error) {
 	var packagesList []internal.PackageInfo
 
 	// remove the last empty line
-	output = strings.TrimSuffix(output, "\n")
-	lines := strings.Split(string(output), "\n")
+	output = bytes.TrimSuffix(output, []byte("\n"))
+	output = bytes.TrimSuffix(output, []byte("\n"))
+	lines := bytes.Split(output, []byte("\n"))
 
 	for _, line := range lines {
 		if len(line) > 0 {
-			parts := strings.Fields(line)
-			name := parts[0]
+			parts := bytes.Fields(line)
+
+			if len(parts) < 2 {
+				continue
+			}
+
+			name := string(parts[0])
 
 			if strings.HasPrefix(name, "dpkg-query:") {
-				name = parts[len(parts)-1]
+				name = string(parts[len(parts)-1])
 
 				if strings.Contains(name, ":") {
 					name = strings.Split(name, ":")[0]
 				}
 			}
 
-			// if name is empty, it might be not what we want
+			// if name is empty, it might not be what we want
 			if name == "" {
 				continue
 			}
 
-			version := parts[len(parts)-1]
-
+			version := string(parts[len(parts)-1])
 			if !regexp.MustCompile(`^\d`).MatchString(version) {
 				version = ""
 			}
 
-			pkg := (*packages)[name]
-			delete(*packages, name)
+			pkg, ok := packages[name]
 
-			if strings.HasPrefix(line, "dpkg-query: ") {
+			if !ok {
+				pkg = internal.PackageInfo{}
+				packages[name] = pkg
+			}
+
+			delete(packages, name)
+
+			switch {
+			case bytes.HasPrefix(line, []byte("dpkg-query: ")):
 				pkg.Status = internal.PackageStatusUnknown
 				pkg.Version = ""
-			} else if parts[len(parts)-2] == "installed" {
+			case string(parts[len(parts)-2]) == "installed":
 				pkg.Status = internal.PackageStatusInstalled
-				pkg.Version = version
-			} else {
+				if version != "" {
+					pkg.Version = version
+				}
+			case string(parts[len(parts)-2]) == "config-files":
+				pkg.Status = internal.PackageStatusConfigFiles
+				if version != "" {
+					pkg.Version = version
+				}
+			default:
 				pkg.Status = internal.PackageStatusAvailable
-				pkg.Version = version
+				if version != "" {
+					pkg.Version = version
+				}
 			}
 
 			packagesList = append(packagesList, pkg)
 		} else {
-			fmt.Printf("apt: line is empty\n")
+			log.Println("apt: line is empty")
 		}
 	}
 

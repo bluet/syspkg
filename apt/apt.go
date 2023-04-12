@@ -5,6 +5,9 @@ import (
 	"os"
 	"os/exec"
 
+	// "github.com/rs/zerolog"
+	// "github.com/rs/zerolog/log"
+
 	"github.com/bluet/syspkg/internal"
 )
 
