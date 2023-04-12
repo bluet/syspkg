@@ -3,26 +3,26 @@ package syspkg
 import (
 	"errors"
 
-	"github.com/bluet/syspkg/apt"
+	"github.com/bluet/syspkg/manager/apt"
 	// "github.com/bluet/syspkg/snap"
 	// "github.com/bluet/syspkg/dnf"
 	// "github.com/bluet/syspkg/zypper"
-	"github.com/bluet/syspkg/internal"
+	"github.com/bluet/syspkg/manager"
 )
 
-type PackageInfo = internal.PackageInfo
-type Options = internal.Options
+type PackageInfo = manager.PackageInfo
+type Options = manager.Options
 
 type PackageManager interface {
 	IsAvailable() bool
-	Install(pkgs []string, opts *internal.Options) ([]internal.PackageInfo, error)
-	Delete(pkgs []string, opts *internal.Options) ([]internal.PackageInfo, error)
-	Find(keywords []string, opts *internal.Options) ([]internal.PackageInfo, error)
-	ListInstalled(opts *internal.Options) ([]internal.PackageInfo, error)
-	ListUpgradable(opts *internal.Options) ([]internal.PackageInfo, error)
-	GetPackageInfo(pkg string, opts *internal.Options) (internal.PackageInfo, error)
-	Upgrade(opts *internal.Options) ([]internal.PackageInfo, error)
-	Refresh(opts *internal.Options) error
+	Install(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error)
+	Delete(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error)
+	Find(keywords []string, opts *manager.Options) ([]manager.PackageInfo, error)
+	ListInstalled(opts *manager.Options) ([]manager.PackageInfo, error)
+	ListUpgradable(opts *manager.Options) ([]manager.PackageInfo, error)
+	GetPackageInfo(pkg string, opts *manager.Options) (manager.PackageInfo, error)
+	Upgrade(opts *manager.Options) ([]manager.PackageInfo, error)
+	Refresh(opts *manager.Options) error
 }
 
 func NewPackageManager() ([]PackageManager, error) {

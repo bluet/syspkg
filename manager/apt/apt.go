@@ -8,7 +8,7 @@ import (
 	// "github.com/rs/zerolog"
 	// "github.com/rs/zerolog/log"
 
-	"github.com/bluet/syspkg/internal"
+	"github.com/bluet/syspkg/manager"
 )
 
 var pm string = "apt"
@@ -37,11 +37,11 @@ func (a *PackageManager) GetPackageManager() string {
 	return pm
 }
 
-func (a *PackageManager) Install(pkgs []string, opts *internal.Options) ([]internal.PackageInfo, error) {
+func (a *PackageManager) Install(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error) {
 	args := append([]string{"install", ArgsFixBroken}, pkgs...)
 
 	if opts == nil {
-		opts = &internal.Options{
+		opts = &manager.Options{
 			DryRun:      false,
 			Interactive: false,
 			Verbose:     false,
@@ -75,10 +75,10 @@ func (a *PackageManager) Install(pkgs []string, opts *internal.Options) ([]inter
 	}
 }
 
-func (a *PackageManager) Delete(pkgs []string, opts *internal.Options) ([]internal.PackageInfo, error) {
+func (a *PackageManager) Delete(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error) {
 	args := append([]string{"remove", ArgsFixBroken, ArgsPurge, ArgsAutoRemove}, pkgs...)
 	if opts == nil {
-		opts = &internal.Options{
+		opts = &manager.Options{
 			DryRun:      false,
 			Interactive: false,
 			Verbose:     false,
@@ -110,12 +110,12 @@ func (a *PackageManager) Delete(pkgs []string, opts *internal.Options) ([]intern
 	}
 }
 
-func (a *PackageManager) Refresh(opts *internal.Options) error {
+func (a *PackageManager) Refresh(opts *manager.Options) error {
 	cmd := exec.Command(pm, "update")
 	cmd.Env = ENV_NonInteractive
 
 	if opts == nil {
-		opts = &internal.Options{
+		opts = &manager.Options{
 			DryRun:      false,
 			Interactive: false,
 			Verbose:     false,
@@ -139,7 +139,7 @@ func (a *PackageManager) Refresh(opts *internal.Options) error {
 	}
 }
 
-func (a *PackageManager) Find(keywords []string, opts *internal.Options) ([]internal.PackageInfo, error) {
+func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manager.PackageInfo, error) {
 	args := append([]string{"search"}, keywords...)
 	cmd := exec.Command("apt", args...)
 	cmd.Env = ENV_NonInteractive
@@ -152,7 +152,7 @@ func (a *PackageManager) Find(keywords []string, opts *internal.Options) ([]inte
 	return ParseFindOutput(string(out), opts), nil
 }
 
-func (a *PackageManager) ListInstalled(opts *internal.Options) ([]internal.PackageInfo, error) {
+func (a *PackageManager) ListInstalled(opts *manager.Options) ([]manager.PackageInfo, error) {
 	cmd := exec.Command("dpkg-query", "-W", "-f", "${binary:Package} ${Version}\n")
 	cmd.Env = ENV_NonInteractive
 	out, err := cmd.Output()
@@ -162,7 +162,7 @@ func (a *PackageManager) ListInstalled(opts *internal.Options) ([]internal.Packa
 	return ParseListInstalledOutput(string(out), opts), nil
 }
 
-func (a *PackageManager) ListUpgradable(opts *internal.Options) ([]internal.PackageInfo, error) {
+func (a *PackageManager) ListUpgradable(opts *manager.Options) ([]manager.PackageInfo, error) {
 	cmd := exec.Command(pm, "list", "--upgradable")
 	cmd.Env = ENV_NonInteractive
 	out, err := cmd.Output()
@@ -172,10 +172,10 @@ func (a *PackageManager) ListUpgradable(opts *internal.Options) ([]internal.Pack
 	return ParseListUpgradableOutput(string(out), opts), nil
 }
 
-func (a *PackageManager) Upgrade(opts *internal.Options) ([]internal.PackageInfo, error) {
+func (a *PackageManager) Upgrade(opts *manager.Options) ([]manager.PackageInfo, error) {
 	args := []string{"upgrade"}
 	if opts == nil {
-		opts = &internal.Options{
+		opts = &manager.Options{
 			Verbose:     false,
 			DryRun:      false,
 			Interactive: false,
@@ -207,12 +207,12 @@ func (a *PackageManager) Upgrade(opts *internal.Options) ([]internal.PackageInfo
 	}
 }
 
-func (a *PackageManager) Clean(opts *internal.Options) error {
+func (a *PackageManager) Clean(opts *manager.Options) error {
 	cmd := exec.Command(pm, "autoclean")
 	cmd.Env = ENV_NonInteractive
 
 	if opts == nil {
-		opts = &internal.Options{
+		opts = &manager.Options{
 			DryRun:      false,
 			Interactive: false,
 			Verbose:     false,
@@ -236,20 +236,20 @@ func (a *PackageManager) Clean(opts *internal.Options) error {
 	}
 }
 
-func (a *PackageManager) GetPackageInfo(pkg string, opts *internal.Options) (internal.PackageInfo, error) {
+func (a *PackageManager) GetPackageInfo(pkg string, opts *manager.Options) (manager.PackageInfo, error) {
 	cmd := exec.Command("apt-cache", "show", pkg)
 	cmd.Env = ENV_NonInteractive
 	out, err := cmd.Output()
 	if err != nil {
-		return internal.PackageInfo{}, err
+		return manager.PackageInfo{}, err
 	}
 	return ParsePackageInfoOutput(string(out), opts), nil
 }
 
-func (a *PackageManager) AutoRemove(opts *internal.Options) ([]internal.PackageInfo, error) {
+func (a *PackageManager) AutoRemove(opts *manager.Options) ([]manager.PackageInfo, error) {
 	args := []string{"autoremove"}
 	if opts == nil {
-		opts = &internal.Options{
+		opts = &manager.Options{
 			Verbose:     false,
 			DryRun:      false,
 			Interactive: false,

@@ -1,4 +1,4 @@
-package internal
+package manager
 
 type PackageStatus string
 
@@ -19,12 +19,4 @@ type PackageInfo struct {
 	Arch           string
 	PackageManager string
 	AdditionalData map[string]string
-}
-
-type Options struct {
-	Interactive bool
-	DryRun      bool
-	Verbose     bool
-	AssumeYes   bool
-	Debug       bool
 }

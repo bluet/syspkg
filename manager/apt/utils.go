@@ -11,11 +11,11 @@ import (
 	// "github.com/rs/zerolog"
 	// "github.com/rs/zerolog/log"
 
-	"github.com/bluet/syspkg/internal"
+	"github.com/bluet/syspkg/manager"
 )
 
-func ParseInstallOutput(output string, opts *internal.Options) []internal.PackageInfo {
-	var packages []internal.PackageInfo
+func ParseInstallOutput(output string, opts *manager.Options) []manager.PackageInfo {
+	var packages []manager.PackageInfo
 
 	// remove the last empty line
 	output = strings.TrimSuffix(output, "\n")
@@ -40,12 +40,12 @@ func ParseInstallOutput(output string, opts *internal.Options) []internal.Packag
 				continue
 			}
 
-			packageInfo := internal.PackageInfo{
+			packageInfo := manager.PackageInfo{
 				Name:           name,
 				Arch:           arch,
 				Version:        strings.Trim(parts[3], "()"),
 				NewVersion:     strings.Trim(parts[3], "()"),
-				Status:         internal.PackageStatusInstalled,
+				Status:         manager.PackageStatusInstalled,
 				PackageManager: pm,
 			}
 			packages = append(packages, packageInfo)
@@ -55,8 +55,8 @@ func ParseInstallOutput(output string, opts *internal.Options) []internal.Packag
 	return packages
 }
 
-func ParseDeletedOutput(output string, opts *internal.Options) []internal.PackageInfo {
-	var packages []internal.PackageInfo
+func ParseDeletedOutput(output string, opts *manager.Options) []manager.PackageInfo {
+	var packages []manager.PackageInfo
 
 	// remove the last empty line
 	output = strings.TrimSuffix(output, "\n")
@@ -84,13 +84,13 @@ func ParseDeletedOutput(output string, opts *internal.Options) []internal.Packag
 				continue
 			}
 
-			packageInfo := internal.PackageInfo{
+			packageInfo := manager.PackageInfo{
 				Name:           name,
 				Version:        strings.Trim(parts[2], "()"),
 				NewVersion:     "",
 				Category:       "",
 				Arch:           arch,
-				Status:         internal.PackageStatusAvailable,
+				Status:         manager.PackageStatusAvailable,
 				PackageManager: pm,
 			}
 			packages = append(packages, packageInfo)
@@ -100,9 +100,9 @@ func ParseDeletedOutput(output string, opts *internal.Options) []internal.Packag
 	return packages
 }
 
-func ParseFindOutput(output string, opts *internal.Options) []internal.PackageInfo {
-	var packages []internal.PackageInfo
-	var packagesDict = make(map[string]internal.PackageInfo)
+func ParseFindOutput(output string, opts *manager.Options) []manager.PackageInfo {
+	var packages []manager.PackageInfo
+	var packagesDict = make(map[string]manager.PackageInfo)
 
 	// Sorting...
 	// Full Text Search...
@@ -134,7 +134,7 @@ func ParseFindOutput(output string, opts *internal.Options) []internal.PackageIn
 				continue
 			}
 
-			packageInfo := internal.PackageInfo{
+			packageInfo := manager.PackageInfo{
 				Name:           strings.Split(parts[0], "/")[0],
 				Version:        parts[1],
 				NewVersion:     parts[1],
@@ -159,8 +159,8 @@ func ParseFindOutput(output string, opts *internal.Options) []internal.PackageIn
 	return packages
 }
 
-func ParseListInstalledOutput(output string, opts *internal.Options) []internal.PackageInfo {
-	var packages []internal.PackageInfo
+func ParseListInstalledOutput(output string, opts *manager.Options) []manager.PackageInfo {
+	var packages []manager.PackageInfo
 
 	// remove the last empty line
 	output = strings.TrimSuffix(output, "\n")
@@ -182,10 +182,10 @@ func ParseListInstalledOutput(output string, opts *internal.Options) []internal.
 				name = parts[0]
 			}
 
-			packageInfo := internal.PackageInfo{
+			packageInfo := manager.PackageInfo{
 				Name:           name,
 				Version:        parts[1],
-				Status:         internal.PackageStatusInstalled,
+				Status:         manager.PackageStatusInstalled,
 				Arch:           arch,
 				PackageManager: pm,
 			}
@@ -196,8 +196,8 @@ func ParseListInstalledOutput(output string, opts *internal.Options) []internal.
 	return packages
 }
 
-func ParseListUpgradableOutput(output string, opts *internal.Options) []internal.PackageInfo {
-	var packages []internal.PackageInfo
+func ParseListUpgradableOutput(output string, opts *manager.Options) []manager.PackageInfo {
+	var packages []manager.PackageInfo
 
 	// Listing...
 	// cloudflared/unknown 2023.4.0 amd64 [upgradable from: 2023.3.1]
@@ -225,13 +225,13 @@ func ParseListUpgradableOutput(output string, opts *internal.Options) []internal
 			version := parts[5]
 			version = strings.TrimSuffix(version, "]")
 
-			packageInfo := internal.PackageInfo{
+			packageInfo := manager.PackageInfo{
 				Name:           name,
 				Version:        version,
 				NewVersion:     newVersion,
 				Category:       category,
 				Arch:           arch,
-				Status:         internal.PackageStatusUpgradable,
+				Status:         manager.PackageStatusUpgradable,
 				PackageManager: pm,
 			}
 			packages = append(packages, packageInfo)
@@ -241,9 +241,9 @@ func ParseListUpgradableOutput(output string, opts *internal.Options) []internal
 	return packages
 }
 
-func getPackageStatus(packages map[string]internal.PackageInfo) ([]internal.PackageInfo, error) {
+func getPackageStatus(packages map[string]manager.PackageInfo) ([]manager.PackageInfo, error) {
 	var packageNames []string
-	var packagesList []internal.PackageInfo
+	var packagesList []manager.PackageInfo
 
 	if len(packages) == 0 {
 		return packagesList, nil
@@ -276,15 +276,15 @@ func getPackageStatus(packages map[string]internal.PackageInfo) ([]internal.Pack
 	// for all the packages that are not found, set their status to unknown, if any
 	for _, pkg := range packages {
 		fmt.Printf("apt: package not found by dpkg-query: %s", pkg.Name)
-		pkg.Status = internal.PackageStatusUnknown
+		pkg.Status = manager.PackageStatusUnknown
 		packagesList = append(packagesList, pkg)
 	}
 
 	return packagesList, nil
 }
 
-func ParseDpkgQueryOutput(output []byte, packages map[string]internal.PackageInfo) ([]internal.PackageInfo, error) {
-	var packagesList []internal.PackageInfo
+func ParseDpkgQueryOutput(output []byte, packages map[string]manager.PackageInfo) ([]manager.PackageInfo, error) {
+	var packagesList []manager.PackageInfo
 
 	// remove the last empty line
 	output = bytes.TrimSuffix(output, []byte("\n"))
@@ -321,7 +321,7 @@ func ParseDpkgQueryOutput(output []byte, packages map[string]internal.PackageInf
 			pkg, ok := packages[name]
 
 			if !ok {
-				pkg = internal.PackageInfo{}
+				pkg = manager.PackageInfo{}
 				packages[name] = pkg
 			}
 
@@ -329,20 +329,20 @@ func ParseDpkgQueryOutput(output []byte, packages map[string]internal.PackageInf
 
 			switch {
 			case bytes.HasPrefix(line, []byte("dpkg-query: ")):
-				pkg.Status = internal.PackageStatusUnknown
+				pkg.Status = manager.PackageStatusUnknown
 				pkg.Version = ""
 			case string(parts[len(parts)-2]) == "installed":
-				pkg.Status = internal.PackageStatusInstalled
+				pkg.Status = manager.PackageStatusInstalled
 				if version != "" {
 					pkg.Version = version
 				}
 			case string(parts[len(parts)-2]) == "config-files":
-				pkg.Status = internal.PackageStatusConfigFiles
+				pkg.Status = manager.PackageStatusConfigFiles
 				if version != "" {
 					pkg.Version = version
 				}
 			default:
-				pkg.Status = internal.PackageStatusAvailable
+				pkg.Status = manager.PackageStatusAvailable
 				if version != "" {
 					pkg.Version = version
 				}
@@ -357,8 +357,8 @@ func ParseDpkgQueryOutput(output []byte, packages map[string]internal.PackageInf
 	return packagesList, nil
 }
 
-func ParsePackageInfoOutput(output string, opts *internal.Options) internal.PackageInfo {
-	var pkg internal.PackageInfo
+func ParsePackageInfoOutput(output string, opts *manager.Options) manager.PackageInfo {
+	var pkg manager.PackageInfo
 
 	// remove the last empty line
 	output = strings.TrimSuffix(output, "\n")

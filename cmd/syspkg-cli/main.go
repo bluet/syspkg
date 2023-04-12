@@ -7,10 +7,10 @@ import (
 	"strings"
 
 	// "github.com/rs/zerolog/log"
+	"github.com/urfave/cli/v2"
 
 	"github.com/bluet/syspkg"
-	"github.com/bluet/syspkg/internal"
-	"github.com/urfave/cli/v2"
+	"github.com/bluet/syspkg/manager"
 )
 
 func main() {
@@ -263,8 +263,8 @@ func main() {
 	}
 }
 
-func getOptions(c *cli.Context) *internal.Options {
-	var opts internal.Options
+func getOptions(c *cli.Context) *manager.Options {
+	var opts manager.Options
 	opts.Verbose = c.Bool("verbose")
 	opts.DryRun = c.Bool("dry-run")
 	opts.Interactive = c.Bool("interactive")
@@ -277,7 +277,7 @@ func getOptions(c *cli.Context) *internal.Options {
 	return &opts
 }
 
-func listUpgradablePackages(pms []syspkg.PackageManager, opts *internal.Options) {
+func listUpgradablePackages(pms []syspkg.PackageManager, opts *manager.Options) {
 	for _, pm := range pms {
 		log.Printf("Listing upgradable packages for %T...\n", pm)
 		upgradablePackages, err := pm.ListUpgradable(opts)
@@ -293,7 +293,7 @@ func listUpgradablePackages(pms []syspkg.PackageManager, opts *internal.Options)
 	}
 }
 
-func performUpgrade(pms []syspkg.PackageManager, opts *internal.Options) error {
+func performUpgrade(pms []syspkg.PackageManager, opts *manager.Options) error {
 	fmt.Println("Performing package upgrade...")
 
 	for _, pm := range pms {
