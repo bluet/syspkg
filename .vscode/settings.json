@@ -6,6 +6,7 @@
                 "dfsg",
                 "dpkg",
                 "Fatalf",
+                "flatpak",
                 "libllvm",
                 "libslf",
                 "pkgs",

@@ -18,9 +18,9 @@ func main() {
 		fmt.Println("(This command must be run with root privileges. If you got exist codes 100 or 101, please run this command with sudo.)")
 	}
 
-	pms, err := syspkg.NewPackageManager()
+	pms, err := syspkg.NewPackageManager([]string{})
 	if err != nil {
-		fmt.Printf("Error while initializing package managers: %+v", err)
+		fmt.Printf("Error while initializing package managers: %+v\n", err)
 		os.Exit(1)
 	}
 
@@ -29,8 +29,9 @@ func main() {
 		Usage: "A universal system package manager",
 		Action: func(c *cli.Context) error {
 			var opts = getOptions(c)
+			pms = filterPackageManager(pms, c)
 
-			log.Println("Listing upgradable packages...")
+			log.Printf("Listing upgradable packages for %T...\n", pms)
 			listUpgradablePackages(pms, opts)
 			return nil
 		},
@@ -41,18 +42,19 @@ func main() {
 				Usage:   "Install packages",
 				Action: func(c *cli.Context) error {
 					var opts = getOptions(c)
+					pms = filterPackageManager(pms, c)
 
-					log.Panicln("Installing packages...")
+					log.Printf("Installing packages for %T...\n", pms)
 
 					pkgNames := c.Args().Slice()
 					for _, pm := range pms {
-						log.Printf("Installing packages for %T...", pm)
+						log.Printf("Installing packages for %T...\n", pm)
 						packages, err := pm.Install(pkgNames, opts)
 						if err != nil {
 							fmt.Printf("Error while installing packages for %T: %+v\n%+v", pm, err, packages)
 							continue
 						}
-						log.Printf("Installed packages for %T:\n%+v", pm, packages)
+						log.Printf("Installed packages for %T:\n%+v\n", pm, packages)
 					}
 					return nil
 				},
@@ -63,18 +65,19 @@ func main() {
 				Usage:   "Delete packages",
 				Action: func(c *cli.Context) error {
 					var opts = getOptions(c)
+					pms = filterPackageManager(pms, c)
 					pkgNames := c.Args().Slice()
 
-					log.Println("Deleting packages...")
+					log.Printf("Deleting packages... for %T\n", pms)
 
 					for _, pm := range pms {
-						log.Printf("Deleting packages for %T...", pm)
+						log.Printf("Deleting packages for %T...\n", pm)
 						packages, err := pm.Delete(pkgNames, opts)
 						if err != nil {
-							fmt.Printf("Error while deleting packages for %T: %+v\n%+v", pm, err, packages)
+							fmt.Printf("Error while deleting packages for %T: %+v\n%+v\n", pm, err, packages)
 							continue
 						}
-						log.Printf("Deleted packages for %T:\n%+v", pm, packages)
+						log.Printf("Deleted packages for %T:\n%+v\n", pm, packages)
 					}
 					return nil
 				},
@@ -85,15 +88,17 @@ func main() {
 				Usage:   "Refresh package list",
 				Action: func(c *cli.Context) error {
 					var opts = getOptions(c)
-					log.Println("Refreshing package list...")
+					pms = filterPackageManager(pms, c)
+
+					log.Printf("Refreshing package list... for %T\n", pms)
 					for _, pm := range pms {
-						log.Printf("Refreshing package list for %T...", pm)
+						log.Printf("Refreshing package list for %T...\n", pm)
 						err := pm.Refresh(opts)
 						if err != nil {
 							fmt.Printf("Error while updating package list for %T: %+v\n", pm, err)
 							continue
 						}
-						log.Printf("Refreshed package list for %T", pm)
+						log.Printf("Refreshed package list for %T\n", pm)
 					}
 					return nil
 				},
@@ -104,8 +109,9 @@ func main() {
 				Usage:   "Upgrade packages",
 				Action: func(c *cli.Context) error {
 					var opts = getOptions(c)
+					pms = filterPackageManager(pms, c)
 
-					log.Println("Upgrading packages...")
+					log.Printf("Upgrading packages... for %T\n", pms)
 
 					listUpgradablePackages(pms, opts)
 					if opts.Interactive {
@@ -118,7 +124,7 @@ func main() {
 							fmt.Println("Upgrade cancelled.")
 							return nil
 						}
-						log.Printf("User confirmed upgrade.")
+						log.Println("User confirmed upgrade.")
 					}
 
 					return performUpgrade(pms, opts)
@@ -130,12 +136,14 @@ func main() {
 				Usage:   "Find matching packages",
 				Action: func(c *cli.Context) error {
 					var opts = getOptions(c)
+					pms = filterPackageManager(pms, c)
 					keywords := c.Args().Slice()
+
 					if len(keywords) == 0 {
 						fmt.Println("Please specify keywords to search.")
 						return nil
 					}
-					log.Printf("Finding packages: %+v", keywords)
+					log.Printf("Finding packages for %T: %+v\n", pms, keywords)
 
 					for _, pm := range pms {
 						pkgs, err := pm.Find(keywords, opts)
@@ -164,6 +172,7 @@ func main() {
 						Usage:   "Show upgradable packages",
 						Action: func(c *cli.Context) error {
 							var opts = getOptions(c)
+							pms = filterPackageManager(pms, c)
 
 							log.Println("Showing upgradable packages...")
 
@@ -177,6 +186,7 @@ func main() {
 						Usage:   "Show package information",
 						Action: func(c *cli.Context) error {
 							var opts = getOptions(c)
+							pms = filterPackageManager(pms, c)
 							pkgName := c.Args().Slice()[0]
 							if len(pkgName) == 0 {
 								fmt.Println("Please specify package name.")
@@ -186,7 +196,7 @@ func main() {
 							log.Println("Showing package information...")
 
 							for _, pm := range pms {
-								log.Printf("Showing package information for %T...", pm)
+								log.Printf("Showing package information for %T...\n", pm)
 								pkg, err := pm.GetPackageInfo(pkgName, opts)
 								if err != nil {
 									fmt.Printf("Error while showing package info for %T: %+v\n", pm, err)
@@ -205,11 +215,12 @@ func main() {
 						Usage:   "Show installed packages",
 						Action: func(c *cli.Context) error {
 							var opts = getOptions(c)
+							pms = filterPackageManager(pms, c)
 
 							log.Println("Showing installed packages...")
 
 							for _, pm := range pms {
-								log.Printf("Showing installed packages for %T...", pm)
+								log.Printf("Showing installed packages for %T...\n", pm)
 								pkgs, err := pm.ListInstalled(opts)
 								if err != nil {
 									fmt.Printf("Error while showing installed packages for %T: %+v\n", pm, err)
@@ -253,6 +264,46 @@ func main() {
 				Aliases: []string{"v"},
 				Usage:   "Verbose - Show more information.",
 			},
+			&cli.BoolFlag{
+				Name:    "apt",
+				Usage:  "Use apt package manager",
+				// Hidden: true,
+			},
+			&cli.BoolFlag{
+				Name:    "yum",
+				Usage:  "Use yum package manager",
+				Hidden: true,
+			},
+			&cli.BoolFlag{
+				Name:    "dnf",
+				Usage:  "Use dnf package manager",
+				Hidden: true,
+			},
+			&cli.BoolFlag{
+				Name:    "pacman",
+				Usage:  "Use pacman package manager",
+				Hidden: true,
+			},
+			&cli.BoolFlag{
+				Name:    "apk",
+				Usage:  "Use apk package manager",
+				Hidden: true,
+			},
+			&cli.BoolFlag{
+				Name:    "zypper",
+				Usage:  "Use zypper package manager",
+				Hidden: true,
+			},
+			&cli.BoolFlag{
+				Name:    "flatpak",
+				Usage:  "Use flatpak package manager",
+				// Hidden: true,
+			},
+			&cli.BoolFlag{
+				Name:    "snap",
+				Usage:  "Use snap package manager",
+				Hidden: true,
+			},
 		},
 	}
 
@@ -277,7 +328,27 @@ func getOptions(c *cli.Context) *manager.Options {
 	return &opts
 }
 
-func listUpgradablePackages(pms []syspkg.PackageManager, opts *manager.Options) {
+func filterPackageManager(availablePMs map[string]syspkg.PackageManager, c *cli.Context) map[string]syspkg.PackageManager {
+	if len(availablePMs) == 0 {
+		log.Fatal("No package managers available!")
+	}
+
+	// if no specific package manager is specified, use all available
+	if !c.Bool("apt") && !c.Bool("flatpak") {
+		return availablePMs
+	}
+
+	var wantedPMs = make(map[string]syspkg.PackageManager)
+	for name, pm := range availablePMs {
+		if c.Bool(name) {
+			wantedPMs[name] = pm
+		}
+	}
+	return wantedPMs
+}
+
+
+func listUpgradablePackages(pms map[string]syspkg.PackageManager, opts *manager.Options) {
 	for _, pm := range pms {
 		log.Printf("Listing upgradable packages for %T...\n", pm)
 		upgradablePackages, err := pm.ListUpgradable(opts)
@@ -293,7 +364,7 @@ func listUpgradablePackages(pms []syspkg.PackageManager, opts *manager.Options) 
 	}
 }
 
-func performUpgrade(pms []syspkg.PackageManager, opts *manager.Options) error {
+func performUpgrade(pms map[string]syspkg.PackageManager, opts *manager.Options) error {
 	fmt.Println("Performing package upgrade...")
 
 	for _, pm := range pms {

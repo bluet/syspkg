@@ -8,7 +8,7 @@ import (
 )
 
 func TestNewPackageManager(t *testing.T) {
-	manager, err := syspkg.NewPackageManager()
+	manager, err := syspkg.NewPackageManager([]string{"apt", "flatpak"})
 	if err != nil {
 		t.Fatalf("NewPackageManager() error: %+v", err)
 	}

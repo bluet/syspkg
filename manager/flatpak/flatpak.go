@@ -1,11 +1,8 @@
-// Package apt provides an implementation of the syspkg manager interface for apt package manager
-// https://wiki.debian.org/Apt
-// https://ubuntu.com/server/docs/package-management
+// Package flatpack provides an implementation of the syspkg manager interface for flatpack package manager
 
-package apt
+package flatpak
 
 import (
-	"log"
 	"os"
 	"os/exec"
 
@@ -15,20 +12,24 @@ import (
 	"github.com/bluet/syspkg/manager"
 )
 
-var pm string = "apt"
+var pm string = "flatpack"
 
 const (
 	ArgsAssumeYes    string = "-y"
-	ArgsAssumeNo     string = "--assume-no"
-	ArgsDryRun       string = "--dry-run"
-	ArgsFixBroken    string = "-f"
-	ArgsQuiet        string = "-qq"
-	ArgsPurge        string = "--purge"
-	ArgsAutoRemove   string = "--autoremove"
-	ArgsShowProgress string = "--show-progress"
+	ArgsAssumeNo     string = ""
+	ArgsDryRun       string = "--no-deploy"
+	ArgsFixBroken    string = ""
+	ArgsQuiet        string = ""
+	ArgsPurge        string = "--delete-data"	// https://docs.flatpak.org/en/latest/flatpak-command-reference.html#flatpak-uninstall
+							// When --delete-data is specified while removing an app, its data directory in ~/.var/app and any permissions it might have are removed. When --delete-data is used without a REF , all 'unowned' app data is removed.
+	ArgsAutoRemove   string = "--unused"	// Remove unused refs on the system.
+	ArgsShowProgress string = ""
+	ArgsNonInteractive string = "--noninteractive"
+	ArgsVerbose string = "--verbose"
+	ArgsUpsert string = "--or-update"
 )
 
-var ENV_NonInteractive []string = []string{"LC_ALL=C", "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true"}
+var ENV_NonInteractive []string = []string{"LC_ALL=C"}
 
 type PackageManager struct{}
 
@@ -42,7 +43,7 @@ func (a *PackageManager) GetPackageManager() string {
 }
 
 func (a *PackageManager) Install(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error) {
-	args := append([]string{"install", ArgsFixBroken}, pkgs...)
+	args := append([]string{"install", ArgsFixBroken, ArgsUpsert, ArgsVerbose}, pkgs...)
 
 	if opts == nil {
 		opts = &manager.Options{
@@ -58,11 +59,15 @@ func (a *PackageManager) Install(pkgs []string, opts *manager.Options) ([]manage
 
 	// assume yes if not interactive, to avoid hanging
 	if !opts.Interactive {
-		args = append(args, ArgsAssumeYes)
+		args = append(args, ArgsAssumeYes, ArgsNonInteractive)
+	}
+
+	if opts.Verbose {
+		args = append(args, ArgsVerbose)
 	}
 
 	cmd := exec.Command(pm, args...)
-
+	
 	if opts.Interactive {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
@@ -80,8 +85,8 @@ func (a *PackageManager) Install(pkgs []string, opts *manager.Options) ([]manage
 }
 
 func (a *PackageManager) Delete(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error) {
-	// args := append([]string{"remove", ArgsFixBroken, ArgsPurge, ArgsAutoRemove}, pkgs...)
-	args := append([]string{"remove", ArgsFixBroken, ArgsAutoRemove}, pkgs...)
+	args := append([]string{"uninstall", ArgsFixBroken, ArgsVerbose}, pkgs...)
+
 	if opts == nil {
 		opts = &manager.Options{
 			DryRun:      false,
@@ -93,8 +98,14 @@ func (a *PackageManager) Delete(pkgs []string, opts *manager.Options) ([]manager
 	if opts.DryRun {
 		args = append(args, ArgsDryRun)
 	}
+
+	// assume yes if not interactive, to avoid hanging
 	if !opts.Interactive {
-		args = append(args, ArgsAssumeYes)
+		args = append(args, ArgsAssumeYes, ArgsNonInteractive)
+	}
+
+	if opts.Verbose {
+		args = append(args, ArgsVerbose)
 	}
 
 	cmd := exec.Command(pm, args...)
@@ -111,13 +122,18 @@ func (a *PackageManager) Delete(pkgs []string, opts *manager.Options) ([]manager
 		if err != nil {
 			return nil, err
 		}
-		return ParseDeletedOutput(string(out), opts), nil
+		return ParseInstallOutput(string(out), opts), nil
 	}
 }
 
-func (a *PackageManager) Refresh(opts *manager.Options) error {
-	cmd := exec.Command(pm, "update")
-	cmd.Env = ENV_NonInteractive
+func (a *PackageManager) Refresh(opts *manager.Options) (error) {
+	// not sure if this is needed
+
+	return nil
+}
+
+func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+	args := append([]string{"search", ArgsVerbose}, keywords...)
 
 	if opts == nil {
 		opts = &manager.Options{
@@ -126,39 +142,31 @@ func (a *PackageManager) Refresh(opts *manager.Options) error {
 			Verbose:     false,
 		}
 	}
+
+	if opts.Verbose {
+		args = append(args, ArgsVerbose)
+	}
+
+	cmd := exec.Command(pm, args...)
+
 	if opts.Interactive {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		cmd.Stdin = os.Stdin
 		err := cmd.Run()
-		return err
+		return nil, err
 	} else {
+		cmd.Env = ENV_NonInteractive
 		out, err := cmd.Output()
 		if err != nil {
-			return err
+			return nil, err
 		}
-		if opts.Verbose {
-			log.Println(string(out))
-		}
-		return nil
+		return ParseFindOutput(string(out), opts), nil
 	}
-}
-
-func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manager.PackageInfo, error) {
-	args := append([]string{"search"}, keywords...)
-	cmd := exec.Command("apt", args...)
-	cmd.Env = ENV_NonInteractive
-
-	out, err := cmd.Output()
-	if err != nil {
-		return nil, err
-	}
-
-	return ParseFindOutput(string(out), opts), nil
 }
 
 func (a *PackageManager) ListInstalled(opts *manager.Options) ([]manager.PackageInfo, error) {
-	cmd := exec.Command("dpkg-query", "-W", "-f", "${binary:Package} ${Version}\n")
+	cmd := exec.Command("flatpak", "list")
 	cmd.Env = ENV_NonInteractive
 	out, err := cmd.Output()
 	if err != nil {
@@ -168,7 +176,7 @@ func (a *PackageManager) ListInstalled(opts *manager.Options) ([]manager.Package
 }
 
 func (a *PackageManager) ListUpgradable(opts *manager.Options) ([]manager.PackageInfo, error) {
-	cmd := exec.Command(pm, "list", "--upgradable")
+	cmd := exec.Command(pm, "remote-ls", "--update")
 	cmd.Env = ENV_NonInteractive
 	out, err := cmd.Output()
 	if err != nil {
@@ -178,7 +186,7 @@ func (a *PackageManager) ListUpgradable(opts *manager.Options) ([]manager.Packag
 }
 
 func (a *PackageManager) Upgrade(opts *manager.Options) ([]manager.PackageInfo, error) {
-	args := []string{"upgrade"}
+	args := []string{"update"}
 	if opts == nil {
 		opts = &manager.Options{
 			Verbose:     false,
@@ -212,76 +220,12 @@ func (a *PackageManager) Upgrade(opts *manager.Options) ([]manager.PackageInfo, 
 	}
 }
 
-func (a *PackageManager) Clean(opts *manager.Options) error {
-	cmd := exec.Command(pm, "autoclean")
-	cmd.Env = ENV_NonInteractive
-
-	if opts == nil {
-		opts = &manager.Options{
-			DryRun:      false,
-			Interactive: false,
-			Verbose:     false,
-		}
-	}
-	if opts.Interactive {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		err := cmd.Run()
-		return err
-	} else {
-		out, err := cmd.Output()
-		if err != nil {
-			return err
-		}
-		if opts.Verbose {
-			log.Println(string(out))
-		}
-		return nil
-	}
-}
-
 func (a *PackageManager) GetPackageInfo(pkg string, opts *manager.Options) (manager.PackageInfo, error) {
-	cmd := exec.Command("apt-cache", "show", pkg)
+	cmd := exec.Command(pm, "info", pkg)
 	cmd.Env = ENV_NonInteractive
 	out, err := cmd.Output()
 	if err != nil {
 		return manager.PackageInfo{}, err
 	}
 	return ParsePackageInfoOutput(string(out), opts), nil
-}
-
-func (a *PackageManager) AutoRemove(opts *manager.Options) ([]manager.PackageInfo, error) {
-	args := []string{"autoremove"}
-	if opts == nil {
-		opts = &manager.Options{
-			Verbose:     false,
-			DryRun:      false,
-			Interactive: false,
-		}
-	}
-
-	if opts.DryRun {
-		args = append(args, ArgsDryRun)
-	}
-	if !opts.Interactive {
-		args = append(args, ArgsAssumeYes)
-	}
-
-	cmd := exec.Command(pm, args...)
-
-	if opts.Interactive {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		err := cmd.Run()
-		return nil, err
-	} else {
-		cmd.Env = ENV_NonInteractive
-		out, err := cmd.Output()
-		if err != nil {
-			return nil, err
-		}
-		return ParseDeletedOutput(string(out), opts), nil
-	}
 }
