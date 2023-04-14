@@ -11,7 +11,7 @@ import (
 	"github.com/bluet/syspkg/manager"
 )
 
-func ParseInstallOutput(output string, opts *manager.Options) []manager.PackageInfo {
+func ParseInstallOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packages []manager.PackageInfo
 
 	// cspell: disable
@@ -49,8 +49,8 @@ func ParseInstallOutput(output string, opts *manager.Options) []manager.PackageI
 
 
 	// remove the last empty line
-	output = strings.TrimSuffix(output, "\n")
-	var lines []string = strings.Split(string(output), "\n")
+	msg = strings.TrimSuffix(msg, "\n")
+	var lines []string = strings.Split(string(msg), "\n")
 
 	for _, line := range lines {
 		if opts.Verbose {
@@ -99,14 +99,14 @@ func ParseInstallOutput(output string, opts *manager.Options) []manager.PackageI
 	return packages
 }
 
-func ParseFindOutput(output string, opts *manager.Options) []manager.PackageInfo {
+func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	// FreeRDP Remote Desktop Client	FreeRDP (Remote Desktop Protocol) Client for Linux.	com.freerdp.FreeRDP	2.10.0	stable	flathub
 	// Fightcade	Play arcade games online.	com.fightcade.Fightcade	2.2	stable	flathub
 	// White House	Using the magic of CSS, hack your world into a unique burst of color and light revealing hidden objects and clues.	com.endlessnetwork.whitehouse	1.175	stable	flathub
 	var packages []manager.PackageInfo
 
-	output = strings.TrimSuffix(output, "\n")
-	var lines []string = strings.Split(string(output), "\n")
+	msg = strings.TrimSuffix(msg, "\n")
+	var lines []string = strings.Split(string(msg), "\n")
 
 	for _, line := range lines {
 		if opts.Verbose {
@@ -138,11 +138,11 @@ func ParseFindOutput(output string, opts *manager.Options) []manager.PackageInfo
 	return packages
 }
 
-func ParseListInstalledOutput(output string, opts *manager.Options) []manager.PackageInfo {
+func ParseListInstalledOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packages []manager.PackageInfo
 
-	output = strings.TrimSuffix(output, "\n")
-	var lines []string = strings.Split(string(output), "\n")
+	msg = strings.TrimSuffix(msg, "\n")
+	var lines []string = strings.Split(string(msg), "\n")
 
 	for _, line := range lines {
 		if opts.Verbose {
@@ -175,11 +175,11 @@ func ParseListInstalledOutput(output string, opts *manager.Options) []manager.Pa
 }
 
 
-func ParseListUpgradableOutput(output string, opts *manager.Options) []manager.PackageInfo {
+func ParseListUpgradableOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packages []manager.PackageInfo
 
-	output = strings.TrimSuffix(output, "\n")
-	var lines []string = strings.Split(string(output), "\n")
+	msg = strings.TrimSuffix(msg, "\n")
+	var lines []string = strings.Split(string(msg), "\n")
 
 	for _, line := range lines {
 		if opts.Verbose {
@@ -212,12 +212,12 @@ func ParseListUpgradableOutput(output string, opts *manager.Options) []manager.P
 }
 
 
-func ParsePackageInfoOutput(output string, opts *manager.Options) manager.PackageInfo {
+func ParsePackageInfoOutput(msg string, opts *manager.Options) manager.PackageInfo {
 	var pkg manager.PackageInfo
 
 	// remove the last empty line
-	output = strings.TrimSuffix(output, "\n")
-	lines := strings.Split(string(output), "\n")
+	msg = strings.TrimSuffix(msg, "\n")
+	lines := strings.Split(string(msg), "\n")
 
 	for _, line := range lines {
 		// remove all leading and trailing spaces

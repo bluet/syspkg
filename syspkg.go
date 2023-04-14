@@ -20,7 +20,7 @@ type PackageManager interface {
 	Install(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error)
 	Delete(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error)
 	Find(keywords []string, opts *manager.Options) ([]manager.PackageInfo, error)
-	ListInstalled(opts *manager.Options) ([]manager.PackageInfo, error)
+	// ListInstalled(opts *manager.Options) ([]manager.PackageInfo, error)
 	ListUpgradable(opts *manager.Options) ([]manager.PackageInfo, error)
 	Upgrade(opts *manager.Options) ([]manager.PackageInfo, error)
 	Refresh(opts *manager.Options) error

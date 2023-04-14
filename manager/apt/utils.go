@@ -14,12 +14,12 @@ import (
 	"github.com/bluet/syspkg/manager"
 )
 
-func ParseInstallOutput(output string, opts *manager.Options) []manager.PackageInfo {
+func ParseInstallOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packages []manager.PackageInfo
 
 	// remove the last empty line
-	output = strings.TrimSuffix(output, "\n")
-	var lines []string = strings.Split(string(output), "\n")
+	msg = strings.TrimSuffix(msg, "\n")
+	var lines []string = strings.Split(string(msg), "\n")
 
 	for _, line := range lines {
 		if opts.Verbose {
@@ -55,12 +55,12 @@ func ParseInstallOutput(output string, opts *manager.Options) []manager.PackageI
 	return packages
 }
 
-func ParseDeletedOutput(output string, opts *manager.Options) []manager.PackageInfo {
+func ParseDeletedOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packages []manager.PackageInfo
 
 	// remove the last empty line
-	output = strings.TrimSuffix(output, "\n")
-	var lines []string = strings.Split(string(output), "\n")
+	msg = strings.TrimSuffix(msg, "\n")
+	var lines []string = strings.Split(string(msg), "\n")
 
 	for _, line := range lines {
 		if opts.Verbose {
@@ -100,7 +100,7 @@ func ParseDeletedOutput(output string, opts *manager.Options) []manager.PackageI
 	return packages
 }
 
-func ParseFindOutput(output string, opts *manager.Options) []manager.PackageInfo {
+func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packages []manager.PackageInfo
 	var packagesDict = make(map[string]manager.PackageInfo)
 
@@ -112,13 +112,13 @@ func ParseFindOutput(output string, opts *manager.Options) []manager.PackageInfo
 	// zvbi/jammy 0.2.35-19 amd64
 	//   Vertical Blanking Interval (VBI) utilities
 
-	output = strings.TrimPrefix(output, "Sorting...\nFull Text Search...\n")
+	msg = strings.TrimPrefix(msg, "Sorting...\nFull Text Search...\n")
 
 	// remove the last empty line
-	output = strings.TrimSuffix(output, "\n")
+	msg = strings.TrimSuffix(msg, "\n")
 
 	// split output by empty lines
-	var lines []string = strings.Split(output, "\n\n")
+	var lines []string = strings.Split(msg, "\n\n")
 
 	for _, line := range lines {
 		if regexp.MustCompile(`^[\w\d-]+/[\w\d-,]+`).MatchString(line) {
@@ -159,12 +159,12 @@ func ParseFindOutput(output string, opts *manager.Options) []manager.PackageInfo
 	return packages
 }
 
-func ParseListInstalledOutput(output string, opts *manager.Options) []manager.PackageInfo {
+func ParseListInstalledOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packages []manager.PackageInfo
 
 	// remove the last empty line
-	output = strings.TrimSuffix(output, "\n")
-	lines := strings.Split(string(output), "\n")
+	msg = strings.TrimSuffix(msg, "\n")
+	lines := strings.Split(string(msg), "\n")
 
 	for _, line := range lines {
 		if len(line) > 0 {
@@ -196,7 +196,7 @@ func ParseListInstalledOutput(output string, opts *manager.Options) []manager.Pa
 	return packages
 }
 
-func ParseListUpgradableOutput(output string, opts *manager.Options) []manager.PackageInfo {
+func ParseListUpgradableOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packages []manager.PackageInfo
 
 	// Listing...
@@ -205,8 +205,8 @@ func ParseListUpgradableOutput(output string, opts *manager.Options) []manager.P
 	// libllvm15/jammy-updates 1:15.0.7-0ubuntu0.22.04.1 i386 [upgradable from: 1:15.0.6-3~ubuntu0.22.04.2]
 
 	// remove the last empty line
-	output = strings.TrimSuffix(output, "\n")
-	lines := strings.Split(string(output), "\n")
+	msg = strings.TrimSuffix(msg, "\n")
+	lines := strings.Split(string(msg), "\n")
 
 	for _, line := range lines {
 		// skip if line starts with "Listing..."
@@ -357,12 +357,12 @@ func ParseDpkgQueryOutput(output []byte, packages map[string]manager.PackageInfo
 	return packagesList, nil
 }
 
-func ParsePackageInfoOutput(output string, opts *manager.Options) manager.PackageInfo {
+func ParsePackageInfoOutput(msg string, opts *manager.Options) manager.PackageInfo {
 	var pkg manager.PackageInfo
 
 	// remove the last empty line
-	output = strings.TrimSuffix(output, "\n")
-	lines := strings.Split(string(output), "\n")
+	msg = strings.TrimSuffix(msg, "\n")
+	lines := strings.Split(string(msg), "\n")
 
 	for _, line := range lines {
 		if len(line) > 0 {
