@@ -144,8 +144,9 @@ func ParsePackageInfoOutput(msg string, opts *manager.Options) manager.PackageIn
 			if key == "name" {
 				pkg.Name = value
 			} else if strings.HasPrefix(key, "latest/") {
+				version := strings.Fields(value)[0]
 				if pkg.Version == "" {
-					pkg.Version = value
+					pkg.Version = version
 				}
 			}
 		}

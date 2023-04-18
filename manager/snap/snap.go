@@ -134,7 +134,7 @@ func (a *PackageManager) Refresh(opts *manager.Options) error {
 
 func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manager.PackageInfo, error) {
 	args := append([]string{"search"}, keywords...)
-	cmd := exec.Command("apt", args...)
+	cmd := exec.Command("snap", args...)
 	cmd.Env = ENV_NonInteractive
 
 	out, err := cmd.Output()

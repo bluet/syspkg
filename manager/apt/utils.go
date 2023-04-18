@@ -124,11 +124,6 @@ func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 		if regexp.MustCompile(`^[\w\d-]+/[\w\d-,]+`).MatchString(line) {
 			parts := strings.Fields(line)
 
-			// debug a package with version "1.4p5-50build1"
-			if strings.Contains(parts[1], "1.4p5-50build1") || strings.Contains(parts[1], "1.2.6-1") {
-				fmt.Printf("apt: debug line: %s\n", line)
-			}
-
 			// if name is empty, it might be not what we want
 			if parts[0] == "" {
 				continue
@@ -302,10 +297,10 @@ func ParseDpkgQueryOutput(output []byte, packages map[string]manager.PackageInfo
 
 			if strings.HasPrefix(name, "dpkg-query:") {
 				name = string(parts[len(parts)-1])
+			}
 
-				if strings.Contains(name, ":") {
-					name = strings.Split(name, ":")[0]
-				}
+			if strings.Contains(name, ":") {
+				name = strings.Split(name, ":")[0]
 			}
 
 			// if name is empty, it might not be what we want

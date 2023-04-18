@@ -191,9 +191,10 @@ func main() {
 						Action: func(c *cli.Context) error {
 							var opts = getOptions(c)
 							pms = filterPackageManager(pms, c)
-							pkgName := c.Args().Slice()[0]
-							if len(pkgName) == 0 {
-								fmt.Println("Please specify package name.")
+							pkgNames := c.Args().Slice()
+
+							if len(pkgNames) != 1 {
+								fmt.Println("Please specify one and only one package name.")
 								return nil
 							}
 
@@ -201,7 +202,7 @@ func main() {
 
 							for _, pm := range pms {
 								log.Printf("Showing package information for %T...\n", pm)
-								pkg, err := pm.GetPackageInfo(pkgName, opts)
+								pkg, err := pm.GetPackageInfo(pkgNames[0], opts)
 								if err != nil {
 									fmt.Printf("Error while showing package info for %T: %+v\n", pm, err)
 									continue
