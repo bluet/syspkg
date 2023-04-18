@@ -50,3 +50,4 @@ go.work
 
 bin/
 tmp/
+**/*.log
