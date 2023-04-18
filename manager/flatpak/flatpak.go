@@ -12,7 +12,7 @@ import (
 	"github.com/bluet/syspkg/manager"
 )
 
-var pm string = "flatpack"
+var pm string = "flatpak"
 
 const (
 	ArgsAssumeYes    string = "-y"
@@ -176,7 +176,7 @@ func (a *PackageManager) ListInstalled(opts *manager.Options) ([]manager.Package
 }
 
 func (a *PackageManager) ListUpgradable(opts *manager.Options) ([]manager.PackageInfo, error) {
-	cmd := exec.Command(pm, "remote-ls", "--update")
+	cmd := exec.Command(pm, "remote-ls", "--updates")
 	cmd.Env = ENV_NonInteractive
 	out, err := cmd.Output()
 	if err != nil {

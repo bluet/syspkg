@@ -27,14 +27,18 @@ func main() {
 	app := &cli.App{
 		Name:  "syspkg",
 		Usage: "A universal system package manager",
-		Action: func(c *cli.Context) error {
-			var opts = getOptions(c)
-			pms = filterPackageManager(pms, c)
+		EnableBashCompletion: true,
+		UseShortOptionHandling: true,
+		Suggest: true,
+		// Action: func(c *cli.Context) error {
+		// 	var opts = getOptions(c)
+		// 	pms = filterPackageManager(pms, c)
 
-			log.Printf("Listing upgradable packages for %T...\n", pms)
-			listUpgradablePackages(pms, opts)
-			return nil
-		},
+		// 	log.Printf("Listing upgradable packages for %T...\n", pms)
+		// 	listUpgradablePackages(pms, opts)
+		// 	return nil
+		// },
+		// DefaultCommand: "show upgradable",
 		Commands: []*cli.Command{
 			{
 				Name:    "install",
@@ -114,7 +118,7 @@ func main() {
 					log.Printf("Upgrading packages... for %T\n", pms)
 
 					listUpgradablePackages(pms, opts)
-					if opts.Interactive {
+					if !opts.AssumeYes {
 						fmt.Print("\nDo you want to perform the system package upgrade? [Y/n]: ")
 						input := ""
 						_, _ = fmt.Scanln(&input)
@@ -239,6 +243,11 @@ func main() {
 			},
 		},
 		Flags: []cli.Flag{
+			// &cli.StringSliceFlag{
+			// 	Name:    "package-manager",
+			// 	Aliases: []string{"pm"},
+			// 	Usage:   "Specify package manager to use. (e.g. apt, apk, pacman, dnf, snap, yum, zypper)",
+			// },
 			&cli.BoolFlag{
 				Name:    "debug",
 				Aliases: []string{"dbg"},
@@ -334,7 +343,7 @@ func filterPackageManager(availablePMs map[string]syspkg.PackageManager, c *cli.
 	}
 
 	// if no specific package manager is specified, use all available
-	if !c.Bool("apt") && !c.Bool("flatpak") {
+	if !c.Bool("apt") && !c.Bool("flatpak") && !c.Bool("snap") && !c.Bool("yum") && !c.Bool("dnf") && !c.Bool("pacman") && !c.Bool("apk") && !c.Bool("zypper") {
 		return availablePMs
 	}
 

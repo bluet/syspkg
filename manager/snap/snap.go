@@ -18,7 +18,7 @@ const (
 	ArgsAssumeYes    string = "-y"
 	ArgsAssumeNo     string = "--assume-no"
 	ArgsDryRun       string = "--dry-run"
-	ArgsFixBroken    string = "-f"
+	ArgsFixBroken    string = ""
 	ArgsQuiet        string = "-qq"
 	ArgsPurge        string = "--purge"
 	ArgsAutoRemove   string = "--autoremove"
@@ -182,9 +182,9 @@ func (a *PackageManager) Upgrade(opts *manager.Options) ([]manager.PackageInfo, 
 	}
 
 	// assume yes if not interactive, to avoid hanging
-	if !opts.Interactive {
-		args = append(args, ArgsAssumeYes)
-	}
+	// if !opts.Interactive {
+	// 	args = append(args, ArgsAssumeYes)
+	// }
 
 	if opts.Verbose {
 		args = append(args, ArgsShowProgress)
@@ -209,4 +209,14 @@ func (a *PackageManager) Upgrade(opts *manager.Options) ([]manager.PackageInfo, 
 		return nil, err
 	}
 	return ParseInstallOutput(string(out), opts), nil
+}
+
+func (a *PackageManager) GetPackageInfo(pkg string, opts *manager.Options) (manager.PackageInfo, error) {
+	cmd := exec.Command("snap", "info", pkg)
+	cmd.Env = ENV_NonInteractive
+	out, err := cmd.Output()
+	if err != nil {
+		return manager.PackageInfo{}, err
+	}
+	return ParsePackageInfoOutput(string(out), opts), nil
 }

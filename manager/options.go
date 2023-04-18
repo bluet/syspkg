@@ -6,4 +6,5 @@ type Options struct {
 	Verbose     bool
 	AssumeYes   bool
 	Debug       bool
+	CustomCommandArgs []string
 }

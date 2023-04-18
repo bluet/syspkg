@@ -2,11 +2,12 @@ package syspkg
 
 import (
 	"errors"
+	"log"
 
 	"github.com/bluet/syspkg/manager"
 	"github.com/bluet/syspkg/manager/apt"
 	"github.com/bluet/syspkg/manager/flatpak"
-	// "github.com/bluet/syspkg/snap"
+	"github.com/bluet/syspkg/manager/snap"
 	// "github.com/bluet/syspkg/dnf"
 	// "github.com/bluet/syspkg/zypper"
 )
@@ -20,7 +21,7 @@ type PackageManager interface {
 	Install(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error)
 	Delete(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error)
 	Find(keywords []string, opts *manager.Options) ([]manager.PackageInfo, error)
-	// ListInstalled(opts *manager.Options) ([]manager.PackageInfo, error)
+	ListInstalled(opts *manager.Options) ([]manager.PackageInfo, error)
 	ListUpgradable(opts *manager.Options) ([]manager.PackageInfo, error)
 	Upgrade(opts *manager.Options) ([]manager.PackageInfo, error)
 	Refresh(opts *manager.Options) error
@@ -37,17 +38,20 @@ func NewPackageManager(wants []string) (map[string]PackageManager, error) {
 	aptManager := &apt.PackageManager{}
 	if aptManager.IsAvailable() {
 		pms["apt"] = aptManager
+		log.Println("apt manager is available")
 	}
 
 	flatpakManager := &flatpak.PackageManager{}
 	if flatpakManager.IsAvailable() {
 		pms["flatpak"] = flatpakManager
+		log.Println("flatpak manager is available")
 	}
 
-	// snapManager := &snap.PackageManager{}
-	// if snapManager.IsAvailable() {
-	// 	pms = append(pms, snapManager)
-	// }
+	snapManager := &snap.PackageManager{}
+	if snapManager.IsAvailable() {
+		pms["snap"] = snapManager
+		log.Println("snap manager is available")
+	}
 
 	// dnfManager := &dnf.PackageManager{}
 	// if dnfManager.IsAvailable() {

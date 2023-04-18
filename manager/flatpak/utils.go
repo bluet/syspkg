@@ -194,6 +194,9 @@ func ParseListUpgradableOutput(msg string, opts *manager.Options) []manager.Pack
 		var name string = parts[1]
 		var arch string = parts[4]
 		var version string = parts[2]
+		if version == "" {
+			version = "unknown"
+		}
 		// var category string = parts[5]
 
 		packageInfo := manager.PackageInfo{
