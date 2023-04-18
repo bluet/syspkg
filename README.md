@@ -80,12 +80,13 @@ func main() {
 - zypper: Partially supported (untested)
 - others: Please open an issue if you'd like to see support for a specific package manager
 
-| Package Manager | Install | Remove | Search | List | Upgrade |
-| --------------- | ------- | ------ | ------ | ---- | ------- |
-| APT             | ✅      | ✅     | ✅     | ✅   | ✅      |
-| SNAP            | ✅      | ✅     | ✅     | ✅   | ✅      |
-| DNF             | ❓      | ❓   | ❓     | ❓   | ❓      |
-| Zypper          | ❓      | ❓   | ❓     | ❓   | ❓      |
+| Package Manager | Install | Remove | Search | Upgrade | List Installed | List Upgradable | Get Package Info |
+| --------------- | ------- | ------ | ------ | ------- | -------------- | --------------- | ---------------- |
+| APT             | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               |
+| SNAP            | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               |
+| Flatpak         | ❓      | ❓    | ✅     | ✅     | ✅             | ✅             | ✅               |
+| DNF             | ❌      | ❌    | ❌     | ❌     | ❌             | ❌             | ❌               |
+| Zypper          | ❌      | ❌    | ❌     | ❌     | ❌             | ❌             | ❌               |
 
 ### TODO
 - [ ] Add support for more package managers
