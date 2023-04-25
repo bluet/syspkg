@@ -46,7 +46,9 @@ test:
 	$(GOTEST) -v -run ExampleGetOSInfo ./osinfo
 
 lint:
+	go mod tidy
 	golangci-lint run
+	gofmt -s -w .
 
 install-tools:
 	$(GOINSTALL) github.com/golangci/golangci-lint/cmd/golangci-lint@latest
