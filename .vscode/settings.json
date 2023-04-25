@@ -17,6 +17,7 @@
                 "libslf",
                 "osinfo",
                 "pkgs",
+                "sindresorhus",
                 "struct",
                 "syspkg",
                 "urfave",

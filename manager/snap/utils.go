@@ -171,36 +171,7 @@ func ParsePackageInfoOutput(msg string, opts *manager.Options) manager.PackageIn
 // bluet@ocisly:~/workspace/go-syspkg$ snap list|grep firefox
 // firefox                         112.0-2                     2559   latest/stable    mozilla**               -
 func ParseListUpgradableOutput(msg string, opts *manager.Options) []manager.PackageInfo {
-	var packages []manager.PackageInfo
-
-	// remove the last empty line
-	msg = strings.TrimSuffix(msg, "\n")
-	var lines []string = strings.Split(string(msg), "\n")
-
-	for _, line := range lines {
-		if opts.Verbose {
-			fmt.Printf("%s: %s", pm, line)
-		}
-		parts := strings.Fields(line)
-		if len(parts) < 5 {
-			continue
-		}
-
-		// skip the first line (header/title)
-		if parts[0] == "Name" {
-			continue
-		}
-
-		packageInfo := manager.PackageInfo{
-			Name:           parts[0],
-			Version:        parts[1],
-			Status:         manager.PackageStatusAvailable,
-			PackageManager: pm,
-		}
-		packages = append(packages, packageInfo)
-	}
-
-	return packages
+	return ParseListOutput(msg, opts)
 }
 
 // ParseFindOutput parses the output of `snap search` command
@@ -210,35 +181,7 @@ func ParseListUpgradableOutput(msg string, opts *manager.Options) []manager.Pack
 // Name                Version  Publisher  Notes  Summary
 // blablaland-desktop  1.0.1    adedev     -      Blablaland Desktop
 func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
-	var packages []manager.PackageInfo
-
-	msg = strings.TrimSuffix(msg, "\n")
-	var lines []string = strings.Split(string(msg), "\n")
-
-	for _, line := range lines {
-		if opts.Verbose {
-			fmt.Printf("%s: %s", pm, line)
-		}
-		parts := strings.Fields(line)
-		if len(parts) < 5 {
-			continue
-		}
-
-		// skip the first line (header/title)
-		if parts[0] == "Name" {
-			continue
-		}
-
-		packageInfo := manager.PackageInfo{
-			Name:           parts[0],
-			Version:        parts[1],
-			Status:         manager.PackageStatusAvailable,
-			PackageManager: pm,
-		}
-		packages = append(packages, packageInfo)
-	}
-
-	return packages
+	return ParseListOutput(msg, opts)
 }
 
 // ParseListInstalledOutput parses the output of `snap list` command
@@ -251,8 +194,13 @@ func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 // canonical-livepatch             10.5.3                      196    latest/stable    canonical✓              -
 // caprine                         2.57.0                      53     latest/stable    sindresorhus            -
 func ParseListInstalledOutput(msg string, opts *manager.Options) []manager.PackageInfo {
+	return ParseListOutput(msg, opts)
+}
+
+func ParseListOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packages []manager.PackageInfo
 
+	// remove the last empty line
 	msg = strings.TrimSuffix(msg, "\n")
 	var lines []string = strings.Split(string(msg), "\n")
 
