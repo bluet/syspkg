@@ -187,9 +187,12 @@ func (a *PackageManager) ListUpgradable(opts *manager.Options) ([]manager.Packag
 	return ParseListUpgradableOutput(string(out), opts), nil
 }
 
-// UpgradeAll upgrades all upgradable packages using the snap package manager with the provided options.
-func (a *PackageManager) UpgradeAll(opts *manager.Options) ([]manager.PackageInfo, error) {
-	args := []string{"refresh", ArgsFixBroken}
+// Upgrade upgrades the specified packages using the snap package manager with the provided options.
+func (a *PackageManager) Upgrade(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+	args := []string{"refresh"}
+	if len(pkgs) > 0 {
+		args = append(args, pkgs...)
+	}
 
 	if opts == nil {
 		opts = &manager.Options{
@@ -231,6 +234,11 @@ func (a *PackageManager) UpgradeAll(opts *manager.Options) ([]manager.PackageInf
 		return nil, err
 	}
 	return ParseInstallOutput(string(out), opts), nil
+}
+
+// UpgradeAll upgrades all upgradable packages using the snap package manager with the provided options.
+func (a *PackageManager) UpgradeAll(opts *manager.Options) ([]manager.PackageInfo, error) {
+	return a.Upgrade(nil, opts)
 }
 
 // GetPackageInfo retrieves information about the specified package using the snap package manager.
