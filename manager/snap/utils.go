@@ -155,7 +155,7 @@ func ParsePackageInfoOutput(msg string, opts *manager.Options) manager.PackageIn
 		}
 	}
 
-	pkg.PackageManager = "apt"
+	pkg.PackageManager = "snap"
 
 	return pkg
 }
