@@ -1,3 +1,4 @@
+// Package main contains the syspkg CLI tool, a universal system package manager.
 package main
 
 import (
@@ -13,11 +14,14 @@ import (
 	"github.com/bluet/syspkg/manager"
 )
 
+// main function initializes syspkg and sets up the CLI application.
 func main() {
+	// Check if the user has root privileges.
 	if os.Geteuid() != 0 {
 		fmt.Println("(This command must be run with root privileges. If you got exist codes 100 or 101, please run this command with sudo.)")
 	}
 
+	// Initialize syspkg and find available package managers.
 	s, err := syspkg.New(
 		syspkg.IncludeOptions(syspkg.IncludeOptions{
 			AllAvailable: true,
@@ -35,6 +39,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Set up the CLI application.
 	app := &cli.App{
 		Name:                   "syspkg",
 		Usage:                  "A universal system package manager",
@@ -328,6 +333,7 @@ func main() {
 		},
 	}
 
+	// Run the CLI application.
 	err = app.Run(os.Args)
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -335,6 +341,7 @@ func main() {
 	}
 }
 
+// getOptions extracts options from the CLI context and returns a manager.Options struct.
 func getOptions(c *cli.Context) *manager.Options {
 	var opts manager.Options
 	opts.Verbose = c.Bool("verbose")
@@ -349,6 +356,7 @@ func getOptions(c *cli.Context) *manager.Options {
 	return &opts
 }
 
+// filterPackageManager filters the available package managers based on user input.
 func filterPackageManager(availablePMs map[string]syspkg.PackageManager, c *cli.Context) map[string]syspkg.PackageManager {
 	if len(availablePMs) == 0 {
 		log.Fatal("No package managers available!")
@@ -368,6 +376,7 @@ func filterPackageManager(availablePMs map[string]syspkg.PackageManager, c *cli.
 	return wantedPMs
 }
 
+// listUpgradablePackages lists upgradable packages for the given package managers.
 func listUpgradablePackages(pms map[string]syspkg.PackageManager, opts *manager.Options) {
 	for _, pm := range pms {
 		log.Printf("Listing upgradable packages for %T...\n", pm)
@@ -384,11 +393,12 @@ func listUpgradablePackages(pms map[string]syspkg.PackageManager, opts *manager.
 	}
 }
 
+// performUpgrade upgrades packages for the given package managers.
 func performUpgrade(pms map[string]syspkg.PackageManager, opts *manager.Options) error {
 	fmt.Println("Performing package upgrade...")
 
 	for _, pm := range pms {
-		packages, err := pm.Upgrade(opts)
+		packages, err := pm.UpgradeAll(opts)
 		if err != nil {
 			fmt.Printf("Error while upgrading packages for %T: %+v\n%+v", pm, err, packages)
 			continue

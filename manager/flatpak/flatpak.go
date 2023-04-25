@@ -1,5 +1,14 @@
-// Package flatpak provides an implementation of the syspkg manager interface for flatpak package manager
-
+// Package flatpak provides an implementation of the syspkg manager interface for the Flatpak package manager.
+// It provides a unified interface for interacting with the Flatpak package manager.
+// This package is a wrapper around the Flatpak command-line interface.
+//
+// Flatpak is a software utility for software deployment, package management, and application virtualization for Linux desktop computers.
+// The Flatpak command-line interface aims to be a complete tool for installing, managing, and running Flatpak software.
+// For more information about Flatpak, visit:
+// - https://flatpak.org/
+// - https://docs.flatpak.org/en/latest/flatpak-command-reference.html
+//
+// This package is part of the syspkg library.
 package flatpak
 
 import (
@@ -14,6 +23,7 @@ import (
 
 var pm string = "flatpak"
 
+// Constants representing Flatpak command arguments.
 const (
 	ArgsAssumeYes string = "-y"
 	ArgsAssumeNo  string = ""
@@ -29,19 +39,24 @@ const (
 	ArgsUpsert         string = "--or-update"
 )
 
+// ENV_NonInteractive is an environment variable that sets the locale to C for non-interactive mode.
 var ENV_NonInteractive []string = []string{"LC_ALL=C"}
 
+// PackageManager implements the syspkg manager interface for Flatpak.
 type PackageManager struct{}
 
+// IsAvailable checks if the Flatpak package manager is available on the system.
 func (a *PackageManager) IsAvailable() bool {
 	_, err := exec.LookPath(pm)
 	return err == nil
 }
 
+// GetPackageManager returns the name of the Flatpak package manager.
 func (a *PackageManager) GetPackageManager() string {
 	return pm
 }
 
+// Install installs the given packages using Flatpak with the provided options.
 func (a *PackageManager) Install(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error) {
 	args := append([]string{"install", ArgsFixBroken, ArgsUpsert, ArgsVerbose}, pkgs...)
 
@@ -84,6 +99,7 @@ func (a *PackageManager) Install(pkgs []string, opts *manager.Options) ([]manage
 	}
 }
 
+// Delete removes the given packages using Flatpak with the provided options.
 func (a *PackageManager) Delete(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error) {
 	args := append([]string{"uninstall", ArgsFixBroken, ArgsVerbose}, pkgs...)
 
@@ -126,12 +142,14 @@ func (a *PackageManager) Delete(pkgs []string, opts *manager.Options) ([]manager
 	}
 }
 
+// Refresh updates the package metadata for Flatpak. Not currently implemented.
 func (a *PackageManager) Refresh(opts *manager.Options) error {
 	// not sure if this is needed
 
 	return nil
 }
 
+// Find searches for packages matching the given keywords using Flatpak with the provided options.
 func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manager.PackageInfo, error) {
 	args := append([]string{"search", ArgsVerbose}, keywords...)
 
@@ -165,6 +183,7 @@ func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manag
 	}
 }
 
+// ListInstalled lists installed packages using Flatpak with the provided options.
 func (a *PackageManager) ListInstalled(opts *manager.Options) ([]manager.PackageInfo, error) {
 	cmd := exec.Command("flatpak", "list")
 	cmd.Env = ENV_NonInteractive
@@ -175,6 +194,7 @@ func (a *PackageManager) ListInstalled(opts *manager.Options) ([]manager.Package
 	return ParseListInstalledOutput(string(out), opts), nil
 }
 
+// ListUpgradable lists upgradable packages using Flatpak with the provided options.
 func (a *PackageManager) ListUpgradable(opts *manager.Options) ([]manager.PackageInfo, error) {
 	cmd := exec.Command(pm, "remote-ls", "--updates")
 	cmd.Env = ENV_NonInteractive
@@ -185,7 +205,8 @@ func (a *PackageManager) ListUpgradable(opts *manager.Options) ([]manager.Packag
 	return ParseListUpgradableOutput(string(out), opts), nil
 }
 
-func (a *PackageManager) Upgrade(opts *manager.Options) ([]manager.PackageInfo, error) {
+// UpgradeAll upgrades all packages using Flatpak with the provided options.
+func (a *PackageManager) UpgradeAll(opts *manager.Options) ([]manager.PackageInfo, error) {
 	args := []string{"update"}
 	if opts == nil {
 		opts = &manager.Options{
@@ -220,6 +241,7 @@ func (a *PackageManager) Upgrade(opts *manager.Options) ([]manager.PackageInfo, 
 	}
 }
 
+// GetPackageInfo retrieves package information for a single package using Flatpak with the provided options.
 func (a *PackageManager) GetPackageInfo(pkg string, opts *manager.Options) (manager.PackageInfo, error) {
 	cmd := exec.Command(pm, "info", pkg)
 	cmd.Env = ENV_NonInteractive

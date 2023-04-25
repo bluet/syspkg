@@ -11,6 +11,7 @@ import (
 	"github.com/bluet/syspkg/manager"
 )
 
+// ParseInstallOutput parses the output of the flatpak install command and returns a slice of PackageInfo.
 func ParseInstallOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packages []manager.PackageInfo
 
@@ -96,6 +97,7 @@ func ParseInstallOutput(msg string, opts *manager.Options) []manager.PackageInfo
 	return packages
 }
 
+// ParseFindOutput parses the output of the flatpak search command and returns a slice of PackageInfo.
 func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	// FreeRDP Remote Desktop Client	FreeRDP (Remote Desktop Protocol) Client for Linux.	com.freerdp.FreeRDP	2.10.0	stable	flathub
 	// Fightcade	Play arcade games online.	com.fightcade.Fightcade	2.2	stable	flathub
@@ -135,6 +137,7 @@ func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	return packages
 }
 
+// ParseListInstalledOutput parses the output of the flatpak list command for installed packages and returns a slice of PackageInfo.
 func ParseListInstalledOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packages []manager.PackageInfo
 
@@ -171,6 +174,7 @@ func ParseListInstalledOutput(msg string, opts *manager.Options) []manager.Packa
 	return packages
 }
 
+// ParseListUpgradableOutput parses the output of the flatpak list command for upgradable packages and returns a slice of PackageInfo.
 func ParseListUpgradableOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packages []manager.PackageInfo
 
@@ -210,6 +214,7 @@ func ParseListUpgradableOutput(msg string, opts *manager.Options) []manager.Pack
 	return packages
 }
 
+// ParsePackageInfoOutput parses the output of the flatpak info command and returns a PackageInfo struct.
 func ParsePackageInfoOutput(msg string, opts *manager.Options) manager.PackageInfo {
 	var pkg manager.PackageInfo
 

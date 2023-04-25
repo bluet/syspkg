@@ -1,7 +1,18 @@
-// Package snap provides an implementation of the syspkg manager interface for snap package manager
-// https://snapcraft.io/docs/getting-started
-// https://en.wikipedia.org/wiki/Snap_(software)
-
+// Package snap provides an implementation of the syspkg manager interface for the snap package manager.
+// It provides a Go (golang) API interface for interacting with the snap package manager.
+// It allows you to query, install, and remove packages, and supports package managers like Apt, Snap, and Flatpak.
+// This package is a wrapper around the snap command line tool.
+//
+// Snap is a software deployment and package management system originally designed and built by Canonical, the company behind the Ubuntu Linux distribution.
+// Snap packages are self-contained applications running in a sandbox with mediated access to the host system.
+// Snap packages have no dependency on any libraries or packages installed on the host system, designed to work on any Linux distribution that has snap support installed.
+// Snap packages are available from the Snap Store, an app store with an audience of millions, and also available from other sources, including the Ubuntu Store, the KDE Discover Store, and the elementary AppCenter.
+//
+// For more information, see:
+//   - https://snapcraft.io/docs/getting-started
+//   - https://en.wikipedia.org/wiki/Snap_(software)
+//
+// This package is part of the syspkg library.
 package snap
 
 import (
@@ -14,6 +25,7 @@ import (
 
 var pm string = "snap"
 
+// Constants for various command line arguments used by the snap package manager.
 const (
 	ArgsAssumeYes    string = "-y"
 	ArgsAssumeNo     string = "--assume-no"
@@ -25,19 +37,24 @@ const (
 	ArgsShowProgress string = "--show-progress"
 )
 
-var ENV_NonInteractive []string = []string{"LC_ALL=C", "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true"}
+// ENV_NonInteractive is an environment variable configuration to set non-interactive mode for package manager commands.
+var ENV_NonInteractive []string = []string{"LC_ALL=C"}
 
+// PackageManager is an empty struct that implements the manager.PackageManager interface for the snap package manager.
 type PackageManager struct{}
 
+// IsAvailable checks if the snap package manager is available on the system.
 func (a *PackageManager) IsAvailable() bool {
 	_, err := exec.LookPath(pm)
 	return err == nil
 }
 
+// GetPackageManager returns the package manager name (in this case, "snap").
 func (a *PackageManager) GetPackageManager() string {
 	return pm
 }
 
+// Install installs the specified packages using the snap package manager with the provided options.
 func (a *PackageManager) Install(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error) {
 	args := append([]string{"install", ArgsFixBroken}, pkgs...)
 
@@ -83,6 +100,7 @@ func (a *PackageManager) Install(pkgs []string, opts *manager.Options) ([]manage
 	return ParseInstallOutput(string(out), opts), nil
 }
 
+// Delete removes the specified packages using the snap package manager with the provided options.
 func (a *PackageManager) Delete(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error) {
 	args := append([]string{"remove", ArgsFixBroken}, pkgs...)
 
@@ -128,10 +146,12 @@ func (a *PackageManager) Delete(pkgs []string, opts *manager.Options) ([]manager
 	return ParseInstallOutput(string(out), opts), nil
 }
 
+// Refresh refreshes the package index for the snap package manager. Currently not implemented.
 func (a *PackageManager) Refresh(opts *manager.Options) error {
 	return nil
 }
 
+// Find searches for packages matching the provided keywords using the snap package manager.
 func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manager.PackageInfo, error) {
 	args := append([]string{"search"}, keywords...)
 	cmd := exec.Command("snap", args...)
@@ -145,6 +165,7 @@ func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manag
 	return ParseFindOutput(string(out), opts), nil
 }
 
+// ListInstalled lists all installed packages using the snap package manager.
 func (a *PackageManager) ListInstalled(opts *manager.Options) ([]manager.PackageInfo, error) {
 	cmd := exec.Command("snap", "list")
 	cmd.Env = ENV_NonInteractive
@@ -155,6 +176,7 @@ func (a *PackageManager) ListInstalled(opts *manager.Options) ([]manager.Package
 	return ParseListInstalledOutput(string(out), opts), nil
 }
 
+// ListUpgradable lists all upgradable packages using the snap package manager.
 func (a *PackageManager) ListUpgradable(opts *manager.Options) ([]manager.PackageInfo, error) {
 	cmd := exec.Command(pm, "refresh", "--list")
 	cmd.Env = ENV_NonInteractive
@@ -165,7 +187,8 @@ func (a *PackageManager) ListUpgradable(opts *manager.Options) ([]manager.Packag
 	return ParseListUpgradableOutput(string(out), opts), nil
 }
 
-func (a *PackageManager) Upgrade(opts *manager.Options) ([]manager.PackageInfo, error) {
+// UpgradeAll upgrades all upgradable packages using the snap package manager with the provided options.
+func (a *PackageManager) UpgradeAll(opts *manager.Options) ([]manager.PackageInfo, error) {
 	args := []string{"refresh", ArgsFixBroken}
 
 	if opts == nil {
@@ -210,6 +233,7 @@ func (a *PackageManager) Upgrade(opts *manager.Options) ([]manager.PackageInfo, 
 	return ParseInstallOutput(string(out), opts), nil
 }
 
+// GetPackageInfo retrieves information about the specified package using the snap package manager.
 func (a *PackageManager) GetPackageInfo(pkg string, opts *manager.Options) (manager.PackageInfo, error) {
 	cmd := exec.Command("snap", "info", pkg)
 	cmd.Env = ENV_NonInteractive

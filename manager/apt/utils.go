@@ -1,3 +1,5 @@
+// Package apt provides a package manager implementation for Debian-based systems using
+// Advanced Package Tool (APT) as the underlying package management tool.
 package apt
 
 import (
@@ -14,34 +16,9 @@ import (
 	"github.com/bluet/syspkg/manager"
 )
 
-// ParseInstalledOutput parses the output of `apt install packageName` command
-// and returns a list of installed packages.
+// ParseInstallOutput parses the output of `apt install packageName` command and returns a list of installed packages.
+// It extracts the package name, package architecture, and version from the lines that start with "Setting up ".
 // Example msg:
-//	Reading package lists... Done
-//	Building dependency tree... Done
-//	Reading state information... Done
-//	Calculating upgrade... Done
-//	The following packages will be upgraded:
-//	libssl-dev libssl3 libssl3:i386 openssl
-//	4 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
-//	4 standard LTS security updates
-//	Need to get 7405 kB of archives.
-//	After this operation, 2048 B of additional disk space will be used.
-//	Get:1 http://ftp.ubuntu-tw.net/ubuntu jammy-security/main amd64 libssl-dev amd64 3.0.2-0ubuntu1.9 [2373 kB]
-//	Get:2 http://ftp.ubuntu-tw.net/ubuntu jammy-security/main i386 libssl3 i386 3.0.2-0ubuntu1.9 [1943 kB]
-//	Get:3 http://ftp.ubuntu-tw.net/ubuntu jammy-security/main amd64 libssl3 amd64 3.0.2-0ubuntu1.9 [1902 kB]
-//	Get:4 http://ftp.ubuntu-tw.net/ubuntu jammy-security/main amd64 openssl amd64 3.0.2-0ubuntu1.9 [1185 kB]
-//	Fetched 7405 kB in 2s (3022 kB/s)
-//	Preconfiguring packages ...
-//	(Reading database ... 331817 files and directories currently installed.)
-//	Preparing to unpack .../libssl-dev_3.0.2-0ubuntu1.9_amd64.deb ...
-//	Unpacking libssl-dev:amd64 (3.0.2-0ubuntu1.9) over (3.0.2-0ubuntu1.8) ...
-//	Preparing to unpack .../libssl3_3.0.2-0ubuntu1.9_amd64.deb ...
-//	De-configuring libssl3:i386 (3.0.2-0ubuntu1.8), to allow configuration of libssl3:amd64 (3.0.2-0ubun
-//	tu1.8) ...
-//	Unpacking libssl3:amd64 (3.0.2-0ubuntu1.9) over (3.0.2-0ubuntu1.8) ...
-//	Preparing to unpack .../libssl3_3.0.2-0ubuntu1.9_i386.deb ...
-//	Unpacking libssl3:i386 (3.0.2-0ubuntu1.9) over (3.0.2-0ubuntu1.8) ...
 //	Preparing to unpack .../openssl_3.0.2-0ubuntu1.9_amd64.deb ...
 //	Unpacking openssl (3.0.2-0ubuntu1.9) over (3.0.2-0ubuntu1.8) ...
 //	Setting up libssl3:amd64 (3.0.2-0ubuntu1.9) ...
@@ -50,7 +27,6 @@ import (
 //	Setting up openssl (3.0.2-0ubuntu1.9) ...
 //	Processing triggers for man-db (2.10.2-1) ...
 //	Processing triggers for libc-bin (2.35-0ubuntu3.1) ...
-// We only need the package name, package architecture and version from the lines that start with "Setting up ".
 func ParseInstallOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packages []manager.PackageInfo
 
@@ -58,19 +34,19 @@ func ParseInstallOutput(msg string, opts *manager.Options) []manager.PackageInfo
 	msg = strings.TrimSuffix(msg, "\n")
 	var lines []string = strings.Split(string(msg), "\n")
 
+	packageInfoPattern := regexp.MustCompile(`Setting up ([\w\d-]+):?([\w\d]+)? \(([\w\d\.-]+)\)`)
+
 	for _, line := range lines {
 		if opts.Verbose {
 			log.Printf("apt: %s", line)
 		}
-		if strings.HasPrefix(line, "Setting up") {
-			parts := strings.Fields(line)
-			var name, arch string
-			if strings.Contains(parts[2], ":") {
-				name = strings.Split(parts[2], ":")[0]
-				arch = strings.Split(parts[2], ":")[1]
-			} else {
-				name = parts[2]
-			}
+
+		match := packageInfoPattern.FindStringSubmatch(line)
+
+		if len(match) == 4 {
+			name := match[1]
+			arch := match[2]
+			version := match[3]
 
 			// if name is empty, it might be not what we want
 			if name == "" {
@@ -80,8 +56,8 @@ func ParseInstallOutput(msg string, opts *manager.Options) []manager.PackageInfo
 			packageInfo := manager.PackageInfo{
 				Name:           name,
 				Arch:           arch,
-				Version:        strings.Trim(parts[3], "()"),
-				NewVersion:     strings.Trim(parts[3], "()"),
+				Version:        version,
+				NewVersion:     version,
 				Status:         manager.PackageStatusInstalled,
 				PackageManager: pm,
 			}
@@ -92,6 +68,8 @@ func ParseInstallOutput(msg string, opts *manager.Options) []manager.PackageInfo
 	return packages
 }
 
+// ParseDeletedOutput parses the output of `apt remove packageName` command
+// and returns a list of removed packages.
 func ParseDeletedOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packages []manager.PackageInfo
 
@@ -103,6 +81,8 @@ func ParseDeletedOutput(msg string, opts *manager.Options) []manager.PackageInfo
 		if opts.Verbose {
 			log.Printf("apt: %s", line)
 		}
+
+		// TODO: rewrite this using regexp
 		if strings.HasPrefix(line, "Removing") {
 			parts := strings.Fields(line)
 			if opts.Verbose {
@@ -137,17 +117,26 @@ func ParseDeletedOutput(msg string, opts *manager.Options) []manager.PackageInfo
 	return packages
 }
 
+// ParseFindOutput parses the output of `apt search packageName` command
+// and returns a list of available packages that match the search query. It extracts package
+// information such as name, version, architecture, and category from the
+// output, and stores them in a list of manager.PackageInfo objects.
+//
+// The output format is expected to be similar to the following example:
+//
+// Sorting...
+// Full Text Search...
+// zutty/jammy 0.11.2.20220109.192032+dfsg1-1 amd64
+// Efficient full-featured X11 terminal emulator
+// zvbi/jammy 0.2.35-19 amd64
+// Vertical Blanking Interval (VBI) utilities
+//
+// The function first removes the "Sorting..." and "Full Text Search..."
+// lines, and then processes each package entry line to extract relevant
+// information.
 func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packages []manager.PackageInfo
 	var packagesDict = make(map[string]manager.PackageInfo)
-
-	// Sorting...
-	// Full Text Search...
-	// zutty/jammy 0.11.2.20220109.192032+dfsg1-1 amd64
-	//   Efficient full-featured X11 terminal emulator
-	//
-	// zvbi/jammy 0.2.35-19 amd64
-	//   Vertical Blanking Interval (VBI) utilities
 
 	msg = strings.TrimPrefix(msg, "Sorting...\nFull Text Search...\n")
 
@@ -191,6 +180,9 @@ func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	return packages
 }
 
+// ParseListInstalledOutput parses the output of `dpkg-query -W -f '${binary:Package} ${Version}\n'` command
+// and returns a list of installed packages. It extracts the package name, version,
+// and architecture from the output and stores them in a list of manager.PackageInfo objects.
 func ParseListInstalledOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packages []manager.PackageInfo
 
@@ -228,6 +220,9 @@ func ParseListInstalledOutput(msg string, opts *manager.Options) []manager.Packa
 	return packages
 }
 
+// ParseListUpgradableOutput parses the output of `apt list --upgradable` command
+// and returns a list of upgradable packages. It extracts the package name, version, new version,
+// category, and architecture from the output and stores them in a list of manager.PackageInfo objects.
 func ParseListUpgradableOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packages []manager.PackageInfo
 
@@ -273,6 +268,9 @@ func ParseListUpgradableOutput(msg string, opts *manager.Options) []manager.Pack
 	return packages
 }
 
+// getPackageStatus takes a map of package names and manager.PackageInfo objects, and returns a list
+// of manager.PackageInfo objects with their statuses updated using the output of `dpkg-query` command.
+// It also adds any packages not found by dpkg-query to the list with their status set to unknown.
 func getPackageStatus(packages map[string]manager.PackageInfo) ([]manager.PackageInfo, error) {
 	var packageNames []string
 	var packagesList []manager.PackageInfo
@@ -315,6 +313,9 @@ func getPackageStatus(packages map[string]manager.PackageInfo) ([]manager.Packag
 	return packagesList, nil
 }
 
+// ParseDpkgQueryOutput parses the output of `dpkg-query` command and updates the status
+// and version of the packages in the provided map of package names and manager.PackageInfo objects.
+// It returns a list of manager.PackageInfo objects with their statuses and versions updated.
 func ParseDpkgQueryOutput(output []byte, packages map[string]manager.PackageInfo) ([]manager.PackageInfo, error) {
 	var packagesList []manager.PackageInfo
 
@@ -389,6 +390,9 @@ func ParseDpkgQueryOutput(output []byte, packages map[string]manager.PackageInfo
 	return packagesList, nil
 }
 
+// ParsePackageInfoOutput parses the output of `apt-cache show packageName` command
+// and returns a manager.PackageInfo object containing package information such as name, version,
+// architecture, and category. This function is useful for getting detailed package information.
 func ParsePackageInfoOutput(msg string, opts *manager.Options) manager.PackageInfo {
 	var pkg manager.PackageInfo
 
