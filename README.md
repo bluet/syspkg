@@ -1,12 +1,13 @@
 # Go-SysPkg
 
-A unified Go library for managing system packages across different package managers (APT, YUM, SNAP, and more).
+A unified Go library and CLI tool for managing system packages across different package managers (apt, yum, snap, flatpak, and more).
 
 ## Features
 
-- Unified package management interface
-- Supports popular package managers such as APT, YUM, and SNAP
+- Unified package management interface for various package managers
+- Supports popular package managers such as APT, Snap, Flatpak, and more
 - Easy-to-use API for package installation, removal, search, listing, and system upgrades
+- Extendable to support additional package managers
 
 ## Getting Started
 
@@ -16,15 +17,16 @@ A unified Go library for managing system packages across different package manag
 
 ### Installation
 
-Install the library using `go get`:
+Install the library using the `go get` command:
 
 ```bash
-go get github.com/bluet/go-syspkg
+go get github.com/bluet/syspkg
 ```
 
 ## Usage
 
-Here's an example demonstrating how to use Go-SysPkg:
+Here's an example demonstrating how to use SysPkg as a Go library:
+(for real use cases, see the [cmd/syspkg-cli/](cmd/syspkg-cli/) directory
 
 ```go
 package main
@@ -32,53 +34,43 @@ package main
 import (
  "fmt"
  "log"
-
- "github.com/bluet/go-syspkg/pkg/syspkg"
+ "os"
+ "github.com/bluet/syspkg"
 )
 
 func main() {
- manager, err := syspkg.NewPackageManager()
+ // Initialize SysPkg with default package managers
+ spkg, err := syspkg.New(syspkg.IncludeOptions{AllAvailable: true})
  if err != nil {
-  log.Fatalf("Error initializing package manager: %+v", err)
+  fmt.Printf("Error while initializing package managers: %+v\n", err)
+  os.Exit(1)
  }
 
- // List installed packages
- installedPackages, err := manager.ListInstalled()
+ // Find available package managers
+ packageManagers, err := spkg.FindPackageManagers(syspkg.IncludeOptions{AllAvailable: true})
  if err != nil {
-  log.Fatalf("Error listing installed packages: %+v", err)
+  fmt.Printf("Error while finding package managers: %+v\n", err)
+  os.Exit(1)
  }
 
- fmt.Println("Installed packages:")
- for _, pkg := range installedPackages {
-  fmt.Printf("- %s (%s)\n", pkg.Name, pkg.Version)
- }
+ // list all upgradable packages for each package manager
+ for pmName, pm := range packageManagers {
+  log.Printf("Listing upgradable packages for %s...\n", pmName)
+  upgradablePackages, err := pm.ListUpgradable(&manager.Options{})
+  if err != nil {
+   fmt.Printf("Error while listing upgradable packages for %s: %+v\n", pmName, err)
+   continue
+  }
 
- // List upgradable packages
- upgradablePackages, err := manager.ListUpgradable()
- if err != nil {
-  log.Fatalf("Error listing upgradable packages: %+v", err)
- }
-
- fmt.Println("Upgradable packages:")
- for _, pkg := range upgradablePackages {
-  fmt.Printf("- %s (%s -> %s)\n", pkg.Name, pkg.Version, pkg.NewVersion)
- }
-
- // Upgrade system packages
- err = manager.UpgradeSystem(true)
- if err != nil {
-  log.Fatalf("Error upgrading system packages: %+v", err)
+  fmt.Printf("Upgradable packages for %s:\n", pmName)
+  for _, pkg := range upgradablePackages {
+   fmt.Printf("%s: %s %s -> %s (%s)\n", pkg.PackageManager, pkg.Name, pkg.Version, pkg.NewVersion, pkg.Status)
+  }
  }
 }
-
 ```
 
-## Status
-- apt: Supported
-- snap: Partially supported
-- dnf: Partially supported (untested)
-- zypper: Partially supported (untested)
-- others: Please open an issue if you'd like to see support for a specific package manager
+## Supported Package Managers
 
 | Package Manager | Install | Remove | Search | Upgrade | List Installed | List Upgradable | Get Package Info |
 | --------------- | ------- | ------ | ------ | ------- | -------------- | --------------- | ---------------- |
@@ -87,15 +79,21 @@ func main() {
 | Flatpak         | ❓      | ❓    | ✅     | ✅     | ✅             | ✅             | ✅               |
 | DNF             | ❌      | ❌    | ❌     | ❌     | ❌             | ❌             | ❌               |
 | Zypper          | ❌      | ❌    | ❌     | ❌     | ❌             | ❌             | ❌               |
+| APK             | ❌      | ❌    | ❌     | ❌     | ❌             | ❌             | ❌               |
+
+
+Please open an issue (or PR ❤️) if you'd like to see support for any unlisted specific package manager.
 
 ### TODO
+
 - [ ] Add support for more package managers
 - [ ] Better error handling
 - [ ] Better return values and status codes
 
-
 ## Contributing
-We welcome contributions to Go-SysPkg! Please read our CONTRIBUTING.md for more information on how to contribute.
+
+We welcome contributions to Go-SysPkg! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for more information on how to contribute.
 
 ## License
-This project is licensed under the MIT License. See the LICENSE file for details.
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
