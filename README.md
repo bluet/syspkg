@@ -23,7 +23,15 @@ See the [Go Reference](https://pkg.go.dev/github.com/bluet/syspkg) for the full 
 
 - Go 1.16 or later (1.20+ preferred)
 
-### Installation
+### Installation (as CLI tool)
+
+Install the CLI tool using the `go install` command:
+
+```bash
+go install github.com/bluet/syspkg/cmd/syspkg@latest
+```
+
+### Installation (as Go library)
 
 Install the library using the `go get` command:
 
@@ -32,6 +40,47 @@ go get github.com/bluet/syspkg
 ```
 
 ## Usage
+
+### CLI Tool
+
+SysPkg provides a unified CLI tool for managing system packages across different package managers. It simplifies the process of working with various package managers by providing a consistent interface through an abstraction layer.
+
+Here's an example demonstrating how to use SysPkg as a CLI tool:
+
+```bash
+# Install a package using APT
+syspkg --apt install vim
+
+# Remove a package using APT
+syspkg --apt remove vim
+
+# Search for a package using Snap
+syspkg --snap search vim
+
+# Show all upgradable packages using Flatpak
+syspkg-cl --flatpak show upgradable
+```
+
+Or, you can do operations without knowing the package manager:
+
+```bash
+# Install a package using all available package managers
+syspkg install vim
+
+# Remove a package using all available package manager
+syspkg remove vim
+
+# Search for a package using all available package manager
+syspkg search vim
+
+# Upgrade all packages using all available package manager
+syspkg upgrade
+```
+
+
+For more examples and real use cases, see the [cmd/syspkg/](cmd/syspkg/) directory.
+
+### Go Library
 
 Here's an example demonstrating how to use SysPkg as a Go library:
 
@@ -69,7 +118,7 @@ func main() {
 }
 ```
 
-For more examples and real use cases, see the [cmd/syspkg-cli/](cmd/syspkg-cli/) directory.
+For more examples and real use cases, see the [cmd/syspkg/](cmd/syspkg/) directory.
 
 ## Supported Package Managers
 

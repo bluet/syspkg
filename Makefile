@@ -32,14 +32,14 @@ endif
 all: test build
 
 build: lint install-tools
-	GOOS=$(GOOS) GOARCH=$(GOARCH) $(GOBUILD) -o $(BINARY_OUTPUT) ./cmd/syspkg-cli
+	GOOS=$(GOOS) GOARCH=$(GOARCH) $(GOBUILD) -o $(BINARY_OUTPUT) ./cmd/syspkg
 
 build-all-arch: lint install-tools
-	GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINARY_OUTPUT)_linux_amd64 ./cmd/syspkg-cli
-	GOOS=linux GOARCH=arm64 $(GOBUILD) -o $(BINARY_OUTPUT)_linux_arm64 ./cmd/syspkg-cli
-	GOOS=darwin GOARCH=amd64 $(GOBUILD) -o $(BINARY_OUTPUT)_darwin_amd64 ./cmd/syspkg-cli
-	GOOS=darwin GOARCH=arm64 $(GOBUILD) -o $(BINARY_OUTPUT)_darwin_arm64 ./cmd/syspkg-cli
-	GOOS=windows GOARCH=amd64 $(GOBUILD) -o $(BINARY_OUTPUT)_windows_amd64.exe ./cmd/syspkg-cli
+	GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINARY_OUTPUT)_linux_amd64 ./cmd/syspkg
+	GOOS=linux GOARCH=arm64 $(GOBUILD) -o $(BINARY_OUTPUT)_linux_arm64 ./cmd/syspkg
+	GOOS=darwin GOARCH=amd64 $(GOBUILD) -o $(BINARY_OUTPUT)_darwin_amd64 ./cmd/syspkg
+	GOOS=darwin GOARCH=arm64 $(GOBUILD) -o $(BINARY_OUTPUT)_darwin_arm64 ./cmd/syspkg
+	GOOS=windows GOARCH=amd64 $(GOBUILD) -o $(BINARY_OUTPUT)_windows_amd64.exe ./cmd/syspkg
 
 test:
 	$(GOTEST) -v ./...
