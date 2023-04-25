@@ -18,7 +18,18 @@ func main() {
 		fmt.Println("(This command must be run with root privileges. If you got exist codes 100 or 101, please run this command with sudo.)")
 	}
 
-	pms, err := syspkg.NewPackageManager([]string{})
+	s, err := syspkg.New(
+		syspkg.IncludeOptions(syspkg.IncludeOptions{
+			AllAvailable: true,
+		}),
+	)
+	if err != nil {
+		fmt.Printf("Error while initializing syspkg: %+v\n", err)
+		os.Exit(1)
+	}
+	pms, err := s.FindPackageManagers(syspkg.IncludeOptions{
+		AllAvailable: true,
+	})
 	if err != nil {
 		fmt.Printf("Error while initializing package managers: %+v\n", err)
 		os.Exit(1)

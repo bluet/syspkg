@@ -1,4 +1,4 @@
-// Package flatpack provides an implementation of the syspkg manager interface for flatpack package manager
+// Package flatpak provides an implementation of the syspkg manager interface for flatpak package manager
 
 package flatpak
 

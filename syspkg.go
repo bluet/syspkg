@@ -8,83 +8,73 @@ import (
 	"github.com/bluet/syspkg/manager/apt"
 	"github.com/bluet/syspkg/manager/flatpak"
 	"github.com/bluet/syspkg/manager/snap"
-	// "github.com/bluet/syspkg/dnf"
 	// "github.com/bluet/syspkg/zypper"
+	// "github.com/bluet/syspkg/dnf"
+	// "github.com/bluet/syspkg/apk"
 )
 
 type PackageInfo = manager.PackageInfo
-type Options = manager.Options
 
-type PackageManager interface {
-	IsAvailable() bool
-	GetPackageManager() string
-	Install(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error)
-	Delete(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error)
-	Find(keywords []string, opts *manager.Options) ([]manager.PackageInfo, error)
-	ListInstalled(opts *manager.Options) ([]manager.PackageInfo, error)
-	ListUpgradable(opts *manager.Options) ([]manager.PackageInfo, error)
-	Upgrade(opts *manager.Options) ([]manager.PackageInfo, error)
-	Refresh(opts *manager.Options) error
-	GetPackageInfo(pkg string, opts *manager.Options) (manager.PackageInfo, error)
+type IncludeOptions struct {
+	AllAvailable bool
+	Apk          bool
+	Apt          bool
+	Dnf          bool
+	Flatpak      bool
+	Snap         bool
+	Zypper       bool
 }
 
-func NewPackageManager(wants []string) (map[string]PackageManager, error) {
-	var pms map[string]PackageManager = make(map[string]PackageManager)
+type sysPkgImpl struct {
+	pms map[string]PackageManager
+}
 
-	// check if apt is available
-	// call apt/apt.go IsAvailable()
-	// if yes, return apt/apt.go PackageManager
+// make sure sysPkgImpl implements SysPkg
+var _ SysPkg = (*sysPkgImpl)(nil)
 
-	aptManager := &apt.PackageManager{}
-	if aptManager.IsAvailable() {
-		pms["apt"] = aptManager
-		log.Println("apt manager is available")
+func New(include IncludeOptions) (SysPkg, error) {
+	impl := &sysPkgImpl{}
+	pms, err := impl.FindPackageManagers(include)
+	if err != nil {
+		return nil, err
 	}
 
-	flatpakManager := &flatpak.PackageManager{}
-	if flatpakManager.IsAvailable() {
-		pms["flatpak"] = flatpakManager
-		log.Println("flatpak manager is available")
+	return &sysPkgImpl{
+		pms: pms,
+	}, nil
+}
+
+func (s *sysPkgImpl) FindPackageManagers(include IncludeOptions) (map[string]PackageManager, error) {
+	var pms = make(map[string]PackageManager)
+	managerList := []struct {
+		managerName string
+		manager     PackageManager
+		include     bool
+	}{
+		{"apt", &apt.PackageManager{}, include.Apt},
+		{"flatpak", &flatpak.PackageManager{}, include.Flatpak},
+		{"snap", &snap.PackageManager{}, include.Snap},
+		// {"apk", &apk.PackageManager{}, include.Apk},
+		// {"dnf", &dnf.PackageManager{}, include.Dnf},
+		// {"zypper", &zypper.PackageManager{}, include.Zypper},
 	}
 
-	snapManager := &snap.PackageManager{}
-	if snapManager.IsAvailable() {
-		pms["snap"] = snapManager
-		log.Println("snap manager is available")
+	for _, m := range managerList {
+		if include.AllAvailable || m.include {
+			if m.manager.IsAvailable() {
+				pms[m.managerName] = m.manager
+				log.Printf("%s manager is available", m.managerName)
+			}
+		}
 	}
-
-	// dnfManager := &dnf.PackageManager{}
-	// if dnfManager.IsAvailable() {
-	// 	pms = append(pms, dnfManager)
-	// }
-
-	// zypperManager := &zypper.PackageManager{}
-	// if zypperManager.IsAvailable() {
-	// 	pms = append(pms, zypperManager)
-	// }
 
 	if len(pms) == 0 {
 		return nil, errors.New("no supported package manager found")
 	}
 
-	if len(wants) == 0 {
-		return pms, nil
-	}
+	return pms, nil
+}
 
-	var ret map[string]PackageManager = make(map[string]PackageManager)
-	for _, pm := range pms {
-		// for i, want := range wants {
-			for _, want := range wants {
-			if want == pm.GetPackageManager() {
-				ret[want] = pm
-				// wants = append(wants[:i], wants[i+1:]...)
-			}
-		}
-	}
-
-	// if len(wants) > 0 {
-	// 	return nil, errors.New("unsupported package manager: " + wants[0])
-	// }
-
-	return ret, nil
+func (s *sysPkgImpl) GetPackageManager(name string) (PackageManager) {
+	return s.pms[name]
 }
