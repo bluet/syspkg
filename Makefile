@@ -43,6 +43,7 @@ build-all-arch: lint install-tools
 
 test:
 	$(GOTEST) -v ./...
+	$(GOTEST) -v -run ExampleGetOSInfo ./osinfo
 
 lint:
 	golangci-lint run
