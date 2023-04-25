@@ -77,7 +77,6 @@ syspkg search vim
 syspkg upgrade
 ```
 
-
 For more examples and real use cases, see the [cmd/syspkg/](cmd/syspkg/) directory.
 
 ### Go Library
