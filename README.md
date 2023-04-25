@@ -4,14 +4,18 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/bluet/syspkg)](https://goreportcard.com/report/github.com/bluet/syspkg)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)]
 
-SysPkg is a unified Go library and CLI tool for managing system packages across different package managers (apt, snap, flatpak, yum, dnf, and more). It simplifies the process of working with various package managers by providing a consistent interface and API.
+SysPkg is a unified CLI tool and Golang library for managing system packages across different package managers (apt, snap, flatpak, yum, dnf, and more). It simplifies the process of working with various package managers by providing a consistent interface and API through an abstraction layer.
 
 ## Features
 
-- Unified package management interface for various package managers
+- A unified package management interface for various package managers
 - Supports popular package managers such as APT, Snap, Flatpak, and more
 - Easy-to-use API for package installation, removal, search, listing, and system upgrades
 - Expandable architecture to support more package managers in the future
+
+## API Documentation
+
+See the [Go Reference](https://pkg.go.dev/github.com/bluet/syspkg) for the full API documentation.
 
 ## Getting Started
 

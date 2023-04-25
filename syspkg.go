@@ -100,3 +100,14 @@ func (s *sysPkgImpl) FindPackageManagers(include IncludeOptions) (map[string]Pac
 func (s *sysPkgImpl) GetPackageManager(name string) PackageManager {
 	return s.pms[name]
 }
+
+// RefreshPackageManagers refreshes the internal list of available package managers, and returns the new list.
+func (s *sysPkgImpl) RefreshPackageManagers(include IncludeOptions) (map[string]PackageManager, error) {
+	pms, err := s.FindPackageManagers(include)
+	if err != nil {
+		return nil, err
+	}
+
+	s.pms = pms
+	return pms, nil
+}
