@@ -19,6 +19,7 @@ import (
 // ParseInstallOutput parses the output of `apt install packageName` command and returns a list of installed packages.
 // It extracts the package name, package architecture, and version from the lines that start with "Setting up ".
 // Example msg:
+//
 //	Preparing to unpack .../openssl_3.0.2-0ubuntu1.9_amd64.deb ...
 //	Unpacking openssl (3.0.2-0ubuntu1.9) over (3.0.2-0ubuntu1.8) ...
 //	Setting up libssl3:amd64 (3.0.2-0ubuntu1.9) ...
@@ -34,7 +35,7 @@ func ParseInstallOutput(msg string, opts *manager.Options) []manager.PackageInfo
 	msg = strings.TrimSuffix(msg, "\n")
 	var lines []string = strings.Split(string(msg), "\n")
 
-	packageInfoPattern := regexp.MustCompile(`Setting up ([\w\d-]+):?([\w\d]+)? \(([\w\d\.-]+)\)`)
+	packageInfoPattern := regexp.MustCompile(`Setting up ([\w\d.-]+):?([\w\d]+)? \(([\w\d\.-]+)\)`)
 
 	for _, line := range lines {
 		if opts.Verbose {
@@ -45,7 +46,7 @@ func ParseInstallOutput(msg string, opts *manager.Options) []manager.PackageInfo
 
 		if len(match) == 4 {
 			name := match[1]
-			arch := match[2]
+			arch := strings.TrimPrefix(match[2], ":") // Remove the colon prefix from the architecture
 			version := match[3]
 
 			// if name is empty, it might be not what we want
