@@ -1,3 +1,20 @@
+// Package syspkg provides a unified interface for interacting with multiple package management systems.
+// It allows you to query, install, and remove packages, and supports package managers like Apt, Snap, and Flatpak.
+//
+// To get started, create a new SysPkg instance by calling the New() function with the desired IncludeOptions.
+// After obtaining a SysPkg instance, you can use the FindPackageManagers() function to find available package managers
+// on the system, and GetPackageManager() to get a specific package manager.
+//
+// Example:
+//
+//	includeOptions := syspkg.IncludeOptions{
+//	    AllAvailable: true,
+//	}
+//	sysPkg, err := syspkg.New(includeOptions)
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//	aptManager := sysPkg.GetPackageManager("apt")
 package syspkg
 
 import (
@@ -13,8 +30,10 @@ import (
 	// "github.com/bluet/syspkg/apk"
 )
 
+// PackageInfo represents a package's information.
 type PackageInfo = manager.PackageInfo
 
+// IncludeOptions specifies which package managers to include when creating a SysPkg instance.
 type IncludeOptions struct {
 	AllAvailable bool
 	Apk          bool
@@ -32,6 +51,7 @@ type sysPkgImpl struct {
 // make sure sysPkgImpl implements SysPkg
 var _ SysPkg = (*sysPkgImpl)(nil)
 
+// New creates a new SysPkg instance with the specified IncludeOptions.
 func New(include IncludeOptions) (SysPkg, error) {
 	impl := &sysPkgImpl{}
 	pms, err := impl.FindPackageManagers(include)
@@ -44,6 +64,7 @@ func New(include IncludeOptions) (SysPkg, error) {
 	}, nil
 }
 
+// FindPackageManagers returns a map of available package managers based on the specified IncludeOptions.
 func (s *sysPkgImpl) FindPackageManagers(include IncludeOptions) (map[string]PackageManager, error) {
 	var pms = make(map[string]PackageManager)
 	managerList := []struct {
@@ -75,6 +96,7 @@ func (s *sysPkgImpl) FindPackageManagers(include IncludeOptions) (map[string]Pac
 	return pms, nil
 }
 
+// GetPackageManager returns a PackageManager instance by its name (e.g., "apt", "snap", "flatpak", etc.).
 func (s *sysPkgImpl) GetPackageManager(name string) (PackageManager) {
 	return s.pms[name]
 }
