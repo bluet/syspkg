@@ -1,5 +1,5 @@
 # .github/workflows/go-release-binaries.yml
-
+name: Go Release Binaries
 on:
   release:
     types: [created]
