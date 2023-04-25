@@ -130,7 +130,6 @@ func TestNewPackageManager(t *testing.T) {
 		}
 	}
 
-
 	// if manager == nil {
 	// 	t.Fatal("NewPackageManager() returned a nil manager")
 	// }

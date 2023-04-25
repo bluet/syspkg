@@ -15,18 +15,18 @@ import (
 var pm string = "flatpak"
 
 const (
-	ArgsAssumeYes    string = "-y"
-	ArgsAssumeNo     string = ""
-	ArgsDryRun       string = "--no-deploy"
-	ArgsFixBroken    string = ""
-	ArgsQuiet        string = ""
-	ArgsPurge        string = "--delete-data"	// https://docs.flatpak.org/en/latest/flatpak-command-reference.html#flatpak-uninstall
-							// When --delete-data is specified while removing an app, its data directory in ~/.var/app and any permissions it might have are removed. When --delete-data is used without a REF , all 'unowned' app data is removed.
-	ArgsAutoRemove   string = "--unused"	// Remove unused refs on the system.
-	ArgsShowProgress string = ""
+	ArgsAssumeYes string = "-y"
+	ArgsAssumeNo  string = ""
+	ArgsDryRun    string = "--no-deploy"
+	ArgsFixBroken string = ""
+	ArgsQuiet     string = ""
+	ArgsPurge     string = "--delete-data" // https://docs.flatpak.org/en/latest/flatpak-command-reference.html#flatpak-uninstall
+	// When --delete-data is specified while removing an app, its data directory in ~/.var/app and any permissions it might have are removed. When --delete-data is used without a REF , all 'unowned' app data is removed.
+	ArgsAutoRemove     string = "--unused" // Remove unused refs on the system.
+	ArgsShowProgress   string = ""
 	ArgsNonInteractive string = "--noninteractive"
-	ArgsVerbose string = "--verbose"
-	ArgsUpsert string = "--or-update"
+	ArgsVerbose        string = "--verbose"
+	ArgsUpsert         string = "--or-update"
 )
 
 var ENV_NonInteractive []string = []string{"LC_ALL=C"}
@@ -67,7 +67,7 @@ func (a *PackageManager) Install(pkgs []string, opts *manager.Options) ([]manage
 	}
 
 	cmd := exec.Command(pm, args...)
-	
+
 	if opts.Interactive {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
@@ -126,7 +126,7 @@ func (a *PackageManager) Delete(pkgs []string, opts *manager.Options) ([]manager
 	}
 }
 
-func (a *PackageManager) Refresh(opts *manager.Options) (error) {
+func (a *PackageManager) Refresh(opts *manager.Options) error {
 	// not sure if this is needed
 
 	return nil

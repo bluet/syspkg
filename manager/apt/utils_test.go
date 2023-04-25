@@ -301,7 +301,7 @@ func TestParseDpkgQueryOutput(t *testing.T) {
 						[]byte(`qemu-kvm deinstall ok config-files 1:4.2-3ubuntu6.23`),
 						[]byte(`dpkg-query: no packages found matching ajsdjsks`),
 						[]byte(`dpkg-query: no packages found matching byobu`),
-					}, 
+					},
 					[]byte("\n"),
 				),
 
@@ -309,7 +309,7 @@ func TestParseDpkgQueryOutput(t *testing.T) {
 					"bash":        {Name: "bash"},
 					"cloudflared": {Name: "cloudflared"},
 					"qemu-kvm":    {Name: "qemu-kvm"},
-					"ajsdjsks":   {Name: "ajsdjsks"},
+					"ajsdjsks":    {Name: "ajsdjsks"},
 					"byobu":       {Name: "byobu"},
 				},
 			},

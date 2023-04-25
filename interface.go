@@ -2,7 +2,6 @@ package syspkg
 
 import "github.com/bluet/syspkg/manager"
 
-
 type PackageManager interface {
 	IsAvailable() bool
 	GetPackageManager() string
@@ -18,7 +17,7 @@ type PackageManager interface {
 
 type SysPkg interface {
 	FindPackageManagers(include IncludeOptions) (map[string]PackageManager, error)
-	GetPackageManager(name string) (PackageManager)
+	GetPackageManager(name string) PackageManager
 	// IsAvailable() bool
 	// GetPackageManager() string
 	// Install(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error)

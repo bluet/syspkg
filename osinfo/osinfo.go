@@ -31,10 +31,10 @@ type OSInfo struct {
 
 // GetOSInfo returns the OS information, as a pointer to an OSInfo struct.
 // The OSInfo struct contains the following fields:
-//  * Name: OS name (ex, linux, darwin, windows)
-//  * Distribution: OS distribution (ex, Ubuntu)
-//  * Version: OS version (ex, 20.04)
-//  * Arch: OS architecture (ex, amd64)
+//   - Name: OS name (ex, linux, darwin, windows)
+//   - Distribution: OS distribution (ex, Ubuntu)
+//   - Version: OS version (ex, 20.04)
+//   - Arch: OS architecture (ex, amd64)
 func GetOSInfo() (*OSInfo, error) {
 	osName := runtime.GOOS
 	osArch := runtime.GOARCH
@@ -100,7 +100,6 @@ func getLinuxDistribution() (string, string, error) {
 
 	return dist, distVersion, nil
 }
-
 
 // getMacOSVersion returns the macOS version as a string.
 func getMacOSVersion() (string, error) {

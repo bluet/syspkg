@@ -46,8 +46,6 @@ func ParseInstallOutput(msg string, opts *manager.Options) []manager.PackageInfo
 	// Installing app/net.davidotek.pupgui2/x86_64/stable
 	// cspell: enable
 
-
-
 	// remove the last empty line
 	msg = strings.TrimSuffix(msg, "\n")
 	var lines []string = strings.Split(string(msg), "\n")
@@ -81,7 +79,6 @@ func ParseInstallOutput(msg string, opts *manager.Options) []manager.PackageInfo
 			} else if strings.HasPrefix(action, "uninstall") {
 				status = manager.PackageStatusAvailable
 			}
-
 
 			packageInfo := manager.PackageInfo{
 				Name:           name,
@@ -124,10 +121,10 @@ func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 		// var category string = parts[5]
 
 		packageInfo := manager.PackageInfo{
-			Name:           name,
+			Name: name,
 			// Arch:           arch,
-			Version:        version,
-			NewVersion:     version,
+			Version:    version,
+			NewVersion: version,
 			// Category:       category,
 			Status:         manager.PackageStatusAvailable,
 			PackageManager: pm,
@@ -160,9 +157,9 @@ func ParseListInstalledOutput(msg string, opts *manager.Options) []manager.Packa
 		// var category string = parts[5]
 
 		packageInfo := manager.PackageInfo{
-			Name:           name,
+			Name: name,
 			// Arch:           arch,
-			Version:        version,
+			Version: version,
 			// NewVersion:     version,
 			// Category:       category,
 			Status:         manager.PackageStatusInstalled,
@@ -173,7 +170,6 @@ func ParseListInstalledOutput(msg string, opts *manager.Options) []manager.Packa
 
 	return packages
 }
-
 
 func ParseListUpgradableOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packages []manager.PackageInfo
@@ -200,10 +196,10 @@ func ParseListUpgradableOutput(msg string, opts *manager.Options) []manager.Pack
 		// var category string = parts[5]
 
 		packageInfo := manager.PackageInfo{
-			Name:           name,
-			Arch:           arch,
+			Name: name,
+			Arch: arch,
 			// Version:        version,
-			NewVersion:     version,
+			NewVersion: version,
 			// Category:       category,
 			Status:         manager.PackageStatusInstalled,
 			PackageManager: pm,
@@ -213,7 +209,6 @@ func ParseListUpgradableOutput(msg string, opts *manager.Options) []manager.Pack
 
 	return packages
 }
-
 
 func ParsePackageInfoOutput(msg string, opts *manager.Options) manager.PackageInfo {
 	var pkg manager.PackageInfo
@@ -242,8 +237,8 @@ func ParsePackageInfoOutput(msg string, opts *manager.Options) manager.PackageIn
 				pkg.Version = value
 			case "Arch":
 				pkg.Arch = value
-			// case "Section":
-			// 	pkg.Category = value
+				// case "Section":
+				// 	pkg.Category = value
 			}
 		}
 	}

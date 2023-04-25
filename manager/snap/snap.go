@@ -145,7 +145,6 @@ func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manag
 	return ParseFindOutput(string(out), opts), nil
 }
 
-
 func (a *PackageManager) ListInstalled(opts *manager.Options) ([]manager.PackageInfo, error) {
 	cmd := exec.Command("snap", "list")
 	cmd.Env = ENV_NonInteractive

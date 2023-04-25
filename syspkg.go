@@ -97,6 +97,6 @@ func (s *sysPkgImpl) FindPackageManagers(include IncludeOptions) (map[string]Pac
 }
 
 // GetPackageManager returns a PackageManager instance by its name (e.g., "apt", "snap", "flatpak", etc.).
-func (s *sysPkgImpl) GetPackageManager(name string) (PackageManager) {
+func (s *sysPkgImpl) GetPackageManager(name string) PackageManager {
 	return s.pms[name]
 }

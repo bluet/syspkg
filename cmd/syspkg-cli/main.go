@@ -36,11 +36,11 @@ func main() {
 	}
 
 	app := &cli.App{
-		Name:  "syspkg",
-		Usage: "A universal system package manager",
-		EnableBashCompletion: true,
+		Name:                   "syspkg",
+		Usage:                  "A universal system package manager",
+		EnableBashCompletion:   true,
 		UseShortOptionHandling: true,
-		Suggest: true,
+		Suggest:                true,
 		// Action: func(c *cli.Context) error {
 		// 	var opts = getOptions(c)
 		// 	pms = filterPackageManager(pms, c)
@@ -286,42 +286,42 @@ func main() {
 				Usage:   "Verbose - Show more information.",
 			},
 			&cli.BoolFlag{
-				Name:    "apt",
-				Usage:  "Use apt package manager",
+				Name:  "apt",
+				Usage: "Use apt package manager",
 				// Hidden: true,
 			},
 			&cli.BoolFlag{
-				Name:    "yum",
+				Name:   "yum",
 				Usage:  "Use yum package manager",
 				Hidden: true,
 			},
 			&cli.BoolFlag{
-				Name:    "dnf",
+				Name:   "dnf",
 				Usage:  "Use dnf package manager",
 				Hidden: true,
 			},
 			&cli.BoolFlag{
-				Name:    "pacman",
+				Name:   "pacman",
 				Usage:  "Use pacman package manager",
 				Hidden: true,
 			},
 			&cli.BoolFlag{
-				Name:    "apk",
+				Name:   "apk",
 				Usage:  "Use apk package manager",
 				Hidden: true,
 			},
 			&cli.BoolFlag{
-				Name:    "zypper",
+				Name:   "zypper",
 				Usage:  "Use zypper package manager",
 				Hidden: true,
 			},
 			&cli.BoolFlag{
-				Name:    "flatpak",
-				Usage:  "Use flatpak package manager",
+				Name:  "flatpak",
+				Usage: "Use flatpak package manager",
 				// Hidden: true,
 			},
 			&cli.BoolFlag{
-				Name:    "snap",
+				Name:   "snap",
 				Usage:  "Use snap package manager",
 				Hidden: true,
 			},
@@ -367,7 +367,6 @@ func filterPackageManager(availablePMs map[string]syspkg.PackageManager, c *cli.
 	}
 	return wantedPMs
 }
-
 
 func listUpgradablePackages(pms map[string]syspkg.PackageManager, opts *manager.Options) {
 	for _, pm := range pms {

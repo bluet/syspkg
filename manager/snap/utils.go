@@ -62,7 +62,7 @@ func ParseInstallOutput(msg string, opts *manager.Options) []manager.PackageInfo
 
 // ParseDeletedOutput parses the output of `snap search` command
 // and returns a list of PackageInfo
-// 
+//
 // Example output:
 // Name                Version  Publisher  Notes  Summary
 // blablaland-desktop  1.0.1    adedev     -      Blablaland Desktop
@@ -112,13 +112,16 @@ func ParseSearchOutput(msg string, opts *manager.Options) []manager.PackageInfo 
 // store-url: https://snapcraft.io/blablaland-desktop
 // license:   unset
 // description: |
-//   Version bureau du jeu Blablaland (inclus Flash Player)
+//
+//	Version bureau du jeu Blablaland (inclus Flash Player)
+//
 // snap-id: yEfmuhiQDVy5B2rxNLaPyUYOE6iJakwr
 // channels:
-//   latest/stable:    –                          
-//   latest/candidate: –                          
-//   latest/beta:      –                          
-//   latest/edge:      1.0.1 2021-06-08 (3) 112MB -
+//
+//	latest/stable:    –
+//	latest/candidate: –
+//	latest/beta:      –
+//	latest/edge:      1.0.1 2021-06-08 (3) 112MB -
 //
 // cspell: enable
 func ParsePackageInfoOutput(msg string, opts *manager.Options) manager.PackageInfo {
