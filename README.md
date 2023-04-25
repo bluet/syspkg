@@ -1,13 +1,17 @@
-# Go-SysPkg
+# SysPkg
 
-A unified Go library and CLI tool for managing system packages across different package managers (apt, yum, snap, flatpak, and more).
+[![Go Reference](https://pkg.go.dev/badge/github.com/bluet/syspkg.svg)](https://pkg.go.dev/github.com/bluet/syspkg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/bluet/syspkg)](https://goreportcard.com/report/github.com/bluet/syspkg)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)]
+
+SysPkg is a unified Go library and CLI tool for managing system packages across different package managers (apt, snap, flatpak, yum, dnf, and more). It simplifies the process of working with various package managers by providing a consistent interface and API.
 
 ## Features
 
 - Unified package management interface for various package managers
 - Supports popular package managers such as APT, Snap, Flatpak, and more
 - Easy-to-use API for package installation, removal, search, listing, and system upgrades
-- Extendable to support additional package managers
+- Expandable architecture to support more package managers in the future
 
 ## Getting Started
 
@@ -26,49 +30,42 @@ go get github.com/bluet/syspkg
 ## Usage
 
 Here's an example demonstrating how to use SysPkg as a Go library:
-(for real use cases, see the [cmd/syspkg-cli/](cmd/syspkg-cli/) directory
 
 ```go
 package main
 
 import (
  "fmt"
- "log"
- "os"
  "github.com/bluet/syspkg"
 )
 
 func main() {
- // Initialize SysPkg with default package managers
- spkg, err := syspkg.New(syspkg.IncludeOptions{AllAvailable: true})
+ // Initialize SysPkg with all available package managers on current system
+ includeOptions := syspkg.IncludeOptions{
+  AllAvailable: true,
+ }
+ syspkgManager, err := syspkg.New(includeOptions)
  if err != nil {
-  fmt.Printf("Error while initializing package managers: %+v\n", err)
-  os.Exit(1)
+  fmt.Printf("Error initializing SysPkg: %v\n", err)
+  return
  }
 
- // Find available package managers
- packageManagers, err := spkg.FindPackageManagers(syspkg.IncludeOptions{AllAvailable: true})
+ // List installed packages using APT
+ aptManager := syspkgManager.GetPackageManager("apt")
+ installedPackages, err := aptManager.ListInstalled(nil)
  if err != nil {
-  fmt.Printf("Error while finding package managers: %+v\n", err)
-  os.Exit(1)
+  fmt.Printf("Error listing installed packages: %v\n", err)
+  return
  }
 
- // list all upgradable packages for each package manager
- for pmName, pm := range packageManagers {
-  log.Printf("Listing upgradable packages for %s...\n", pmName)
-  upgradablePackages, err := pm.ListUpgradable(&manager.Options{})
-  if err != nil {
-   fmt.Printf("Error while listing upgradable packages for %s: %+v\n", pmName, err)
-   continue
-  }
-
-  fmt.Printf("Upgradable packages for %s:\n", pmName)
-  for _, pkg := range upgradablePackages {
-   fmt.Printf("%s: %s %s -> %s (%s)\n", pkg.PackageManager, pkg.Name, pkg.Version, pkg.NewVersion, pkg.Status)
-  }
+ fmt.Println("Installed packages:")
+ for _, pkg := range installedPackages {
+  fmt.Printf("- %s (%s)\n", pkg.Name, pkg.Version)
  }
 }
 ```
+
+For more examples and real use cases, see the [cmd/syspkg-cli/](cmd/syspkg-cli/) directory.
 
 ## Supported Package Managers
 
@@ -77,18 +74,15 @@ func main() {
 | APT             | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               |
 | SNAP            | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               |
 | Flatpak         | ❓      | ❓    | ✅     | ✅     | ✅             | ✅             | ✅               |
-| DNF             | ❌      | ❌    | ❌     | ❌     | ❌             | ❌             | ❌               |
-| Zypper          | ❌      | ❌    | ❌     | ❌     | ❌             | ❌             | ❌               |
-| APK             | ❌      | ❌    | ❌     | ❌     | ❌             | ❌             | ❌               |
-
+| Your favorite package manager here! | 🚀 | 🚀 | 🚀 | 🚀 | 🚀 | 🚀 | 🚀 |
 
 Please open an issue (or PR ❤️) if you'd like to see support for any unlisted specific package manager.
 
 ### TODO
 
 - [ ] Add support for more package managers
-- [ ] Better error handling
-- [ ] Better return values and status codes
+- [ ] Improve error handling
+- [ ] Enhance return values and status codes
 
 ## Contributing
 
