@@ -58,7 +58,7 @@ syspkg --apt remove vim
 syspkg --snap search vim
 
 # Show all upgradable packages using Flatpak
-syspkg-cl --flatpak show upgradable
+syspkg --flatpak show upgradable
 ```
 
 Or, you can do operations without knowing the package manager:
