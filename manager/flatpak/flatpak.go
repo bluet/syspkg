@@ -12,6 +12,7 @@
 package flatpak
 
 import (
+	"log"
 	"os"
 	"os/exec"
 
@@ -225,20 +226,22 @@ func (a *PackageManager) UpgradeAll(opts *manager.Options) ([]manager.PackageInf
 
 	cmd := exec.Command(pm, args...)
 
+	log.Printf("Running command: %s %s", pm, args)
+
 	if opts.Interactive {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		cmd.Stdin = os.Stdin
 		err := cmd.Run()
 		return nil, err
-	} else {
-		cmd.Env = ENV_NonInteractive
-		out, err := cmd.Output()
-		if err != nil {
-			return nil, err
-		}
-		return ParseInstallOutput(string(out), opts), nil
 	}
+
+	cmd.Env = ENV_NonInteractive
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+	return ParseInstallOutput(string(out), opts), nil
 }
 
 // GetPackageInfo retrieves package information for a single package using Flatpak with the provided options.

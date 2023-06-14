@@ -228,7 +228,8 @@ func (a *PackageManager) Upgrade(pkgs []string, opts *manager.Options) ([]manage
 		return nil, err
 	}
 
-	cmd.Env = append(os.Environ(), ENV_NonInteractive...)
+	// cmd.Env = append(os.Environ(), ENV_NonInteractive...)
+	cmd.Env = ENV_NonInteractive
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, err

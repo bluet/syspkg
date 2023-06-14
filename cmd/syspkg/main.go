@@ -404,7 +404,7 @@ func performUpgrade(pms map[string]syspkg.PackageManager, opts *manager.Options)
 			continue
 		}
 		// log.Printf("Upgraded packages for %T: %+v", pm, packages)
-		log.Println("Packages upgraded:")
+		log.Printf("Packages upgraded for %T:\n", pm)
 		for _, pkg := range packages {
 			fmt.Printf("%s: %s -> %s (%s)\n", pkg.PackageManager, pkg.Name, pkg.NewVersion, pkg.Status)
 		}
