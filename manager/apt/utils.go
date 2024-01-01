@@ -136,8 +136,7 @@ func ParseDeletedOutput(msg string, opts *manager.Options) []manager.PackageInfo
 // lines, and then processes each package entry line to extract relevant
 // information.
 func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
-	var packages []manager.PackageInfo
-	var packagesDict = make(map[string]manager.PackageInfo)
+	var packages []*manager.PackageInfo
 
 	msg = strings.TrimPrefix(msg, "Sorting...\nFull Text Search...\n")
 
@@ -165,15 +164,15 @@ func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 				PackageManager: pm,
 			}
 
-			packagesDict[packageInfo.Name] = packageInfo
+			packages = append(packages, &packageInfo)
 		}
 	}
 
-	if len(packagesDict) == 0 {
+	if len(packages) == 0 {
 		return packages
 	}
 
-	packages, err := getPackageStatus(packagesDict)
+	packages, err := getPackageStatus(packages)
 	if err != nil {
 		log.Printf("apt: getPackageStatus error: %s\n", err)
 	}
@@ -272,9 +271,9 @@ func ParseListUpgradableOutput(msg string, opts *manager.Options) []manager.Pack
 // getPackageStatus takes a map of package names and manager.PackageInfo objects, and returns a list
 // of manager.PackageInfo objects with their statuses updated using the output of `dpkg-query` command.
 // It also adds any packages not found by dpkg-query to the list with their status set to unknown.
-func getPackageStatus(packages map[string]manager.PackageInfo) ([]manager.PackageInfo, error) {
+func getPackageStatus(packages []*manager.PackageInfo) ([]*manager.PackageInfo, error) {
 	var packageNames []string
-	var packagesList []manager.PackageInfo
+	var packagesList []*manager.PackageInfo
 
 	if len(packages) == 0 {
 		return packagesList, nil
@@ -302,13 +301,6 @@ func getPackageStatus(packages map[string]manager.PackageInfo) ([]manager.Packag
 	packagesList, err = ParseDpkgQueryOutput(out, packages)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse dpkg-query output: %+v", err)
-	}
-
-	// for all the packages that are not found, set their status to unknown, if any
-	for _, pkg := range packages {
-		fmt.Printf("apt: package not found by dpkg-query: %s", pkg.Name)
-		pkg.Status = manager.PackageStatusUnknown
-		packagesList = append(packagesList, pkg)
 	}
 
 	return packagesList, nil
