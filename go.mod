@@ -2,7 +2,7 @@ module github.com/bluet/syspkg
 
 go 1.21
 
-require github.com/urfave/cli/v2 v2.27.5 // direct
+require github.com/urfave/cli/v2 v2.27.6 // direct
 
 require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.5 // indirect
