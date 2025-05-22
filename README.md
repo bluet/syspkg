@@ -124,6 +124,7 @@ For more examples and real use cases, see the [cmd/syspkg/](cmd/syspkg/) directo
 | Package Manager | Install | Remove | Search | Upgrade | List Installed | List Upgradable | Get Package Info |
 | --------------- | ------- | ------ | ------ | ------- | -------------- | --------------- | ---------------- |
 | APT             | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               |
+| YUM             | ❓      | ❓    | ✅     | ❓     | ✅             | ❓             | ✅               |
 | SNAP            | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               |
 | Flatpak         | ❓      | ❓    | ✅     | ✅     | ✅             | ✅             | ✅               |
 | Your favorite package manager here! | 🚀 | 🚀 | 🚀 | 🚀 | 🚀 | 🚀 | 🚀 |

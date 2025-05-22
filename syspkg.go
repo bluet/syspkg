@@ -26,6 +26,7 @@ import (
 	"github.com/bluet/syspkg/manager/apt"
 	"github.com/bluet/syspkg/manager/flatpak"
 	"github.com/bluet/syspkg/manager/snap"
+	"github.com/bluet/syspkg/manager/yum"
 	// "github.com/bluet/syspkg/zypper"
 	// "github.com/bluet/syspkg/dnf"
 	// "github.com/bluet/syspkg/apk"
@@ -42,6 +43,7 @@ type IncludeOptions struct {
 	Dnf          bool
 	Flatpak      bool
 	Snap         bool
+	Yum          bool
 	Zypper       bool
 }
 
@@ -76,6 +78,7 @@ func (s *sysPkgImpl) FindPackageManagers(include IncludeOptions) (map[string]Pac
 		{"apt", &apt.PackageManager{}, include.Apt},
 		{"flatpak", &flatpak.PackageManager{}, include.Flatpak},
 		{"snap", &snap.PackageManager{}, include.Snap},
+		{"yum", &yum.PackageManager{}, include.Yum},
 		// {"apk", &apk.PackageManager{}, include.Apk},
 		// {"dnf", &dnf.PackageManager{}, include.Dnf},
 		// {"zypper", &zypper.PackageManager{}, include.Zypper},
