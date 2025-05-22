@@ -89,8 +89,10 @@ func getLinuxDistribution() (string, string, error) {
 		line := scanner.Text()
 		if strings.HasPrefix(line, "ID=") {
 			dist = strings.TrimPrefix(line, "ID=")
+			dist = strings.Trim(dist, "\"")
 		} else if strings.HasPrefix(line, "VERSION_ID=") {
-			distVersion = strings.Trim(strings.TrimPrefix(line, "VERSION_ID="), "\"")
+			distVersion = strings.TrimPrefix(line, "VERSION_ID=")
+			distVersion = strings.Trim(distVersion, "\"")
 		}
 	}
 
