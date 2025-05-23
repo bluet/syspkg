@@ -60,7 +60,7 @@ func TestNewPackageManager(t *testing.T) {
 				}
 			}
 		}
-	} else if OSInfo.Distribution == "fedora" || OSInfo.Distribution == "centos" || OSInfo.Distribution == "rhel" || OSInfo.Distribution == "rockylinux" || OSInfo.Distribution == "almalinux" || OSInfo.Distribution == "amazon linux" || OSInfo.Distribution == "oracle linux" || OSInfo.Distribution == "scientific linux" || OSInfo.Distribution == "cloudlinux" {
+	} else if OSInfo.Distribution == "fedora" || OSInfo.Distribution == "centos" || OSInfo.Distribution == "rhel" || OSInfo.Distribution == "rockylinux" || OSInfo.Distribution == "rocky" || OSInfo.Distribution == "almalinux" || OSInfo.Distribution == "amazon linux" || OSInfo.Distribution == "oracle linux" || OSInfo.Distribution == "scientific linux" || OSInfo.Distribution == "cloudlinux" {
 		if _, ok := pms["dnf"]; !ok && s.GetPackageManager("dnf") == nil {
 			if _, ok := pms["yum"]; !ok && s.GetPackageManager("yum") == nil {
 				t.Fatalf("dnf or yum package manager not found")

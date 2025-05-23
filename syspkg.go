@@ -20,11 +20,13 @@ package syspkg
 import (
 	"errors"
 	"log"
+	"sort"
 
 	"github.com/bluet/syspkg/manager"
 	"github.com/bluet/syspkg/manager/apt"
 	"github.com/bluet/syspkg/manager/flatpak"
 	"github.com/bluet/syspkg/manager/snap"
+	"github.com/bluet/syspkg/manager/yum"
 	// "github.com/bluet/syspkg/zypper"
 	// "github.com/bluet/syspkg/dnf"
 	// "github.com/bluet/syspkg/apk"
@@ -41,6 +43,7 @@ type IncludeOptions struct {
 	Dnf          bool
 	Flatpak      bool
 	Snap         bool
+	Yum          bool
 	Zypper       bool
 }
 
@@ -75,6 +78,7 @@ func (s *sysPkgImpl) FindPackageManagers(include IncludeOptions) (map[string]Pac
 		{"apt", &apt.PackageManager{}, include.Apt},
 		{"flatpak", &flatpak.PackageManager{}, include.Flatpak},
 		{"snap", &snap.PackageManager{}, include.Snap},
+		{"yum", &yum.PackageManager{}, include.Yum},
 		// {"apk", &apk.PackageManager{}, include.Apk},
 		// {"dnf", &dnf.PackageManager{}, include.Dnf},
 		// {"zypper", &zypper.PackageManager{}, include.Zypper},
@@ -97,8 +101,22 @@ func (s *sysPkgImpl) FindPackageManagers(include IncludeOptions) (map[string]Pac
 }
 
 // GetPackageManager returns a PackageManager instance by its name (e.g., "apt", "snap", "flatpak", etc.).
+// if name is empty, return the first available
 func (s *sysPkgImpl) GetPackageManager(name string) PackageManager {
-	return s.pms[name]
+	var pm PackageManager
+
+	if name == "" {
+		// get first pm available, lexicographically sorted
+		keys := make([]string, 0, len(s.pms))
+		for k := range s.pms {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		pm = s.pms[keys[0]]
+	} else {
+		pm = s.pms[name]
+	}
+	return pm
 }
 
 // RefreshPackageManagers refreshes the internal list of available package managers, and returns the new list.

@@ -293,12 +293,12 @@ func main() {
 			&cli.BoolFlag{
 				Name:  "apt",
 				Usage: "Use apt package manager",
-				// Hidden: true,
+				Hidden: false,
 			},
 			&cli.BoolFlag{
 				Name:   "yum",
 				Usage:  "Use yum package manager",
-				Hidden: true,
+				Hidden: false,
 			},
 			&cli.BoolFlag{
 				Name:   "dnf",
@@ -323,12 +323,12 @@ func main() {
 			&cli.BoolFlag{
 				Name:  "flatpak",
 				Usage: "Use flatpak package manager",
-				// Hidden: true,
+				Hidden: false,
 			},
 			&cli.BoolFlag{
 				Name:   "snap",
 				Usage:  "Use snap package manager",
-				Hidden: true,
+				Hidden: false,
 			},
 		},
 	}
