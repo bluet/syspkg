@@ -20,6 +20,7 @@ package syspkg
 import (
 	"errors"
 	"log"
+	"sort"
 
 	"github.com/bluet/syspkg/manager"
 	"github.com/bluet/syspkg/manager/apt"
@@ -97,8 +98,22 @@ func (s *sysPkgImpl) FindPackageManagers(include IncludeOptions) (map[string]Pac
 }
 
 // GetPackageManager returns a PackageManager instance by its name (e.g., "apt", "snap", "flatpak", etc.).
+// if name is empty, return the first available
 func (s *sysPkgImpl) GetPackageManager(name string) PackageManager {
-	return s.pms[name]
+	var pm PackageManager
+
+	if name == "" {
+		// get first pm available, lexicographically sorted
+		keys := make([]string, 0, len(s.pms))
+		for k := range s.pms {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		pm = s.pms[keys[0]]
+	} else {
+		pm = s.pms[name]
+	}
+	return pm
 }
 
 // RefreshPackageManagers refreshes the internal list of available package managers, and returns the new list.
