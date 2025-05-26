@@ -30,9 +30,6 @@ const (
 	ArgsShowProgress string = ""
 )
 
-// ENV_NonInteractive contains environment variables used to set non-interactive mode for yum and dpkg.
-var ENV_NonInteractive []string = []string{}
-
 // PackageManager implements the manager.PackageManager interface for the yum package manager.
 type PackageManager struct{}
 
@@ -58,7 +55,6 @@ func (a *PackageManager) Delete(pkgs []string, opts *manager.Options) ([]manager
 // Refresh updates the package list using the yum package manager.
 func (a *PackageManager) Refresh(opts *manager.Options) error {
 	cmd := exec.Command(pm, "clean", "expire-cache")
-	cmd.Env = ENV_NonInteractive
 
 	if opts == nil {
 		opts = &manager.Options{
@@ -89,7 +85,6 @@ func (a *PackageManager) Refresh(opts *manager.Options) error {
 func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manager.PackageInfo, error) {
 	args := append([]string{"search"}, keywords...)
 	cmd := exec.Command(pm, args...)
-	cmd.Env = ENV_NonInteractive
 
 	out, err := cmd.Output()
 	if err != nil {
@@ -103,7 +98,6 @@ func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manag
 func (a *PackageManager) ListInstalled(opts *manager.Options) ([]manager.PackageInfo, error) {
 	args := []string{"list", "--installed"}
 	cmd := exec.Command(pm, args...)
-	cmd.Env = ENV_NonInteractive
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, err
@@ -127,7 +121,6 @@ func (a *PackageManager) Clean(opts *manager.Options) error {
 // GetPackageInfo retrieves package information for the specified package using the yum package manager.
 func (a *PackageManager) GetPackageInfo(pkg string, opts *manager.Options) (manager.PackageInfo, error) {
 	cmd := exec.Command(pm, "info", pkg)
-	cmd.Env = ENV_NonInteractive
 	out, err := cmd.Output()
 	if err != nil {
 		return manager.PackageInfo{}, err

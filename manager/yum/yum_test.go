@@ -1,4 +1,4 @@
-// yum/yum.go
+// yum/yum_test.go
 package yum_test
 
 import (
@@ -128,13 +128,13 @@ rsync.x86_64                                                                    
 	packages := yum.ParseListInstalledOutput(msg, nil)
 	found := false
 	for _, pack := range packages {
-		if pack.Name != "rpm" || pack.Arch != "x86_64" || pack.Version != "4.16.1.3-34.el9.0.1" {
+		if pack.Name == "rpm" || pack.Arch == "x86_64" || pack.Version == "4.16.1.3-34.el9.0.1" {
 			found = true
 			break
 		}
 	}
 	if !found {
-		t.Errorf("Expected to find nginx, found %+v", packages)
+		t.Errorf("Expected to find rpm, but not found. Found instead %+v", packages)
 	}
 }
 
