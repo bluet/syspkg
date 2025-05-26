@@ -53,7 +53,7 @@ type SysPkg interface {
 	// If the name is empty, the first available package manager will be returned.
 	// If no suitable package manager is found, an error is returned.
 	// Note: only package managers that are specified in the IncludeOptions when creating the SysPkg instance (with New() method) will be returned. If you want to use package managers that are not specified in the IncludeOptions, you should use the FindPackageManagers() method to get a list of all available package managers, or use RefreshPackageManagers() with the IncludeOptions parameter to refresh the package manager list.
-	GetPackageManager(name string) PackageManager
+	GetPackageManager(name string) (PackageManager, error)
 
 	// Install(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error)
 	// Delete(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error)
