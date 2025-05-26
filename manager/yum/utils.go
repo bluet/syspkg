@@ -86,8 +86,8 @@ func ParseListInstalledOutput(msg string, opts *manager.Options) []manager.Packa
 		if len(line) > 0 {
 			parts := strings.Fields(line)
 
-			// if name is empty, it might be not what we want
-			if parts[0] == "" {
+			// if it doesn't split correctly, or the name is empty, it might be not what we want
+			if len(parts) < 2 || parts[0] == "" {
 				continue
 			}
 			name_arch := strings.Split(parts[0], ".")
