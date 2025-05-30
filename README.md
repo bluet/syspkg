@@ -21,7 +21,7 @@ See the [Go Reference](https://pkg.go.dev/github.com/bluet/syspkg) for the full 
 
 ### Prerequisites
 
-- Go 1.21 or later
+- Go 1.23 or later
 
 ### Installation (as CLI tool)
 
@@ -150,7 +150,7 @@ Please open an issue (or PR ❤️) if you'd like to see support for any unliste
 
 ### CI/CD Status
 - ✅ **Linting**: golangci-lint, gofmt, go vet
-- ✅ **Testing**: Ubuntu with Go 1.21, 1.22, 1.23
+- ✅ **Testing**: Ubuntu with Go 1.23, 1.24 (should update CI to match)
 - 🚧 **Multi-platform**: macOS testing planned after platform-specific package manager support
 
 ### Contributing

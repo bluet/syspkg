@@ -64,7 +64,7 @@ Options: `--debug`, `--assume-yes`, `--dry-run`, `--interactive`, `--verbose`
 
 ## Important Notes
 
-- The project requires Go 1.21+ 
+- The project requires Go 1.23+ (tests with 1.23, 1.24) 
 - Always run `make lint` before committing to ensure code quality
 - When implementing new package managers, focus on parsing command outputs correctly
 - The CLI automatically detects available package managers if no flag is specified
