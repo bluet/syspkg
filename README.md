@@ -150,7 +150,7 @@ Please open an issue (or PR ❤️) if you'd like to see support for any unliste
 
 ### CI/CD Status
 - ✅ **Linting**: golangci-lint, gofmt, go vet
-- ✅ **Testing**: Ubuntu with Go 1.23, 1.24 (should update CI to match)
+- ✅ **Testing**: Ubuntu with Go 1.23, 1.24
 - 🚧 **Multi-platform**: macOS testing planned after platform-specific package manager support
 
 ### Contributing
