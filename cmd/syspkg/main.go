@@ -22,11 +22,9 @@ func main() {
 	}
 
 	// Initialize syspkg and find available package managers.
-	s, err := syspkg.New(
-		syspkg.IncludeOptions(syspkg.IncludeOptions{
-			AllAvailable: true,
-		}),
-	)
+	s, err := syspkg.New(syspkg.IncludeOptions{
+		AllAvailable: true,
+	})
 	if err != nil {
 		fmt.Printf("Error while initializing syspkg: %+v\n", err)
 		os.Exit(1)
@@ -291,8 +289,8 @@ func main() {
 				Usage:   "Verbose - Show more information.",
 			},
 			&cli.BoolFlag{
-				Name:  "apt",
-				Usage: "Use apt package manager",
+				Name:   "apt",
+				Usage:  "Use apt package manager",
 				Hidden: false,
 			},
 			&cli.BoolFlag{
@@ -321,8 +319,8 @@ func main() {
 				Hidden: true,
 			},
 			&cli.BoolFlag{
-				Name:  "flatpak",
-				Usage: "Use flatpak package manager",
+				Name:   "flatpak",
+				Usage:  "Use flatpak package manager",
 				Hidden: false,
 			},
 			&cli.BoolFlag{

@@ -1,0 +1,102 @@
+# golangci-lint configuration
+# https://golangci-lint.run/usage/configuration/
+
+run:
+  timeout: 5m
+  tests: true
+  exclude-dirs:
+    - vendor
+    - testdata
+    - testing
+
+linters:
+  enable:
+    # Default linters
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - typecheck
+    - unused
+    # Additional linters
+    - gofmt
+    - goimports
+    - misspell
+    - unconvert
+    - gocyclo
+    - goprintffuncname
+    - gosec
+    - nakedret
+    - noctx
+    - nolintlint
+    - predeclared
+    - thelper
+    - tparallel
+    - unparam
+
+  disable:
+    - depguard
+    - dogsled
+    - dupl
+    - funlen
+    - gochecknoinits
+    - goconst
+    - gocritic
+    - gocognit
+    - lll
+    - nestif
+    - testpackage
+    - wrapcheck
+    - exhaustive
+    - exhaustruct
+    - nlreturn
+
+linters-settings:
+  gofmt:
+    simplify: true
+  goimports:
+    local-prefixes: github.com/bluet/syspkg
+  govet:
+    enable:
+      - shadow
+  misspell:
+    locale: US
+  gocyclo:
+    min-complexity: 20
+
+issues:
+  exclude-rules:
+    # Exclude some linters from running on tests files
+    - path: _test\.go
+      linters:
+        - gosec
+        - gocyclo
+
+    # Exclude shadow warning for common patterns
+    - linters:
+        - govet
+      text: "shadow: declaration of \"err\""
+
+    # Exclude misspelling in specific cases
+    - linters:
+        - misspell
+      text: "cancelled"
+
+    # Exclude unnecessary conversion in utils (string([]byte) is explicit)
+    - path: utils\.go
+      linters:
+        - unconvert
+      text: "unnecessary conversion"
+
+    # Exclude high cyclomatic complexity for main function
+    - path: cmd/syspkg/main\.go
+      linters:
+        - gocyclo
+      text: "cyclomatic complexity.*of func `main`"
+
+  # Maximum issues count per one linter
+  max-issues-per-linter: 50
+
+  # Maximum count of issues with the same text
+  max-same-issues: 10

@@ -8,6 +8,7 @@ import (
 	"log"
 	"os/exec"
 	"regexp"
+	"sort"
 	"strings"
 
 	// "github.com/rs/zerolog"
@@ -158,7 +159,7 @@ func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 
 			packageInfo := manager.PackageInfo{
 				Name:           strings.Split(parts[0], "/")[0],
-				Version:        parts[1],
+				Version:        "",
 				NewVersion:     parts[1],
 				Category:       strings.Split(parts[0], "/")[1],
 				Arch:           parts[2],
@@ -283,6 +284,9 @@ func getPackageStatus(packages map[string]manager.PackageInfo) ([]manager.Packag
 	for name := range packages {
 		packageNames = append(packageNames, name)
 	}
+
+	// Sort package names to ensure deterministic output order
+	sort.Strings(packageNames)
 
 	args := []string{"-W", "--showformat", "${binary:Package} ${Status} ${Version}\n"}
 	args = append(args, packageNames...)

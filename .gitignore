@@ -50,4 +50,13 @@ go.work
 
 bin/
 tmp/
-**/*.log
+**/*.log.dccache
+
+# Development cache and temporary files
+.dccache
+*.log
+
+# Temporary development notes (not part of official docs)
+*_improvements.md
+*_notes.md
+*_todo.md
