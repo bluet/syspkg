@@ -50,4 +50,4 @@ go.work
 
 bin/
 tmp/
-**/*.log
+**/*.log.dccache
