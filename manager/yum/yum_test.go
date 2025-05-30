@@ -23,7 +23,7 @@ func TestYumPackageManagerNotAvailable(t *testing.T) {
 	}
 	_, errlu := yumManager.ListUpgradable(&opts)
 	if errlu == nil {
-		t.Fatal("YumPackageManager should not support list-upgadeable")
+		t.Fatal("YumPackageManager should not support list-upgradable")
 	}
 	_, erru := yumManager.Upgrade(packages, nil)
 	if erru == nil {
