@@ -30,14 +30,16 @@ jobs:
             pm: yum
             dockerfile: almalinux.Dockerfile
             test_tags: "unit,integration,yum"
-          - os: fedora
-            pm: dnf
-            dockerfile: fedora.Dockerfile
-            test_tags: "unit,integration,dnf"
-          - os: alpine
-            pm: apk
-            dockerfile: alpine.Dockerfile
-            test_tags: "unit,integration,apk"
+          # TODO: Enable when DNF support is implemented
+          # - os: fedora
+          #   pm: dnf
+          #   dockerfile: fedora.Dockerfile
+          #   test_tags: "unit,integration,dnf"
+          # TODO: Enable when APK support is implemented
+          # - os: alpine
+          #   pm: apk
+          #   dockerfile: alpine.Dockerfile
+          #   test_tags: "unit,integration,apk"
 
     steps:
     - name: Checkout code
@@ -160,6 +162,7 @@ jobs:
       run: |
         # Test Ubuntu detection
         docker run --rm -v $PWD:/workspace ubuntu:22.04 bash -c "
+          apt-get update && apt-get install -y curl &&
           cd /workspace &&
           curl -L https://go.dev/dl/go1.23.0.linux-amd64.tar.gz | tar -C /usr/local -xz &&
           /usr/local/go/bin/go test -v ./osinfo -run TestGetOSInfo

@@ -100,13 +100,15 @@ test-docker-alma:
 	@echo "Running AlmaLinux YUM tests..."
 	docker-compose -f testing/docker/docker-compose.test.yml up almalinux-yum-test --abort-on-container-exit
 
-test-docker-fedora:
-	@echo "Running Fedora DNF tests..."
-	docker-compose -f testing/docker/docker-compose.test.yml up fedora-dnf-test --abort-on-container-exit
+# TODO: Enable when DNF support is implemented
+# test-docker-fedora:
+# 	@echo "Running Fedora DNF tests..."
+# 	docker-compose -f testing/docker/docker-compose.test.yml up fedora-dnf-test --abort-on-container-exit
 
-test-docker-alpine:
-	@echo "Running Alpine APK tests..."
-	docker-compose -f testing/docker/docker-compose.test.yml up alpine-apk-test --abort-on-container-exit
+# TODO: Enable when APK support is implemented
+# test-docker-alpine:
+# 	@echo "Running Alpine APK tests..."
+# 	docker-compose -f testing/docker/docker-compose.test.yml up alpine-apk-test --abort-on-container-exit
 
 test-docker-all: test-docker
 

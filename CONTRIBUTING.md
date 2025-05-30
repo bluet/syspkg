@@ -294,8 +294,8 @@ graph LR
 make test-docker-ubuntu    # Test APT on Ubuntu
 make test-docker-rocky     # Test YUM on Rocky Linux 8
 make test-docker-alma      # Test YUM on AlmaLinux 8
-make test-docker-fedora    # Test DNF on Fedora 39
-make test-docker-alpine    # Test APK on Alpine Linux
+# make test-docker-fedora  # TODO: DNF not implemented yet
+# make test-docker-alpine  # TODO: APK not implemented yet
 
 # Test all OS at once
 make test-docker-all       # Parallel testing across all OS
