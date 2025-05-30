@@ -22,11 +22,9 @@ func main() {
 	}
 
 	// Initialize syspkg and find available package managers.
-	s, err := syspkg.New(
-		syspkg.IncludeOptions(syspkg.IncludeOptions{
-			AllAvailable: true,
-		}),
-	)
+	s, err := syspkg.New(syspkg.IncludeOptions{
+		AllAvailable: true,
+	})
 	if err != nil {
 		fmt.Printf("Error while initializing syspkg: %+v\n", err)
 		os.Exit(1)

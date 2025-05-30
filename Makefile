@@ -1,4 +1,4 @@
-.PHONY: all build build-all-arch test lint install-tools
+.PHONY: all build build-all-arch test lint format fmt check install-tools
 
 # Go parameters
 GOCMD=go
@@ -50,5 +50,38 @@ lint:
 	golangci-lint run
 	gofmt -s -w .
 
+format fmt:
+	@echo "Running gofmt..."
+	@gofmt -s -w .
+	@echo "Running goimports..."
+	@go install golang.org/x/tools/cmd/goimports@latest
+	@goimports -w -local github.com/bluet/syspkg .
+	@echo "Formatting complete!"
+
+check:
+	@echo "Checking code formatting..."
+	@if [ -n "$$(gofmt -l .)" ]; then \
+		echo "The following files need formatting:"; \
+		gofmt -l .; \
+		echo ""; \
+		echo "Run 'make format' to fix formatting"; \
+		exit 1; \
+	fi
+	@echo "Checking go mod tidy..."
+	@go mod tidy
+	@if [ -n "$$(git status --porcelain go.mod go.sum)" ]; then \
+		echo "go.mod or go.sum needs updating"; \
+		echo "Run 'go mod tidy' and commit the changes"; \
+		exit 1; \
+	fi
+	@echo "Running go vet..."
+	@go vet ./...
+	@echo "Running golangci-lint..."
+	@golangci-lint run
+	@echo "All checks passed!"
+
 install-tools:
 	$(GOINSTALL) github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+# TODO: Add Docker testing targets when Dockerfiles are implemented
+# TODO: Add unit/integration test targets when build tags are added to test files

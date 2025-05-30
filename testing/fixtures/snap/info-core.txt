@@ -1,0 +1,51 @@
+name:      core
+summary:   Snap runtime environment
+publisher: Canonical**
+store-url: https://snapcraft.io/core
+license:   unset
+description: |
+  Base snaps are a specific type of snap that include libraries and
+  dependencies common to many applications. They provide a consistent and
+  reliable execution environment for the snap packages that use them.
+
+  This core base snap additionally includes the snapd binaries, which in
+  later releases are installed separately as the snapd snap. For more details
+  on the snapd snap, see https://snapcraft.io/snapd.
+
+  The core base snap provides a runtime environment based on Ubuntu 16.04 ESM
+  (Xenial Xerus).
+
+  Other Ubuntu environment base snaps include:
+  -   Core 18: <https://snapcraft.io/core18>
+  -   Core 20: <https://snapcraft.io/core20>
+  -   Core 22: <https://snapcraft.io/core22>
+  -   Core 24: <https://snapcraft.io/core24>
+
+  **Using a base snap**
+
+  Base snaps are installed automatically when a snap package requires them.
+  Only one of each type of base snap is ever installed.
+
+  Manually removing a base snap may affect the stability of your system.
+
+  **Building snaps with core**
+
+  Snap developers can use this base in their own snaps by adding the
+  following to the snap's snapcraft.yaml:
+
+      base: core
+
+  **Additional Information***
+
+  For more details, and guidance on using base snaps, see our documentation:
+  <https://snapcraft.io/docs/base-snaps>
+type:         core
+snap-id:      99T7MUlRhtI3U0QFgl5mXXESAiSwt776
+tracking:     latest/stable
+refresh-date: 22 days ago, at 18:37 CST
+channels:
+  latest/stable:    16-2.61.4-20241002 2025-05-09 (17210) 109MB -
+  latest/candidate: 16-2.61.4-20241002 2025-05-06 (17210) 109MB -
+  latest/beta:      16-2.61.4-20250508 2025-05-08 (17212) 109MB -
+  latest/edge:      16-2.61.4-20250529 2025-05-29 (17230) 109MB -
+installed:          16-2.61.4-20241002            (17210) 109MB core

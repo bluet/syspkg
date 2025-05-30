@@ -1,0 +1,96 @@
+# See https://pre-commit.com for more information
+repos:
+  # Official pre-commit hooks (maintained by pre-commit organization)
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-json
+      - id: check-toml
+      - id: mixed-line-ending
+
+  # Google's official pre-commit tool hooks (optional - uncomment if needed)
+  # - repo: https://github.com/google/pre-commit-tool-hooks
+  #   rev: v1.2.5
+  #   hooks:
+  #     - id: check-copyright
+  #       args: ['--copyright', 'Copyright YYYY']
+
+  # Go-specific hooks using local system tools (most secure approach)
+  - repo: local
+    hooks:
+      - id: go-fmt
+        name: go-fmt
+        entry: gofmt
+        args: [-w, -s]
+        language: system
+        files: \.go$
+        description: Run gofmt to format Go code
+
+      - id: go-imports
+        name: go-imports
+        entry: goimports
+        args: [-w, -local, github.com/bluet/syspkg]
+        language: system
+        files: \.go$
+        description: Run goimports to organize imports per Go Code Review guidelines
+
+      - id: go-vet
+        name: go-vet
+        entry: go
+        args: [vet, ./...]
+        language: system
+        files: \.go$
+        pass_filenames: false
+        description: Run go vet to check for suspicious constructs
+
+      - id: go-mod-tidy
+        name: go-mod-tidy
+        entry: go
+        args: [mod, tidy]
+        language: system
+        files: ^go\.(mod|sum)$
+        pass_filenames: false
+        description: Run go mod tidy to ensure dependencies are clean
+
+      - id: golangci-lint
+        name: golangci-lint
+        entry: golangci-lint
+        args: [run, --fix]
+        language: system
+        files: \.go$
+        pass_filenames: false
+        description: Run golangci-lint with auto-fix
+
+      # Uncomment for stricter pre-commit (may be slow):
+      # - id: go-test
+      #   name: go-test
+      #   entry: go
+      #   args: [test, -v, ./...]
+      #   language: system
+      #   files: \.go$
+      #   pass_filenames: false
+      #   description: Run go test to ensure code compiles and passes tests
+
+      - id: go-build
+        name: go-build
+        entry: go
+        args: [build, ./...]
+        language: system
+        files: \.go$
+        pass_filenames: false
+        description: Check that packages can be built
+
+      - id: go-mod-verify
+        name: go-mod-verify
+        entry: go
+        args: [mod, verify]
+        language: system
+        files: ^go\.(mod|sum)$
+        pass_filenames: false
+        description: Verify dependencies have expected content
