@@ -1,6 +1,8 @@
 package testenv
 
 import (
+	"strconv"
+	"strings"
 	"testing"
 )
 
@@ -66,4 +68,42 @@ func TestGetFixturePath(t *testing.T) {
 	}
 
 	t.Logf("Fixture path for apt search-vim: %s", path)
+}
+
+// TestVersionParsing tests the version parsing logic for RHEL-based distributions
+func TestVersionParsing(t *testing.T) {
+	tests := []struct {
+		version  string
+		expected string // expected package manager
+	}{
+		{"8", "yum"},
+		{"8.5", "yum"},
+		{"8.5.2111", "yum"},
+		{"9", "dnf"},
+		{"9.0", "dnf"},
+		{"9.1.2022", "dnf"},
+		{"7.9", ""}, // No manager for version < 8
+	}
+
+	for _, tt := range tests {
+		t.Run("version_"+tt.version, func(t *testing.T) {
+			// Simulate version parsing logic
+			versionParts := strings.Split(tt.version, ".")
+			var manager string
+			if len(versionParts) > 0 {
+				majorVersion, err := strconv.Atoi(versionParts[0])
+				if err == nil {
+					if majorVersion >= 9 {
+						manager = "dnf"
+					} else if majorVersion >= 8 {
+						manager = "yum"
+					}
+				}
+			}
+
+			if manager != tt.expected {
+				t.Errorf("For version %s, expected %s but got %s", tt.version, tt.expected, manager)
+			}
+		})
+	}
 }

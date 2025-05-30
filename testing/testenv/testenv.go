@@ -4,6 +4,7 @@ package testenv
 
 import (
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/bluet/syspkg/osinfo"
@@ -64,11 +65,19 @@ func getAvailableManagers(osInfo *osinfo.OSInfo) []string {
 
 		case "rocky", "almalinux", "centos":
 			// Determine YUM vs DNF based on version
-			if osInfo.Version >= "8" {
-				managers = []string{"yum"}
-			}
-			if osInfo.Version >= "9" || osInfo.Distribution == "fedora" {
-				managers = []string{"dnf"}
+			// Extract major version number
+			versionParts := strings.Split(osInfo.Version, ".")
+			if len(versionParts) > 0 {
+				majorVersion, err := strconv.Atoi(versionParts[0])
+				if err == nil {
+					if majorVersion >= 9 {
+						// RHEL/Rocky/Alma 9+ uses DNF
+						managers = []string{"dnf"}
+					} else if majorVersion >= 8 {
+						// RHEL/Rocky/Alma 8 uses YUM
+						managers = []string{"yum"}
+					}
+				}
 			}
 
 		case "alpine":
