@@ -1,14 +1,13 @@
 //go:build integration
 // +build integration
 
-package yum_test
+package yum
 
 import (
 	"os"
 	"testing"
 
 	"github.com/bluet/syspkg/manager"
-	"github.com/bluet/syspkg/manager/yum"
 	"github.com/bluet/syspkg/testing/testenv"
 )
 
@@ -24,7 +23,7 @@ func TestYumIntegrationEnvironmentAware(t *testing.T) {
 		t.Skip(reason)
 	}
 
-	yumManager := yum.PackageManager{}
+	yumManager := PackageManager{}
 
 	// Test availability
 	if !yumManager.IsAvailable() {
@@ -141,8 +140,8 @@ func TestYumParsingWithRealOutput(t *testing.T) {
 	}
 
 	// Only run if we can capture real output
-	if !env.InContainer || env.GetTestPackageManager() != "yum" {
-		t.Skip("Real output parsing test only runs in YUM containers")
+	if !env.InContainer {
+		t.Skip("Real output parsing test only runs in containers")
 	}
 
 	// Test parsing with fixtures appropriate to current environment
@@ -150,7 +149,7 @@ func TestYumParsingWithRealOutput(t *testing.T) {
 		fixturePath := env.GetFixturePath("yum", "search-vim")
 
 		if data, err := os.ReadFile(fixturePath); err == nil {
-			packages := yum.ParseFindOutput(string(data), nil)
+			packages := ParseFindOutput(string(data), nil)
 
 			if len(packages) == 0 {
 				t.Error("Failed to parse any packages from fixture")
