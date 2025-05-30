@@ -169,40 +169,33 @@ Please open an issue (or PR ❤️) if you'd like to see support for any unliste
 - ✅ **Go mod verification**: Dependency integrity validation
 - 🚧 **Multi-platform testing**: macOS/Windows testing planned
 
-### Development Setup
-
-1. **Clone and setup**:
-   ```bash
-   git clone https://github.com/bluet/syspkg.git
-   cd syspkg
-   ```
-
-2. **Install pre-commit hooks**:
-   ```bash
-   pre-commit install
-   ```
-
-3. **Run development commands**:
-   ```bash
-   make test          # Run tests
-   make check         # Code quality checks
-   make build         # Build binary
-   ```
-
-### Contributing
-See [CLAUDE.md](CLAUDE.md) for detailed development guidelines and architecture overview.
-
-### TODO
-
-- [ ] Add brew support for macOS
-- [ ] Add chocolatey/scoop/winget support for Windows
-- [ ] Add support for more Linux package managers (dnf, apk, zypper)
-- [ ] Implement Docker-based testing for multi-OS validation
-- [ ] Improve error handling and status codes
-
 ## Contributing
 
-We welcome contributions to Go-SysPkg! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for more information on how to contribute.
+We welcome contributions to SysPkg!
+
+### For Users
+- **Bug reports**: Open an issue with details about the problem
+- **Feature requests**: Let us know what package managers or features you'd like to see
+
+### For Developers
+- **Quick start**: See [CONTRIBUTING.md](CONTRIBUTING.md) for comprehensive development guide
+- **Architecture**: See [CLAUDE.md](CLAUDE.md) for detailed technical documentation
+- **Testing strategy**: Multi-OS Docker testing with environment-aware test execution
+
+**Development workflow:**
+```bash
+git clone https://github.com/bluet/syspkg.git
+cd syspkg
+make test          # ✅ Smart testing - works on any OS (30s)
+make check         # ✅ Code quality checks (15s)
+
+# Working on package managers? See CONTRIBUTING.md for:
+# make test-docker-rocky   # 🐳 Test YUM on Rocky Linux (5min)
+# make test-docker-fedora  # 🐳 Test DNF on Fedora (5min)
+# make test-docker-all     # 🐳 Test all OS (15min)
+```
+
+**🎯 Quick decision:** Always start with `make test` - it automatically detects your OS and tests what's available!
 
 ## License
 

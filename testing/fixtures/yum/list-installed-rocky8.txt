@@ -1,0 +1,20 @@
+Installed Packages
+acl.x86_64                            2.2.53-1.el8.1                     @System
+audit-libs.x86_64                     3.0.7-5.el8                        @System
+basesystem.noarch                     11-5.el8                           @System
+bash.x86_64                           4.4.20-4.el8_6                     @System
+binutils.x86_64                       2.30-123.el8                       @System
+bzip2-libs.x86_64                     1.0.6-26.el8                       @System
+ca-certificates.noarch                2023.2.60_v7.0.306-80.0.el8_8      @System
+chkconfig.x86_64                      1.19.2-1.el8                       @System
+coreutils-single.x86_64               8.30-15.el8                        @System
+cracklib.x86_64                       2.9.6-15.el8                       @System
+cracklib-dicts.x86_64                 2.9.6-15.el8                       @System
+crypto-policies.noarch                20230731-1.git3177e06.el8          @System
+cryptsetup-libs.x86_64                2.3.7-7.el8                        @System
+curl.x86_64                           7.61.1-33.el8                      @System
+cyrus-sasl-lib.x86_64                 2.1.27-6.el8_5                     @System
+dbus.x86_64                           1:1.12.8-26.el8                    @System
+dbus-common.noarch                    1:1.12.8-26.el8                    @System
+dbus-daemon.x86_64                    1:1.12.8-26.el8                    @System
+dbus-libs.x86_64                      1:1.12.8-26.el8                    @System

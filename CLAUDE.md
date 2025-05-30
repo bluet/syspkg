@@ -136,15 +136,112 @@ Options: `--debug`, `--assume-yes`, `--dry-run`, `--interactive`, `--verbose`
 
 ## Testing Strategy Notes
 
-### Docker Testing Capabilities
-- **Works Well**: APT, DNF/YUM, APK, Flatpak (limited) - for capturing command outputs and testing parsers
-- **Doesn't Work**: Snap (requires systemd), actual package installations
-- **Best Practice**: Use Docker to capture real outputs, then use mocks for testing
+SysPkg uses a comprehensive multi-layered testing approach to ensure package managers work correctly across different operating systems.
 
-### Testing Approach
-1. **Unit Tests**: Parser functions with captured fixtures
-2. **Integration Tests**: Mock exec.Command for package operations
-3. **Docker Tests**: Multi-OS parser validation with real command outputs
-4. **CI/CD Tests**: Native runners for snap and full integration tests
+### OS/Package Manager Matrix Testing
 
-See `testing/docker/` for implementation details and strategies.
+**Configuration-Driven Testing**: `testing/os-matrix.yaml` defines which package managers should be tested on which OS distributions.
+
+**Supported Testing Environments**:
+- **Ubuntu/Debian**: APT, Flatpak, Snap
+- **RHEL/Rocky/Alma**: YUM (v8), DNF (v9+)
+- **Fedora**: DNF, Flatpak
+- **Alpine**: APK
+- **Arch** (planned): Pacman
+
+### Multi-Layer Test Architecture
+
+#### 1. **Unit Tests** (Run Everywhere)
+```bash
+make test-unit
+```
+- Parser functions with OS-specific fixtures
+- OS detection logic
+- Command construction
+- No actual package manager execution
+
+#### 2. **Integration Tests** (Docker + Native)
+```bash
+make test-integration
+```
+- Real package manager availability checks
+- Command output capture for test fixtures
+- Limited package operations (list, search, show)
+
+#### 3. **Docker-Based Multi-OS Testing**
+```bash
+make test-docker-all          # All OS
+make test-docker-ubuntu       # APT testing
+make test-docker-rocky        # YUM testing
+make test-docker-alma         # YUM testing
+make test-docker-fedora       # DNF testing
+make test-docker-alpine       # APK testing
+```
+
+**Docker Benefits**:
+- Test YUM on Rocky Linux/AlmaLinux
+- Test APT on various Ubuntu/Debian versions
+- Generate real command outputs for fixtures
+- Isolated, reproducible test environments
+
+#### 4. **System Tests** (Native CI Only)
+- Actual package installation/removal
+- Privileged operations
+- Snap/systemd dependent features
+
+### Environment-Aware Testing
+
+**Automatic Detection**: Tests automatically detect the current OS and determine which package managers to test:
+
+```go
+env, _ := testenv.GetTestEnvironment()
+if skip, reason := env.ShouldSkipTest("yum"); skip {
+    t.Skip(reason)
+}
+```
+
+**Test Tags**: Tests use build tags for selective execution:
+- `unit`: Parser and core logic tests
+- `integration`: Real command execution (limited)
+- `system`: Full package operations (privileged)
+- `apt`, `yum`, `dnf`, `apk`: Package manager specific
+
+### CI/CD Multi-OS Pipeline
+
+**Docker Matrix**: Tests run across multiple OS in parallel:
+```yaml
+strategy:
+  matrix:
+    include:
+      - os: ubuntu, pm: apt
+      - os: rockylinux, pm: yum
+      - os: almalinux, pm: yum
+      - os: fedora, pm: dnf
+      - os: alpine, pm: apk
+```
+
+**Native Tests**: For systemd-dependent features like Snap:
+```yaml
+- os: ubuntu, runner: ubuntu-latest, pm: snap
+```
+
+### Local Development Workflow
+
+**For detailed development workflows, see [CONTRIBUTING.md](CONTRIBUTING.md)**
+
+**Quick reference:**
+1. **Daily development**: `make test` (smart OS-aware testing)
+2. **Package manager work**: `make test-docker-rocky` (YUM), `make test-docker-fedora` (DNF)
+3. **Comprehensive validation**: `make test-docker-all`
+4. **Fixture updates**: `make test-fixtures`
+
+### Test Fixture Generation
+
+Fixtures are automatically generated from real package manager outputs across different OS:
+- `testing/fixtures/apt/search-vim-ubuntu22.txt`
+- `testing/fixtures/yum/search-vim-rocky8.txt`
+- `testing/fixtures/dnf/search-vim-fedora39.txt`
+
+This ensures parsers work correctly with real-world output variations across distributions.
+
+See `testing/docker/`, `testing/os-matrix.yaml`, and [CONTRIBUTING.md](CONTRIBUTING.md) for complete details.

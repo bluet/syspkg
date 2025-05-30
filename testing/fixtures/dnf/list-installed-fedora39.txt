@@ -1,0 +1,20 @@
+Installed Packages
+alternatives.x86_64                      1.26-1.fc39                 @koji-override-0
+audit-libs.x86_64                        3.1.5-1.fc39                @koji-override-0
+authselect.x86_64                        1.4.3-1.fc39                @anaconda
+authselect-libs.x86_64                   1.4.3-1.fc39                @anaconda
+basesystem.noarch                        11-18.fc39                  @anaconda
+bash.x86_64                              5.2.26-1.fc39               @koji-override-0
+bzip2-libs.x86_64                        1.0.8-16.fc39               @anaconda
+ca-certificates.noarch                   2024.2.69_v8.0.401-1.0.fc39 @koji-override-0
+coreutils.x86_64                         9.3-7.fc39                  @koji-override-0
+coreutils-common.x86_64                  9.3-7.fc39                  @koji-override-0
+cracklib.x86_64                          2.9.11-2.fc39               @anaconda
+crypto-policies.noarch                   20231204-1.git1e3a2e4.fc39  @koji-override-0
+curl.x86_64                              8.2.1-5.fc39                @koji-override-0
+cyrus-sasl-lib.x86_64                    2.1.28-11.fc39              @anaconda
+dnf.noarch                               4.21.1-1.fc39               @koji-override-0
+dnf-data.noarch                          4.21.1-1.fc39               @koji-override-0
+elfutils-default-yama-scope.noarch       0.191-2.fc39                @koji-override-0
+elfutils-libelf.x86_64                   0.191-2.fc39                @koji-override-0
+elfutils-libs.x86_64                     0.191-2.fc39                @koji-override-0
