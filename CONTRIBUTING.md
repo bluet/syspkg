@@ -44,7 +44,7 @@ go install golang.org/x/tools/cmd/goimports@latest
 
 # Optional: Install pre-commit for automated quality checks
 pip install pre-commit
-pre-commit install
+# Note: pre-commit install was already done in step 3 of the basic workflow
 ```
 
 ### Project Structure

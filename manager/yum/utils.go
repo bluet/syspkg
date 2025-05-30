@@ -84,7 +84,7 @@ func ParseListInstalledOutput(msg string, opts *manager.Options) []manager.Packa
 
 	// remove the last empty line
 	msg = strings.TrimSuffix(msg, "\n")
-	lines := strings.Split(string(msg), "\n")
+	lines := strings.Split(msg, "\n")
 
 	for _, line := range lines {
 		if strings.HasPrefix(line, "Installed Packages") {
@@ -131,7 +131,7 @@ func ParsePackageInfoOutput(msg string, opts *manager.Options) manager.PackageIn
 
 	// remove the last empty line
 	msg = strings.TrimSuffix(msg, "\n")
-	lines := strings.Split(string(msg), "\n")
+	lines := strings.Split(msg, "\n")
 
 	for _, line := range lines {
 		if len(line) > 0 {

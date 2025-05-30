@@ -1,4 +1,6 @@
-.PHONY: all build build-all-arch test lint format fmt check install-tools test-docker test-docker-all test-fixtures
+.PHONY: all build build-all-arch test lint format fmt check install-tools \
+	test-docker test-docker-all test-docker-ubuntu test-docker-rocky test-docker-alma \
+	test-docker-clean test-fixtures test-unit test-integration test-env
 
 # Go parameters
 GOCMD=go

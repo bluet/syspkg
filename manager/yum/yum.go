@@ -65,11 +65,6 @@ func (a *PackageManager) Delete(pkgs []string, opts *manager.Options) ([]manager
 // aggressive cache clearing. This preserves valid cache files while ensuring
 // up-to-date repository information.
 func (a *PackageManager) Refresh(opts *manager.Options) error {
-	ctx, cancel := context.WithTimeout(context.Background(), cleanTimeout)
-	defer cancel()
-
-	cmd := exec.CommandContext(ctx, pm, "clean", "expire-cache")
-
 	if opts == nil {
 		opts = &manager.Options{
 			DryRun:      false,
@@ -77,6 +72,18 @@ func (a *PackageManager) Refresh(opts *manager.Options) error {
 			Verbose:     false,
 		}
 	}
+
+	// Handle dry run mode
+	if opts.DryRun {
+		log.Println("Dry run mode: would execute 'yum clean expire-cache'")
+		return nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), cleanTimeout)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, pm, "clean", "expire-cache")
+
 	if opts.Interactive {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
@@ -139,11 +146,6 @@ func (a *PackageManager) UpgradeAll(opts *manager.Options) ([]manager.PackageInf
 // Uses 'yum clean all' which removes all cached packages, metadata, and headers.
 // This is what administrators typically expect from a clean operation.
 func (a *PackageManager) Clean(opts *manager.Options) error {
-	ctx, cancel := context.WithTimeout(context.Background(), cleanTimeout)
-	defer cancel()
-
-	cmd := exec.CommandContext(ctx, pm, "clean", "all")
-
 	if opts == nil {
 		opts = &manager.Options{
 			DryRun:      false,
@@ -151,6 +153,18 @@ func (a *PackageManager) Clean(opts *manager.Options) error {
 			Verbose:     false,
 		}
 	}
+
+	// Handle dry run mode
+	if opts.DryRun {
+		log.Println("Dry run mode: would execute 'yum clean all'")
+		return nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), cleanTimeout)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, pm, "clean", "all")
+
 	if opts.Interactive {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
