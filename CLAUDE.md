@@ -76,7 +76,7 @@ Options: `--debug`, `--assume-yes`, `--dry-run`, `--interactive`, `--verbose`
 
 ## Project Improvement Roadmap
 
-*Note: Todo list consolidated 2025-05-30 - removed duplicates, feature creep items, and over-engineering. Focused on core security, testing, and platform support.*
+*Note: To-do list consolidated 2025-05-30 - removed duplicates, feature creep items, and over-engineering. Focused on core security, testing, and platform support.*
 
 ### 🔴 High Priority (Security & Critical Bugs) - 4 items
 1. **Fix command injection vulnerability** - validate/sanitize package names before exec.Command

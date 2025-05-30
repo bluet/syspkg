@@ -172,7 +172,7 @@ jobs:
 
 ## Best Practices
 
-1. **Keep Images Minimal**: Only install what's needed for testing
+1. **Keep Images Minimal**: Install only what's required for testing
 2. **Cache Aggressively**: Use Docker layer caching
 3. **Parallelize Tests**: Run different OS tests concurrently
 4. **Mock External Calls**: Don't actually install packages in tests
