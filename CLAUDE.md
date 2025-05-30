@@ -68,6 +68,10 @@ Options: `--debug`, `--assume-yes`, `--dry-run`, `--interactive`, `--verbose`
 - The CLI automatically detects available package managers if no flag is specified
 - Root privileges are often required for package operations
 
+## Philosophy
+
+**Tool-Focused Approach**: SysPkg focuses on supporting package manager tools based on their functionality rather than the operating system they're running on. If apt+dpkg work correctly in a container, on macOS via Homebrew, or in any other environment, SysPkg will support them. This makes the project more flexible and useful across different development environments.
+
 ## Project Improvement Roadmap
 
 ### 🔴 High Priority (Security & Critical Bugs)

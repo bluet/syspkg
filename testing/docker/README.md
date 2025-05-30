@@ -80,13 +80,17 @@ services:
 
 ## Usage
 
-### Run All Container Tests
+**Note:** These Docker testing targets are planned for future implementation. Currently, the project tests on Ubuntu in CI/CD.
+
+### Planned: Run All Container Tests
 ```bash
+# TODO: Implement when Makefile targets are added
 make test-docker-all
 ```
 
-### Run Specific OS Test
+### Planned: Run Specific OS Test
 ```bash
+# TODO: Implement when docker-compose.test.yml is created
 docker-compose -f docker-compose.test.yml run ubuntu-test
 ```
 

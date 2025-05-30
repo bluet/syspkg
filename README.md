@@ -4,7 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/bluet/syspkg)](https://goreportcard.com/report/github.com/bluet/syspkg)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/bluet/syspkg/blob/main/LICENSE)
 
-SysPkg is a unified CLI tool and Golang library for managing system packages across different package managers (apt, snap, flatpak, yum, dnf, and more). It simplifies the process of working with various package managers by providing a consistent interface and API through an abstraction layer.
+SysPkg is a unified CLI tool and Golang library for managing system packages across different package managers. Currently supports apt, snap, and flatpak with plans for more. It simplifies package management by providing a consistent interface and API through an abstraction layer that focuses on package manager tools rather than specific operating systems.
 
 ## Features
 
@@ -21,7 +21,7 @@ See the [Go Reference](https://pkg.go.dev/github.com/bluet/syspkg) for the full 
 
 ### Prerequisites
 
-- Go 1.16 or later (1.20+ preferred)
+- Go 1.21 or later
 
 ### Installation (as CLI tool)
 
@@ -102,8 +102,14 @@ func main() {
   return
  }
 
+ // Get APT package manager (if available)
+ aptManager, err := syspkgManager.GetPackageManager("apt")
+ if err != nil {
+  fmt.Printf("APT package manager not available: %v\n", err)
+  return
+ }
+ 
  // List installed packages using APT
- aptManager := syspkgManager.GetPackageManager("apt")
  installedPackages, err := aptManager.ListInstalled(nil)
  if err != nil {
   fmt.Printf("Error listing installed packages: %v\n", err)
@@ -125,16 +131,38 @@ For more examples and real use cases, see the [cmd/syspkg/](cmd/syspkg/) directo
 | --------------- | ------- | ------ | ------ | ------- | -------------- | --------------- | ---------------- |
 | APT             | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               |
 | SNAP            | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               |
-| Flatpak         | ❓      | ❓    | ✅     | ✅     | ✅             | ✅             | ✅               |
-| Your favorite package manager here! | 🚀 | 🚀 | 🚀 | 🚀 | 🚀 | 🚀 | 🚀 |
+| Flatpak         | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               |
+| DNF/YUM         | 🚧      | 🚧    | 🚧     | 🚧     | 🚧             | 🚧             | 🚧               |
+| APK (Alpine)    | 🚧      | 🚧    | 🚧     | 🚧     | 🚧             | 🚧             | 🚧               |
+| Zypper (openSUSE) | 🚧   | 🚧    | 🚧     | 🚧     | 🚧             | 🚧             | 🚧               |
+
+**Legend:** ✅ Implemented, 🚧 Planned, ❌ Not supported
+
+**Philosophy:** SysPkg focuses on supporting package manager tools wherever they work, regardless of the underlying operating system. If you have apt+dpkg working on macOS via Homebrew, or in a container, SysPkg will support it.
 
 Please open an issue (or PR ❤️) if you'd like to see support for any unlisted specific package manager.
 
+## Development
+
+### Documentation
+- **CLAUDE.md** - Development guidelines, architecture, and project roadmap
+- **testing/** - Test fixtures and Docker testing infrastructure (planned)
+
+### CI/CD Status
+- ✅ **Linting**: golangci-lint, gofmt, go vet
+- ✅ **Testing**: Ubuntu with Go 1.21, 1.22, 1.23
+- 🚧 **Multi-platform**: macOS testing planned after platform-specific package manager support
+
+### Contributing
+See [CLAUDE.md](CLAUDE.md) for detailed development guidelines.
+
 ### TODO
 
-- [ ] Add support for more package managers
-- [ ] Improve error handling
-- [ ] Enhance return values and status codes
+- [ ] Add brew support for macOS
+- [ ] Add chocolatey/scoop/winget support for Windows  
+- [ ] Add support for more Linux package managers (dnf, apk, zypper)
+- [ ] Implement Docker-based testing for multi-OS validation
+- [ ] Improve error handling and status codes
 
 ## Contributing
 
