@@ -100,8 +100,6 @@ func (s *sysPkgImpl) FindPackageManagers(include IncludeOptions) (map[string]Pac
 // GetPackageManager returns a PackageManager instance by its name (e.g., "apt", "snap", "flatpak", etc.).
 // if name is empty, return the first available
 func (s *sysPkgImpl) GetPackageManager(name string) (PackageManager, error) {
-	var pm PackageManager
-
 	// if there are no package managers, return before accessing non existing properties
 	if len(s.pms) == 0 {
 		return nil, errors.New("no supported package manager detected")
@@ -114,12 +112,12 @@ func (s *sysPkgImpl) GetPackageManager(name string) (PackageManager, error) {
 			keys = append(keys, k)
 		}
 		sort.Strings(keys)
-		pm = s.pms[keys[0]]
-	} else {
-		pm, found := s.pms[name]
-		if !found {
-			return pm, errors.New("no such package manager")
-		}
+		return s.pms[keys[0]], nil
+	}
+
+	pm, found := s.pms[name]
+	if !found {
+		return nil, errors.New("no such package manager")
 	}
 	return pm, nil
 }
