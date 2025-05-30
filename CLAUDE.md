@@ -74,53 +74,42 @@ Options: `--debug`, `--assume-yes`, `--dry-run`, `--interactive`, `--verbose`
 
 ## Project Improvement Roadmap
 
-### 🔴 High Priority (Security & Critical Bugs)
+*Note: Todo list consolidated 2025-05-30 - removed duplicates, feature creep items, and over-engineering. Focused on core security, testing, and platform support.*
+
+### 🔴 High Priority (Security & Critical Bugs) - 4 items
 1. **Fix command injection vulnerability** - validate/sanitize package names before exec.Command
 2. **Implement input validation helper function** for package names and arguments
 3. **Fix resource leaks** in error handling paths
 4. **Add security scanning with Snyk** to CI/CD pipeline
 5. **Review and merge PR #12** - fix GetPackageManager("") panic bug ✅
 
-### 🟡 Medium Priority (Code Quality & Bugs)
+### 🟡 Medium Priority (Code Quality & Testing) - 7 items
 **Testing:**
 - Create integration tests with mocked command execution
 - Add unit tests for snap package manager
 - Add unit tests for flatpak package manager
-- Set up CI/CD pipeline with multi-platform testing (only Ubuntu currently, macOS temporarily removed)
-- Add benchmark tests for parsing functions
-- Simplify TestNewPackageManager - remove unimplemented package managers ✅
-- Implement Docker-based testing for multi-OS support
 
 **Code Improvements:**
-- Complete TODO items in apt manager implementation
 - Implement context support for cancellation and timeouts
 - Create custom error types for better error handling
 - Extract common parsing logic to shared utilities (DRY principle)
-- Implement structured logging with slog or similar
 - Replace magic strings/numbers with named constants
 
-**Bug Fixes:**
-- Fix issue #3 - upgraded packages not shown in CLI
-- Fix issue #2 - handle macOS 'apt' binary conflict (temporarily avoided by removing macOS from CI)
+**Removed from roadmap (2025-05-30):**
+- ~~Structured logging~~ (over-engineering for project scope)
+- ~~Progress indicators~~ (feature creep for CLI/library)
+- ~~Architecture diagrams~~ (low ROI for library project)
+- ~~TODO comment fixes~~ (covered by security improvements)
 
-### 🟢 Low Priority (New Features)
-**Platform Support:**
-- Add proper macOS support with brew package manager implementation
-- Add proper Windows support with chocolatey/scoop/winget package managers
-- Re-enable macOS in CI/CD pipeline once brew support is implemented
-
+### 🟢 Low Priority (Platform Support) - 3 items
 **New Package Managers:**
-- Review PR #10 and implement full dnf/yum package manager support (Red Hat/Fedora)
-- Implement zypper package manager (openSUSE)
-- Implement apk package manager (Alpine Linux)
+- Add proper macOS support with brew package manager implementation
+- Add Windows support with chocolatey/scoop/winget package managers
+- Implement dnf/yum package manager support (Red Hat/Fedora)
 
-**Enhancements:**
-- Add progress indicators for long operations
-- Implement parallel operations for multiple package managers
-
-**Documentation:**
-- Create CONTRIBUTING.md file
-- Create architecture diagram
+**Removed from roadmap (2025-05-30):**
+- ~~zypper, apk support~~ (lower priority than core platforms)
+- ~~Parallel operations~~ (premature optimization)
 
 ## Testing Strategy Notes
 
