@@ -153,14 +153,14 @@ func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 			parts := strings.Fields(line)
 
 			// if name is empty, it might be not what we want
-			if parts[0] == "" {
+			if parts[0] == "" || len(parts) < 3 {
 				continue
 			}
 
 			packageInfo := manager.PackageInfo{
 				Name:           strings.Split(parts[0], "/")[0],
-				Version:        parts[1],
-				NewVersion:     "",
+				Version:        "",
+				NewVersion:     parts[1],
 				Category:       strings.Split(parts[0], "/")[1],
 				Arch:           parts[2],
 				PackageManager: pm,
@@ -174,7 +174,7 @@ func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 		return packages
 	}
 
-	packages, err := getPackageStatus(packagesDict)
+	packages, err := getPackageStatus(packagesDict, opts)
 	if err != nil {
 		log.Printf("apt: getPackageStatus error: %s\n", err)
 	}
@@ -273,12 +273,19 @@ func ParseListUpgradableOutput(msg string, opts *manager.Options) []manager.Pack
 // getPackageStatus takes a map of package names and manager.PackageInfo objects, and returns a list
 // of manager.PackageInfo objects with their statuses updated using the output of `dpkg-query` command.
 // It also adds any packages not found by dpkg-query to the list with their status set to unknown.
-func getPackageStatus(packages map[string]manager.PackageInfo) ([]manager.PackageInfo, error) {
+func getPackageStatus(packages map[string]manager.PackageInfo, opts *manager.Options) ([]manager.PackageInfo, error) {
 	var packageNames []string
 	var packagesList []manager.PackageInfo
 
 	if len(packages) == 0 {
 		return packagesList, nil
+	}
+
+	if opts != nil && opts.Debug {
+		log.Printf("getPackageStatus: received %d packages", len(packages))
+		for name, pkg := range packages {
+			log.Printf("Input package: %s -> %+v", name, pkg)
+		}
 	}
 
 	for name := range packages {
@@ -293,9 +300,16 @@ func getPackageStatus(packages map[string]manager.PackageInfo) ([]manager.Packag
 	cmd := exec.Command("dpkg-query", args...)
 	cmd.Env = ENV_NonInteractive
 
+	if opts != nil && opts.Debug {
+		log.Printf("Running dpkg-query with args: %v", args)
+	}
+
 	// dpkg-query might exit with status 1, which is not an error when some packages are not found
 	out, err := cmd.CombinedOutput()
 	if err != nil {
+		if opts != nil && opts.Debug {
+			log.Printf("dpkg-query error: %v, output: %q", err, string(out))
+		}
 		if exitErr, ok := err.(*exec.ExitError); ok {
 			if exitErr.ExitCode() != 1 && !strings.Contains(string(out), "no packages found matching") {
 				return nil, fmt.Errorf("command failed with output: %s", string(out))
@@ -303,15 +317,26 @@ func getPackageStatus(packages map[string]manager.PackageInfo) ([]manager.Packag
 		}
 	}
 
-	packagesList, err = ParseDpkgQueryOutput(out, packages)
+	if opts != nil && opts.Debug {
+		log.Printf("dpkg-query output: %q", string(out))
+	}
+
+	packagesList, err = ParseDpkgQueryOutput(out, packages, opts)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse dpkg-query output: %+v", err)
+	}
+
+	if opts != nil && opts.Debug {
+		log.Printf("After ParseDpkgQueryOutput: packagesList=%+v, remaining packages=%+v", packagesList, packages)
 	}
 
 	// for all the packages that are not found by dpkg-query, set their status to available
 	for _, pkg := range packages {
 		// These are packages that weren't processed by dpkg-query (not installed)
 		pkg.Status = manager.PackageStatusAvailable
+		if opts != nil && opts.Debug {
+			log.Printf("Adding unprocessed package: %+v", pkg)
+		}
 		packagesList = append(packagesList, pkg)
 	}
 
@@ -321,7 +346,7 @@ func getPackageStatus(packages map[string]manager.PackageInfo) ([]manager.Packag
 // ParseDpkgQueryOutput parses the output of `dpkg-query` command and updates the status
 // and version of the packages in the provided map of package names and manager.PackageInfo objects.
 // It returns a list of manager.PackageInfo objects with their statuses and versions updated.
-func ParseDpkgQueryOutput(output []byte, packages map[string]manager.PackageInfo) ([]manager.PackageInfo, error) {
+func ParseDpkgQueryOutput(output []byte, packages map[string]manager.PackageInfo, opts *manager.Options) ([]manager.PackageInfo, error) {
 	var packagesList []manager.PackageInfo
 
 	// remove the last empty line
@@ -367,8 +392,8 @@ func ParseDpkgQueryOutput(output []byte, packages map[string]manager.PackageInfo
 
 			switch {
 			case bytes.HasPrefix(line, []byte("dpkg-query: ")):
-				pkg.Status = manager.PackageStatusUnknown
-				pkg.Version = ""
+				pkg.Status = manager.PackageStatusAvailable
+				// Keep the version from search results, don't overwrite with empty
 			case string(parts[len(parts)-2]) == "installed":
 				pkg.Status = manager.PackageStatusInstalled
 				if version != "" {
