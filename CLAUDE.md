@@ -83,11 +83,13 @@ Options: `--debug`, `--assume-yes`, `--dry-run`, `--interactive`, `--verbose`
 
 ## Important Notes
 
-- The project requires Go 1.23+ (tests with 1.23, 1.24)
-- Always run `make lint` before committing to ensure code quality
-- When implementing new package managers, focus on parsing command outputs correctly
-- The CLI automatically detects available package managers if no flag is specified
-- Root privileges are often required for package operations
+- **License**: Apache License 2.0 (provides patent protection and enterprise-grade legal clarity)
+- **Go Version**: Requires Go 1.23+ (CI tests with 1.23, 1.24)
+- **Code Quality**: Always run `make check` before committing to ensure quality
+- **Pre-commit**: Hooks automatically enforce formatting, linting, and security checks
+- **Package Managers**: When implementing new ones, focus on parsing command outputs correctly
+- **CLI Detection**: Automatically detects available package managers if no flag is specified
+- **Privileges**: Root privileges are often required for package operations
 
 ## Philosophy
 
