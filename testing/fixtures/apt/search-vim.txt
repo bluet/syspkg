@@ -47,4 +47,3 @@ context-modules/jammy,jammy 20210301-1 all
 
 copyq/jammy 6.0.1-1 amd64
   Advanced clipboard manager with editing and scripting features
-

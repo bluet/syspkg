@@ -108,7 +108,7 @@ func main() {
   fmt.Printf("APT package manager not available: %v\n", err)
   return
  }
- 
+
  // List installed packages using APT
  installedPackages, err := aptManager.ListInstalled(nil)
  if err != nil {
@@ -146,20 +146,50 @@ Please open an issue (or PR ❤️) if you'd like to see support for any unliste
 
 ### Documentation
 - **CLAUDE.md** - Development guidelines, architecture, and project roadmap
-- **testing/** - Test fixtures and Docker testing infrastructure (planned)
+- **testing/** - Test fixtures and Docker testing infrastructure
+- **.pre-commit-config.yaml** - Secure pre-commit hooks aligned with Go best practices
+- **.github/workflows/** - CI/CD pipelines for testing, linting, building, and releases
 
 ### CI/CD Status
-- ✅ **Linting**: golangci-lint, gofmt, go vet
-- ✅ **Testing**: Ubuntu with Go 1.23, 1.24
-- 🚧 **Multi-platform**: macOS testing planned after platform-specific package manager support
+
+| Workflow | Status | Description |
+| -------- | ------ | ----------- |
+| **Test and Coverage** | ✅ | Go 1.23/1.24 testing with coverage reporting |
+| **Lint and Format** | ✅ | golangci-lint, gofmt, go vet quality checks |
+| **Build** | ✅ | Multi-version build verification |
+| **Release Binaries** | ✅ | Cross-platform binary releases |
+
+- ✅ **Pre-commit hooks**: Automated code quality and security checks
+- ✅ **Go mod verification**: Dependency integrity validation
+- 🚧 **Multi-platform testing**: macOS/Windows testing planned
+
+### Development Setup
+
+1. **Clone and setup**:
+   ```bash
+   git clone https://github.com/bluet/syspkg.git
+   cd syspkg
+   ```
+
+2. **Install pre-commit hooks**:
+   ```bash
+   pre-commit install
+   ```
+
+3. **Run development commands**:
+   ```bash
+   make test          # Run tests
+   make check         # Code quality checks
+   make build         # Build binary
+   ```
 
 ### Contributing
-See [CLAUDE.md](CLAUDE.md) for detailed development guidelines.
+See [CLAUDE.md](CLAUDE.md) for detailed development guidelines and architecture overview.
 
 ### TODO
 
 - [ ] Add brew support for macOS
-- [ ] Add chocolatey/scoop/winget support for Windows  
+- [ ] Add chocolatey/scoop/winget support for Windows
 - [ ] Add support for more Linux package managers (dnf, apk, zypper)
 - [ ] Implement Docker-based testing for multi-OS validation
 - [ ] Improve error handling and status codes

@@ -411,3 +411,6 @@ func performUpgrade(pms map[string]syspkg.PackageManager, opts *manager.Options)
 	fmt.Println("Upgrade completed.")
 	return nil
 }
+
+// Test comment
+// Test comment

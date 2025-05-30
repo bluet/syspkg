@@ -69,10 +69,10 @@ func TestAptInstall(t *testing.T) {
             "apt install -y vim": readFixture("apt/install-vim.txt"),
         },
     }
-    
+
     pm := apt.NewWithExecutor(executor)
     packages, err := pm.Install([]string{"vim"}, &manager.Options{AssumeYes: true})
-    
+
     assert.NoError(t, err)
     assert.Len(t, packages, 1)
 }
@@ -89,14 +89,14 @@ jobs:
           sudo apt update
           sudo apt install -y vim
           go test -tags=integration ./manager/apt
-          
+
   snap-test:
     runs-on: ubuntu-latest
     steps:
       - run: |
           sudo snap install hello-world
           go test -tags=integration ./manager/snap
-          
+
   flatpak-test:
     runs-on: ubuntu-latest
     steps:
@@ -117,7 +117,7 @@ type DockerTestRunner struct {
 }
 
 func (d *DockerTestRunner) CaptureOutput(outputFile string) error {
-    cmd := exec.Command("docker", "run", "--rm", 
+    cmd := exec.Command("docker", "run", "--rm",
         "-v", fmt.Sprintf("%s:/workspace", os.Getwd()),
         d.Image,
         "bash", "-c", d.Cmd + " > /workspace/" + outputFile)
@@ -131,12 +131,12 @@ func TestCaptureRealOutputs(t *testing.T) {
     if os.Getenv("CAPTURE_FIXTURES") != "true" {
         t.Skip("Skipping fixture capture")
     }
-    
+
     runner := &DockerTestRunner{
         Image: "ubuntu:22.04",
         Cmd:   "apt update && apt search golang",
     }
-    
+
     err := runner.CaptureOutput("testing/fixtures/apt/search-golang.txt")
     assert.NoError(t, err)
 }

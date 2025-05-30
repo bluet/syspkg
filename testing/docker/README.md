@@ -115,7 +115,7 @@ import (
     "os"
     "os/exec"
     "testing"
-    
+
     "github.com/bluet/syspkg/manager/apt"
 )
 
@@ -124,15 +124,15 @@ func TestParseSearchOutput_MultiOS(t *testing.T) {
     if os.Getenv("IN_CONTAINER") != "true" {
         t.Skip("Skipping container-only test")
     }
-    
+
     // Test with real apt output from this OS version
     output, err := exec.Command("apt", "search", "vim").Output()
     if err != nil {
         t.Skip("apt not available in this container")
     }
-    
+
     packages := apt.ParseSearchOutput(string(output))
-    
+
     // Verify parsing works for this OS version
     if len(packages) == 0 {
         t.Error("Expected to parse some packages")
@@ -155,14 +155,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Run Docker Tests
         run: |
           # TODO: Create docker-compose.test.yml before enabling
           docker-compose -f testing/docker/docker-compose.test.yml up \
             --abort-on-container-exit \
             --exit-code-from ubuntu-test
-            
+
       - name: Upload Test Results
         uses: actions/upload-artifact@v3
         with:

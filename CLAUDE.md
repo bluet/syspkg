@@ -21,11 +21,30 @@ go test ./manager/apt -v  # Run tests for specific package
 
 ### Lint and Format
 ```bash
-make lint          # Run go mod tidy, golangci-lint, and gofmt  
+make lint          # Run go mod tidy, golangci-lint, and gofmt
 make format        # Format code with gofmt and goimports
 make check         # Run all code quality checks (formatting, linting, vet)
 make install-tools # Install required tools (golangci-lint)
 ```
+
+### Pre-commit Hooks
+```bash
+pre-commit install        # Install pre-commit hooks
+pre-commit run --all-files # Run all hooks on all files
+```
+
+**Pre-commit hooks include:**
+- File hygiene (trailing whitespace, EOF, merge conflicts)
+- Go tools (gofmt, goimports, go vet, go mod tidy, golangci-lint)
+- Build verification (go build, go mod verify)
+- Security-focused using local system tools only
+
+### CI/CD Workflows
+Located in `.github/workflows/`:
+- **test-and-coverage.yml**: Go 1.23/1.24 testing with coverage
+- **lint-and-format.yml**: Code quality and formatting checks
+- **build.yml**: Multi-version build verification
+- **release-binaries.yml**: Cross-platform binary releases
 
 ## Architecture Overview
 
@@ -64,7 +83,7 @@ Options: `--debug`, `--assume-yes`, `--dry-run`, `--interactive`, `--verbose`
 
 ## Important Notes
 
-- The project requires Go 1.23+ (tests with 1.23, 1.24) 
+- The project requires Go 1.23+ (tests with 1.23, 1.24)
 - Always run `make lint` before committing to ensure code quality
 - When implementing new package managers, focus on parsing command outputs correctly
 - The CLI automatically detects available package managers if no flag is specified
