@@ -22,10 +22,12 @@ This directory contains Docker configurations for testing go-syspkg across multi
 - Privileged operations
 - Snap/systemd dependent features
 
-## Docker Test Structure
+## Docker Test Structure (Planned)
+
+**Note:** The docker-compose.test.yml file is planned for future implementation. This shows the intended structure.
 
 ```yaml
-# docker-compose.test.yml
+# Planned: docker-compose.test.yml
 version: '3.8'
 
 services:
@@ -111,7 +113,10 @@ package apt_test
 
 import (
     "os"
+    "os/exec"
     "testing"
+    
+    "github.com/bluet/syspkg/manager/apt"
 )
 
 func TestParseSearchOutput_MultiOS(t *testing.T) {
@@ -135,10 +140,12 @@ func TestParseSearchOutput_MultiOS(t *testing.T) {
 }
 ```
 
-## CI Integration
+## CI Integration (Planned)
+
+**Note:** This is a planned feature for multi-OS Docker testing. Currently, the project uses `.github/workflows/test.yml` for Ubuntu-based testing.
 
 ```yaml
-# .github/workflows/multi-os-test.yml
+# Planned: .github/workflows/multi-os-test.yml
 name: Multi-OS Docker Tests
 
 on: [push, pull_request]
@@ -151,6 +158,7 @@ jobs:
       
       - name: Run Docker Tests
         run: |
+          # TODO: Create docker-compose.test.yml before enabling
           docker-compose -f testing/docker/docker-compose.test.yml up \
             --abort-on-container-exit \
             --exit-code-from ubuntu-test
@@ -159,7 +167,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: test-results
-          path: test-results/
+          path: test-results/  # TODO: Ensure tests output to this directory
 ```
 
 ## Best Practices

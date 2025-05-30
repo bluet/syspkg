@@ -21,7 +21,9 @@ go test ./manager/apt -v  # Run tests for specific package
 
 ### Lint and Format
 ```bash
-make lint          # Run go mod tidy, golangci-lint, and gofmt
+make lint          # Run go mod tidy, golangci-lint, and gofmt  
+make format        # Format code with gofmt and goimports
+make check         # Run all code quality checks (formatting, linting, vet)
 make install-tools # Install required tools (golangci-lint)
 ```
 
