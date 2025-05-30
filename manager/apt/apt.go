@@ -18,6 +18,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 
 	// "github.com/rs/zerolog"
 	// "github.com/rs/zerolog/log"
@@ -46,9 +47,36 @@ var ENV_NonInteractive []string = []string{"LC_ALL=C", "DEBIAN_FRONTEND=noninter
 type PackageManager struct{}
 
 // IsAvailable checks if the apt package manager is available on the system.
+// It verifies both that apt exists and that it's the Debian apt package manager
+// (not the Java Annotation Processing Tool with the same name on some systems).
 func (a *PackageManager) IsAvailable() bool {
+	// First check if apt command exists
 	_, err := exec.LookPath(pm)
-	return err == nil
+	if err != nil {
+		return false
+	}
+	
+	// Verify it's the Debian apt by checking for dpkg (Debian package manager)
+	_, dpkgErr := exec.LookPath("dpkg")
+	if dpkgErr != nil {
+		return false
+	}
+	
+	// Test if this is actually functional Debian apt by trying a safe command
+	// This approach: if apt+dpkg work together, support them regardless of platform
+	cmd := exec.Command("apt", "--version")
+	output, err := cmd.Output()
+	if err != nil {
+		return false
+	}
+	
+	// Verify the output looks like Debian apt (not Java apt)
+	outputStr := string(output)
+	// Debian apt version output typically contains "apt" and version info
+	// Java apt would have very different output
+	return len(outputStr) > 0 && 
+		   strings.Contains(strings.ToLower(outputStr), "apt") &&
+		   !strings.Contains(strings.ToLower(outputStr), "java")
 }
 
 // GetPackageManager returns the name of the apt package manager.

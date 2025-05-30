@@ -158,7 +158,7 @@ func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 
 			packageInfo := manager.PackageInfo{
 				Name:           strings.Split(parts[0], "/")[0],
-				Version:        parts[1],
+				Version:        "",
 				NewVersion:     parts[1],
 				Category:       strings.Split(parts[0], "/")[1],
 				Arch:           parts[2],
