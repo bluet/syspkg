@@ -111,16 +111,39 @@ jobs:
 ```go
 package testing
 
+import (
+    "context"
+    "fmt"
+    "os"
+    "os/exec"
+    "time"
+)
+
 type DockerTestRunner struct {
-    Image string
-    Cmd   string
+    Image   string
+    Cmd     string
+    Timeout time.Duration
 }
 
 func (d *DockerTestRunner) CaptureOutput(outputFile string) error {
-    cmd := exec.Command("docker", "run", "--rm",
-        "-v", fmt.Sprintf("%s:/workspace", os.Getwd()),
+    timeout := d.Timeout
+    if timeout == 0 {
+        timeout = 30 * time.Second
+    }
+
+    ctx, cancel := context.WithTimeout(context.Background(), timeout)
+    defer cancel()
+
+    workDir, err := os.Getwd()
+    if err != nil {
+        return fmt.Errorf("failed to get working directory: %w", err)
+    }
+
+    cmd := exec.CommandContext(ctx, "docker", "run", "--rm",
+        "-v", fmt.Sprintf("%s:/workspace", workDir),
         d.Image,
         "bash", "-c", d.Cmd + " > /workspace/" + outputFile)
+
     return cmd.Run()
 }
 ```
@@ -133,8 +156,9 @@ func TestCaptureRealOutputs(t *testing.T) {
     }
 
     runner := &DockerTestRunner{
-        Image: "ubuntu:22.04",
-        Cmd:   "apt update && apt search golang",
+        Image:   "ubuntu:22.04",
+        Cmd:     "apt update && apt search golang",
+        Timeout: 60 * time.Second, // Optional: defaults to 30s
     }
 
     err := runner.CaptureOutput("testing/fixtures/apt/search-golang.txt")
