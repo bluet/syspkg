@@ -83,28 +83,5 @@ check:
 install-tools:
 	$(GOINSTALL) github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
-# Docker testing targets
-.PHONY: test-docker-build test-docker-ubuntu test-docker-alpine test-docker-all
-
-test-docker-build:
-	@echo "Building Docker test images..."
-	docker build -f testing/docker/ubuntu.Dockerfile -t syspkg-test:ubuntu .
-	docker build -f testing/docker/alpine.Dockerfile -t syspkg-test:alpine .
-
-test-docker-ubuntu: test-docker-build
-	@echo "Running tests in Ubuntu container..."
-	docker run --rm -v $(PWD):/workspace syspkg-test:ubuntu
-
-test-docker-alpine: test-docker-build
-	@echo "Running tests in Alpine container..."
-	docker run --rm -v $(PWD):/workspace syspkg-test:alpine
-
-test-docker-all: test-docker-ubuntu test-docker-alpine
-	@echo "All Docker tests completed"
-
-# Run tests with specific tags
-test-unit:
-	$(GOTEST) -v -tags=unit ./...
-
-test-integration:
-	$(GOTEST) -v -tags=integration ./...
+# TODO: Add Docker testing targets when Dockerfiles are implemented
+# TODO: Add unit/integration test targets when build tags are added to test files
