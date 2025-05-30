@@ -4,6 +4,7 @@ package testenv
 
 import (
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -128,16 +129,21 @@ func (env *TestEnvironment) ShouldSkipTest(requiredPM string) (bool, string) {
 
 // GetFixturePath returns the appropriate fixture path for the current OS
 func (env *TestEnvironment) GetFixturePath(pm, operation string) string {
-	base := "testing/fixtures/" + pm + "/"
+	// Use filepath.Join for proper path construction
+	baseDir := filepath.Join("testing", "fixtures", pm)
 
-	// Use OS-specific fixtures if available
-	osSpecific := base + operation + "-" + env.Distribution + ".txt"
-	if _, err := os.Stat(osSpecific); err == nil {
-		return osSpecific
+	// Try OS-specific fixtures first
+	osSpecificFile := operation + "-" + env.Distribution + ".txt"
+	osSpecificPath := filepath.Join(baseDir, osSpecificFile)
+
+	// Check if OS-specific fixture exists
+	if info, err := os.Stat(osSpecificPath); err == nil && !info.IsDir() {
+		return osSpecificPath
 	}
 
 	// Fall back to generic fixtures
-	return base + operation + ".txt"
+	genericFile := operation + ".txt"
+	return filepath.Join(baseDir, genericFile)
 }
 
 // IsContainerEnvironment returns true if running in a container
