@@ -18,13 +18,27 @@ import (
 func main() {
 	// Check if this is a read-only command that doesn't need root
 	isReadOnlyCommand := false
-	if len(os.Args) > 1 {
-		cmd := os.Args[1]
-		switch cmd {
+	// Look for the actual command, skipping flags
+	for i := 1; i < len(os.Args); i++ {
+		arg := os.Args[i]
+		// Skip flags (start with -)
+		if strings.HasPrefix(arg, "-") {
+			continue
+		}
+		// First non-flag argument is the command
+		switch arg {
 		case "find", "search", "f", "show", "s":
 			isReadOnlyCommand = true
-		case "help", "h", "--help", "-h":
+		case "help", "h":
 			isReadOnlyCommand = true
+		}
+		break
+	}
+	// Also handle help flags specifically
+	for _, arg := range os.Args[1:] {
+		if arg == "--help" || arg == "-h" {
+			isReadOnlyCommand = true
+			break
 		}
 	}
 

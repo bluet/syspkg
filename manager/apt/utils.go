@@ -159,8 +159,8 @@ func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 
 			packageInfo := manager.PackageInfo{
 				Name:           strings.Split(parts[0], "/")[0],
-				Version:        "",
-				NewVersion:     parts[1],
+				Version:        parts[1],
+				NewVersion:     "",
 				Category:       strings.Split(parts[0], "/")[1],
 				Arch:           parts[2],
 				PackageManager: pm,
@@ -308,10 +308,10 @@ func getPackageStatus(packages map[string]manager.PackageInfo) ([]manager.Packag
 		return nil, fmt.Errorf("failed to parse dpkg-query output: %+v", err)
 	}
 
-	// for all the packages that are not found, set their status to unknown, if any
+	// for all the packages that are not found by dpkg-query, set their status to available
 	for _, pkg := range packages {
-		fmt.Printf("apt: package not found by dpkg-query: %s", pkg.Name)
-		pkg.Status = manager.PackageStatusUnknown
+		// These are packages that weren't processed by dpkg-query (not installed)
+		pkg.Status = manager.PackageStatusAvailable
 		packagesList = append(packagesList, pkg)
 	}
 
