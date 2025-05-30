@@ -30,7 +30,7 @@ func TestNewPackageManager(t *testing.T) {
 		AllAvailable: true,
 	})
 	if err != nil {
-		t.Fatalf("GetPackageManagers() error: %+v", err)
+		t.Fatalf("FindPackageManagers() error: %+v", err)
 	}
 
 	log.Printf("pms: %+v", pms)
@@ -53,73 +53,96 @@ func TestNewPackageManager(t *testing.T) {
 	// if we are on any other distro, we should have nothing
 
 	if OSInfo.Distribution == "ubuntu" || OSInfo.Distribution == "debian" || OSInfo.Distribution == "mint" || OSInfo.Distribution == "PopOS" || OSInfo.Distribution == "elementary" || OSInfo.Distribution == "Zorin" || OSInfo.Distribution == "ChromeOS" {
-		if _, ok := pms["apt"]; !ok && s.GetPackageManager("apt") == nil {
-			if _, ok := pms["snap"]; !ok && s.GetPackageManager("snap") == nil {
-				if _, ok := pms["flatpak"]; !ok && s.GetPackageManager("flatpak") == nil {
+		pm,err:=s.GetPackageManager("apt")
+
+		if err != nil && pm == nil {
+			pm,err:=s.GetPackageManager("snap")
+
+			if err!=nil && pm == nil {
+				pm,err:=s.GetPackageManager("flatpak")
+
+				if err!=nil && pm == nil {
 					t.Fatalf("apt, snap, or flatpak package manager not found")
 				}
 			}
 		}
 	} else if OSInfo.Distribution == "fedora" || OSInfo.Distribution == "centos" || OSInfo.Distribution == "rhel" || OSInfo.Distribution == "rockylinux" || OSInfo.Distribution == "almalinux" || OSInfo.Distribution == "amazon linux" || OSInfo.Distribution == "oracle linux" || OSInfo.Distribution == "scientific linux" || OSInfo.Distribution == "cloudlinux" {
-		if _, ok := pms["dnf"]; !ok && s.GetPackageManager("dnf") == nil {
-			if _, ok := pms["yum"]; !ok && s.GetPackageManager("yum") == nil {
+		pm,err:=s.GetPackageManager("dnf")
+		if err != nil && pm == nil {
+			pm,err:=s.GetPackageManager("yum")
+			if err != nil && pm == nil {
 				t.Fatalf("dnf or yum package manager not found")
 			}
 		}
 	} else if OSInfo.Distribution == "opensuse" {
-		if _, ok := pms["zypper"]; !ok && s.GetPackageManager("zypper") == nil {
+		pm,err:=s.GetPackageManager("zypper")
+		if err != nil && pm == nil {
 			t.Fatalf("zypper package manager not found")
 		}
 	} else if OSInfo.Distribution == "alpine" {
-		if _, ok := pms["apk"]; !ok && s.GetPackageManager("apk") == nil {
+		pm,err:=s.GetPackageManager("apk")
+		if err != nil && pm == nil {
 			t.Fatalf("apk package manager not found")
 		}
 	} else if OSInfo.Distribution == "arch" {
-		if _, ok := pms["pacman"]; !ok && s.GetPackageManager("pacman") == nil {
+		pm,err:=s.GetPackageManager("pacman")
+		if err != nil && pm == nil {
 			t.Fatalf("pacman package manager not found")
 		}
 	} else if OSInfo.Distribution == "gentoo" {
-		if _, ok := pms["emerge"]; !ok && s.GetPackageManager("emerge") == nil {
+		pm,err:=s.GetPackageManager("emerge")
+		if err != nil && pm == nil {
 			t.Fatalf("emerge package manager not found")
 		}
 	} else if OSInfo.Distribution == "slackware" {
-		if _, ok := pms["slackpkg"]; !ok && s.GetPackageManager("slackpkg") == nil {
+		pm,err:=s.GetPackageManager("slackpkg")
+		if err != nil && pm == nil {
 			t.Fatalf("slackpkg package manager not found")
 		}
 	} else if OSInfo.Distribution == "void" {
-		if _, ok := pms["xbps"]; !ok && s.GetPackageManager("xbps") == nil {
+		pm,err:=s.GetPackageManager("xbps")
+		if err != nil && pm == nil {
 			t.Fatalf("xbps package manager not found")
 		}
 	} else if OSInfo.Distribution == "solus" {
-		if _, ok := pms["eopkg"]; !ok && s.GetPackageManager("eopkg") == nil {
+		pm,err:=s.GetPackageManager("eopkg")
+		if err != nil && pm == nil {
 			t.Fatalf("eopkg package manager not found")
 		}
 	} else if OSInfo.Distribution == "freebsd" || OSInfo.Distribution == "dragonfly" || OSInfo.Distribution == "termux" {
-		if _, ok := pms["pkg"]; !ok && s.GetPackageManager("pkg") == nil {
+		pm,err:=s.GetPackageManager("pkg")
+		if err != nil && pm == nil {
 			t.Fatalf("pkg package manager not found")
 		}
 	} else if OSInfo.Distribution == "openbsd" || OSInfo.Distribution == "netbsd" {
-		if _, ok := pms["pkg_add"]; !ok && s.GetPackageManager("pkg_add") == nil {
+		pm,err:=s.GetPackageManager("pkg_add")
+		if err != nil && pm == nil {
 			t.Fatalf("pkg_add package manager not found")
 		}
 	} else if OSInfo.Distribution == "macos" {
-		if _, ok := pms["brew"]; !ok && s.GetPackageManager("brew") == nil {
+		pm,err:=s.GetPackageManager("brew")
+		if err != nil && pm == nil {
 			t.Fatalf("brew package manager not found")
 		}
 	} else if OSInfo.Distribution == "windows" {
-		if _, ok := pms["chocolatey"]; !ok && s.GetPackageManager("chocolatey") == nil {
-			if _, ok := pms["scoop"]; !ok && s.GetPackageManager("scoop") == nil {
-				if _, ok := pms["winget"]; !ok && s.GetPackageManager("winget") == nil {
+		pm,err:=s.GetPackageManager("chocolatey")
+		if err != nil && pm == nil {
+		pm,err:=s.GetPackageManager("scoop")
+		if err != nil && pm == nil {
+		pm,err:=s.GetPackageManager("winget")
+		if err != nil && pm == nil {
 					t.Fatalf("chocolatey, scoop, or winget package manager not found")
 				}
 			}
 		}
 	} else if OSInfo.Distribution == "android" {
-		if _, ok := pms["f-droid"]; !ok && s.GetPackageManager("f-droid") == nil {
+		pm,err:=s.GetPackageManager("f-droid")
+		if err != nil && pm == nil {
 			t.Fatalf("f-droid package manager not found")
 		}
 	} else if OSInfo.Distribution == "ios" {
-		if _, ok := pms["cydia"]; !ok && s.GetPackageManager("cydia") == nil {
+		pm,err:=s.GetPackageManager("cydia")
+		if err != nil && pm == nil {
 			t.Fatalf("cydia package manager not found")
 		}
 	} else {

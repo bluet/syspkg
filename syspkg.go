@@ -14,12 +14,13 @@
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
-//	aptManager := sysPkg.GetPackageManager("apt")
+//	aptManager,err := sysPkg.GetPackageManager("apt")
 package syspkg
 
 import (
 	"errors"
 	"log"
+	"sort"
 
 	"github.com/bluet/syspkg/manager"
 	"github.com/bluet/syspkg/manager/apt"
@@ -97,8 +98,30 @@ func (s *sysPkgImpl) FindPackageManagers(include IncludeOptions) (map[string]Pac
 }
 
 // GetPackageManager returns a PackageManager instance by its name (e.g., "apt", "snap", "flatpak", etc.).
-func (s *sysPkgImpl) GetPackageManager(name string) PackageManager {
-	return s.pms[name]
+// if name is empty, return the first available
+func (s *sysPkgImpl) GetPackageManager(name string) (PackageManager,error) {
+	var pm PackageManager
+
+	// if there are no package managers, return before accessing non existing properties
+	if len(s.pms) == 0 {
+		return nil, errors.New("no supported package manager detected")
+	}
+
+	if name == "" {
+		// get first pm available, lexicographically sorted
+		keys := make([]string, 0, len(s.pms))
+		for k := range s.pms {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		pm = s.pms[keys[0]]
+	} else {
+		pm,found := s.pms[name]
+		if !found {
+			return pm, errors.New("no such package manager")
+		}
+	}
+	return pm, nil
 }
 
 // RefreshPackageManagers refreshes the internal list of available package managers, and returns the new list.
