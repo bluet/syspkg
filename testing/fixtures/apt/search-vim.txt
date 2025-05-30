@@ -1,0 +1,50 @@
+排序...
+全文搜尋...
+acr/jammy,jammy 1.9.4-1 all
+  autoconf like tool
+
+alot/jammy,jammy 0.10-1 all
+  Text mode MUA using notmuch mail
+
+alot-doc/jammy,jammy 0.10-1 all
+  Text mode MUA using notmuch mail - documentation
+
+apvlv/jammy 0.4.0-2 amd64
+  PDF viewer with Vim-like behaviour
+
+biosyntax-vim/jammy,jammy 1.0.0b-2 all
+  Syntax Highlighting for Computational Biology (vim)
+
+bleachbit/jammy,jammy 4.4.2-1 all
+  delete unnecessary files from the system
+
+bombadillo/jammy-updates,jammy-security 2.3.3-3ubuntu0.1 amd64
+  Non-web client for the terminal
+
+clang-format-11/jammy 1:11.1.0-6 amd64
+  Tool to format C/C++/Obj-C code
+
+clang-format-12/jammy 1:12.0.1-19ubuntu3 amd64
+  Tool to format C/C++/Obj-C code
+
+clang-format-13/jammy-updates,jammy-security 1:13.0.1-2ubuntu2.2 amd64
+  Tool to format C/C++/Obj-C code
+
+clang-format-14/jammy-updates,jammy-security 1:14.0.0-1ubuntu1.1 amd64
+  Tool to format C/C++/Obj-C code
+
+clang-format-15/jammy-updates,jammy-security 1:15.0.7-0ubuntu0.22.04.3 amd64
+  Tool to format C/C++/Obj-C code
+
+clang-format-18/不明 1:18.1.8~++20240731024944+3b5b5c1ec4a3-1~exp1~20240731145000.144 amd64
+  Tool to format C/C++/Obj-C code
+
+colordiff/jammy,jammy 1.0.18-1.1 all
+  tool to colorize 'diff' output
+
+context-modules/jammy,jammy 20210301-1 all
+  additional ConTeXt modules
+
+copyq/jammy 6.0.1-1 amd64
+  Advanced clipboard manager with editing and scripting features
+

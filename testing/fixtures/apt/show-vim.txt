@@ -1,0 +1,29 @@
+Package: vim
+Version: 2:8.2.3995-1ubuntu2.24
+Priority: optional
+Section: editors
+Origin: Ubuntu
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Original-Maintainer: Debian Vim Maintainers <team+vim@tracker.debian.org>
+Bugs: https://bugs.launchpad.net/ubuntu/+filebug
+Installed-Size: 4,025 kB
+Provides: editor
+Depends: vim-common (= 2:8.2.3995-1ubuntu2.24), vim-runtime (= 2:8.2.3995-1ubuntu2.24), libacl1 (>= 2.2.23), libc6 (>= 2.34), libgpm2 (>= 1.20.7), libpython3.10 (>= 3.10.0), libselinux1 (>= 3.1~), libsodium23 (>= 1.0.14), libtinfo6 (>= 6)
+Suggests: ctags, vim-doc, vim-scripts
+Homepage: https://www.vim.org/
+Task: cloud-image, ubuntu-wsl, server, ubuntu-server-raspi, lubuntu-desktop
+Download-Size: 1,728 kB
+APT-Manual-Installed: yes
+APT-Sources: http://ftp.ubuntu-tw.net/ubuntu jammy-updates/main amd64 Packages
+Description: Vi IMproved - enhanced vi editor
+ Vim is an almost compatible version of the UNIX editor Vi.
+ .
+ Many new features have been added: multi level undo, syntax
+ highlighting, command line history, on-line help, filename
+ completion, block operations, folding, Unicode support, etc.
+ .
+ This package contains a version of vim compiled with a rather
+ standard set of features.  This package does not provide a GUI
+ version of Vim.  See the other vim-* packages if you need more
+ (or less).
+

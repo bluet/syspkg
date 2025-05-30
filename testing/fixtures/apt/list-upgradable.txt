@@ -1,0 +1,10 @@
+正在列出...
+apt-transport-https/jammy-updates,jammy-updates 2.4.14 all [可升級自：2.4.13]
+apt-utils/jammy-updates 2.4.14 amd64 [可升級自：2.4.13]
+apt/jammy-updates 2.4.14 amd64 [可升級自：2.4.13]
+chrome-remote-desktop/stable 137.0.7151.0 amd64 [可升級自：136.0.7103.19]
+initramfs-tools-bin/jammy-updates 0.140ubuntu13.5 amd64 [可升級自：0.140ubuntu13.4]
+initramfs-tools-core/jammy-updates,jammy-updates 0.140ubuntu13.5 all [可升級自：0.140ubuntu13.4]
+initramfs-tools/jammy-updates,jammy-updates 0.140ubuntu13.5 all [可升級自：0.140ubuntu13.4]
+libapt-pkg6.0/jammy-updates 2.4.14 amd64 [可升級自：2.4.13]
+opera-stable/stable 119.0.5497.56 amd64 [可升級自：119.0.5497.52]
