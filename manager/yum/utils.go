@@ -54,14 +54,16 @@ func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 			if parts[0] == "" {
 				continue
 			}
-			nameArch := strings.Split(parts[0], ".")
-			if len(nameArch) < 2 {
+			// Find the last dot to separate name and architecture
+			lastDotIndex := strings.LastIndex(parts[0], ".")
+			if lastDotIndex == -1 {
+				// No dot found, skip this line
 				continue
 			}
 
 			packageInfo := manager.PackageInfo{
-				Name:           nameArch[0],
-				Arch:           nameArch[1],
+				Name:           parts[0][:lastDotIndex],
+				Arch:           parts[0][lastDotIndex+1:],
 				PackageManager: pm,
 			}
 
@@ -96,12 +98,14 @@ func ParseListInstalledOutput(msg string, opts *manager.Options) []manager.Packa
 			if len(parts) < 2 || parts[0] == "" {
 				continue
 			}
-			nameArch := strings.Split(parts[0], ".")
-			if len(nameArch) < 2 {
+			// Find the last dot to separate name and architecture
+			lastDotIndex := strings.LastIndex(parts[0], ".")
+			if lastDotIndex == -1 {
+				// No dot found, skip this line
 				continue
 			}
-			name := nameArch[0]
-			arch := nameArch[1]
+			name := parts[0][:lastDotIndex]
+			arch := parts[0][lastDotIndex+1:]
 
 			packageInfo := manager.PackageInfo{
 				Name:           name,
