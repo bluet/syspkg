@@ -68,6 +68,79 @@ syspkg/
 
 SysPkg uses a sophisticated **3-tier testing approach** to ensure compatibility across different operating systems:
 
+### Testing Architecture Overview
+
+```mermaid
+graph TB
+    subgraph "Developer Machine"
+        Dev[Developer Code Changes]
+        MT[make test<br/>Smart OS Detection]
+        MC[make check<br/>Code Quality]
+    end
+
+    subgraph "Testing Tiers"
+        subgraph "Tier 1: Unit Tests"
+            UT[Parser Tests<br/>OS Detection Tests<br/>Core Logic Tests]
+        end
+
+        subgraph "Tier 2: Integration Tests"
+            IT[Real Commands<br/>Limited Operations<br/>Fixture Validation]
+        end
+
+        subgraph "Tier 3: Docker Tests"
+            DT[Multi-OS Containers<br/>Full PM Testing<br/>Fixture Generation]
+        end
+    end
+
+    subgraph "CI/CD Pipeline"
+        CI1[Standard Tests<br/>Ubuntu Native]
+        CI2[Multi-OS Docker<br/>Matrix Testing]
+        CI3[Coverage Reports<br/>Artifact Collection]
+    end
+
+    Dev --> MT
+    MT --> UT
+    MT --> IT
+    Dev --> MC
+    Dev --> DT
+
+    UT --> CI1
+    IT --> CI1
+    DT --> CI2
+    CI1 --> CI3
+    CI2 --> CI3
+
+    style Dev fill:#f9f,stroke:#333,stroke-width:2px
+    style MT fill:#9f9,stroke:#333,stroke-width:2px
+    style DT fill:#99f,stroke:#333,stroke-width:2px
+```
+
+### How Testing Works
+
+```mermaid
+flowchart LR
+    subgraph "Your Development Environment"
+        A[Code Change] --> B{What OS?}
+        B -->|Ubuntu| C[Tests APT/Snap/Flatpak]
+        B -->|Rocky Linux| D[Tests YUM]
+        B -->|Fedora| E[Tests DNF]
+        B -->|macOS| F[Skips Linux PMs]
+
+        C --> G[make test]
+        D --> G
+        E --> G
+        F --> G
+
+        G --> H{Need other OS?}
+        H -->|Yes| I[make test-docker-*]
+        H -->|No| J[Continue Development]
+    end
+
+    style A fill:#f96,stroke:#333,stroke-width:2px
+    style G fill:#6f6,stroke:#333,stroke-width:2px
+    style I fill:#66f,stroke:#333,stroke-width:2px
+```
+
 ## 🤔 **When Should I Run Which Tests?**
 
 ### **SIMPLE DECISION TREE:**
@@ -178,6 +251,43 @@ go test -tags=system ./...            # Full package operations (requires privil
 **Command:** `make test-docker-*`
 **Speed:** 🐌 Slow (5-15 minutes)
 **Use when:** Package manager development, pre-release validation
+
+#### Docker Testing Mechanism
+
+```mermaid
+graph LR
+    subgraph "make test-docker-rocky"
+        A[Rocky Linux Container] --> B[Install Go 1.23.4]
+        B --> C[Mount Source Code]
+        C --> D[Run YUM Tests]
+        D --> E[Generate Fixtures]
+    end
+
+    subgraph "make test-docker-fedora"
+        F[Fedora Container] --> G[Install Go]
+        G --> H[Mount Source Code]
+        H --> I[Run DNF Tests]
+        I --> J[Generate Fixtures]
+    end
+
+    subgraph "make test-docker-all"
+        K[Docker Compose] --> L[Ubuntu Container]
+        K --> M[Rocky Container]
+        K --> N[Alma Container]
+        K --> O[Fedora Container]
+        K --> P[Alpine Container]
+
+        L --> Q[Parallel Execution]
+        M --> Q
+        N --> Q
+        O --> Q
+        P --> Q
+    end
+
+    style A fill:#f99,stroke:#333,stroke-width:2px
+    style F fill:#99f,stroke:#333,stroke-width:2px
+    style K fill:#9f9,stroke:#333,stroke-width:2px
+```
 
 ```bash
 # Test specific OS/package manager combinations
@@ -334,6 +444,60 @@ func TestYum(t *testing.T) {
 - **System tests**: Test actual package installation (use sparingly, requires privileges)
 
 ### Fixtures and Mocking
+
+#### Test Fixture Generation Flow
+
+```mermaid
+graph LR
+    subgraph "Fixture Generation Process"
+        A[make test-fixtures] --> B{For Each OS}
+
+        B --> C[Ubuntu Container]
+        B --> D[Rocky Container]
+        B --> E[Fedora Container]
+        B --> F[Alpine Container]
+
+        C --> G[apt search vim]
+        C --> H[apt show vim]
+
+        D --> I[yum search vim]
+        D --> J[yum info vim]
+
+        E --> K[dnf search vim]
+        E --> L[dnf info vim]
+
+        F --> M[apk search vim]
+        F --> N[apk info vim]
+
+        G --> O[fixtures/apt/search-vim-ubuntu22.txt]
+        H --> P[fixtures/apt/show-vim-ubuntu22.txt]
+        I --> Q[fixtures/yum/search-vim-rocky8.txt]
+        J --> R[fixtures/yum/info-vim-rocky8.txt]
+        K --> S[fixtures/dnf/search-vim-fedora39.txt]
+        L --> T[fixtures/dnf/info-vim-fedora39.txt]
+        M --> U[fixtures/apk/search-vim-alpine318.txt]
+        N --> V[fixtures/apk/info-vim-alpine318.txt]
+    end
+
+    subgraph "Test Usage"
+        O --> W[Parser Unit Tests]
+        P --> W
+        Q --> W
+        R --> W
+        S --> W
+        T --> W
+        U --> W
+        V --> W
+
+        W --> X[No Network Required]
+        W --> Y[Fast Execution]
+        W --> Z[Real PM Output]
+    end
+
+    style A fill:#9f9,stroke:#333,stroke-width:2px
+    style W fill:#99f,stroke:#333,stroke-width:2px
+```
+
 ```go
 // Use real fixtures captured from Docker containers
 func TestParseRealOutput(t *testing.T) {
@@ -374,6 +538,50 @@ make check                # Complete quality check suite
 - Document public APIs with comments
 
 ## 🚀 Continuous Integration
+
+### CI/CD Pipeline Flow
+
+```mermaid
+graph TD
+    subgraph "GitHub Actions Triggers"
+        PR[Pull Request] --> CI
+        Push[Push to Branch] --> CI
+        Main[Push to Main] --> CI
+    end
+
+    subgraph "CI Workflows"
+        CI --> W1[test-and-coverage.yml]
+        CI --> W2[lint-and-format.yml]
+        CI --> W3[build.yml]
+        Main --> W4[multi-os-test.yml]
+
+        W1 --> T1[Ubuntu Native Tests<br/>APT, Snap, Flatpak]
+        W2 --> T2[Code Quality<br/>golangci-lint, gofmt]
+        W3 --> T3[Multi-Version Build<br/>Go 1.23, 1.24]
+        W4 --> T4[Docker Matrix Tests<br/>5 OS × 5 PMs]
+    end
+
+    subgraph "Test Results"
+        T1 --> R1[Coverage Report]
+        T2 --> R2[Lint Results]
+        T3 --> R3[Build Artifacts]
+        T4 --> R4[Test Fixtures]
+
+        R1 --> Status[GitHub Status Check]
+        R2 --> Status
+        R3 --> Status
+        R4 --> Status
+    end
+
+    Status --> M{Merge Decision}
+    M -->|All Pass| Merge[✅ Ready to Merge]
+    M -->|Any Fail| Fix[❌ Fix Required]
+
+    style PR fill:#f9f,stroke:#333,stroke-width:2px
+    style Main fill:#9ff,stroke:#333,stroke-width:2px
+    style Merge fill:#9f9,stroke:#333,stroke-width:2px
+    style Fix fill:#f99,stroke:#333,stroke-width:2px
+```
 
 ### Current CI Workflows
 
