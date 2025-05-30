@@ -106,7 +106,7 @@ Options: `--debug`, `--assume-yes`, `--dry-run`, `--interactive`, `--verbose`
 4. **Add security scanning with Snyk** to CI/CD pipeline
 5. **Review and merge PR #12** - fix GetPackageManager("") panic bug ✅
 
-### 🟡 Medium Priority (Code Quality & Testing) - 7 items
+### 🟡 Medium Priority (Code Quality & Testing) - 8 items
 **Testing:**
 - Create integration tests with mocked command execution
 - Add unit tests for snap package manager
@@ -117,6 +117,7 @@ Options: `--debug`, `--assume-yes`, `--dry-run`, `--interactive`, `--verbose`
 - Create custom error types for better error handling
 - Extract common parsing logic to shared utilities (DRY principle)
 - Replace magic strings/numbers with named constants
+- **Fix APT multi-arch package parsing** (Issue #15) - cosmetic fix for empty package names
 
 **Removed from roadmap (2025-05-30):**
 - ~~Structured logging~~ (over-engineering for project scope)
@@ -124,11 +125,11 @@ Options: `--debug`, `--assume-yes`, `--dry-run`, `--interactive`, `--verbose`
 - ~~Architecture diagrams~~ (low ROI for library project)
 - ~~TODO comment fixes~~ (covered by security improvements)
 
-### 🟢 Low Priority (Platform Support) - 3 items
+### 🟢 Low Priority (Platform Support) - 2 items
 **New Package Managers:**
 - Add proper macOS support with brew package manager implementation
 - Add Windows support with chocolatey/scoop/winget package managers
-- Implement dnf/yum package manager support (Red Hat/Fedora)
+- ~~Implement dnf/yum package manager support (Red Hat/Fedora)~~ ✅ **COMPLETED**
 
 **Removed from roadmap (2025-05-30):**
 - ~~zypper, apk support~~ (lower priority than core platforms)

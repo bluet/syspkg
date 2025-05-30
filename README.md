@@ -9,12 +9,12 @@
 [![Go Version](https://img.shields.io/github/go-mod/go-version/bluet/syspkg)](https://github.com/bluet/syspkg)
 [![GitHub release](https://img.shields.io/github/v/release/bluet/syspkg)](https://github.com/bluet/syspkg/releases)
 
-SysPkg is a unified CLI tool and Golang library for managing system packages across different package managers. Currently, it supports APT, Snap, and Flatpak, with plans for more. It simplifies package management by providing a consistent interface and API through an abstraction layer that focuses on package manager tools rather than specific operating systems.
+SysPkg is a unified CLI tool and Golang library for managing system packages across different package managers. Currently, it supports APT, YUM, Snap, and Flatpak, with plans for more. It simplifies package management by providing a consistent interface and API through an abstraction layer that focuses on package manager tools rather than specific operating systems.
 
 ## Features
 
 - A unified package management interface for various package managers
-- Supports popular package managers such as APT, Snap, Flatpak, and more
+- Supports popular package managers such as APT, YUM, Snap, Flatpak, and more
 - Easy-to-use API for package installation, removal, search, listing, and system upgrades
 - Expandable architecture to support more package managers in the future
 
@@ -64,6 +64,9 @@ syspkg --snap search vim
 
 # Show all upgradable packages using Flatpak
 syspkg --flatpak show upgradable
+
+# Install a package using YUM (on RHEL/CentOS/Rocky/AlmaLinux)
+syspkg --yum install vim
 ```
 
 Or, you can do operations without knowing the package manager:
@@ -135,10 +138,10 @@ For more examples and real use cases, see the [cmd/syspkg/](cmd/syspkg/) directo
 | Package Manager | Install | Remove | Search | Upgrade | List Installed | List Upgradable | Get Package Info |
 | --------------- | ------- | ------ | ------ | ------- | -------------- | --------------- | ---------------- |
 | APT             | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               |
-| YUM             | ❓      | ❓    | ✅     | ❓     | ✅             | ❓             | ✅               |
+| YUM             | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               |
 | SNAP            | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               |
 | Flatpak         | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               |
-| DNF/YUM         | 🚧      | 🚧    | 🚧     | 🚧     | 🚧             | 🚧             | 🚧               |
+| DNF             | 🚧      | 🚧    | 🚧     | 🚧     | 🚧             | 🚧             | 🚧               |
 | APK (Alpine)    | 🚧      | 🚧    | 🚧     | 🚧     | 🚧             | 🚧             | 🚧               |
 | Zypper (openSUSE) | 🚧   | 🚧    | 🚧     | 🚧     | 🚧             | 🚧             | 🚧               |
 
