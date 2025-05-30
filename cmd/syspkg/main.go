@@ -16,8 +16,20 @@ import (
 
 // main function initializes syspkg and sets up the CLI application.
 func main() {
-	// Check if the user has root privileges.
-	if os.Geteuid() != 0 {
+	// Check if this is a read-only command that doesn't need root
+	isReadOnlyCommand := false
+	if len(os.Args) > 1 {
+		cmd := os.Args[1]
+		switch cmd {
+		case "find", "search", "f", "show", "s":
+			isReadOnlyCommand = true
+		case "help", "h", "--help", "-h":
+			isReadOnlyCommand = true
+		}
+	}
+
+	// Check if the user has root privileges for commands that need it
+	if os.Geteuid() != 0 && !isReadOnlyCommand {
 		fmt.Println("(This command must be run with root privileges. If you got exist codes 100 or 101, please run this command with sudo.)")
 	}
 
