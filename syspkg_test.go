@@ -124,7 +124,7 @@ func TestNewPackageManager(t *testing.T) {
 		// apt, flatpak, and snap. These may or may not be available on any given system.
 		// Just log what we found for debugging purposes.
 		log.Printf("Found %d package managers: %v", len(pms), getPackageManagerNames(pms))
-		
+
 		// Don't fail the test - package manager availability varies by system
 		// and installation method (e.g., apt can be installed on macOS via Homebrew)
 	}
