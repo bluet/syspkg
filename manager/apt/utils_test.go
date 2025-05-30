@@ -128,22 +128,22 @@ func TestParseFindOutput(t *testing.T) {
 
 	var expectedPackageInfo = []manager.PackageInfo{
 		{
-			Name: "zvbi",
-			// Version:    "0.2.35-19",
+			Name: "zutty",
+			// Version:    "0.11.2.20220109.192032+dfsg1-1",
 			// NewVersion: "",
 			Version:        "",
-			NewVersion:     "0.2.35-19",
+			NewVersion:     "0.11.2.20220109.192032+dfsg1-1",
 			Status:         manager.PackageStatusUnknown,
 			Category:       "jammy",
 			Arch:           "amd64",
 			PackageManager: "apt",
 		},
 		{
-			Name: "zutty",
-			// Version:    "0.11.2.20220109.192032+dfsg1-1",
+			Name: "zvbi",
+			// Version:    "0.2.35-19",
 			// NewVersion: "",
 			Version:        "",
-			NewVersion:     "0.11.2.20220109.192032+dfsg1-1",
+			NewVersion:     "0.2.35-19",
 			Status:         manager.PackageStatusUnknown,
 			Category:       "jammy",
 			Arch:           "amd64",
