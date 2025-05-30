@@ -14,7 +14,7 @@
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
-//	aptManager,err := sysPkg.GetPackageManager("apt")
+//	aptManager, err := sysPkg.GetPackageManager("apt")
 package syspkg
 
 import (
@@ -99,7 +99,7 @@ func (s *sysPkgImpl) FindPackageManagers(include IncludeOptions) (map[string]Pac
 
 // GetPackageManager returns a PackageManager instance by its name (e.g., "apt", "snap", "flatpak", etc.).
 // if name is empty, return the first available
-func (s *sysPkgImpl) GetPackageManager(name string) (PackageManager,error) {
+func (s *sysPkgImpl) GetPackageManager(name string) (PackageManager, error) {
 	var pm PackageManager
 
 	// if there are no package managers, return before accessing non existing properties
@@ -116,7 +116,7 @@ func (s *sysPkgImpl) GetPackageManager(name string) (PackageManager,error) {
 		sort.Strings(keys)
 		pm = s.pms[keys[0]]
 	} else {
-		pm,found := s.pms[name]
+		pm, found := s.pms[name]
 		if !found {
 			return pm, errors.New("no such package manager")
 		}
