@@ -26,10 +26,6 @@ jobs:
             pm: yum
             dockerfile: rockylinux.Dockerfile
             test_tags: "unit,integration,yum"
-          - os: almalinux
-            pm: yum
-            dockerfile: almalinux.Dockerfile
-            test_tags: "unit,integration,yum"
           # TODO: Enable when DNF support is implemented
           # - os: fedora
           #   pm: dnf

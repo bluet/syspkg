@@ -215,7 +215,6 @@ strategy:
     include:
       - os: ubuntu, pm: apt
       - os: rockylinux, pm: yum
-      - os: almalinux, pm: yum
       - os: fedora, pm: dnf
       - os: alpine, pm: apk
 ```
