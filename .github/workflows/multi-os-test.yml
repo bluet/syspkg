@@ -61,7 +61,7 @@ jobs:
           -e TEST_PACKAGE_MANAGER=${{ matrix.pm }} \
           -e IN_CONTAINER=true \
           syspkg-test-${{ matrix.os }}:latest \
-          go test -v -tags="${{ matrix.test_tags }}" ./manager/${{ matrix.pm }} ./osinfo 2>/dev/null || echo "Some tests expected to fail in containers"
+          go test -v -tags="${{ matrix.test_tags }}" ./manager/${{ matrix.pm }} ./osinfo
 
     - name: Generate test fixtures
       run: |
