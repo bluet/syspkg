@@ -214,7 +214,10 @@ make test-docker-alpine       # APK testing
 **Automatic Detection**: Tests automatically detect the current OS and determine which package managers to test:
 
 ```go
-env, _ := testenv.GetTestEnvironment()
+env, err := testenv.GetTestEnvironment()
+if err != nil {
+    t.Fatalf("failed to get test environment: %v", err)
+}
 if skip, reason := env.ShouldSkipTest("yum"); skip {
     t.Skip(reason)
 }

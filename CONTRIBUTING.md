@@ -424,7 +424,10 @@ newos-family:
 ```go
 // ✅ Good: Environment-aware test
 func TestYumOnlyOnRHEL(t *testing.T) {
-    env, _ := testenv.GetTestEnvironment()
+    env, err := testenv.GetTestEnvironment()
+    if err != nil {
+        t.Fatalf("failed to get test environment: %v", err)
+    }
     if skip, reason := env.ShouldSkipTest("yum"); skip {
         t.Skip(reason)
     }
