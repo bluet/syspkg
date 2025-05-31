@@ -34,10 +34,11 @@ pre-commit run --all-files # Run all hooks on all files
 ```
 
 **Pre-commit hooks include:**
-- File hygiene (trailing whitespace, EOF, merge conflicts)
+- File hygiene (trailing whitespace, EOF, merge conflicts) - **excludes fixtures/**
 - Go tools (gofmt, goimports, go vet, go mod tidy, golangci-lint)
 - Build verification (go build, go mod verify)
 - Security-focused using local system tools only
+- **Fixture protection**: Test fixtures excluded from formatting to preserve authentic output
 
 ### CI/CD Workflows
 Located in `.github/workflows/`:
