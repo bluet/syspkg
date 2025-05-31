@@ -116,6 +116,17 @@ Options: `--debug`, `--assume-yes`, `--dry-run`, `--interactive`, `--verbose`
 - Add unit tests for snap package manager
 - Add unit tests for flatpak package manager
 - **APT fixture cleanup and behavior testing** ✅ - Reduced 16→7 fixtures, full test coverage
+- **YUM fixture analysis and cleanup** - Following APT pattern:
+  - Analyze YUM fixtures to determine what's needed for comprehensive testing
+  - Check if YUM fixtures have redundant/duplicate files like APT had
+  - Verify YUM fixtures use correct format for their respective parsers
+  - Identify which YUM parse functions are missing tests
+  - Remove redundant YUM fixtures (if any)
+  - Create missing YUM fixtures for untested parse functions
+  - Add comprehensive behavior tests for all YUM parse functions
+  - Convert YUM tests from inline data to fixture-based pattern
+  - Ensure YUM fixtures follow consistent naming convention
+  - Run YUM tests to verify fixture compatibility and completeness
 
 **Documentation:**
 - **API and behavior documentation** ✅ - Enhanced interface docs, status normalization, cross-PM compatibility
