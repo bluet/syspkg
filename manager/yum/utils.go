@@ -10,6 +10,9 @@ import (
 	"github.com/bluet/syspkg/manager"
 )
 
+// epochRegex matches RPM epoch pattern: -digit:
+var epochRegex = regexp.MustCompile(`-(\d+):`)
+
 // packageLineRegex matches package lines in yum search output (name.arch format)
 var packageLineRegex = regexp.MustCompile(`^[\w\d-]+\.[\w\d_]+`)
 
@@ -272,11 +275,11 @@ func ParseInstallOutput(msg string, opts *manager.Options) []manager.PackageInfo
 				arch := line[lastDotIndex+1:]
 				nameVersion := line[:lastDotIndex]
 
-				// Find package name by looking for version pattern (contains :)
+				// Find package name by looking for version pattern (epoch or version)
 				var name, version string
-				if epochIndex := strings.Index(nameVersion, "-2:"); epochIndex != -1 {
-					name = nameVersion[:epochIndex]
-					version = nameVersion[epochIndex+1:]
+				if matches := epochRegex.FindStringIndex(nameVersion); matches != nil {
+					name = nameVersion[:matches[0]]
+					version = nameVersion[matches[0]+1:]
 				} else if versionIndex := strings.LastIndex(nameVersion, "-"); versionIndex != -1 {
 					name = nameVersion[:versionIndex]
 					version = nameVersion[versionIndex+1:]
