@@ -11,6 +11,13 @@
 
 SysPkg is a unified CLI tool and Golang library for managing system packages across different package managers. Currently, it supports APT, YUM, Snap, and Flatpak, with plans for more. It simplifies package management by providing a consistent interface and API through an abstraction layer that focuses on package manager tools rather than specific operating systems.
 
+## Key Features
+
+- **Cross-Package Manager Compatibility**: Normalized status reporting (e.g., APT's config-files state maps to available)
+- **Consistent API**: Same interface across all supported package managers
+- **Tool-Focused**: Works wherever package manager tools work (containers, cross-platform, etc.)
+- **Production Ready**: Comprehensive testing across multiple OS distributions
+
 ## Features
 
 - A unified package management interface for various package managers
@@ -166,11 +173,13 @@ Please open an issue (or PR ❤️) if you'd like to see support for any unliste
 | **Test and Coverage** | ✅ | Go 1.23/1.24 testing with coverage reporting |
 | **Lint and Format** | ✅ | golangci-lint, gofmt, go vet quality checks |
 | **Build** | ✅ | Multi-version build verification |
+| **Multi-OS Tests** | ✅ | Docker-based testing across Ubuntu, Rocky Linux, Alpine |
 | **Release Binaries** | ✅ | Cross-platform binary releases |
 
 - ✅ **Pre-commit hooks**: Automated code quality and security checks
 - ✅ **Go mod verification**: Dependency integrity validation
-- 🚧 **Multi-platform testing**: macOS/Windows testing planned
+- ✅ **Multi-OS compatibility**: Docker testing with Go 1.23.4 across distributions
+- ✅ **Fixture-based testing**: Real package manager output validation
 
 ## Contributing
 

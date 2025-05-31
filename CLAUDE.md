@@ -95,6 +95,8 @@ Options: `--debug`, `--assume-yes`, `--dry-run`, `--interactive`, `--verbose`
 
 **Tool-Focused Approach**: SysPkg focuses on supporting package manager tools based on their functionality rather than the operating system they're running on. If apt+dpkg work correctly in a container, on macOS via Homebrew, or in any other environment, SysPkg will support them. This makes the project more flexible and useful across different development environments.
 
+**Cross-Package Manager Compatibility**: SysPkg normalizes package states for consistent behavior across different package managers. For example, APT's "config-files" state (packages removed but with configuration files remaining) is normalized to "available" status to match the semantics used by other package managers like YUM and Snap.
+
 ## Project Improvement Roadmap
 
 *Note: To-do list consolidated 2025-05-30 - removed duplicates, feature creep items, and over-engineering. Focused on core security, testing, and platform support.*
@@ -105,12 +107,15 @@ Options: `--debug`, `--assume-yes`, `--dry-run`, `--interactive`, `--verbose`
 3. **Fix resource leaks** in error handling paths
 4. **Add security scanning with Snyk** to CI/CD pipeline
 5. **Review and merge PR #12** - fix GetPackageManager("") panic bug ✅
+6. **Cross-package manager status normalization** ✅ - APT config-files → available
+7. **GitHub workflow compatibility fixes** ✅ - Go 1.23.4, Docker multi-OS testing
 
 ### 🟡 Medium Priority (Code Quality & Testing) - 8 items
 **Testing:**
 - Create integration tests with mocked command execution
 - Add unit tests for snap package manager
 - Add unit tests for flatpak package manager
+- **APT fixture cleanup and behavior testing** ✅ - Reduced 16→7 fixtures, full test coverage
 
 **Code Improvements:**
 - Implement context support for cancellation and timeouts

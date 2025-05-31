@@ -455,7 +455,10 @@ func ParseDpkgQueryOutput(output []byte, packages map[string]manager.PackageInfo
 					pkg.Version = version
 				}
 			case string(parts[len(parts)-2]) == "config-files":
-				pkg.Status = manager.PackageStatusAvailable // Normalize to available for cross-PM compatibility
+				// Cross-package manager compatibility: normalize config-files state to available.
+				// APT's config-files state (package removed but config files remain) maps to
+				// the same semantic meaning as "available" in other package managers.
+				pkg.Status = manager.PackageStatusAvailable
 				if version != "" {
 					pkg.Version = version
 				}

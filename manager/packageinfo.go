@@ -17,6 +17,7 @@ const (
 
 	// PackageStatusAvailable represents a package that exists in repositories but is not installed.
 	// This includes packages that were previously installed but removed (including config-files state).
+	// For cross-package manager compatibility, APT's config-files state is normalized to this status.
 	// Used by: All package managers
 	PackageStatusAvailable PackageStatus = "available"
 

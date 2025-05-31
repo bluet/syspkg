@@ -21,12 +21,18 @@ type PackageManager interface {
 	Delete(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error)
 
 	// Find searches for packages using the specified keywords and checks their installation status.
-	// For each found package:
+	// Cross-package manager status normalization ensures consistent behavior:
 	//   - Status=installed: Package is currently installed
 	//   - Status=available: Package exists in repositories but is not installed
+	//     (includes previously installed packages that have been removed, even with config files remaining)
 	//   - Status=upgradable: Package is installed but newer version is available
+	//
 	// Version field contains installed version (empty if not installed).
 	// NewVersion field contains available version from repositories.
+	//
+	// Implementation notes:
+	//   - APT config-files state is normalized to available for cross-PM compatibility
+	//   - All package managers follow consistent status semantics
 	Find(keywords []string, opts *manager.Options) ([]manager.PackageInfo, error)
 
 	// ListInstalled lists all currently installed packages.
