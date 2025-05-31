@@ -14,7 +14,19 @@ chromeos-themes       2020-01-18-25-g765be0e           gantonayde      -        
 nvim                  v0.11.1                          neovim-snap     classic  Vim-fork focused on extensibility and usability
 kakoune               v2023.08.05                      lukewh          classic  Modal editor
 neovide               0.8.0+git                        j4qfrost        -        The snappiest vim editor you are likely to find.
-yazi                  v25.5.28                         sxyazi          classic  💥 Blazing fast terminal file manager written in Rust, based on async I/O.
+yazi                  shipped                          sxyazi          classic  💥 Blazing fast terminal file manager written in Rust, based on async I/O.
 sudoku-rs             1.1                              mitchel0022     -        Sudoku right in the terminal
 4ktube                2025.5.23                        rishabh3354     -        YouTube Video Downloader 🚀
 libretextus           0.2                              npscript42      -        Simple Bible Utility
+tpad                  2.1                              caozhen         -        Terminal text editor with GUI-like user interface
+universal-ctags       0.2024-05-27+09:10:28+653ca9204  tartley         -        Universal-Ctags packaged as an installable snap for Linux
+snippetpixie          1.5.3                            bytepixie       classic  Your little expandable text snippet helper
+nvim-gtk              0.1.1                            daa84           -        GUI client for NeoVIM
+hexdino               0.1.3                            luz666          -        A hex editor with vim like keybindings written in Rust.
+slitherling           e2a2e8c                          tejohnso        -        A simple snake game
+neomutt               20241212-14-g7b49f7c3f           nicolasbock     -        NeoMutt is a command line mail reader (or MUA)
+notion-calendar-snap  2.0.0                            ulvimammaadov   -        Unofficial Notion Calendar App for Linux distributions
+xcape-lbo             7fca364                          lbo             -        Modify keys to act as other keys
+leo-editor            6.0-final                        technatica      -        Leo is an IDE, outliner and PIM.
+walk                  1.6.2                            antonmedv       -        A terminal navigator
+llama                 1.4.0                            antonmedv       -        A terminal file manager

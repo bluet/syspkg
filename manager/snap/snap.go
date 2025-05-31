@@ -159,6 +159,13 @@ func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manag
 
 	out, err := cmd.Output()
 	if err != nil {
+		// Snap search returns exit code 64 when no packages found - this is not an error
+		if exitError, ok := err.(*exec.ExitError); ok {
+			if exitError.ExitCode() == 64 {
+				// No packages found, return empty list
+				return []manager.PackageInfo{}, nil
+			}
+		}
 		return nil, err
 	}
 

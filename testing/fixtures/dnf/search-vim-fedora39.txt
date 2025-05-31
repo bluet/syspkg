@@ -1,0 +1,140 @@
+========================= Name & Summary Matched: vim ==========================
+awesome-vim-colorschemes.noarch : Collection of color schemes for Neo/vim, merged for quick use
+beakerlib-vim-syntax.noarch : Files for syntax highlighting BeakerLib tests in VIM editor
+boxes-vim.noarch : Vim plugin for boxes
+espeak-ng-vim.noarch : Vim syntax highlighting for espeak-ng data files
+fluxbox-vim-syntax.noarch : Fluxbox syntax scripts for vim
+gap-vim.noarch : Edit GAP files with VIM
+geany-plugins-vimode.x86_64 : Vim-mode plugin for Geany
+neovim.x86_64 : Vim-fork focused on extensibility and agility
+neovim-ale.noarch : Asynchronous NeoVim Lint Engine
+neovim-qt.x86_64 : Qt GUI for Neovim
+notmuch-vim.x86_64 : A Vim plugin for notmuch
+ocaml-sexplib-vim.x86_64 : Support for sexplib syntax in vim
+perl-Text-VimColor.noarch : Syntax color text in HTML or XML using Vim
+poke-vim.x86_64 : vim support for poke
+protobuf-vim.noarch : Vim syntax highlighting for Google Protocol Buffers descriptions
+python-neovim-doc.noarch : Documentation for python-neovim
+python3-neovim.noarch : Python client to Neovim
+supercollider-vim.x86_64 : SuperCollider support for Vim
+texlive-context-vim.noarch : Generate Context syntax highlighting code from vim
+texlive-context-vim-doc.noarch : Documentation for context-vim
+vim-X11.x86_64 : The VIM version of the vi editor for the X Window System - GVim
+vim-airline.noarch : Lean & mean status/tabline for vim that's light as air
+vim-ale.noarch : Asynchronous Vim Lint Engine
+vim-ansible.noarch : Vim plugin for syntax highlighting ansible's common filetypes
+vim-command-t.x86_64 : An extremely fast, intuitive mechanism for opening files in VIM
+vim-commentary.noarch : Comment and uncomments stuff in Vim using motion as a target
+vim-common.x86_64 : The common files needed by any version of the VIM editor
+vim-ctrlp.noarch : Full path fuzzy file, buffer, mru, tag, ... finder for Vim
+vim-data.noarch : Shared data for Vi and Vim
+vim-default-editor.noarch : Set vim as the default editor
+vim-devicons.noarch : Adds file type icons to Vim plugins
+vim-editorconfig.noarch : EditorConfig Vim Plugin
+vim-enhanced.x86_64 : A version of the VIM editor which includes recent enhancements
+vim-filesystem.noarch : VIM filesystem layout
+vim-fugitive-gitlab.noarch : GitLab support for vim-fugitive plugin
+vim-fugitive-pagure.noarch : Pagure support for vim-fugitive plugin
+vim-go.x86_64 : Go development plugin for Vim
+vim-golint.x86_64 : Golint vim plugin
+vim-gtk-syntax.noarch : Vim syntax highlighting for GLib, Gtk+, Gstreamer, and more
+vim-gv.noarch : Git commit browser in Vim
+vim-javabrowser.noarch : The javabrowser plugin for VIM editor
+vim-jedi.noarch : The Jedi vim plugin
+vim-jellybeans.noarch : A colorful, dark color scheme for Vim
+vim-latex.noarch : Tools to view, edit and compile LaTeX documents in Vim
+vim-latex-doc.noarch : Documentation for vim-latex
+vim-mediawiki.noarch : Vim syntax highlighting for MediaWiki
+vim-merlin.noarch : Context sensitive completion for OCaml in Vim
+vim-minimal.x86_64 : A minimal version of the VIM editor
+vim-nerdtree.noarch : A tree explorer plugin for the editor Vim
+vim-omnicppcomplete.noarch : vim c++ completion omnifunc with a ctags database
+vim-perl-support.noarch : Perl-IDE for VIM
+vim-powerline.noarch : Powerline VIM plugin
+vim-rhubarb.noarch : GitHub support for vim-fugitive plugin
+vim-syntastic.noarch : A vim plugins to check syntax for programming languages
+vim-syntastic-vim.noarch : A syntax checker for vim programming language
+vim-taglist.noarch : The taglist plugin for VIM editor
+vimb.x86_64 : A fast and lightweight vim like web browser
+vimiv.x86_64 : An image viewer with vim-like keybindings
+vimiv-qt.x86_64 : An image viewer with vim-like keybindings
+vimpal.x86_64 : Separate application providing a file tree for VIM
+============================== Name Matched: vim ===============================
+vim-fugitive.noarch : A Git wrapper so awesome, it should be illegal
+vim-gitgutter.noarch : Shows git diff markers in the sign column and stages/previews/undoes hunks
+vim-halibut.noarch : Syntax file for the halibut manual tool
+vim-pathogen.noarch : Manage your runtimepath
+vim-syntastic-ada.noarch : A syntax checker for ada programming language
+vim-syntastic-ansible.noarch : A syntax checker for ansible programming language
+vim-syntastic-asciidoc.noarch : A syntax checker for asciidoc programming language
+vim-syntastic-asl.noarch : A syntax checker for asl programming language
+vim-syntastic-asm.noarch : A syntax checker for asm programming language
+vim-syntastic-c.noarch : A syntax checker for c programming language
+vim-syntastic-cabal.noarch : A syntax checker for cabal programming language
+vim-syntastic-coq.noarch : A syntax checker for coq programming language
+vim-syntastic-cpp.noarch : A syntax checker for cpp programming language
+vim-syntastic-cs.noarch : A syntax checker for cs programming language
+vim-syntastic-css.noarch : A syntax checker for css programming language
+vim-syntastic-cucumber.noarch : A syntax checker for cucumber programming language
+vim-syntastic-docbk.noarch : A syntax checker for docbk programming language
+vim-syntastic-elixir.noarch : A syntax checker for elixir programming language
+vim-syntastic-erlang.noarch : A syntax checker for erlang programming language
+vim-syntastic-eruby.noarch : A syntax checker for eruby programming language
+vim-syntastic-fortran.noarch : A syntax checker for fortran programming language
+vim-syntastic-glsl.noarch : A syntax checker for glsl programming language
+vim-syntastic-go.noarch : A syntax checker for go programming language
+vim-syntastic-haml.noarch : A syntax checker for haml programming language
+vim-syntastic-haskell.noarch : A syntax checker for haskell programming language
+vim-syntastic-help.noarch : A syntax checker for help programming language
+vim-syntastic-html.noarch : A syntax checker for html programming language
+vim-syntastic-java.noarch : A syntax checker for java programming language
+vim-syntastic-json.noarch : A syntax checker for json programming language
+vim-syntastic-julia.noarch : A syntax checker for julia programming language
+vim-syntastic-less.noarch : A syntax checker for less programming language
+vim-syntastic-lex.noarch : A syntax checker for lex programming language
+vim-syntastic-llvm.noarch : A syntax checker for llvm programming language
+vim-syntastic-lua.noarch : A syntax checker for lua programming language
+vim-syntastic-matlab.noarch : A syntax checker for matlab programming language
+vim-syntastic-nasm.noarch : A syntax checker for nasm programming language
+vim-syntastic-objc.noarch : A syntax checker for objc programming language
+vim-syntastic-objcpp.noarch : A syntax checker for objcpp programming language
+vim-syntastic-ocaml.noarch : A syntax checker for ocaml programming language
+vim-syntastic-perl.noarch : A syntax checker for perl programming language
+vim-syntastic-perl6.noarch : A syntax checker for perl6 programming language
+vim-syntastic-php.noarch : A syntax checker for php programming language
+vim-syntastic-po.noarch : A syntax checker for po programming language
+vim-syntastic-pod.noarch : A syntax checker for pod programming language
+vim-syntastic-puppet.noarch : A syntax checker for puppet programming language
+vim-syntastic-python.noarch : A syntax checker for python programming language
+vim-syntastic-qml.noarch : A syntax checker for qml programming language
+vim-syntastic-rst.noarch : A syntax checker for rst programming language
+vim-syntastic-ruby.noarch : A syntax checker for ruby programming language
+vim-syntastic-sass.noarch : A syntax checker for sass programming language
+vim-syntastic-scala.noarch : A syntax checker for scala programming language
+vim-syntastic-scss.noarch : A syntax checker for scss programming language
+vim-syntastic-sh.noarch : A syntax checker for sh programming language
+vim-syntastic-spec.noarch : A syntax checker for spec programming language
+vim-syntastic-tcl.noarch : A syntax checker for tcl programming language
+vim-syntastic-tex.noarch : A syntax checker for tex programming language
+vim-syntastic-texinfo.noarch : A syntax checker for texinfo programming language
+vim-syntastic-text.noarch : A syntax checker for text programming language
+vim-syntastic-trig.noarch : A syntax checker for trig programming language
+vim-syntastic-turtle.noarch : A syntax checker for turtle programming language
+vim-syntastic-vala.noarch : A syntax checker for vala programming language
+vim-syntastic-verilog.noarch : A syntax checker for verilog programming language
+vim-syntastic-xhtml.noarch : A syntax checker for xhtml programming language
+vim-syntastic-xml.noarch : A syntax checker for xml programming language
+vim-syntastic-xslt.noarch : A syntax checker for xslt programming language
+vim-syntastic-yacc.noarch : A syntax checker for yacc programming language
+vim-syntastic-yaml.noarch : A syntax checker for yaml programming language
+vim-syntastic-yara.noarch : A syntax checker for yara programming language
+vim-syntastic-z80.noarch : A syntax checker for z80 programming language
+vim-syntastic-zsh.noarch : A syntax checker for zsh programming language
+vim-trailing-whitespace.noarch : Highlights trailing whitespace in red and provides :FixWhitespace to fix it
+============================= Summary Matched: vim =============================
+apvlv.x86_64 : PDF viewer which behaves like Vim
+external-editor-revived.x86_64 : Thunderbird extension that allows editing emails in external editors such as Vim
+kakoune.x86_64 : Code editor heavily inspired by Vim
+qutebrowser.noarch : A keyboard-driven, vim-like browser based on PyQt5 and QtWebEngine
+ranger.noarch : A vim-like file manager
+vis.x86_64 : A vim-like editor with structural regex from plan9

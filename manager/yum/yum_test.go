@@ -23,7 +23,7 @@ func TestYumPackageManagerNotAvailable(t *testing.T) {
 	}
 	_, errlu := yumManager.ListUpgradable(&opts)
 	if errlu == nil {
-		t.Fatal("YumPackageManager should not support list-upgadeable")
+		t.Fatal("YumPackageManager should not support list-upgradable")
 	}
 	_, erru := yumManager.Upgrade(packages, nil)
 	if erru == nil {
@@ -109,10 +109,30 @@ nginx-mod-http-xslt-filter.x86_64 : Nginx XSLT module
 nginx-mod-mail.x86_64 : Nginx mail modules
 nginx-mod-stream.x86_64 : Nginx stream modules
 pcp-pmda-nginx.x86_64 : Performance Co-Pilot (PCP) metrics for the Nginx Webserver
+perl-DBD-MySQL.x86_64 : A MySQL interface for Perl
+libreoffice-langpack-en.x86_64 : English language pack for LibreOffice
 `
 	packages := yum.ParseFindOutput(msg, nil)
 	if packages[0].Name != "nginx" || packages[0].Arch != "x86_64" {
 		t.Errorf("Expected to find nginx, found %+v", packages[0])
+	}
+
+	// Test package with dots in name (critical test case)
+	foundPerlDBD := false
+	foundLibreOffice := false
+	for _, pkg := range packages {
+		if pkg.Name == "perl-DBD-MySQL" && pkg.Arch == "x86_64" {
+			foundPerlDBD = true
+		}
+		if pkg.Name == "libreoffice-langpack-en" && pkg.Arch == "x86_64" {
+			foundLibreOffice = true
+		}
+	}
+	if !foundPerlDBD {
+		t.Error("Failed to correctly parse package with dots: perl-DBD-MySQL.x86_64")
+	}
+	if !foundLibreOffice {
+		t.Error("Failed to correctly parse package with dots: libreoffice-langpack-en.x86_64")
 	}
 }
 
@@ -123,18 +143,25 @@ NetworkManager.x86_64                                                           
 rocky-release.noarch                                                                     9.5-1.2.el9                                                                          @baseos
 rpm.x86_64                                                                               4.16.1.3-34.el9.0.1                                                                  @baseos
 rsync.x86_64                                                                             3.2.3-20.el9                                                                         @baseos
+perl-DBD-MySQL.x86_64                                                                    4.050-10.el9                                                                         @appstream
 
 `
 	packages := yum.ParseListInstalledOutput(msg, nil)
 	found := false
+	foundPerlDBD := false
 	for _, pack := range packages {
-		if pack.Name == "rpm" || pack.Arch == "x86_64" || pack.Version == "4.16.1.3-34.el9.0.1" {
+		if pack.Name == "rpm" && pack.Arch == "x86_64" && pack.Version == "4.16.1.3-34.el9.0.1" {
 			found = true
-			break
+		}
+		if pack.Name == "perl-DBD-MySQL" && pack.Arch == "x86_64" && pack.Version == "4.050-10.el9" {
+			foundPerlDBD = true
 		}
 	}
 	if !found {
 		t.Errorf("Expected to find rpm, but not found. Found instead %+v", packages)
+	}
+	if !foundPerlDBD {
+		t.Error("Failed to correctly parse package with dots: perl-DBD-MySQL.x86_64")
 	}
 }
 

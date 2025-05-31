@@ -9,6 +9,9 @@ import (
 	"github.com/bluet/syspkg/manager"
 )
 
+// packageLineRegex matches package lines in yum search output (name.arch format)
+var packageLineRegex = regexp.MustCompile(`^[\w\d-]+\.[\w\d_]+`)
+
 // ParseFindOutput parses the output of `yum search packageName` command
 // and returns a list of available packages that match the search query. It extracts package
 // information such as name, architecture from the
@@ -26,15 +29,16 @@ import (
 // The function first removes the "Last Metadata..." and the "========="
 // lines, and then processes each package entry line to extract relevant
 // information.
+//
+// The opts parameter is reserved for future parsing options and is currently unused.
 func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packages []manager.PackageInfo
 
 	// remove the last empty line
 	msg = strings.TrimSuffix(msg, "\n")
 
-	// split output by empty lines
-	var lines []string = strings.Split(msg, "\n")
-	var packageLineRegex = regexp.MustCompile(`^[\w\d-]+\.[\w\d_]+`)
+	// split output by lines
+	lines := strings.Split(msg, "\n")
 
 	for _, line := range lines {
 		if strings.HasPrefix(line, "=======") {
@@ -50,14 +54,17 @@ func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 			if parts[0] == "" {
 				continue
 			}
-			name_arch := strings.Split(parts[0], ".")
-			if len(name_arch) != 2 {
+			// Find the last dot to separate name and architecture
+			lastDotIndex := strings.LastIndex(parts[0], ".")
+			if lastDotIndex == -1 {
+				// No dot found, skip this line
 				continue
 			}
 
 			packageInfo := manager.PackageInfo{
-				Name:           name_arch[0],
-				Arch:           name_arch[1],
+				Name:           parts[0][:lastDotIndex],
+				Arch:           parts[0][lastDotIndex+1:],
+				Status:         manager.PackageStatusAvailable,
 				PackageManager: pm,
 			}
 
@@ -71,12 +78,14 @@ func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 // ParseListInstalledOutput parses the output of `yum list --installed` command
 // and returns a list of installed packages. It extracts the package name, version,
 // and architecture from the output and stores them in a list of manager.PackageInfo objects.
+//
+// The opts parameter is reserved for future parsing options and is currently unused.
 func ParseListInstalledOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packages []manager.PackageInfo
 
 	// remove the last empty line
 	msg = strings.TrimSuffix(msg, "\n")
-	lines := strings.Split(string(msg), "\n")
+	lines := strings.Split(msg, "\n")
 
 	for _, line := range lines {
 		if strings.HasPrefix(line, "Installed Packages") {
@@ -90,12 +99,14 @@ func ParseListInstalledOutput(msg string, opts *manager.Options) []manager.Packa
 			if len(parts) < 2 || parts[0] == "" {
 				continue
 			}
-			name_arch := strings.Split(parts[0], ".")
-			if len(name_arch) != 2 {
+			// Find the last dot to separate name and architecture
+			lastDotIndex := strings.LastIndex(parts[0], ".")
+			if lastDotIndex == -1 {
+				// No dot found, skip this line
 				continue
 			}
-			name := name_arch[0]
-			arch := name_arch[1]
+			name := parts[0][:lastDotIndex]
+			arch := parts[0][lastDotIndex+1:]
 
 			packageInfo := manager.PackageInfo{
 				Name:           name,
@@ -114,12 +125,14 @@ func ParseListInstalledOutput(msg string, opts *manager.Options) []manager.Packa
 // ParsePackageInfoOutput parses the output of `yum info packageName` command
 // and returns a manager.PackageInfo object containing package information such as name, version,
 // architecture, and category. This function is useful for getting detailed package information.
+//
+// The opts parameter is reserved for future parsing options and is currently unused.
 func ParsePackageInfoOutput(msg string, opts *manager.Options) manager.PackageInfo {
 	var pkg manager.PackageInfo
 
 	// remove the last empty line
 	msg = strings.TrimSuffix(msg, "\n")
-	lines := strings.Split(string(msg), "\n")
+	lines := strings.Split(msg, "\n")
 
 	for _, line := range lines {
 		if len(line) > 0 {

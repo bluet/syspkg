@@ -95,6 +95,8 @@ Options: `--debug`, `--assume-yes`, `--dry-run`, `--interactive`, `--verbose`
 
 **Tool-Focused Approach**: SysPkg focuses on supporting package manager tools based on their functionality rather than the operating system they're running on. If apt+dpkg work correctly in a container, on macOS via Homebrew, or in any other environment, SysPkg will support them. This makes the project more flexible and useful across different development environments.
 
+**Cross-Package Manager Compatibility**: SysPkg normalizes package states for consistent behavior across different package managers. For example, APT's "config-files" state (packages removed but with configuration files remaining) is normalized to "available" status to match the semantics used by other package managers like YUM and Snap.
+
 ## Project Improvement Roadmap
 
 *Note: To-do list consolidated 2025-05-30 - removed duplicates, feature creep items, and over-engineering. Focused on core security, testing, and platform support.*
@@ -105,18 +107,39 @@ Options: `--debug`, `--assume-yes`, `--dry-run`, `--interactive`, `--verbose`
 3. **Fix resource leaks** in error handling paths
 4. **Add security scanning with Snyk** to CI/CD pipeline
 5. **Review and merge PR #12** - fix GetPackageManager("") panic bug ✅
+6. **Cross-package manager status normalization** ✅ - APT config-files → available
+7. **GitHub workflow compatibility fixes** ✅ - Go 1.23.4, Docker multi-OS testing
 
-### 🟡 Medium Priority (Code Quality & Testing) - 7 items
+### 🟡 Medium Priority (Code Quality & Testing) - 8 items
 **Testing:**
 - Create integration tests with mocked command execution
 - Add unit tests for snap package manager
 - Add unit tests for flatpak package manager
+- **APT fixture cleanup and behavior testing** ✅ - Reduced 16→7 fixtures, full test coverage
+- **Cross-platform parsing robustness** ✅ - CRLF/whitespace handling, regex optimization
+- **YUM fixture analysis and cleanup** - Following APT pattern:
+  - Analyze YUM fixtures to determine what's needed for comprehensive testing
+  - Check if YUM fixtures have redundant/duplicate files like APT had
+  - Verify YUM fixtures use correct format for their respective parsers
+  - Identify which YUM parse functions are missing tests
+  - Remove redundant YUM fixtures (if any)
+  - Create missing YUM fixtures for untested parse functions
+  - Add comprehensive behavior tests for all YUM parse functions
+  - Convert YUM tests from inline data to fixture-based pattern
+  - Ensure YUM fixtures follow consistent naming convention
+  - Run YUM tests to verify fixture compatibility and completeness
+
+**Documentation:**
+- **API and behavior documentation** ✅ - Enhanced interface docs, status normalization, cross-PM compatibility
+- **Error handling best practices** ✅ - Fixed ignored errors in documentation examples
+- **Accuracy improvements** ✅ - Fixed misleading comments about status handling
 
 **Code Improvements:**
 - Implement context support for cancellation and timeouts
 - Create custom error types for better error handling
 - Extract common parsing logic to shared utilities (DRY principle)
 - Replace magic strings/numbers with named constants
+- **Fix APT multi-arch package parsing** (Issue #15) - cosmetic fix for empty package names
 
 **Removed from roadmap (2025-05-30):**
 - ~~Structured logging~~ (over-engineering for project scope)
@@ -124,11 +147,11 @@ Options: `--debug`, `--assume-yes`, `--dry-run`, `--interactive`, `--verbose`
 - ~~Architecture diagrams~~ (low ROI for library project)
 - ~~TODO comment fixes~~ (covered by security improvements)
 
-### 🟢 Low Priority (Platform Support) - 3 items
+### 🟢 Low Priority (Platform Support) - 2 items
 **New Package Managers:**
 - Add proper macOS support with brew package manager implementation
 - Add Windows support with chocolatey/scoop/winget package managers
-- Implement dnf/yum package manager support (Red Hat/Fedora)
+- ~~Implement dnf/yum package manager support (Red Hat/Fedora)~~ ✅ **COMPLETED**
 
 **Removed from roadmap (2025-05-30):**
 - ~~zypper, apk support~~ (lower priority than core platforms)
@@ -136,15 +159,114 @@ Options: `--debug`, `--assume-yes`, `--dry-run`, `--interactive`, `--verbose`
 
 ## Testing Strategy Notes
 
-### Docker Testing Capabilities
-- **Works Well**: APT, DNF/YUM, APK, Flatpak (limited) - for capturing command outputs and testing parsers
-- **Doesn't Work**: Snap (requires systemd), actual package installations
-- **Best Practice**: Use Docker to capture real outputs, then use mocks for testing
+SysPkg uses a comprehensive multi-layered testing approach to ensure package managers work correctly across different operating systems.
 
-### Testing Approach
-1. **Unit Tests**: Parser functions with captured fixtures
-2. **Integration Tests**: Mock exec.Command for package operations
-3. **Docker Tests**: Multi-OS parser validation with real command outputs
-4. **CI/CD Tests**: Native runners for snap and full integration tests
+### OS/Package Manager Matrix Testing
 
-See `testing/docker/` for implementation details and strategies.
+**Configuration-Driven Testing**: `testing/os-matrix.yaml` defines which package managers should be tested on which OS distributions.
+
+**Supported Testing Environments**:
+- **Ubuntu/Debian**: APT, Flatpak, Snap
+- **RHEL/Rocky/Alma**: YUM (v8), DNF (v9+)
+- **Fedora**: DNF, Flatpak
+- **Alpine**: APK
+- **Arch** (planned): Pacman
+
+### Multi-Layer Test Architecture
+
+#### 1. **Unit Tests** (Run Everywhere)
+```bash
+make test-unit
+```
+- Parser functions with OS-specific fixtures
+- OS detection logic
+- Command construction
+- No actual package manager execution
+
+#### 2. **Integration Tests** (Docker + Native)
+```bash
+make test-integration
+```
+- Real package manager availability checks
+- Command output capture for test fixtures
+- Limited package operations (list, search, show)
+
+#### 3. **Docker-Based Multi-OS Testing**
+```bash
+make test-docker-all          # All OS
+make test-docker-ubuntu       # APT testing
+make test-docker-rocky        # YUM testing
+make test-docker-alma         # YUM testing
+make test-docker-fedora       # DNF testing
+make test-docker-alpine       # APK testing
+```
+
+**Docker Benefits**:
+- Test YUM on Rocky Linux/AlmaLinux
+- Test APT on various Ubuntu/Debian versions
+- Generate real command outputs for fixtures
+- Isolated, reproducible test environments
+
+#### 4. **System Tests** (Native CI Only)
+- Actual package installation/removal
+- Privileged operations
+- Snap/systemd dependent features
+
+### Environment-Aware Testing
+
+**Automatic Detection**: Tests automatically detect the current OS and determine which package managers to test:
+
+```go
+env, err := testenv.GetTestEnvironment()
+if err != nil {
+    t.Fatalf("failed to get test environment: %v", err)
+}
+if skip, reason := env.ShouldSkipTest("yum"); skip {
+    t.Skip(reason)
+}
+```
+
+**Test Tags**: Tests use build tags for selective execution:
+- `unit`: Parser and core logic tests
+- `integration`: Real command execution (limited)
+- `system`: Full package operations (privileged)
+- `apt`, `yum`, `dnf`, `apk`: Package manager specific
+
+### CI/CD Multi-OS Pipeline
+
+**Docker Matrix**: Tests run across multiple OSes in parallel:
+```yaml
+strategy:
+  matrix:
+    include:
+      - os: ubuntu, pm: apt
+      - os: rockylinux, pm: yum
+      - os: fedora, pm: dnf
+      - os: alpine, pm: apk
+```
+
+**Native Tests**: For systemd-dependent features like Snap:
+```yaml
+- os: ubuntu, runner: ubuntu-latest, pm: snap
+```
+
+### Local Development Workflow
+
+**For detailed development workflows, see [CONTRIBUTING.md](CONTRIBUTING.md)**
+
+**Quick reference:**
+1. **Daily development**: `make test` (smart OS-aware testing)
+2. **Package manager work**: `make test-docker-rocky` (YUM), `make test-docker-fedora` (DNF)
+3. **Comprehensive validation**: `make test-docker-all`
+4. **Fixture updates**: `make test-fixtures`
+
+### Test Fixture Generation
+
+Fixtures are automatically generated from real package manager outputs across different OSes:
+- `testing/fixtures/apt/search-vim-ubuntu22.txt`
+- `testing/fixtures/yum/search-vim-rocky8.txt`
+- `testing/fixtures/dnf/search-vim-fedora39.txt`
+
+This ensures parsers work correctly with real-world output variations across distributions.
+
+See `testing/docker/`, `testing/os-matrix.yaml`, and [CONTRIBUTING.md](CONTRIBUTING.md) for complete details.

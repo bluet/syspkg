@@ -1,0 +1,24 @@
+Last metadata expiration check: 0:00:39 ago on Sat May 31 04:19:59 2025.
+Available Packages
+Name         : vim-enhanced
+Epoch        : 2
+Version      : 8.0.1763
+Release      : 19.el8_6.4
+Architecture : x86_64
+Size         : 1.4 M
+Source       : vim-8.0.1763-19.el8_6.4.src.rpm
+Repository   : appstream
+Summary      : A version of the VIM editor which includes recent enhancements
+URL          : http://www.vim.org/
+License      : Vim and MIT
+Description  : VIM (VIsual editor iMproved) is an updated and improved version of the
+             : vi editor.  Vi was the first real screen-based editor for UNIX, and is
+             : still very popular.  VIM improves on vi by adding new features:
+             : multiple windows, multi-level undo, block highlighting and more.  The
+             : vim-enhanced package contains a version of VIM with extra, recently
+             : introduced features like Python and Perl interpreters.
+             :
+             : Install the vim-enhanced package if you'd like to use a version of the
+             : VIM editor which includes recently added enhancements like
+             : interpreters for the Python and Perl scripting languages.  You'll also
+             : need to install the vim-common package.

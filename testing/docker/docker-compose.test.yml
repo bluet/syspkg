@@ -1,0 +1,140 @@
+version: '3.8'
+
+# Multi-OS testing with Docker Compose
+# Usage: docker-compose -f testing/docker/docker-compose.test.yml up
+
+services:
+  # Ubuntu - APT testing
+  ubuntu-apt-test:
+    build:
+      context: ../..
+      dockerfile: testing/docker/ubuntu.Dockerfile
+    environment:
+      - IN_CONTAINER=true
+      - TEST_OS=ubuntu
+      - TEST_OS_VERSION=22.04
+      - TEST_PACKAGE_MANAGER=apt
+      - TEST_TAGS=unit,integration,apt
+    volumes:
+      - ../..:/workspace
+    working_dir: /workspace
+    command: >
+      bash -c "
+        echo 'Running Ubuntu APT tests...' &&
+        go test -v -tags='unit integration apt' ./manager/apt ./osinfo &&
+        echo 'Generating APT fixtures...' &&
+        apt update &&
+        apt search vim > testing/fixtures/apt/search-vim-ubuntu22.txt 2>/dev/null || true &&
+        apt show vim > testing/fixtures/apt/show-vim-ubuntu22.txt 2>/dev/null || true
+      "
+
+  # Rocky Linux 8 - YUM testing
+  rockylinux-yum-test:
+    build:
+      context: ../..
+      dockerfile: testing/docker/rockylinux.Dockerfile
+    environment:
+      - IN_CONTAINER=true
+      - TEST_OS=rockylinux
+      - TEST_OS_VERSION=8
+      - TEST_PACKAGE_MANAGER=yum
+      - TEST_TAGS=unit,integration,yum
+    volumes:
+      - ../..:/workspace
+    working_dir: /workspace
+    command: >
+      bash -c "
+        echo 'Running Rocky Linux YUM tests...' &&
+        go test -v -tags='unit integration yum' ./manager/yum ./osinfo &&
+        echo 'Generating YUM fixtures...' &&
+        yum search vim > testing/fixtures/yum/search-vim-rocky8.txt 2>/dev/null || true &&
+        yum info vim > testing/fixtures/yum/info-vim-rocky8.txt 2>/dev/null || true &&
+        yum list --installed > testing/fixtures/yum/list-installed-rocky8.txt 2>/dev/null || true
+      "
+
+  # AlmaLinux 8 - YUM testing
+  almalinux-yum-test:
+    build:
+      context: ../..
+      dockerfile: testing/docker/almalinux.Dockerfile
+    environment:
+      - IN_CONTAINER=true
+      - TEST_OS=almalinux
+      - TEST_OS_VERSION=8
+      - TEST_PACKAGE_MANAGER=yum
+      - TEST_TAGS=unit,integration,yum
+    volumes:
+      - ../..:/workspace
+    working_dir: /workspace
+    command: >
+      bash -c "
+        echo 'Running AlmaLinux YUM tests...' &&
+        go test -v -tags='unit integration yum' ./manager/yum ./osinfo &&
+        echo 'Generating YUM fixtures...' &&
+        yum search vim > testing/fixtures/yum/search-vim-alma8.txt 2>/dev/null || true &&
+        yum info vim > testing/fixtures/yum/info-vim-alma8.txt 2>/dev/null || true
+      "
+
+  # TODO: Enable when DNF support is implemented
+  # fedora-dnf-test:
+  #   build:
+  #     context: ../..
+  #     dockerfile: testing/docker/fedora.Dockerfile
+  #   environment:
+  #     - IN_CONTAINER=true
+  #     - TEST_OS=fedora
+  #     - TEST_OS_VERSION=39
+  #     - TEST_PACKAGE_MANAGER=dnf
+  #     - TEST_TAGS=unit,integration,dnf
+  #   volumes:
+  #     - ../..:/workspace
+  #   working_dir: /workspace
+  #   command: >
+  #     bash -c "
+  #       echo 'Running Fedora DNF tests...' &&
+  #       go test -v -tags='unit integration dnf' ./manager/dnf ./osinfo 2>/dev/null || echo 'DNF manager not implemented yet' &&
+  #       echo 'Generating DNF fixtures...' &&
+  #       dnf search vim > testing/fixtures/dnf/search-vim-fedora39.txt 2>/dev/null || true &&
+  #       dnf info vim > testing/fixtures/dnf/info-vim-fedora39.txt 2>/dev/null || true
+  #     "
+
+  # TODO: Enable when APK support is implemented
+  # alpine-apk-test:
+  #   build:
+  #     context: ../..
+  #     dockerfile: testing/docker/alpine.Dockerfile
+  #   environment:
+  #     - IN_CONTAINER=true
+  #     - TEST_OS=alpine
+  #     - TEST_OS_VERSION=3.18
+  #     - TEST_PACKAGE_MANAGER=apk
+  #     - TEST_TAGS=unit,integration,apk
+  #   volumes:
+  #     - ../..:/workspace
+  #   working_dir: /workspace
+  #   command: >
+  #     sh -c "
+  #       echo 'Running Alpine APK tests...' &&
+  #       go test -v -tags='unit integration apk' ./manager/apk ./osinfo 2>/dev/null || echo 'APK manager not implemented yet' &&
+  #       echo 'Generating APK fixtures...' &&
+  #       apk update &&
+  #       apk search vim > testing/fixtures/apk/search-vim-alpine.txt 2>/dev/null || true &&
+  #       apk info vim > testing/fixtures/apk/info-vim-alpine.txt 2>/dev/null || true
+  #     "
+
+# Test runner that runs all tests in parallel
+  test-all:
+    image: ubuntu:22.04
+    depends_on:
+      - ubuntu-apt-test
+      - rockylinux-yum-test
+      - almalinux-yum-test
+      # - fedora-dnf-test  # TODO: Enable when DNF support is implemented
+      # - alpine-apk-test  # TODO: Enable when APK support is implemented
+    volumes:
+      - ../..:/workspace
+    working_dir: /workspace
+    command: >
+      bash -c "
+        echo 'All OS-specific tests completed!'
+      "

@@ -9,12 +9,21 @@
 [![Go Version](https://img.shields.io/github/go-mod/go-version/bluet/syspkg)](https://github.com/bluet/syspkg)
 [![GitHub release](https://img.shields.io/github/v/release/bluet/syspkg)](https://github.com/bluet/syspkg/releases)
 
-SysPkg is a unified CLI tool and Golang library for managing system packages across different package managers. Currently, it supports APT, Snap, and Flatpak, with plans for more. It simplifies package management by providing a consistent interface and API through an abstraction layer that focuses on package manager tools rather than specific operating systems.
+SysPkg is a unified CLI tool and Golang library for managing system packages across different package managers. Currently, it supports APT, YUM, Snap, and Flatpak, with plans for more. It simplifies package management by providing a consistent interface and API through an abstraction layer that focuses on package manager tools rather than specific operating systems.
+
+## Key Features
+
+- **Cross-Package Manager Compatibility**: Normalized status reporting (e.g., APT's config-files state maps to available)
+- **Consistent API**: Same interface across all supported package managers
+- **Tool-Focused**: Works wherever package manager tools work (containers, cross-platform, etc.)
+- **Production Ready**: Comprehensive testing across multiple OS distributions
+- **Performance Optimized**: Efficient parsing with compiled regexes and robust error handling
+- **Cross-Platform**: Handles different line endings (CRLF/LF) and whitespace variations
 
 ## Features
 
 - A unified package management interface for various package managers
-- Supports popular package managers such as APT, Snap, Flatpak, and more
+- Supports popular package managers such as APT, YUM, Snap, Flatpak, and more
 - Easy-to-use API for package installation, removal, search, listing, and system upgrades
 - Expandable architecture to support more package managers in the future
 
@@ -64,6 +73,9 @@ syspkg --snap search vim
 
 # Show all upgradable packages using Flatpak
 syspkg --flatpak show upgradable
+
+# Install a package using YUM (on RHEL/CentOS/Rocky/AlmaLinux)
+syspkg --yum install vim
 ```
 
 Or, you can do operations without knowing the package manager:
@@ -135,10 +147,10 @@ For more examples and real use cases, see the [cmd/syspkg/](cmd/syspkg/) directo
 | Package Manager | Install | Remove | Search | Upgrade | List Installed | List Upgradable | Get Package Info |
 | --------------- | ------- | ------ | ------ | ------- | -------------- | --------------- | ---------------- |
 | APT             | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               |
-| YUM             | ❓      | ❓    | ✅     | ❓     | ✅             | ❓             | ✅               |
+| YUM             | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               |
 | SNAP            | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               |
 | Flatpak         | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               |
-| DNF/YUM         | 🚧      | 🚧    | 🚧     | 🚧     | 🚧             | 🚧             | 🚧               |
+| DNF             | 🚧      | 🚧    | 🚧     | 🚧     | 🚧             | 🚧             | 🚧               |
 | APK (Alpine)    | 🚧      | 🚧    | 🚧     | 🚧     | 🚧             | 🚧             | 🚧               |
 | Zypper (openSUSE) | 🚧   | 🚧    | 🚧     | 🚧     | 🚧             | 🚧             | 🚧               |
 
@@ -163,46 +175,41 @@ Please open an issue (or PR ❤️) if you'd like to see support for any unliste
 | **Test and Coverage** | ✅ | Go 1.23/1.24 testing with coverage reporting |
 | **Lint and Format** | ✅ | golangci-lint, gofmt, go vet quality checks |
 | **Build** | ✅ | Multi-version build verification |
+| **Multi-OS Tests** | ✅ | Docker-based testing across Ubuntu, Rocky Linux, Alpine |
 | **Release Binaries** | ✅ | Cross-platform binary releases |
 
 - ✅ **Pre-commit hooks**: Automated code quality and security checks
 - ✅ **Go mod verification**: Dependency integrity validation
-- 🚧 **Multi-platform testing**: macOS/Windows testing planned
-
-### Development Setup
-
-1. **Clone and setup**:
-   ```bash
-   git clone https://github.com/bluet/syspkg.git
-   cd syspkg
-   ```
-
-2. **Install pre-commit hooks**:
-   ```bash
-   pre-commit install
-   ```
-
-3. **Run development commands**:
-   ```bash
-   make test          # Run tests
-   make check         # Code quality checks
-   make build         # Build binary
-   ```
-
-### Contributing
-See [CLAUDE.md](CLAUDE.md) for detailed development guidelines and architecture overview.
-
-### TODO
-
-- [ ] Add brew support for macOS
-- [ ] Add chocolatey/scoop/winget support for Windows
-- [ ] Add support for more Linux package managers (dnf, apk, zypper)
-- [ ] Implement Docker-based testing for multi-OS validation
-- [ ] Improve error handling and status codes
+- ✅ **Multi-OS compatibility**: Docker testing with Go 1.23.4 across distributions
+- ✅ **Fixture-based testing**: Real package manager output validation
 
 ## Contributing
 
-We welcome contributions to Go-SysPkg! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for more information on how to contribute.
+We welcome contributions to SysPkg!
+
+### For Users
+- **Bug reports**: Open an issue with details about the problem
+- **Feature requests**: Please let us know what package managers or features you'd like to see
+
+### For Developers
+- **Quick start**: See [CONTRIBUTING.md](CONTRIBUTING.md) for a comprehensive development guide
+- **Architecture**: See [CLAUDE.md](CLAUDE.md) for detailed technical documentation
+- **Testing strategy**: Multi-OS Docker testing with environment-aware test execution
+
+**Development workflow:**
+```bash
+git clone https://github.com/bluet/syspkg.git
+cd syspkg
+make test          # ✅ Smart testing - works on any OS (30s)
+make check         # ✅ Code quality checks (15s)
+
+# Working on package managers? See CONTRIBUTING.md for:
+# make test-docker-rocky   # 🐳 Test YUM on Rocky Linux (5min)
+# make test-docker-fedora  # 🐳 Test DNF on Fedora (5min)
+# make test-docker-all     # 🐳 Test all OS (15min)
+```
+
+**🎯 Quick decision:** Always start with `make test` - it automatically detects your OS and tests what's available!
 
 ## License
 

@@ -1,0 +1,17 @@
+gvim-9.0.2073-r0 description:
+advanced text editor, with GUI
+
+gvim-9.0.2073-r0 webpage:
+https://www.vim.org/
+
+gvim-9.0.2073-r0 installed size:
+2996 KiB
+
+vim-9.0.2073-r0 description:
+Improved vi-style text editor
+
+vim-9.0.2073-r0 webpage:
+https://www.vim.org/
+
+vim-9.0.2073-r0 installed size:
+2692 KiB

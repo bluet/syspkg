@@ -1,12 +1,2 @@
-Vim	The ubiquitous text editor	org.vim.Vim	v9.1.1355-4-gf57c065e7	stable	flathub
-Vimix	Video live mixer	io.github.brunoherbelin.Vimix	0.8.4	stable	flathub
-AVI MetaEdit	Embed, validate, and export AVI files metadata	net.mediaarea.AVIMetaEdit	1.0.2	stable	flathub
-Neovim	Vim-fork focused on extensibility and usability	io.neovim.nvim	0.11.1	stable	flathub
-Vieb	Vim Inspired Electron Browser	dev.vieb.Vieb	12.3.0	stable	flathub
-iamb	A terminal Matrix client for Vim addicts	chat.iamb.iamb	0.0.10	stable	flathub
-Devhelp	瀏覽與搜尋 API 文件的開發者工具	org.gnome.Devhelp	43.0	stable	flathub
-Builder	Create applications for GNOME	org.gnome.Builder	48.0	stable	flathub
-Formiko	reStructuredText and MarkDown editor	cz.zeropage.Formiko	1.5.0	stable	flathub
-Communique	RSS Reader with cross-platform sync	com.github.suzie97.communique	1.1.0	stable	flathub
-qutebrowser	A keyboard-driven web browser	org.qutebrowser.qutebrowser	2.5.4	stable	flathub
-4KTUBE	4K YouTube Downloader – Download HD YouTube Videos, Playlists, and Music Instantly.	com.warlordsoftwares.youtube-downloader-4ktube	2025.5.23	stable	flathub
+Flatpak 1.12.7
+No matches found

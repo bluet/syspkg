@@ -1,0 +1,134 @@
+# OS/Package Manager Testing Matrix Configuration
+# This file defines which package managers should be tested on which operating systems
+
+matrix:
+  # Debian-based distributions
+  debian-family:
+    distributions:
+      - ubuntu:20.04
+      - ubuntu:22.04
+      - ubuntu:24.04
+      - debian:11
+      - debian:12
+    package_managers:
+      apt:
+        available: true
+        operations: [search, list, install, remove, upgrade, show]
+        test_priority: high
+      flatpak:
+        available: true
+        operations: [search, list, install, remove, show]
+        test_priority: medium
+        setup_required: true
+      snap:
+        available: false  # Requires systemd in containers
+        operations: []
+        test_priority: low
+        notes: "Use native CI runners for snap testing"
+
+  # RHEL-based distributions
+  rhel-family:
+    distributions:
+      - rockylinux:8
+      - rockylinux:9
+      - almalinux:8
+      - almalinux:9
+      - fedora:38
+      - fedora:39
+      - centos:stream8
+      - centos:stream9
+    package_managers:
+      yum:
+        available: true
+        operations: [search, list, show, clean, refresh]
+        test_priority: high
+        distributions: ["rockylinux:8", "almalinux:8", "centos:stream8"]
+      dnf:
+        available: true
+        operations: [search, list, install, remove, upgrade, show]
+        test_priority: high
+        distributions: ["rockylinux:9", "almalinux:9", "fedora:38", "fedora:39", "centos:stream9"]
+      flatpak:
+        available: true
+        operations: [search, list, show]
+        test_priority: low
+        setup_required: true
+
+  # Alpine-based
+  alpine-family:
+    distributions:
+      - alpine:3.17
+      - alpine:3.18
+      - alpine:3.19
+    package_managers:
+      apk:
+        available: true
+        operations: [search, list, install, remove, upgrade, show]
+        test_priority: medium
+
+  # Arch-based (future)
+  arch-family:
+    distributions:
+      - archlinux:latest
+    package_managers:
+      pacman:
+        available: true
+        operations: [search, list, install, remove, upgrade, show]
+        test_priority: low
+
+# Test execution strategy
+test_strategy:
+  # Unit tests (parser functions) - run on all OS
+  unit:
+    scope: all_distributions
+    method: docker
+    fixture_dependent: true
+
+  # Integration tests (real commands, limited operations)
+  integration:
+    scope: primary_distributions  # subset for CI efficiency
+    method: docker
+    operations: [search, list, show, clean, refresh]
+
+  # Full system tests (actual installs/removes)
+  system:
+    scope: native_runners_only
+    method: github_actions_matrix
+    operations: [install, remove, upgrade]
+    require_privileges: true
+
+# Primary distributions for CI (to limit resource usage)
+primary_distributions:
+  - ubuntu:22.04      # APT testing
+  - rockylinux:9      # DNF testing
+  - almalinux:8       # YUM testing
+  - alpine:3.18       # APK testing
+  - fedora:39         # Latest DNF
+
+# Test fixtures to generate per OS
+fixtures:
+  apt:
+    commands:
+      - "apt update && apt search vim"
+      - "apt show vim"
+      - "apt list --installed | head -20"
+      - "apt list --upgradable"
+
+  yum:
+    commands:
+      - "yum search vim"
+      - "yum info vim"
+      - "yum list --installed | head -20"
+
+  dnf:
+    commands:
+      - "dnf search vim"
+      - "dnf info vim"
+      - "dnf list --installed | head -20"
+      - "dnf list --upgrades"
+
+  apk:
+    commands:
+      - "apk search vim"
+      - "apk info vim"
+      - "apk list --installed"
