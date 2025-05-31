@@ -7,7 +7,7 @@ import (
 	"github.com/bluet/syspkg/manager"
 )
 
-func TestCheckRpmInstallationStatusWithRunner(t *testing.T) {
+func TestCheckRpmInstallationStatus(t *testing.T) {
 	tests := []struct {
 		name             string
 		packageNames     []string
@@ -104,7 +104,7 @@ func TestCheckRpmInstallationStatusWithRunner(t *testing.T) {
 			}
 
 			// Test the function
-			result, err := checkRpmInstallationStatusWithRunner(tt.packageNames, runner)
+			result, err := checkRpmInstallationStatus(tt.packageNames, runner)
 
 			// Check error expectation
 			if tt.expectedError && err == nil {

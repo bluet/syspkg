@@ -555,7 +555,7 @@ func (a *PackageManager) enhancePackagesWithStatus(packages []manager.PackageInf
 	runner := manager.NewOSCommandRunner()
 
 	// Check installation status using rpm -q
-	installedPackages, err := checkRpmInstallationStatusWithRunner(packageNames, runner)
+	installedPackages, err := checkRpmInstallationStatus(packageNames, runner)
 	if err != nil {
 		return nil, err
 	}
