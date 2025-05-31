@@ -10,32 +10,39 @@ import (
 
 func TestYumPackageManagerNotAvailable(t *testing.T) {
 	yumManager := yum.PackageManager{}
+
+	// Skip this test if YUM is actually available (like in Rocky Linux CI environment)
+	if yumManager.IsAvailable() {
+		t.Skip("Skipping 'not available' test because YUM is available in this environment")
+	}
+
+	// This test validates behavior when YUM is not available on the system
 	opts := manager.Options{}
 	packages := []string{"nginx"}
 
 	_, erri := yumManager.Install(packages, nil)
 	if erri == nil {
-		t.Fatal("YumPackageManager should not support installation")
+		t.Fatal("YumPackageManager should not support installation when not available")
 	}
 	_, errd := yumManager.Delete(packages, nil)
 	if errd == nil {
-		t.Fatal("YumPackageManager should not support removal")
+		t.Fatal("YumPackageManager should not support removal when not available")
 	}
 	_, errlu := yumManager.ListUpgradable(&opts)
 	if errlu == nil {
-		t.Fatal("YumPackageManager should not support list-upgradable")
+		t.Fatal("YumPackageManager should not support list-upgradable when not available")
 	}
 	_, erru := yumManager.Upgrade(packages, nil)
 	if erru == nil {
-		t.Fatal("YumPackageManager should not support upgrade")
+		t.Fatal("YumPackageManager should not support upgrade when not available")
 	}
 	_, errua := yumManager.UpgradeAll(&opts)
 	if errua == nil {
-		t.Fatal("YumPackageManager should not support upgrade-all")
+		t.Fatal("YumPackageManager should not support upgrade-all when not available")
 	}
 	_, errar := yumManager.AutoRemove(&opts)
 	if errar == nil {
-		t.Fatal("YumPackageManager should not support autoremove")
+		t.Fatal("YumPackageManager should not support autoremove when not available")
 	}
 }
 
