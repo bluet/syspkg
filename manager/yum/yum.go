@@ -7,19 +7,18 @@
 // Behavior Contracts:
 //
 // Status Determination:
-//   - YUM search output does not indicate installation status
-//   - Find() always returns PackageStatusAvailable (limitation of YUM output format)
-//   - To determine actual installation status, use ListInstalled() or GetPackageInfo()
+//   - Find() provides accurate installation status via rpm -q integration
+//   - Cross-package manager API consistency with APT implementation
 //   - GetPackageInfo() shows "Installed Packages" vs "Available Packages" sections
 //
 // Field Usage by Operation:
-//   - Find: Status=available, Version="", NewVersion="" (YUM limitation)
+//   - Find: Status=installed/available/upgradable (via rpm -q), Version=installed_version, NewVersion=available_version
 //   - ListInstalled: Status=installed, Version=installed_version, NewVersion=""
 //   - GetPackageInfo: Status=available/installed (based on section), Version=package_version
 //
-// Cross-Package Manager Compatibility Note:
-//   - Unlike APT, YUM cannot determine installation status from search results
-//   - Users should use GetPackageInfo() for accurate status determination
+// Cross-Package Manager Compatibility:
+//   - Full API consistency with APT package manager
+//   - Normalized status reporting across all package managers
 //
 // This package is part of the syspkg library.
 package yum
@@ -232,21 +231,20 @@ func (a *PackageManager) Refresh(opts *manager.Options) error {
 }
 
 // Find searches for packages matching the provided keywords using the yum package manager.
+// Returns packages with accurate installation status detection via rpm -q integration.
 //
-// IMPORTANT: Due to YUM output limitations, this method always returns PackageStatusAvailable
-// regardless of actual installation status. YUM search output does not indicate whether
-// packages are installed or not.
-//
-// To determine accurate installation status:
-//   - Use GetPackageInfo() which shows "Installed Packages" vs "Available Packages"
-//   - Use ListInstalled() and check if the package appears in the list
+// Status Detection:
+//   - Uses rpm -q to check installation status for each found package
+//   - Status=installed: Package is currently installed
+//   - Status=available: Package exists in repositories but is not installed
+//   - Status=upgradable: Package is installed but newer version is available
 //
 // Returned fields:
 //   - Name: Package name
 //   - Arch: Package architecture
-//   - Status: Always PackageStatusAvailable (YUM limitation)
-//   - Version: Always empty (not provided by yum search)
-//   - NewVersion: Always empty (not provided by yum search)
+//   - Status: Accurate status via rpm -q integration (installed/available/upgradable)
+//   - Version: Installed version (if installed) or empty
+//   - NewVersion: Available version from repositories
 func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manager.PackageInfo, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), readTimeout)
 	defer cancel()

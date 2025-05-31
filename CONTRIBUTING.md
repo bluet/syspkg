@@ -294,8 +294,8 @@ graph LR
 make test-docker-ubuntu    # Test APT on Ubuntu
 make test-docker-rocky     # Test YUM on Rocky Linux 8
 make test-docker-alma      # Test YUM on AlmaLinux 8
-# make test-docker-fedora  # TODO: DNF not implemented yet
-# make test-docker-alpine  # TODO: APK not implemented yet
+# make test-docker-fedora  # DNF testing (implementation in progress)
+# make test-docker-alpine  # APK testing (implementation in progress)
 
 # Test all OS at once
 make test-docker-all       # Parallel testing across all OS
@@ -696,7 +696,7 @@ make test-docker-ubuntu  # Match CI environment
 ## 📈 Development Roadmap
 
 ### Current Priorities
-1. **Complete YUM/DNF support** (in progress)
+1. **Complete DNF support** (YUM fully implemented ✅)
 2. **Add APK support** for Alpine Linux
 3. **Implement Pacman support** for Arch Linux
 4. **Add Homebrew support** for macOS
