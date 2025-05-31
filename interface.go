@@ -43,6 +43,10 @@ type PackageManager interface {
 	// Returns packages with Status=upgradable, Version=current, NewVersion=available.
 	ListUpgradable(opts *manager.Options) ([]manager.PackageInfo, error)
 
+	// Upgrade upgrades the specified packages to their latest versions.
+	// Returns PackageInfo for each upgraded package with new version information.
+	Upgrade(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error)
+
 	// UpgradeAll upgrades all packages or only the specified ones.
 	// Returns PackageInfo for each upgraded package with new version information.
 	UpgradeAll(opts *manager.Options) ([]manager.PackageInfo, error)
@@ -54,6 +58,15 @@ type PackageManager interface {
 	// GetPackageInfo returns detailed information about the specified package.
 	// Returns package metadata including name, version, architecture, and category.
 	GetPackageInfo(pkg string, opts *manager.Options) (manager.PackageInfo, error)
+
+	// Clean performs cleanup of package manager caches and temporary files.
+	// The specific behavior depends on the package manager implementation.
+	Clean(opts *manager.Options) error
+
+	// AutoRemove removes packages that were automatically installed as dependencies
+	// but are no longer needed by any manually installed packages.
+	// Returns PackageInfo for each removed package with Status=available.
+	AutoRemove(opts *manager.Options) ([]manager.PackageInfo, error)
 }
 
 // SysPkg is the interface that defines the methods for interacting with the SysPkg library.

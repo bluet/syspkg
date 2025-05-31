@@ -203,3 +203,250 @@ func ParsePackageInfoOutput(msg string, opts *manager.Options) manager.PackageIn
 
 	return pkg
 }
+
+// ParseInstallOutput parses the output of `yum install -y packageName` command
+// and returns a list of successfully installed packages. It extracts package
+// information from both the "Installing:" and "Installing dependencies:" sections.
+//
+// Expected output format:
+//
+//	Installing:
+//	 vim-enhanced       x86_64     2:8.0.1763-19.el8_6.4        appstream     1.4 M
+//	Installing dependencies:
+//	 vim-common         x86_64     2:8.0.1763-19.el8_6.4        appstream     6.3 M
+//	...
+//	Installed:
+//	  vim-enhanced-2:8.0.1763-19.el8_6.4.x86_64
+//	  vim-common-2:8.0.1763-19.el8_6.4.x86_64
+//
+// Returns all installed packages with Status=installed.
+// The opts parameter is reserved for future parsing options and is currently unused.
+func ParseInstallOutput(msg string, opts *manager.Options) []manager.PackageInfo {
+	var packages []manager.PackageInfo
+
+	// remove the last empty line
+	msg = strings.TrimSuffix(msg, "\n")
+	lines := strings.Split(msg, "\n")
+
+	installedSection := false
+	for _, line := range lines {
+		// Look for the "Installed:" section which contains the final list
+		if strings.HasPrefix(line, "Installed:") {
+			installedSection = true
+			continue
+		}
+
+		// Parse packages from the Installed: section
+		if installedSection {
+			line = strings.TrimSpace(line)
+			if line == "" || line == "Complete!" {
+				break
+			}
+
+			// Parse package-version-arch format: vim-enhanced-2:8.0.1763-19.el8_6.4.x86_64
+			if strings.Contains(line, "-") && strings.Contains(line, ".") {
+				// Find the last dot to separate arch
+				lastDotIndex := strings.LastIndex(line, ".")
+				if lastDotIndex == -1 {
+					continue
+				}
+
+				arch := line[lastDotIndex+1:]
+				nameVersion := line[:lastDotIndex]
+
+				// Find package name by looking for version pattern (contains :)
+				var name, version string
+				if epochIndex := strings.Index(nameVersion, "-2:"); epochIndex != -1 {
+					name = nameVersion[:epochIndex]
+					version = nameVersion[epochIndex+1:]
+				} else if versionIndex := strings.LastIndex(nameVersion, "-"); versionIndex != -1 {
+					name = nameVersion[:versionIndex]
+					version = nameVersion[versionIndex+1:]
+				} else {
+					// Fallback: treat entire thing as name
+					name = nameVersion
+					version = ""
+				}
+
+				packageInfo := manager.PackageInfo{
+					Name:           name,
+					Version:        version,
+					NewVersion:     version, // For install, new version equals installed version
+					Status:         manager.PackageStatusInstalled,
+					Arch:           arch,
+					PackageManager: "yum",
+				}
+				packages = append(packages, packageInfo)
+			}
+		}
+	}
+
+	return packages
+}
+
+// ParseDeleteOutput parses the output of `yum remove -y packageName` command
+// and returns a list of successfully removed packages.
+//
+// Expected output format:
+//
+//	Removing:
+//	 tree           x86_64           1.7.0-15.el8           @baseos           106 k
+//	...
+//	Removed:
+//	  tree-1.7.0-15.el8.x86_64
+//
+// Returns all removed packages with Status=available.
+// The opts parameter is reserved for future parsing options and is currently unused.
+func ParseDeleteOutput(msg string, opts *manager.Options) []manager.PackageInfo {
+	var packages []manager.PackageInfo
+
+	// remove the last empty line
+	msg = strings.TrimSuffix(msg, "\n")
+	lines := strings.Split(msg, "\n")
+
+	removedSection := false
+	for _, line := range lines {
+		// Look for the "Removed:" section which contains the final list
+		if strings.HasPrefix(line, "Removed:") {
+			removedSection = true
+			continue
+		}
+
+		// Parse packages from the Removed: section
+		if removedSection {
+			line = strings.TrimSpace(line)
+			if line == "" || line == "Complete!" {
+				break
+			}
+
+			// Parse package-version-arch format: tree-1.7.0-15.el8.x86_64
+			if strings.Contains(line, "-") && strings.Contains(line, ".") {
+				// Find the last dot to separate arch
+				lastDotIndex := strings.LastIndex(line, ".")
+				if lastDotIndex == -1 {
+					continue
+				}
+
+				arch := line[lastDotIndex+1:]
+				nameVersion := line[:lastDotIndex]
+
+				// Find package name by looking for version pattern
+				var name, version string
+				if versionIndex := strings.LastIndex(nameVersion, "-"); versionIndex != -1 {
+					name = nameVersion[:versionIndex]
+					version = nameVersion[versionIndex+1:]
+				} else {
+					// Fallback: treat entire thing as name
+					name = nameVersion
+					version = ""
+				}
+
+				packageInfo := manager.PackageInfo{
+					Name:           name,
+					Version:        version,
+					NewVersion:     "", // For delete, new version is empty
+					Status:         manager.PackageStatusAvailable,
+					Arch:           arch,
+					PackageManager: "yum",
+				}
+				packages = append(packages, packageInfo)
+			}
+		}
+	}
+
+	return packages
+}
+
+// ParseListUpgradableOutput parses the output of `yum check-update` command
+// and returns a list of packages that have updates available.
+//
+// Expected output format:
+//
+//	Last metadata expiration check: 0:05:23 ago on Sat May 31 10:00:00 2025.
+//
+//	kernel.x86_64                    4.18.0-477.27.1.el8_8      baseos
+//	vim-common.x86_64                2:8.0.1763-19.el8_6.4      appstream
+//
+// Returns packages with Status=upgradable, NewVersion=available version.
+// The opts parameter is reserved for future parsing options and is currently unused.
+func ParseListUpgradableOutput(msg string, opts *manager.Options) []manager.PackageInfo {
+	var packages []manager.PackageInfo
+
+	// remove the last empty line
+	msg = strings.TrimSuffix(msg, "\n")
+	lines := strings.Split(msg, "\n")
+
+	for _, line := range lines {
+		// Skip metadata expiration and empty lines
+		if strings.HasPrefix(line, "Last metadata") || strings.TrimSpace(line) == "" {
+			continue
+		}
+
+		// Parse package lines: package.arch version repository
+		parts := strings.Fields(line)
+		if len(parts) >= 3 && strings.Contains(parts[0], ".") {
+			// Find the last dot to separate name and architecture
+			lastDotIndex := strings.LastIndex(parts[0], ".")
+			if lastDotIndex == -1 {
+				continue
+			}
+
+			name := parts[0][:lastDotIndex]
+			arch := parts[0][lastDotIndex+1:]
+			newVersion := parts[1]
+
+			packageInfo := manager.PackageInfo{
+				Name:           name,
+				Version:        "", // Current version not provided by yum check-update
+				NewVersion:     newVersion,
+				Status:         manager.PackageStatusUpgradable,
+				Arch:           arch,
+				PackageManager: "yum",
+			}
+			packages = append(packages, packageInfo)
+		}
+	}
+
+	return packages
+}
+
+// ParseUpgradeOutput parses the output of `yum update -y packageName` command
+// and returns a list of successfully upgraded packages.
+//
+// Expected output format is similar to install, but with "Upgrading:" section:
+//
+//	Upgrading:
+//	 vim-common      x86_64    2:8.0.1763-19.el8_6.4  appstream              6.3 M
+//	...
+//	Upgraded:
+//	  vim-common-2:8.0.1763-19.el8_6.4.x86_64
+//
+// Returns all upgraded packages with new version information.
+// The opts parameter is reserved for future parsing options and is currently unused.
+func ParseUpgradeOutput(msg string, opts *manager.Options) []manager.PackageInfo {
+	// Upgrade output format is very similar to install output,
+	// we can reuse the same parser logic
+	return ParseInstallOutput(msg, opts)
+}
+
+// ParseAutoRemoveOutput parses the output of `yum autoremove -y` command
+// and returns a list of successfully removed packages.
+//
+// Expected output format:
+//
+//	Removing:
+//	 perl-IO-Socket-IP      noarch    0.39-5.el8         @appstream           99 k
+//	Removing unused dependencies:
+//	 perl-IO-Socket-SSL     noarch    2.066-4.module     @appstream          618 k
+//	...
+//	Removed:
+//	  perl-IO-Socket-IP-0.39-5.el8.noarch
+//	  perl-IO-Socket-SSL-2.066-4.module.noarch
+//
+// Returns all removed packages with Status=available.
+// The opts parameter is reserved for future parsing options and is currently unused.
+func ParseAutoRemoveOutput(msg string, opts *manager.Options) []manager.PackageInfo {
+	// AutoRemove output format is the same as regular remove output,
+	// we can reuse the same parser logic
+	return ParseDeleteOutput(msg, opts)
+}

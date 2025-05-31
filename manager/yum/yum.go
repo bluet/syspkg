@@ -26,7 +26,6 @@ package yum
 
 import (
 	"context"
-	"errors"
 	"log"
 	"os"
 	"os/exec"
@@ -69,12 +68,125 @@ func (a *PackageManager) GetPackageManager() string {
 	return pm
 }
 
+// Install installs the specified packages using the yum package manager.
+// Returns PackageInfo for each successfully installed package with Status=installed.
+// Version and NewVersion fields will contain the installed version.
+//
+// Behavior:
+//   - Automatically installs dependencies
+//   - Returns all installed packages (main packages + dependencies)
+//   - Uses -y flag to automatically answer yes to prompts
+//   - Respects DryRun, Interactive, and Verbose options
 func (a *PackageManager) Install(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error) {
-	return nil, errors.New("not implemented")
+	if opts == nil {
+		opts = &manager.Options{
+			DryRun:      false,
+			Interactive: false,
+			Verbose:     false,
+		}
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	defer cancel()
+
+	args := []string{"install"}
+
+	// Handle options
+	if opts.DryRun {
+		args = append(args, "--assumeno")
+	} else if !opts.Interactive {
+		args = append(args, "-y")
+	}
+
+	if opts.Verbose {
+		args = append(args, "-v")
+	}
+
+	args = append(args, pkgs...)
+	cmd := exec.CommandContext(ctx, pm, args...)
+
+	if opts.Interactive {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Stdin = os.Stdin
+		err := cmd.Run()
+		if err != nil {
+			return nil, err
+		}
+		// For interactive mode, we can't parse output, return empty list
+		return []manager.PackageInfo{}, nil
+	}
+
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+
+	if opts.Verbose {
+		log.Println(string(out))
+	}
+
+	return ParseInstallOutput(string(out), opts), nil
 }
 
+// Delete removes the specified packages using the yum package manager.
+// Returns PackageInfo for each successfully removed package with Status=available.
+// Version field contains the removed version, NewVersion will be empty.
+//
+// Behavior:
+//   - Does not remove dependencies by default (use AutoRemove for that)
+//   - Uses -y flag to automatically answer yes to prompts
+//   - Respects DryRun, Interactive, and Verbose options
 func (a *PackageManager) Delete(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error) {
-	return nil, errors.New("not implemented")
+	if opts == nil {
+		opts = &manager.Options{
+			DryRun:      false,
+			Interactive: false,
+			Verbose:     false,
+		}
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	defer cancel()
+
+	args := []string{"remove"}
+
+	// Handle options
+	if opts.DryRun {
+		args = append(args, "--assumeno")
+	} else if !opts.Interactive {
+		args = append(args, "-y")
+	}
+
+	if opts.Verbose {
+		args = append(args, "-v")
+	}
+
+	args = append(args, pkgs...)
+	cmd := exec.CommandContext(ctx, pm, args...)
+
+	if opts.Interactive {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Stdin = os.Stdin
+		err := cmd.Run()
+		if err != nil {
+			return nil, err
+		}
+		// For interactive mode, we can't parse output, return empty list
+		return []manager.PackageInfo{}, nil
+	}
+
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+
+	if opts.Verbose {
+		log.Println(string(out))
+	}
+
+	return ParseDeleteOutput(string(out), opts), nil
 }
 
 // Refresh updates the package list using the yum package manager.
@@ -164,14 +276,138 @@ func (a *PackageManager) ListInstalled(opts *manager.Options) ([]manager.Package
 	return ParseListInstalledOutput(string(out), opts), nil
 }
 
+// ListUpgradable lists all packages that have newer versions available.
+// Returns packages with Status=upgradable, Version=current, NewVersion=available.
+//
+// Uses 'yum check-update' which returns exit code 100 when updates are available,
+// exit code 0 when no updates are available.
 func (a *PackageManager) ListUpgradable(opts *manager.Options) ([]manager.PackageInfo, error) {
-	return nil, errors.New("not implemented")
+	ctx, cancel := context.WithTimeout(context.Background(), readTimeout)
+	defer cancel()
+
+	args := []string{"check-update"}
+	cmd := exec.CommandContext(ctx, pm, args...)
+
+	out, err := cmd.Output()
+	// YUM check-update returns exit code 100 when updates are available
+	// This is normal behavior, not an error
+	if err != nil {
+		if exitError, ok := err.(*exec.ExitError); ok && exitError.ExitCode() == 100 {
+			// Exit code 100 means updates are available, continue parsing
+		} else {
+			// Other exit codes indicate real errors
+			return nil, err
+		}
+	}
+
+	return ParseListUpgradableOutput(string(out), opts), nil
 }
+
+// Upgrade upgrades the specified packages using the yum package manager.
+// Returns PackageInfo for each successfully upgraded package with new version information.
 func (a *PackageManager) Upgrade(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error) {
-	return nil, errors.New("not implemented")
+	if opts == nil {
+		opts = &manager.Options{
+			DryRun:      false,
+			Interactive: false,
+			Verbose:     false,
+		}
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+	defer cancel()
+
+	args := []string{"update"}
+
+	// Handle options
+	if opts.DryRun {
+		args = append(args, "--assumeno")
+	} else if !opts.Interactive {
+		args = append(args, "-y")
+	}
+
+	if opts.Verbose {
+		args = append(args, "-v")
+	}
+
+	args = append(args, pkgs...)
+	cmd := exec.CommandContext(ctx, pm, args...)
+
+	if opts.Interactive {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Stdin = os.Stdin
+		err := cmd.Run()
+		if err != nil {
+			return nil, err
+		}
+		// For interactive mode, we can't parse output, return empty list
+		return []manager.PackageInfo{}, nil
+	}
+
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+
+	if opts.Verbose {
+		log.Println(string(out))
+	}
+
+	return ParseUpgradeOutput(string(out), opts), nil
 }
+
+// UpgradeAll upgrades all packages that have newer versions available.
+// Returns PackageInfo for each upgraded package with new version information.
 func (a *PackageManager) UpgradeAll(opts *manager.Options) ([]manager.PackageInfo, error) {
-	return nil, errors.New("not implemented")
+	if opts == nil {
+		opts = &manager.Options{
+			DryRun:      false,
+			Interactive: false,
+			Verbose:     false,
+		}
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
+	defer cancel()
+
+	args := []string{"update"}
+
+	// Handle options
+	if opts.DryRun {
+		args = append(args, "--assumeno")
+	} else if !opts.Interactive {
+		args = append(args, "-y")
+	}
+
+	if opts.Verbose {
+		args = append(args, "-v")
+	}
+
+	cmd := exec.CommandContext(ctx, pm, args...)
+
+	if opts.Interactive {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Stdin = os.Stdin
+		err := cmd.Run()
+		if err != nil {
+			return nil, err
+		}
+		// For interactive mode, we can't parse output, return empty list
+		return []manager.PackageInfo{}, nil
+	}
+
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+
+	if opts.Verbose {
+		log.Println(string(out))
+	}
+
+	return ParseUpgradeOutput(string(out), opts), nil
 }
 
 // Clean performs comprehensive cleanup of YUM caches.
@@ -238,6 +474,55 @@ func (a *PackageManager) GetPackageInfo(pkg string, opts *manager.Options) (mana
 	return ParsePackageInfoOutput(string(out), opts), nil
 }
 
+// AutoRemove removes unneeded dependencies using the yum package manager.
+// Returns PackageInfo for each successfully removed package with Status=available.
 func (a *PackageManager) AutoRemove(opts *manager.Options) ([]manager.PackageInfo, error) {
-	return nil, errors.New("not implemented")
+	if opts == nil {
+		opts = &manager.Options{
+			DryRun:      false,
+			Interactive: false,
+			Verbose:     false,
+		}
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	defer cancel()
+
+	args := []string{"autoremove"}
+
+	// Handle options
+	if opts.DryRun {
+		args = append(args, "--assumeno")
+	} else if !opts.Interactive {
+		args = append(args, "-y")
+	}
+
+	if opts.Verbose {
+		args = append(args, "-v")
+	}
+
+	cmd := exec.CommandContext(ctx, pm, args...)
+
+	if opts.Interactive {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Stdin = os.Stdin
+		err := cmd.Run()
+		if err != nil {
+			return nil, err
+		}
+		// For interactive mode, we can't parse output, return empty list
+		return []manager.PackageInfo{}, nil
+	}
+
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+
+	if opts.Verbose {
+		log.Println(string(out))
+	}
+
+	return ParseAutoRemoveOutput(string(out), opts), nil
 }

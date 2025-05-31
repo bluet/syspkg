@@ -366,3 +366,337 @@ func TestYUM_CrossPackageManagerCompatibility(t *testing.T) {
 		}
 	})
 }
+
+// TestInstall_BehaviorWithFixtures tests the Install operation behavior
+func TestInstall_BehaviorWithFixtures(t *testing.T) {
+	testCases := []struct {
+		name           string
+		fixture        string
+		expectPackages bool
+		expectError    bool
+	}{
+		{
+			name:           "successful install with dependencies",
+			fixture:        "install-vim-rocky8.txt",
+			expectPackages: true,
+			expectError:    false,
+		},
+		{
+			name:           "install multiple packages",
+			fixture:        "install-multiple-rocky8.txt",
+			expectPackages: true,
+			expectError:    false,
+		},
+		{
+			name:           "install already installed package",
+			fixture:        "install-already-installed-rocky8.txt",
+			expectPackages: false, // "Nothing to do" case
+			expectError:    false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			fixture := loadFixture(t, tc.fixture)
+			packages := yum.ParseInstallOutput(fixture, &manager.Options{})
+
+			// Test behavior expectations
+			if tc.expectPackages && len(packages) == 0 {
+				t.Error("Expected packages to be installed but got none")
+			}
+			if !tc.expectPackages && len(packages) > 0 {
+				t.Errorf("Expected no packages to be installed but got %d", len(packages))
+			}
+
+			// Test contract: All returned packages should have expected fields
+			for _, pkg := range packages {
+				if pkg.Name == "" {
+					t.Error("Installed package name should not be empty")
+				}
+				if pkg.Status != manager.PackageStatusInstalled {
+					t.Errorf("Installed packages should have status 'installed', got '%s'", pkg.Status)
+				}
+				if pkg.Version == "" {
+					t.Error("Installed packages should have Version populated")
+				}
+				if pkg.NewVersion != pkg.Version {
+					t.Errorf("For install, NewVersion should equal Version, got Version='%s' NewVersion='%s'", pkg.Version, pkg.NewVersion)
+				}
+				if pkg.PackageManager != "yum" {
+					t.Errorf("Package manager should be 'yum', got '%s'", pkg.PackageManager)
+				}
+			}
+		})
+	}
+}
+
+// TestDelete_BehaviorWithFixtures tests the Delete operation behavior
+func TestDelete_BehaviorWithFixtures(t *testing.T) {
+	testCases := []struct {
+		name           string
+		fixture        string
+		expectPackages bool
+	}{
+		{
+			name:           "successful remove single package",
+			fixture:        "remove-tree-rocky8.txt",
+			expectPackages: true,
+		},
+		{
+			name:           "remove with dependencies",
+			fixture:        "remove-nginx-rocky8.txt",
+			expectPackages: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			fixture := loadFixture(t, tc.fixture)
+			packages := yum.ParseDeleteOutput(fixture, &manager.Options{})
+
+			// Test behavior expectations
+			if tc.expectPackages && len(packages) == 0 {
+				t.Error("Expected packages to be removed but got none")
+			}
+
+			// Test contract: All returned packages should have expected fields
+			for _, pkg := range packages {
+				if pkg.Name == "" {
+					t.Error("Removed package name should not be empty")
+				}
+				if pkg.Status != manager.PackageStatusAvailable {
+					t.Errorf("Removed packages should have status 'available', got '%s'", pkg.Status)
+				}
+				if pkg.Version == "" {
+					t.Error("Removed packages should have Version populated")
+				}
+				if pkg.NewVersion != "" {
+					t.Errorf("For delete, NewVersion should be empty, got '%s'", pkg.NewVersion)
+				}
+				if pkg.PackageManager != "yum" {
+					t.Errorf("Package manager should be 'yum', got '%s'", pkg.PackageManager)
+				}
+			}
+		})
+	}
+}
+
+// TestListUpgradable_BehaviorWithFixtures tests the ListUpgradable operation behavior
+func TestListUpgradable_BehaviorWithFixtures(t *testing.T) {
+	testCases := []struct {
+		name    string
+		fixture string
+	}{
+		{
+			name:    "check for available updates",
+			fixture: "check-update-rocky8.txt",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			fixture := loadFixture(t, tc.fixture)
+			packages := yum.ParseListUpgradableOutput(fixture, &manager.Options{})
+
+			// Test behavior: ListUpgradable should not fail with real YUM output
+			// Note: The actual package count depends on the specific fixture content
+
+			// Test contract: All returned packages should have expected fields
+			for _, pkg := range packages {
+				if pkg.Name == "" {
+					t.Error("Upgradable package name should not be empty")
+				}
+				if pkg.Status != manager.PackageStatusUpgradable {
+					t.Errorf("Upgradable packages should have status 'upgradable', got '%s'", pkg.Status)
+				}
+				if pkg.NewVersion == "" {
+					t.Error("Upgradable packages should have NewVersion populated")
+				}
+				// Note: Current version may not be provided by yum check-update
+				if pkg.PackageManager != "yum" {
+					t.Errorf("Package manager should be 'yum', got '%s'", pkg.PackageManager)
+				}
+			}
+		})
+	}
+}
+
+// TestAutoRemove_BehaviorWithFixtures tests the AutoRemove operation behavior
+func TestAutoRemove_BehaviorWithFixtures(t *testing.T) {
+	testCases := []struct {
+		name    string
+		fixture string
+	}{
+		{
+			name:    "autoremove unused dependencies",
+			fixture: "autoremove-rocky8.txt",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			fixture := loadFixture(t, tc.fixture)
+			packages := yum.ParseAutoRemoveOutput(fixture, &manager.Options{})
+
+			// Test behavior: AutoRemove should not fail with real YUM output
+			// Note: May return empty list if no packages to remove
+
+			// Test contract: All returned packages should have expected fields
+			for _, pkg := range packages {
+				if pkg.Name == "" {
+					t.Error("Auto-removed package name should not be empty")
+				}
+				if pkg.Status != manager.PackageStatusAvailable {
+					t.Errorf("Auto-removed packages should have status 'available', got '%s'", pkg.Status)
+				}
+				if pkg.NewVersion != "" {
+					t.Errorf("For autoremove, NewVersion should be empty, got '%s'", pkg.NewVersion)
+				}
+				if pkg.PackageManager != "yum" {
+					t.Errorf("Package manager should be 'yum', got '%s'", pkg.PackageManager)
+				}
+			}
+		})
+	}
+}
+
+// TestUpgrade_BehaviorWithFixtures tests the Upgrade operation behavior
+func TestUpgrade_BehaviorWithFixtures(t *testing.T) {
+	testCases := []struct {
+		name           string
+		fixture        string
+		expectPackages bool
+		expectError    bool
+	}{
+		{
+			name:           "no packages to upgrade (dry run)",
+			fixture:        "update-all-dryrun-rocky8.txt",
+			expectPackages: false, // "Nothing to do" case
+			expectError:    false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			fixture := loadFixture(t, tc.fixture)
+			packages := yum.ParseUpgradeOutput(fixture, &manager.Options{})
+
+			// Test behavior expectations
+			if tc.expectPackages && len(packages) == 0 {
+				t.Error("Expected packages to be upgraded but got none")
+			}
+			if !tc.expectPackages && len(packages) > 0 {
+				t.Errorf("Expected no packages to be upgraded but got %d", len(packages))
+			}
+
+			// Test contract: All returned packages should have expected fields
+			for _, pkg := range packages {
+				if pkg.Name == "" {
+					t.Error("Upgraded package name should not be empty")
+				}
+				if pkg.Status != manager.PackageStatusInstalled {
+					t.Errorf("Upgraded packages should have status 'installed', got '%s'", pkg.Status)
+				}
+				if pkg.Version == "" {
+					t.Error("Upgraded packages should have Version populated")
+				}
+				if pkg.PackageManager != "yum" {
+					t.Errorf("Package manager should be 'yum', got '%s'", pkg.PackageManager)
+				}
+
+				// Note: Current implementation limitation - Upgrade uses same parser as Install
+				// Future enhancement: Should show Version=old_version, NewVersion=new_version for upgrades
+				// Currently: Version=NewVersion=final_installed_version (same as Install behavior)
+				if pkg.NewVersion != pkg.Version {
+					t.Logf("INFO: Upgrade shows version transition - Version='%s' NewVersion='%s'", pkg.Version, pkg.NewVersion)
+				}
+			}
+		})
+	}
+}
+
+// TestUpgradeAll_BehaviorWithFixtures tests the UpgradeAll operation behavior
+func TestUpgradeAll_BehaviorWithFixtures(t *testing.T) {
+	testCases := []struct {
+		name           string
+		fixture        string
+		expectPackages bool
+	}{
+		{
+			name:           "no system updates available",
+			fixture:        "update-all-dryrun-rocky8.txt",
+			expectPackages: false, // "Nothing to do" case
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			fixture := loadFixture(t, tc.fixture)
+			packages := yum.ParseUpgradeOutput(fixture, &manager.Options{})
+
+			// Test behavior expectations
+			if tc.expectPackages && len(packages) == 0 {
+				t.Error("Expected packages to be upgraded but got none")
+			}
+			if !tc.expectPackages && len(packages) > 0 {
+				t.Errorf("Expected no packages to be upgraded but got %d", len(packages))
+			}
+
+			// Test contract: All returned packages should have expected fields
+			for _, pkg := range packages {
+				if pkg.Name == "" {
+					t.Error("Upgraded package name should not be empty")
+				}
+				if pkg.Status != manager.PackageStatusInstalled {
+					t.Errorf("Upgraded packages should have status 'installed', got '%s'", pkg.Status)
+				}
+				if pkg.Version == "" {
+					t.Error("Upgraded packages should have Version populated")
+				}
+				if pkg.PackageManager != "yum" {
+					t.Errorf("Package manager should be 'yum', got '%s'", pkg.PackageManager)
+				}
+
+				// Note: Current implementation limitation - UpgradeAll uses same parser as Install
+				// Future enhancement: Should show Version=old_version, NewVersion=new_version for upgrades
+				// Currently: Version=NewVersion=final_installed_version (same as Install behavior)
+				if pkg.NewVersion != pkg.Version {
+					t.Logf("INFO: UpgradeAll shows version transition - Version='%s' NewVersion='%s'", pkg.Version, pkg.NewVersion)
+				}
+			}
+		})
+	}
+}
+
+// TestUpgrade_CrossOperationCompatibility documents behavioral differences between operations
+func TestUpgrade_CrossOperationCompatibility(t *testing.T) {
+	t.Run("upgrade vs install behavior documentation", func(t *testing.T) {
+		// This test documents the current implementation behavior and expected differences
+
+		// Current behavior (implementation limitation):
+		// - Install: Version=NewVersion=installed_version
+		// - Upgrade: Version=NewVersion=installed_version (same as Install)
+		//
+		// Expected behavior (future enhancement):
+		// - Install: Version=NewVersion=installed_version (correct)
+		// - Upgrade: Version=old_version, NewVersion=new_version (shows transition)
+
+		t.Log("Current Implementation: Upgrade operations use ParseInstallOutput")
+		t.Log("Limitation: Version transitions (old→new) are not captured")
+		t.Log("Behavior: Upgrade currently behaves like Install (shows final installed version only)")
+		t.Log("Future Enhancement: Should parse 'Upgrading:' section to capture version transitions")
+
+		// Test that both operations exist and follow same interface
+		// This ensures they can be enhanced independently in the future
+		fixture := loadFixture(t, "update-all-dryrun-rocky8.txt")
+
+		installResult := yum.ParseInstallOutput(fixture, &manager.Options{})
+		upgradeResult := yum.ParseUpgradeOutput(fixture, &manager.Options{})
+
+		// Currently they behave identically (both return empty for "Nothing to do")
+		if len(installResult) != len(upgradeResult) {
+			t.Errorf("Expected Install and Upgrade to behave identically with current implementation, got Install=%d Upgrade=%d",
+				len(installResult), len(upgradeResult))
+		}
+	})
+}
