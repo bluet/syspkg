@@ -42,7 +42,7 @@ description: |
 type:         core
 snap-id:      99T7MUlRhtI3U0QFgl5mXXESAiSwt776
 tracking:     latest/stable
-refresh-date: 22 days ago, at 18:37 CST
+refresh-date: 23 days ago, at 18:37 CST
 channels:
   latest/stable:    16-2.61.4-20241002 2025-05-09 (17210) 109MB -
   latest/candidate: 16-2.61.4-20241002 2025-05-06 (17210) 109MB -

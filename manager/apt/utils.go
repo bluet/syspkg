@@ -120,22 +120,29 @@ func ParseDeletedOutput(msg string, opts *manager.Options) []manager.PackageInfo
 }
 
 // ParseFindOutput parses the output of `apt search packageName` command
-// and returns a list of available packages that match the search query. It extracts package
-// information such as name, version, architecture, and category from the
-// output, and stores them in a list of manager.PackageInfo objects.
+// and returns a list of packages that match the search query with their installation status.
 //
-// The output format is expected to be similar to the following example:
+// This function performs two operations:
+// 1. Parses APT search output to extract package information
+// 2. Checks installation status via dpkg-query for each found package
 //
-// Sorting...
-// Full Text Search...
-// zutty/jammy 0.11.2.20220109.192032+dfsg1-1 amd64
-// Efficient full-featured X11 terminal emulator
-// zvbi/jammy 0.2.35-19 amd64
-// Vertical Blanking Interval (VBI) utilities
+// Expected APT search output format:
 //
-// The function first removes the "Sorting..." and "Full Text Search..."
-// lines, and then processes each package entry line to extract relevant
-// information.
+//	Sorting...
+//	Full Text Search...
+//	zutty/jammy 0.11.2.20220109.192032+dfsg1-1 amd64
+//	Efficient full-featured X11 terminal emulator
+//	zvbi/jammy 0.2.35-19 amd64
+//	Vertical Blanking Interval (VBI) utilities
+//
+// Returned PackageInfo status will be:
+//   - installed: Package is currently installed (dpkg-query returns "installed")
+//   - available: Package exists in repos but not installed (dpkg-query not found or "not-installed")
+//   - upgradable: Package installed but newer version available (handled elsewhere)
+//
+// Version field usage:
+//   - installed packages: Version=installed_version, NewVersion=repo_version
+//   - available packages: Version="", NewVersion=repo_version
 func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packages []manager.PackageInfo
 	var packagesDict = make(map[string]manager.PackageInfo)
@@ -149,7 +156,7 @@ func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var lines []string = strings.Split(msg, "\n\n")
 
 	for _, line := range lines {
-		if regexp.MustCompile(`^[\w\d-]+/[\w\d-,]+`).MatchString(line) {
+		if regexp.MustCompile(`^[^\s]+/[^\s]+`).MatchString(line) {
 			parts := strings.Fields(line)
 
 			// if name is empty, it might be not what we want
@@ -157,11 +164,19 @@ func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 				continue
 			}
 
+			// Parse package name and category safely
+			nameParts := strings.Split(parts[0], "/")
+			name := nameParts[0]
+			var category string
+			if len(nameParts) > 1 {
+				category = nameParts[1]
+			}
+
 			packageInfo := manager.PackageInfo{
-				Name:           strings.Split(parts[0], "/")[0],
+				Name:           name,
 				Version:        "",
 				NewVersion:     parts[1],
-				Category:       strings.Split(parts[0], "/")[1],
+				Category:       category,
 				Arch:           parts[2],
 				PackageManager: pm,
 			}
@@ -196,14 +211,17 @@ func ParseListInstalledOutput(msg string, opts *manager.Options) []manager.Packa
 		if len(line) > 0 {
 			parts := strings.Fields(line)
 
-			// if name is empty, it might be not what we want
-			if parts[0] == "" {
+			// Validate minimum required fields
+			if len(parts) < 2 || parts[0] == "" {
 				continue
 			}
 			var name, arch string
 			if strings.Contains(parts[0], ":") {
-				name = strings.Split(parts[0], ":")[0]
-				arch = strings.Split(parts[0], ":")[1]
+				archParts := strings.Split(parts[0], ":")
+				name = archParts[0]
+				if len(archParts) > 1 {
+					arch = archParts[1]
+				}
 			} else {
 				name = parts[0]
 			}
@@ -246,6 +264,11 @@ func ParseListUpgradableOutput(msg string, opts *manager.Options) []manager.Pack
 		if len(line) > 0 {
 			parts := strings.Fields(line)
 			// log.Printf("apt: parts: %+v", parts)
+
+			// Validate minimum required fields for upgradable format
+			if len(parts) < 6 {
+				continue // Skip malformed lines
+			}
 
 			name := strings.Split(parts[0], "/")[0]
 			category := strings.Split(parts[0], "/")[1]
@@ -374,7 +397,12 @@ func getPackageStatus(packages map[string]manager.PackageInfo, opts *manager.Opt
 // and version of the packages in the provided map of package names and manager.PackageInfo objects.
 // It returns a list of manager.PackageInfo objects with their statuses and versions updated.
 func ParseDpkgQueryOutput(output []byte, packages map[string]manager.PackageInfo, opts *manager.Options) ([]manager.PackageInfo, error) {
-	var packagesList []manager.PackageInfo
+	packagesList := make([]manager.PackageInfo, 0)
+
+	// Handle nil packages map
+	if packages == nil {
+		packages = make(map[string]manager.PackageInfo)
+	}
 
 	// remove the last empty line
 	output = bytes.TrimSuffix(output, []byte("\n"))
@@ -427,7 +455,7 @@ func ParseDpkgQueryOutput(output []byte, packages map[string]manager.PackageInfo
 					pkg.Version = version
 				}
 			case string(parts[len(parts)-2]) == "config-files":
-				pkg.Status = manager.PackageStatusConfigFiles
+				pkg.Status = manager.PackageStatusAvailable // Normalize to available for cross-PM compatibility
 				if version != "" {
 					pkg.Version = version
 				}

@@ -30,8 +30,7 @@ hunspell-dictionaries-1-7-2004  1.7-20.04+pkg-6fd6              2      latest/st
 journey                         2.14.6                          23     latest/stable    2appstudio**            -
 mesa-2404                       24.2.8                          495    latest/stable    canonical**             -
 multipass                       1.15.1                          14535  latest/stable    canonical**             -
-postman                         11.47.1                         329    latest/beta      postman-inc**           -
-pre-commit                      2.13.0+pkg-3696                 478    latest/beta      brlin                   classic
+postman                         11.47.4                         331    latest/beta      postman-inc**           -
 pwdsafety                       v0.4.0                          2      latest/stable    edoardottt              -
 snap-store                      41.3-72-g80e7130                1216   latest/stable/…  canonical**             -
 snapd                           2.68.4                          24505  latest/stable    canonical**             snapd
