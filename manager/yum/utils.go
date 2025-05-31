@@ -3,7 +3,6 @@
 package yum
 
 import (
-	"os/exec"
 	"regexp"
 	"strings"
 
@@ -17,12 +16,10 @@ var epochRegex = regexp.MustCompile(`-(\d+):`)
 var packageLineRegex = regexp.MustCompile(`^[\w\d-]+\.[\w\d_]+`)
 
 // ParseFindOutput parses the output of `yum search packageName` command
-// and returns a list of packages that match the search query with accurate installation status.
+// and returns a list of packages that match the search query.
 //
-// This function now provides complete status detection by:
-//  1. Parsing yum search output to find available packages
-//  2. Using rpm -q to check installation status for each found package
-//  3. Returning accurate status information (installed/available)
+// This function performs pure parsing of yum search output without making any system calls.
+// Status detection is handled separately by the calling function using rpm -q integration.
 //
 // The output format is expected to be similar to the following example:
 //
@@ -36,14 +33,10 @@ var packageLineRegex = regexp.MustCompile(`^[\w\d-]+\.[\w\d_]+`)
 // Returned PackageInfo fields:
 //   - Name: Package name (e.g., "nginx")
 //   - Arch: Architecture (e.g., "x86_64")
-//   - Status: PackageStatusInstalled or PackageStatusAvailable (accurate)
-//   - Version: Installed version if package is installed, empty if not installed
+//   - Status: PackageStatusAvailable (default - enhanced by calling function)
+//   - Version: Empty (will be set by status enhancement if installed)
 //   - NewVersion: Empty (search doesn't provide repo version)
 //   - PackageManager: "yum"
-//
-// Performance: This function makes additional rpm -q calls to determine status,
-// similar to how APT uses dpkg-query. The performance impact is minimal for
-// typical Find() usage patterns.
 //
 // The opts parameter is reserved for future parsing options and is currently unused.
 func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
@@ -87,23 +80,12 @@ func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 		}
 	}
 
-	if len(packagesDict) == 0 {
-		return []manager.PackageInfo{}
+	// Convert map to slice and return
+	result := make([]manager.PackageInfo, 0, len(packagesDict))
+	for _, pkg := range packagesDict {
+		result = append(result, pkg)
 	}
-
-	// Check installation status for found packages (similar to APT's approach)
-	packages, err := getYumPackageStatus(packagesDict, opts)
-	if err != nil {
-		// If status checking fails, return packages with available status
-		// This maintains backward compatibility while providing better functionality when possible
-		result := make([]manager.PackageInfo, 0, len(packagesDict))
-		for _, pkg := range packagesDict {
-			result = append(result, pkg)
-		}
-		return result
-	}
-
-	return packages
+	return result
 }
 
 // ParseListInstalledOutput parses the output of `yum list --installed` command
@@ -472,67 +454,21 @@ func ParseAutoRemoveOutput(msg string, opts *manager.Options) []manager.PackageI
 	return ParseDeleteOutput(msg, opts)
 }
 
-// getYumPackageStatus checks the installation status of packages found by yum search
-// by running rpm -q to query the RPM database. This provides accurate status information
-// similar to how APT uses dpkg-query.
-//
-// Returns packages with updated status:
-//   - installed: Package is currently installed
-//   - available: Package exists in repos but not installed
-//   - upgradable: Package installed but newer version available (future enhancement)
-func getYumPackageStatus(packages map[string]manager.PackageInfo, _ *manager.Options) ([]manager.PackageInfo, error) {
-	if len(packages) == 0 {
-		return []manager.PackageInfo{}, nil
-	}
-
-	// Get list of package names to check
-	packageNames := make([]string, 0, len(packages))
-	for name := range packages {
-		packageNames = append(packageNames, name)
-	}
-
-	// Use rpm -q to check installation status (faster than yum list installed)
-	// rpm -q returns exit code 0 for installed packages, 1 for not installed
-	installedPackages, err := checkRpmInstallationStatus(packageNames)
-	if err != nil {
-		return nil, err
-	}
-
-	// Build result list with updated status
-	result := make([]manager.PackageInfo, 0, len(packages))
-	for _, pkgName := range packageNames {
-		pkg := packages[pkgName]
-
-		// Check if package is installed
-		if _, isInstalled := installedPackages[pkgName]; isInstalled {
-			pkg.Status = manager.PackageStatusInstalled
-			pkg.Version = installedPackages[pkgName].Version
-		} else {
-			pkg.Status = manager.PackageStatusAvailable
-			pkg.Version = ""
-		}
-
-		result = append(result, pkg)
-	}
-
-	return result, nil
-}
-
-// checkRpmInstallationStatus uses rpm -q to check which packages are installed
-// Returns a map of installed package names to their PackageInfo and an error if rpm command fails
-func checkRpmInstallationStatus(packageNames []string) (map[string]manager.PackageInfo, error) {
+// checkRpmInstallationStatusWithRunner uses rpm -q to check which packages are installed
+// Returns a map of installed package names to their PackageInfo using the provided CommandRunner
+func checkRpmInstallationStatusWithRunner(packageNames []string, runner manager.CommandRunner) (map[string]manager.PackageInfo, error) {
 	installedPackages := make(map[string]manager.PackageInfo)
 
-	// Check if rpm command is available
-	if _, err := exec.LookPath("rpm"); err != nil {
+	// Check if rpm command is available by trying to run rpm --version
+	_, err := runner.Output("rpm", "--version")
+	if err != nil {
 		return nil, err
 	}
 
 	// Check each package individually with rpm -q
 	// Using individual queries because rpm -q with multiple packages can be unreliable
 	for _, pkgName := range packageNames {
-		cmd := exec.Command("rpm", "-q", pkgName)
-		out, err := cmd.Output()
+		out, err := runner.Output("rpm", "-q", pkgName)
 
 		if err != nil {
 			// rpm -q returns exit code 1 for packages that are not installed

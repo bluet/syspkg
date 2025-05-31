@@ -257,7 +257,18 @@ func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manag
 		return nil, err
 	}
 
-	return ParseFindOutput(string(out), opts), nil
+	// Parse the search output to get basic package info
+	packages := ParseFindOutput(string(out), opts)
+
+	// Enhance with accurate status information using rpm -q
+	// This provides cross-package manager API consistency
+	enhancedPackages, err := a.enhancePackagesWithStatus(packages, opts)
+	if err != nil {
+		// If status enhancement fails, return basic packages (backward compatibility)
+		return packages, nil
+	}
+
+	return enhancedPackages, nil
 }
 
 // ListInstalled lists all installed packages using the yum package manager.
@@ -523,4 +534,45 @@ func (a *PackageManager) AutoRemove(opts *manager.Options) ([]manager.PackageInf
 	}
 
 	return ParseAutoRemoveOutput(string(out), opts), nil
+}
+
+// enhancePackagesWithStatus adds accurate installation status to packages using rpm -q
+// This method performs the system calls that were previously embedded in parsing functions
+func (a *PackageManager) enhancePackagesWithStatus(packages []manager.PackageInfo, _ *manager.Options) ([]manager.PackageInfo, error) {
+	if len(packages) == 0 {
+		return packages, nil
+	}
+
+	// Build map for faster lookup
+	packageMap := make(map[string]manager.PackageInfo)
+	packageNames := make([]string, 0, len(packages))
+	for _, pkg := range packages {
+		packageMap[pkg.Name] = pkg
+		packageNames = append(packageNames, pkg.Name)
+	}
+
+	// Create command runner (can be mocked in tests)
+	runner := manager.NewOSCommandRunner()
+
+	// Check installation status using rpm -q
+	installedPackages, err := checkRpmInstallationStatusWithRunner(packageNames, runner)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build result list with updated status
+	result := make([]manager.PackageInfo, 0, len(packages))
+	for _, pkg := range packages {
+		// Check if package is installed
+		if installedInfo, isInstalled := installedPackages[pkg.Name]; isInstalled {
+			pkg.Status = manager.PackageStatusInstalled
+			pkg.Version = installedInfo.Version
+		} else {
+			pkg.Status = manager.PackageStatusAvailable
+			pkg.Version = ""
+		}
+		result = append(result, pkg)
+	}
+
+	return result, nil
 }
