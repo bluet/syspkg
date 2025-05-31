@@ -13,22 +13,32 @@ import (
 var packageLineRegex = regexp.MustCompile(`^[\w\d-]+\.[\w\d_]+`)
 
 // ParseFindOutput parses the output of `yum search packageName` command
-// and returns a list of available packages that match the search query. It extracts package
-// information such as name, architecture from the
-// output, and stores them in a list of manager.PackageInfo objects.
+// and returns a list of packages that match the search query.
+//
+// IMPORTANT LIMITATION: YUM search output does not indicate installation status.
+// All packages are returned with PackageStatusAvailable regardless of whether
+// they are actually installed. This is a limitation of the YUM command output format.
+//
+// To determine accurate installation status, users should:
+//  1. Use GetPackageInfo() for individual packages (shows Installed/Available sections)
+//  2. Cross-reference with ListInstalled() results
 //
 // The output format is expected to be similar to the following example:
 //
-//Last metadata expiration check: 0:26:09 ago on Thu 22 May 2025 04:30:18 PM UTC.
-// ==================================================Name Exactly Matched: nginx ====================================================
-//nginx.x86_64 : A high performance web server and reverse proxy server
-//====================================================Name & Summary Matched: nginx==================================================
-//nginx-all-modules.noarch : A meta package that installs all available Nginx modules
-//nginx-core.x86_64 : nginx minimal core
-
-// The function first removes the "Last Metadata..." and the "========="
-// lines, and then processes each package entry line to extract relevant
-// information.
+//	Last metadata expiration check: 0:26:09 ago on Thu 22 May 2025 04:30:18 PM UTC.
+//	==================================================Name Exactly Matched: nginx ====================================================
+//	nginx.x86_64 : A high performance web server and reverse proxy server
+//	====================================================Name & Summary Matched: nginx==================================================
+//	nginx-all-modules.noarch : A meta package that installs all available Nginx modules
+//	nginx-core.x86_64 : nginx minimal core
+//
+// Returned PackageInfo fields:
+//   - Name: Package name (e.g., "nginx")
+//   - Arch: Architecture (e.g., "x86_64")
+//   - Status: Always PackageStatusAvailable (YUM limitation)
+//   - Version: Always empty (not provided by yum search)
+//   - NewVersion: Always empty (not provided by yum search)
+//   - PackageManager: "yum"
 //
 // The opts parameter is reserved for future parsing options and is currently unused.
 func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
@@ -124,17 +134,43 @@ func ParseListInstalledOutput(msg string, opts *manager.Options) []manager.Packa
 
 // ParsePackageInfoOutput parses the output of `yum info packageName` command
 // and returns a manager.PackageInfo object containing package information such as name, version,
-// architecture, and category. This function is useful for getting detailed package information.
+// architecture, and status. This function determines installation status based on whether
+// the package appears under "Installed Packages" or "Available Packages" section.
+//
+// Expected output format:
+//
+//	Installed Packages
+//	Name         : package-name
+//	Version      : 1.0.0
+//	...
+//
+// OR:
+//
+//	Available Packages
+//	Name         : package-name
+//	Version      : 1.0.0
+//	...
 //
 // The opts parameter is reserved for future parsing options and is currently unused.
 func ParsePackageInfoOutput(msg string, opts *manager.Options) manager.PackageInfo {
 	var pkg manager.PackageInfo
+	var isInstalled bool
 
 	// remove the last empty line
 	msg = strings.TrimSuffix(msg, "\n")
 	lines := strings.Split(msg, "\n")
 
 	for _, line := range lines {
+		// Check for section headers to determine status
+		if strings.HasPrefix(line, "Installed Packages") {
+			isInstalled = true
+			continue
+		}
+		if strings.HasPrefix(line, "Available Packages") {
+			isInstalled = false
+			continue
+		}
+
 		if len(line) > 0 {
 			parts := strings.SplitN(line, ":", 2)
 
@@ -157,6 +193,13 @@ func ParsePackageInfoOutput(msg string, opts *manager.Options) manager.PackageIn
 	}
 
 	pkg.PackageManager = "yum"
+
+	// Set status based on which section the package was found in
+	if isInstalled {
+		pkg.Status = manager.PackageStatusInstalled
+	} else {
+		pkg.Status = manager.PackageStatusAvailable
+	}
 
 	return pkg
 }

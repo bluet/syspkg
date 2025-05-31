@@ -129,6 +129,19 @@ func TestFind_BehaviorWithFixtures(t *testing.T) {
 				if pkg.Arch == "" {
 					t.Error("Package architecture should not be empty")
 				}
+
+				// Test YUM limitation: Status is always available regardless of actual installation
+				if pkg.Status != manager.PackageStatusAvailable {
+					t.Errorf("YUM Find should always return PackageStatusAvailable due to output limitation, got '%s'", pkg.Status)
+				}
+
+				// Test YUM limitation: Version fields are not populated by search
+				if pkg.Version != "" {
+					t.Errorf("YUM Find should not populate Version field, got '%s'", pkg.Version)
+				}
+				if pkg.NewVersion != "" {
+					t.Errorf("YUM Find should not populate NewVersion field, got '%s'", pkg.NewVersion)
+				}
 			}
 		})
 	}
@@ -205,28 +218,32 @@ func TestListInstalled_BehaviorWithFixtures(t *testing.T) {
 // TestGetPackageInfo_BehaviorWithFixtures tests the GetPackageInfo operation behavior
 func TestGetPackageInfo_BehaviorWithFixtures(t *testing.T) {
 	testCases := []struct {
-		name         string
-		fixture      string
-		expectError  bool
-		expectedName string
+		name           string
+		fixture        string
+		expectError    bool
+		expectedName   string
+		expectedStatus manager.PackageStatus
 	}{
 		{
-			name:         "available package info",
-			fixture:      "info-nginx-rocky8.txt",
-			expectError:  false,
-			expectedName: "nginx",
+			name:           "available package info",
+			fixture:        "info-nginx-rocky8.txt",
+			expectError:    false,
+			expectedName:   "nginx",
+			expectedStatus: manager.PackageStatusAvailable,
 		},
 		{
-			name:         "installed package info",
-			fixture:      "info-vim-installed-rocky8.txt",
-			expectError:  false,
-			expectedName: "vim-enhanced",
+			name:           "installed package info",
+			fixture:        "info-vim-installed-rocky8.txt",
+			expectError:    false,
+			expectedName:   "vim-enhanced",
+			expectedStatus: manager.PackageStatusInstalled,
 		},
 		{
-			name:         "available vim package info",
-			fixture:      "info-vim-rocky8.txt",
-			expectError:  false,
-			expectedName: "vim-enhanced",
+			name:           "available vim package info",
+			fixture:        "info-vim-rocky8.txt",
+			expectError:    false,
+			expectedName:   "vim-enhanced",
+			expectedStatus: manager.PackageStatusAvailable,
 		},
 	}
 
@@ -248,6 +265,11 @@ func TestGetPackageInfo_BehaviorWithFixtures(t *testing.T) {
 				}
 				if pkg.PackageManager != "yum" {
 					t.Errorf("Package manager should be 'yum', got '%s'", pkg.PackageManager)
+				}
+
+				// Test behavior: Status should be determined by section header
+				if pkg.Status != tc.expectedStatus {
+					t.Errorf("Expected status '%s' based on section, got '%s'", tc.expectedStatus, pkg.Status)
 				}
 			}
 		})
@@ -299,6 +321,48 @@ func TestComplexPackageNames(t *testing.T) {
 		}
 		if !foundLibreOffice {
 			t.Error("Failed to correctly parse package with dots: libreoffice-langpack-en.x86_64")
+		}
+	})
+}
+
+// TestYUM_CrossPackageManagerCompatibility documents YUM-specific behavior differences
+// compared to other package managers, particularly around status determination
+func TestYUM_CrossPackageManagerCompatibility(t *testing.T) {
+	t.Run("Find operation status limitation", func(t *testing.T) {
+		// This test documents that YUM Find always returns available status
+		// unlike APT which can determine actual installation status
+		fixture := loadFixture(t, "search-vim-rocky8.txt")
+		packages := yum.ParseFindOutput(fixture, &manager.Options{})
+
+		if len(packages) == 0 {
+			t.Fatal("Expected packages in search results")
+		}
+
+		// Document YUM limitation: Cannot determine if packages are installed
+		for _, pkg := range packages {
+			if pkg.Status != manager.PackageStatusAvailable {
+				t.Errorf("YUM Find limitation: should always return available status, got %s", pkg.Status)
+			}
+		}
+
+		// Document that users must use GetPackageInfo for accurate status
+		t.Log("YUM users must use GetPackageInfo() to determine actual installation status")
+	})
+
+	t.Run("GetPackageInfo provides accurate status", func(t *testing.T) {
+		// Test that GetPackageInfo correctly determines status from section headers
+		installedFixture := loadFixture(t, "info-vim-installed-rocky8.txt")
+		installedPkg := yum.ParsePackageInfoOutput(installedFixture, &manager.Options{})
+
+		if installedPkg.Status != manager.PackageStatusInstalled {
+			t.Errorf("GetPackageInfo should detect installed status from 'Installed Packages' section, got %s", installedPkg.Status)
+		}
+
+		availableFixture := loadFixture(t, "info-vim-rocky8.txt")
+		availablePkg := yum.ParsePackageInfoOutput(availableFixture, &manager.Options{})
+
+		if availablePkg.Status != manager.PackageStatusAvailable {
+			t.Errorf("GetPackageInfo should detect available status from 'Available Packages' section, got %s", availablePkg.Status)
 		}
 	})
 }
