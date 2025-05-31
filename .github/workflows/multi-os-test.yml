@@ -167,8 +167,9 @@ jobs:
         # Test Alpine detection
         docker run --rm -v $PWD:/workspace alpine:3.18 sh -c "
           cd /workspace &&
-          apk add --no-cache go &&
-          go test -v ./osinfo -run TestGetOSInfo
+          apk add --no-cache curl tar &&
+          curl -L https://go.dev/dl/go1.23.4.linux-amd64.tar.gz | tar -C /usr/local -xz &&
+          /usr/local/go/bin/go test -v ./osinfo -run TestGetOSInfo
         "
 
 # Summary job that depends on all tests
