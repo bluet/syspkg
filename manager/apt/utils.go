@@ -353,7 +353,8 @@ func addUnprocessedPackages(packagesList []manager.PackageInfo, packages map[str
 
 // getPackageStatus takes a map of package names and manager.PackageInfo objects, and returns a list
 // of manager.PackageInfo objects with their statuses updated using the output of `dpkg-query` command.
-// It also adds any packages not found by dpkg-query to the list with their status set to unknown.
+// It also adds any packages not found by dpkg-query to the list; their status is initially set to unknown,
+// but then converted to available for cross-package manager compatibility.
 func getPackageStatus(packages map[string]manager.PackageInfo, opts *manager.Options) ([]manager.PackageInfo, error) {
 	var packageNames []string
 	var packagesList []manager.PackageInfo
