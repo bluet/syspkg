@@ -187,10 +187,10 @@ We welcome contributions to SysPkg!
 
 ### For Users
 - **Bug reports**: Open an issue with details about the problem
-- **Feature requests**: Let us know what package managers or features you'd like to see
+- **Feature requests**: Please let us know what package managers or features you'd like to see
 
 ### For Developers
-- **Quick start**: See [CONTRIBUTING.md](CONTRIBUTING.md) for comprehensive development guide
+- **Quick start**: See [CONTRIBUTING.md](CONTRIBUTING.md) for a comprehensive development guide
 - **Architecture**: See [CLAUDE.md](CLAUDE.md) for detailed technical documentation
 - **Testing strategy**: Multi-OS Docker testing with environment-aware test execution
 

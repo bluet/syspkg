@@ -228,7 +228,7 @@ if skip, reason := env.ShouldSkipTest("yum"); skip {
 
 ### CI/CD Multi-OS Pipeline
 
-**Docker Matrix**: Tests run across multiple OS in parallel:
+**Docker Matrix**: Tests run across multiple OSes in parallel:
 ```yaml
 strategy:
   matrix:
@@ -256,7 +256,7 @@ strategy:
 
 ### Test Fixture Generation
 
-Fixtures are automatically generated from real package manager outputs across different OS:
+Fixtures are automatically generated from real package manager outputs across different OSes:
 - `testing/fixtures/apt/search-vim-ubuntu22.txt`
 - `testing/fixtures/yum/search-vim-rocky8.txt`
 - `testing/fixtures/dnf/search-vim-fedora39.txt`
