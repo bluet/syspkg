@@ -117,6 +117,9 @@ Options: `--debug`, `--assume-yes`, `--dry-run`, `--interactive`, `--verbose`
 - Add unit tests for flatpak package manager
 - **APT fixture cleanup and behavior testing** ✅ - Reduced 16→7 fixtures, full test coverage
 
+**Documentation:**
+- **API and behavior documentation** ✅ - Enhanced interface docs, status normalization, cross-PM compatibility
+
 **Code Improvements:**
 - Implement context support for cancellation and timeouts
 - Create custom error types for better error handling
