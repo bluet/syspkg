@@ -75,44 +75,48 @@ func ParseInstallOutput(msg string, opts *manager.Options) []manager.PackageInfo
 func ParseDeletedOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packages []manager.PackageInfo
 
-	// remove the last empty line
+	// Normalize line endings (handle both Unix \n and Windows \r\n)
+	msg = strings.ReplaceAll(msg, "\r\n", "\n")
 	msg = strings.TrimSuffix(msg, "\n")
-	var lines []string = strings.Split(string(msg), "\n")
+	var lines []string = strings.Split(msg, "\n")
 
-	for _, line := range lines {
+	for _, rawLine := range lines {
+		// Normalize whitespace (drops CR and any leading/trailing whitespace)
+		line := strings.TrimSpace(rawLine)
+
 		if opts.Verbose {
 			log.Printf("apt: %s", line)
 		}
 
-		// TODO: rewrite this using regexp
+		// Use regex for robust parsing of "Removing package:arch (version) ..." lines
 		if strings.HasPrefix(line, "Removing") {
-			parts := strings.Fields(line)
-			if opts.Verbose {
-				log.Printf("apt: parts: %s", parts)
-			}
-			var name, arch string
-			if strings.Contains(parts[1], ":") {
-				name = strings.Split(parts[1], ":")[0]
-				arch = strings.Split(parts[1], ":")[1]
-			} else {
-				name = parts[1]
-			}
+			// Regex handles both "package (version)" and "package:arch (version)" formats
+			removeRegex := regexp.MustCompile(`^Removing\s+(\S+?)(?::(\S+))?\s+\(([^)]+)\)`)
+			if match := removeRegex.FindStringSubmatch(line); match != nil {
+				name := match[1]
+				arch := match[2] // May be empty if no architecture specified
+				version := match[3]
 
-			// if name is empty, it might be not what we want
-			if name == "" {
-				continue
-			}
+				if opts.Verbose {
+					log.Printf("apt: parsed - name: %s, arch: %s, version: %s", name, arch, version)
+				}
 
-			packageInfo := manager.PackageInfo{
-				Name:           name,
-				Version:        strings.Trim(parts[2], "()"),
-				NewVersion:     "",
-				Category:       "",
-				Arch:           arch,
-				Status:         manager.PackageStatusAvailable,
-				PackageManager: pm,
+				// Skip if name is empty
+				if name == "" {
+					continue
+				}
+
+				packageInfo := manager.PackageInfo{
+					Name:           name,
+					Version:        version,
+					NewVersion:     "",
+					Category:       "",
+					Arch:           arch,
+					Status:         manager.PackageStatusAvailable,
+					PackageManager: pm,
+				}
+				packages = append(packages, packageInfo)
 			}
-			packages = append(packages, packageInfo)
 		}
 	}
 
