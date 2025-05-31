@@ -160,7 +160,7 @@ jobs:
         docker run --rm -v $PWD:/workspace ubuntu:22.04 bash -c "
           apt-get update && apt-get install -y curl &&
           cd /workspace &&
-          curl -L https://go.dev/dl/go1.23.0.linux-amd64.tar.gz | tar -C /usr/local -xz &&
+          curl -L https://go.dev/dl/go1.23.4.linux-amd64.tar.gz | tar -C /usr/local -xz &&
           /usr/local/go/bin/go test -v ./osinfo -run TestGetOSInfo
         "
 
