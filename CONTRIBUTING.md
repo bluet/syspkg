@@ -441,10 +441,72 @@ func TestYum(t *testing.T) {
 }
 ```
 
+### Three-Layer Testing Strategy
+
+SysPkg follows modern testing best practices with a three-layer approach that allows testing almost every line of code without requiring system commands:
+
+#### 1. **Unit Tests** (Pure Logic, No System Calls)
+- **Purpose**: Test parsing functions and business logic using fixtures
+- **Location**: `*_test.go` files (e.g., `behavior_test.go`)
+- **Characteristics**:
+  - Use real package manager output captured as fixtures
+  - No system calls or external dependencies
+  - Can run anywhere (CI, developer machines, any OS)
+  - Fast execution (milliseconds)
+- **Example**:
+  ```go
+  func TestParseFindOutput_BehaviorWithFixtures(t *testing.T) {
+      fixture := loadFixture(t, "search-vim-rocky8.txt")
+      packages := yum.ParseFindOutput(fixture, &manager.Options{})
+      // Test parser behavior with real output
+  }
+  ```
+
+#### 2. **Integration Tests** (Real Commands, OS-Aware)
+- **Purpose**: Test full method implementations with actual package managers
+- **Location**: `*_integration_test.go` files
+- **Build Tag**: `// +build integration`
+- **Characteristics**:
+  - Execute real package manager commands
+  - Automatically skip when package manager not available
+  - Test the complete code path including enhancements
+  - Medium execution time (seconds)
+- **Example**:
+  ```go
+  func TestYUMOperations_Integration(t *testing.T) {
+      env, _ := testenv.GetTestEnvironment()
+      if skip, reason := env.ShouldSkipTest("yum"); skip {
+          t.Skip(reason)
+      }
+      pm := &yum.PackageManager{}
+      packages, err := pm.Find([]string{"bash"}, &manager.Options{})
+      // Verify enhanced status detection works
+  }
+  ```
+
+#### 3. **Mock Tests** (Full Logic, No System Calls) - *Future Enhancement*
+- **Purpose**: Test complete method logic with dependency injection
+- **Requirement**: CommandRunner interface (Issue #20)
+- **Characteristics**:
+  - Test full business logic without system dependencies
+  - Use MockCommandRunner for controlled responses
+  - Can test error conditions and edge cases
+  - Fast execution like unit tests
+- **Future Example**:
+  ```go
+  func TestFind_WithMockedCommands(t *testing.T) {
+      mock := manager.NewMockCommandRunner()
+      mock.AddCommand("yum", []string{"search", "vim"}, searchFixture)
+      mock.AddCommand("rpm", []string{"-q", "vim"}, installedOutput)
+      // Test complete Find() logic with mocked system calls
+  }
+  ```
+
 ### Test Organization
-- **Unit tests**: Test parser functions with captured fixtures
-- **Integration tests**: Test real package manager availability and basic operations
-- **System tests**: Test actual package installation (use sparingly, requires privileges)
+- **Unit tests**: Test parser functions with captured fixtures (always run)
+- **Integration tests**: Test real package manager operations (run when available)
+- **System tests**: Test privileged operations like install/remove (use sparingly)
+- **Mock tests**: Test full logic without system calls (coming with Issue #20)
 
 ### Fixtures and Mocking
 

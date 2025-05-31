@@ -63,8 +63,9 @@ func TestPackageManager_GetPackageManager(t *testing.T) {
 	}
 }
 
-// TestFind_BehaviorWithFixtures tests the Find operation behavior using real command output fixtures
-func TestFind_BehaviorWithFixtures(t *testing.T) {
+// TestParseFindOutput_BehaviorWithFixtures tests the ParseFindOutput parser behavior using real YUM search command output fixtures
+// Note: This tests the parser function directly, not the Find() method which enhances results with rpm -q
+func TestParseFindOutput_BehaviorWithFixtures(t *testing.T) {
 	testCases := []struct {
 		name             string
 		fixture          string
@@ -130,17 +131,19 @@ func TestFind_BehaviorWithFixtures(t *testing.T) {
 					t.Error("Package architecture should not be empty")
 				}
 
-				// Test YUM limitation: Status is always available regardless of actual installation
+				// Test ParseFindOutput limitation: Status is always available since YUM search output
+				// doesn't include installation status (the Find() method enhances this with rpm -q)
 				if pkg.Status != manager.PackageStatusAvailable {
-					t.Errorf("YUM Find should always return PackageStatusAvailable due to output limitation, got '%s'", pkg.Status)
+					t.Errorf("ParseFindOutput should always return PackageStatusAvailable due to YUM search output limitation, got '%s'", pkg.Status)
 				}
 
-				// Test YUM limitation: Version fields are not populated by search
+				// Test ParseFindOutput limitation: Version fields are not populated by YUM search output
+				// (the Find() method enhances this for installed packages)
 				if pkg.Version != "" {
-					t.Errorf("YUM Find should not populate Version field, got '%s'", pkg.Version)
+					t.Errorf("ParseFindOutput should not populate Version field from search output, got '%s'", pkg.Version)
 				}
 				if pkg.NewVersion != "" {
-					t.Errorf("YUM Find should not populate NewVersion field, got '%s'", pkg.NewVersion)
+					t.Errorf("ParseFindOutput should not populate NewVersion field from search output, got '%s'", pkg.NewVersion)
 				}
 			}
 		})
