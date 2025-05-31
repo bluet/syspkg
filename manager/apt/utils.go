@@ -17,6 +17,9 @@ import (
 	"github.com/bluet/syspkg/manager"
 )
 
+// removeRegex matches APT remove output lines to extract package information
+var removeRegex = regexp.MustCompile(`^Removing\s+(\S+?)(?::(\S+))?\s+\(([^)]+)\)`)
+
 // ParseInstallOutput parses the output of `apt install packageName` command and returns a list of installed packages.
 // It extracts the package name, package architecture, and version from the lines that start with "Setting up ".
 // Example msg:
@@ -91,7 +94,6 @@ func ParseDeletedOutput(msg string, opts *manager.Options) []manager.PackageInfo
 		// Use regex for robust parsing of "Removing package:arch (version) ..." lines
 		if strings.HasPrefix(line, "Removing") {
 			// Regex handles both "package (version)" and "package:arch (version)" formats
-			removeRegex := regexp.MustCompile(`^Removing\s+(\S+?)(?::(\S+))?\s+\(([^)]+)\)`)
 			if match := removeRegex.FindStringSubmatch(line); match != nil {
 				name := match[1]
 				arch := match[2] // May be empty if no architecture specified
