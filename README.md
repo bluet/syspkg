@@ -17,6 +17,8 @@ SysPkg is a unified CLI tool and Golang library for managing system packages acr
 - **Consistent API**: Same interface across all supported package managers
 - **Tool-Focused**: Works wherever package manager tools work (containers, cross-platform, etc.)
 - **Production Ready**: Comprehensive testing across multiple OS distributions
+- **Performance Optimized**: Efficient parsing with compiled regexes and robust error handling
+- **Cross-Platform**: Handles different line endings (CRLF/LF) and whitespace variations
 
 ## Features
 
