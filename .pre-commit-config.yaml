@@ -5,7 +5,9 @@ repos:
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
+        exclude: ^testing/fixtures/
       - id: end-of-file-fixer
+        exclude: ^testing/fixtures/
       - id: check-yaml
       - id: check-added-large-files
       - id: check-merge-conflict
@@ -13,6 +15,7 @@ repos:
       - id: check-json
       - id: check-toml
       - id: mixed-line-ending
+        exclude: ^testing/fixtures/
 
   # Google's official pre-commit tool hooks (optional - uncomment if needed)
   # - repo: https://github.com/google/pre-commit-tool-hooks

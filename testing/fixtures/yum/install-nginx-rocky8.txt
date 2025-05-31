@@ -1,0 +1,384 @@
+Last metadata expiration check: 0:00:42 ago on Sat May 31 07:53:22 2025.
+Dependencies resolved.
+===============================================================================================
+ Package                       Arch    Version                                 Repo        Size
+===============================================================================================
+Installing:
+ nginx                         x86_64  1:1.14.1-9.module+el8.4.0+542+81547229  appstream  566 k
+Installing dependencies:
+ dejavu-fonts-common           noarch  2.35-7.el8                              baseos      73 k
+ dejavu-sans-fonts             noarch  2.35-7.el8                              baseos     1.5 M
+ fontconfig                    x86_64  2.13.1-4.el8                            baseos     273 k
+ fontpackages-filesystem       noarch  1.44-22.el8                             baseos      15 k
+ freetype                      x86_64  2.9.1-10.el8_10                         baseos     393 k
+ gd                            x86_64  2.2.5-7.el8                             appstream  143 k
+ groff-base                    x86_64  1.22.3-18.el8                           baseos     1.0 M
+ jbigkit-libs                  x86_64  2.1-14.el8                              appstream   54 k
+ libX11                        x86_64  1.6.8-9.el8_10                          appstream  611 k
+ libX11-common                 noarch  1.6.8-9.el8_10                          appstream  157 k
+ libXau                        x86_64  1.0.9-3.el8                             appstream   36 k
+ libXpm                        x86_64  3.5.12-11.el8                           appstream   58 k
+ libjpeg-turbo                 x86_64  1.5.3-14.el8_10                         appstream  156 k
+ libpng                        x86_64  2:1.6.34-5.el8                          baseos     125 k
+ libtiff                       x86_64  4.0.9-34.el8_10                         appstream  189 k
+ libwebp                       x86_64  1.0.0-10.el8                            appstream  273 k
+ libxcb                        x86_64  1.13.1-1.el8                            appstream  228 k
+ libxslt                       x86_64  1.1.32-6.1.el8_10                       baseos     249 k
+ ncurses                       x86_64  6.1-10.20180224.el8                     baseos     386 k
+ nginx-all-modules             noarch  1:1.14.1-9.module+el8.4.0+542+81547229  appstream   22 k
+ nginx-filesystem              noarch  1:1.14.1-9.module+el8.4.0+542+81547229  appstream   23 k
+ nginx-mod-http-image-filter   x86_64  1:1.14.1-9.module+el8.4.0+542+81547229  appstream   34 k
+ nginx-mod-http-perl           x86_64  1:1.14.1-9.module+el8.4.0+542+81547229  appstream   45 k
+ nginx-mod-http-xslt-filter    x86_64  1:1.14.1-9.module+el8.4.0+542+81547229  appstream   32 k
+ nginx-mod-mail                x86_64  1:1.14.1-9.module+el8.4.0+542+81547229  appstream   63 k
+ nginx-mod-stream              x86_64  1:1.14.1-9.module+el8.4.0+542+81547229  appstream   84 k
+ perl-Carp                     noarch  1.42-396.el8                            baseos      29 k
+ perl-Data-Dumper              x86_64  2.167-399.el8                           baseos      57 k
+ perl-Digest                   noarch  1.17-395.el8                            appstream   26 k
+ perl-Digest-MD5               x86_64  2.55-396.el8                            appstream   36 k
+ perl-Encode                   x86_64  4:2.97-3.el8                            baseos     1.5 M
+ perl-Errno                    x86_64  1.28-422.el8                            baseos      75 k
+ perl-Exporter                 noarch  5.72-396.el8                            baseos      33 k
+ perl-File-Path                noarch  2.15-2.el8                              baseos      37 k
+ perl-File-Temp                noarch  0.230.600-1.el8                         baseos      62 k
+ perl-Getopt-Long              noarch  1:2.50-4.el8                            baseos      62 k
+ perl-HTTP-Tiny                noarch  0.074-3.el8                             baseos      58 k
+ perl-IO                       x86_64  1.38-422.el8                            baseos     141 k
+ perl-IO-Socket-IP             noarch  0.39-5.el8                              appstream   46 k
+ perl-IO-Socket-SSL            noarch  2.066-4.module+el8.9.0+1517+e71a7a62    appstream  297 k
+ perl-MIME-Base64              x86_64  3.15-396.el8                            baseos      30 k
+ perl-Mozilla-CA               noarch  20160104-7.module+el8.9.0+1521+0101edce appstream   14 k
+ perl-Net-SSLeay               x86_64  1.88-2.module+el8.9.0+1517+e71a7a62     appstream  378 k
+ perl-PathTools                x86_64  3.74-1.el8                              baseos      89 k
+ perl-Pod-Escapes              noarch  1:1.07-395.el8                          baseos      19 k
+ perl-Pod-Perldoc              noarch  3.28-396.el8                            baseos      85 k
+ perl-Pod-Simple               noarch  1:3.35-395.el8                          baseos     212 k
+ perl-Pod-Usage                noarch  4:1.69-395.el8                          baseos      33 k
+ perl-Scalar-List-Utils        x86_64  3:1.49-2.el8                            baseos      67 k
+ perl-Socket                   x86_64  4:2.027-3.el8                           baseos      58 k
+ perl-Storable                 x86_64  1:3.11-3.el8                            baseos      97 k
+ perl-Term-ANSIColor           noarch  4.06-396.el8                            baseos      45 k
+ perl-Term-Cap                 noarch  1.17-395.el8                            baseos      22 k
+ perl-Text-ParseWords          noarch  3.30-395.el8                            baseos      17 k
+ perl-Text-Tabs+Wrap           noarch  2013.0523-395.el8                       baseos      23 k
+ perl-Time-Local               noarch  1:1.280-1.el8                           baseos      32 k
+ perl-URI                      noarch  1.73-3.el8                              appstream  115 k
+ perl-Unicode-Normalize        x86_64  1.25-396.el8                            baseos      81 k
+ perl-constant                 noarch  1.33-396.el8                            baseos      24 k
+ perl-interpreter              x86_64  4:5.26.3-422.el8                        baseos     6.3 M
+ perl-libnet                   noarch  3.11-3.el8                              appstream  120 k
+ perl-libs                     x86_64  4:5.26.3-422.el8                        baseos     1.6 M
+ perl-macros                   x86_64  4:5.26.3-422.el8                        baseos      71 k
+ perl-parent                   noarch  1:0.237-1.el8                           baseos      19 k
+ perl-podlators                noarch  4.11-1.el8                              baseos     117 k
+ perl-threads                  x86_64  1:2.21-2.el8                            baseos      60 k
+ perl-threads-shared           x86_64  1.58-2.el8                              baseos      47 k
+Enabling module streams:
+ nginx                                 1.14
+ perl                                  5.26
+ perl-IO-Socket-SSL                    2.066
+ perl-libwww-perl                      6.34
+
+Transaction Summary
+===============================================================================================
+Install  68 Packages
+
+Total download size: 19 M
+Installed size: 56 M
+Downloading Packages:
+(1/68): jbigkit-libs-2.1-14.el8.x86_64.rpm      532 kB/s |  54 kB     00:00
+(2/68): gd-2.2.5-7.el8.x86_64.rpm               1.1 MB/s | 143 kB     00:00
+(3/68): libXau-1.0.9-3.el8.x86_64.rpm           778 kB/s |  36 kB     00:00
+(4/68): libX11-1.6.8-9.el8_10.x86_64.rpm        3.2 MB/s | 611 kB     00:00
+(5/68): libX11-common-1.6.8-9.el8_10.noarch.rpm 1.7 MB/s | 157 kB     00:00
+(6/68): libXpm-3.5.12-11.el8.x86_64.rpm         1.9 MB/s |  58 kB     00:00
+(7/68): libjpeg-turbo-1.5.3-14.el8_10.x86_64.rp 3.9 MB/s | 156 kB     00:00
+(8/68): libxcb-1.13.1-1.el8.x86_64.rpm          2.8 MB/s | 228 kB     00:00
+(9/68): libtiff-4.0.9-34.el8_10.x86_64.rpm      1.6 MB/s | 189 kB     00:00
+(10/68): libwebp-1.0.0-10.el8.x86_64.rpm        2.5 MB/s | 273 kB     00:00
+(11/68): nginx-filesystem-1.14.1-9.module+el8.4 607 kB/s |  23 kB     00:00
+(12/68): nginx-all-modules-1.14.1-9.module+el8. 478 kB/s |  22 kB     00:00
+(13/68): nginx-mod-http-image-filter-1.14.1-9.m 693 kB/s |  34 kB     00:00
+(14/68): nginx-1.14.1-9.module+el8.4.0+542+8154 5.3 MB/s | 566 kB     00:00
+(15/68): nginx-mod-http-perl-1.14.1-9.module+el 795 kB/s |  45 kB     00:00
+(16/68): nginx-mod-http-xslt-filter-1.14.1-9.mo 1.1 MB/s |  32 kB     00:00
+(17/68): nginx-mod-mail-1.14.1-9.module+el8.4.0 2.1 MB/s |  63 kB     00:00
+(18/68): perl-Digest-1.17-395.el8.noarch.rpm    842 kB/s |  26 kB     00:00
+(19/68): perl-Digest-MD5-2.55-396.el8.x86_64.rp 1.3 MB/s |  36 kB     00:00
+(20/68): nginx-mod-stream-1.14.1-9.module+el8.4 1.5 MB/s |  84 kB     00:00
+(21/68): perl-IO-Socket-IP-0.39-5.el8.noarch.rp 1.7 MB/s |  46 kB     00:00
+(22/68): perl-Mozilla-CA-20160104-7.module+el8. 476 kB/s |  14 kB     00:00
+(23/68): perl-IO-Socket-SSL-2.066-4.module+el8. 3.1 MB/s | 297 kB     00:00
+(24/68): perl-URI-1.73-3.el8.noarch.rpm         1.5 MB/s | 115 kB     00:00
+(25/68): perl-Net-SSLeay-1.88-2.module+el8.9.0+ 3.0 MB/s | 378 kB     00:00
+(26/68): perl-libnet-3.11-3.el8.noarch.rpm      2.1 MB/s | 120 kB     00:00
+(27/68): dejavu-fonts-common-2.35-7.el8.noarch. 264 kB/s |  73 kB     00:00
+(28/68): fontpackages-filesystem-1.44-22.el8.no  55 kB/s |  15 kB     00:00
+(29/68): fontconfig-2.13.1-4.el8.x86_64.rpm     484 kB/s | 273 kB     00:00
+(30/68): freetype-2.9.1-10.el8_10.x86_64.rpm    681 kB/s | 393 kB     00:00
+(31/68): dejavu-sans-fonts-2.35-7.el8.noarch.rp 1.3 MB/s | 1.5 MB     00:01
+(32/68): libpng-1.6.34-5.el8.x86_64.rpm         812 kB/s | 125 kB     00:00
+(33/68): libxslt-1.1.32-6.1.el8_10.x86_64.rpm   914 kB/s | 249 kB     00:00
+(34/68): groff-base-1.22.3-18.el8.x86_64.rpm    1.1 MB/s | 1.0 MB     00:00
+(35/68): ncurses-6.1-10.20180224.el8.x86_64.rpm 1.3 MB/s | 386 kB     00:00
+(36/68): perl-Carp-1.42-396.el8.noarch.rpm      324 kB/s |  29 kB     00:00
+(37/68): perl-Data-Dumper-2.167-399.el8.x86_64. 113 kB/s |  57 kB     00:00
+(38/68): perl-Errno-1.28-422.el8.x86_64.rpm     146 kB/s |  75 kB     00:00
+(39/68): perl-Exporter-5.72-396.el8.noarch.rpm  872 kB/s |  33 kB     00:00
+(40/68): perl-File-Path-2.15-2.el8.noarch.rpm   1.1 MB/s |  37 kB     00:00
+(41/68): perl-File-Temp-0.230.600-1.el8.noarch. 1.7 MB/s |  62 kB     00:00
+(42/68): perl-Getopt-Long-2.50-4.el8.noarch.rpm 1.6 MB/s |  62 kB     00:00
+(43/68): perl-HTTP-Tiny-0.074-3.el8.noarch.rpm  929 kB/s |  58 kB     00:00
+(44/68): perl-MIME-Base64-3.15-396.el8.x86_64.r 371 kB/s |  30 kB     00:00
+(45/68): perl-IO-1.38-422.el8.x86_64.rpm        1.1 MB/s | 141 kB     00:00
+(46/68): perl-Encode-2.97-3.el8.x86_64.rpm      2.0 MB/s | 1.5 MB     00:00
+(47/68): perl-PathTools-3.74-1.el8.x86_64.rpm   2.1 MB/s |  89 kB     00:00
+(48/68): perl-Pod-Escapes-1.07-395.el8.noarch.r 432 kB/s |  19 kB     00:00
+(49/68): perl-Pod-Perldoc-3.28-396.el8.noarch.r 1.2 MB/s |  85 kB     00:00
+(50/68): perl-Pod-Simple-3.35-395.el8.noarch.rp 1.6 MB/s | 212 kB     00:00
+(51/68): perl-Pod-Usage-1.69-395.el8.noarch.rpm 247 kB/s |  33 kB     00:00
+(52/68): perl-Scalar-List-Utils-1.49-2.el8.x86_ 436 kB/s |  67 kB     00:00
+(53/68): perl-Term-ANSIColor-4.06-396.el8.noarc 359 kB/s |  45 kB     00:00
+(54/68): perl-Socket-2.027-3.el8.x86_64.rpm     245 kB/s |  58 kB     00:00
+(55/68): perl-Storable-3.11-3.el8.x86_64.rpm    418 kB/s |  97 kB     00:00
+(56/68): perl-Term-Cap-1.17-395.el8.noarch.rpm   70 kB/s |  22 kB     00:00
+(57/68): perl-Text-ParseWords-3.30-395.el8.noar  59 kB/s |  17 kB     00:00
+(58/68): perl-Text-Tabs+Wrap-2013.0523-395.el8.  81 kB/s |  23 kB     00:00
+(59/68): perl-Time-Local-1.280-1.el8.noarch.rpm 1.3 MB/s |  32 kB     00:00
+(60/68): perl-Unicode-Normalize-1.25-396.el8.x8 1.5 MB/s |  81 kB     00:00
+(61/68): perl-constant-1.33-396.el8.noarch.rpm  464 kB/s |  24 kB     00:00
+(62/68): perl-macros-5.26.3-422.el8.x86_64.rpm  950 kB/s |  71 kB     00:00
+(63/68): perl-parent-0.237-1.el8.noarch.rpm     109 kB/s |  19 kB     00:00
+(64/68): perl-podlators-4.11-1.el8.noarch.rpm   1.7 MB/s | 117 kB     00:00
+(65/68): perl-threads-2.21-2.el8.x86_64.rpm     906 kB/s |  60 kB     00:00
+(66/68): perl-threads-shared-1.58-2.el8.x86_64. 749 kB/s |  47 kB     00:00
+(67/68): perl-libs-5.26.3-422.el8.x86_64.rpm    2.4 MB/s | 1.6 MB     00:00
+(68/68): perl-interpreter-5.26.3-422.el8.x86_64 4.2 MB/s | 6.3 MB     00:01
+--------------------------------------------------------------------------------
+Total                                           3.0 MB/s |  19 MB     00:06
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                        1/1
+  Installing       : libpng-2:1.6.34-5.el8.x86_64                          1/68
+  Installing       : freetype-2.9.1-10.el8_10.x86_64                       2/68
+  Installing       : fontpackages-filesystem-1.44-22.el8.noarch            3/68
+  Installing       : libjpeg-turbo-1.5.3-14.el8_10.x86_64                  4/68
+  Installing       : dejavu-fonts-common-2.35-7.el8.noarch                 5/68
+  Installing       : dejavu-sans-fonts-2.35-7.el8.noarch                   6/68
+  Installing       : fontconfig-2.13.1-4.el8.x86_64                        7/68
+  Running scriptlet: fontconfig-2.13.1-4.el8.x86_64                        7/68
+  Installing       : ncurses-6.1-10.20180224.el8.x86_64                    8/68
+  Installing       : libxslt-1.1.32-6.1.el8_10.x86_64                      9/68
+  Installing       : groff-base-1.22.3-18.el8.x86_64                      10/68
+  Installing       : perl-Digest-1.17-395.el8.noarch                      11/68
+  Installing       : perl-Digest-MD5-2.55-396.el8.x86_64                  12/68
+  Installing       : perl-Data-Dumper-2.167-399.el8.x86_64                13/68
+  Installing       : perl-libnet-3.11-3.el8.noarch                        14/68
+  Installing       : perl-URI-1.73-3.el8.noarch                           15/68
+  Installing       : perl-Pod-Escapes-1:1.07-395.el8.noarch               16/68
+  Installing       : perl-Net-SSLeay-1.88-2.module+el8.9.0+1517+e71a7a6   17/68
+  Installing       : perl-Mozilla-CA-20160104-7.module+el8.9.0+1521+010   18/68
+  Installing       : perl-IO-Socket-IP-0.39-5.el8.noarch                  19/68
+  Installing       : perl-Time-Local-1:1.280-1.el8.noarch                 20/68
+  Installing       : perl-IO-Socket-SSL-2.066-4.module+el8.9.0+1517+e71   21/68
+  Installing       : perl-Term-ANSIColor-4.06-396.el8.noarch              22/68
+  Installing       : perl-Term-Cap-1.17-395.el8.noarch                    23/68
+  Installing       : perl-File-Temp-0.230.600-1.el8.noarch                24/68
+  Installing       : perl-Pod-Simple-1:3.35-395.el8.noarch                25/68
+  Installing       : perl-HTTP-Tiny-0.074-3.el8.noarch                    26/68
+  Installing       : perl-podlators-4.11-1.el8.noarch                     27/68
+  Installing       : perl-Pod-Perldoc-3.28-396.el8.noarch                 28/68
+  Installing       : perl-Text-ParseWords-3.30-395.el8.noarch             29/68
+  Installing       : perl-Pod-Usage-4:1.69-395.el8.noarch                 30/68
+  Installing       : perl-MIME-Base64-3.15-396.el8.x86_64                 31/68
+  Installing       : perl-Storable-1:3.11-3.el8.x86_64                    32/68
+  Installing       : perl-Getopt-Long-1:2.50-4.el8.noarch                 33/68
+  Installing       : perl-Errno-1.28-422.el8.x86_64                       34/68
+  Installing       : perl-Socket-4:2.027-3.el8.x86_64                     35/68
+  Installing       : perl-Encode-4:2.97-3.el8.x86_64                      36/68
+  Installing       : perl-Carp-1.42-396.el8.noarch                        37/68
+  Installing       : perl-Exporter-5.72-396.el8.noarch                    38/68
+  Installing       : perl-libs-4:5.26.3-422.el8.x86_64                    39/68
+  Installing       : perl-Scalar-List-Utils-3:1.49-2.el8.x86_64           40/68
+  Installing       : perl-parent-1:0.237-1.el8.noarch                     41/68
+  Installing       : perl-macros-4:5.26.3-422.el8.x86_64                  42/68
+  Installing       : perl-Text-Tabs+Wrap-2013.0523-395.el8.noarch         43/68
+  Installing       : perl-Unicode-Normalize-1.25-396.el8.x86_64           44/68
+  Installing       : perl-File-Path-2.15-2.el8.noarch                     45/68
+  Installing       : perl-IO-1.38-422.el8.x86_64                          46/68
+  Installing       : perl-PathTools-3.74-1.el8.x86_64                     47/68
+  Installing       : perl-constant-1.33-396.el8.noarch                    48/68
+  Installing       : perl-threads-1:2.21-2.el8.x86_64                     49/68
+  Installing       : perl-threads-shared-1.58-2.el8.x86_64                50/68
+  Installing       : perl-interpreter-4:5.26.3-422.el8.x86_64             51/68
+  Running scriptlet: nginx-filesystem-1:1.14.1-9.module+el8.4.0+542+815   52/68
+  Installing       : nginx-filesystem-1:1.14.1-9.module+el8.4.0+542+815   52/68
+  Installing       : libwebp-1.0.0-10.el8.x86_64                          53/68
+  Installing       : libXau-1.0.9-3.el8.x86_64                            54/68
+  Installing       : libxcb-1.13.1-1.el8.x86_64                           55/68
+  Installing       : libX11-common-1.6.8-9.el8_10.noarch                  56/68
+  Installing       : libX11-1.6.8-9.el8_10.x86_64                         57/68
+  Installing       : libXpm-3.5.12-11.el8.x86_64                          58/68
+  Installing       : jbigkit-libs-2.1-14.el8.x86_64                       59/68
+  Running scriptlet: jbigkit-libs-2.1-14.el8.x86_64                       59/68
+  Installing       : libtiff-4.0.9-34.el8_10.x86_64                       60/68
+  Installing       : gd-2.2.5-7.el8.x86_64                                61/68
+  Running scriptlet: gd-2.2.5-7.el8.x86_64                                61/68
+  Installing       : nginx-mod-http-perl-1:1.14.1-9.module+el8.4.0+542+   62/68
+  Running scriptlet: nginx-mod-http-perl-1:1.14.1-9.module+el8.4.0+542+   62/68
+  Installing       : nginx-mod-http-xslt-filter-1:1.14.1-9.module+el8.4   63/68
+  Running scriptlet: nginx-mod-http-xslt-filter-1:1.14.1-9.module+el8.4   63/68
+  Installing       : nginx-mod-mail-1:1.14.1-9.module+el8.4.0+542+81547   64/68
+  Running scriptlet: nginx-mod-mail-1:1.14.1-9.module+el8.4.0+542+81547   64/68
+  Installing       : nginx-mod-stream-1:1.14.1-9.module+el8.4.0+542+815   65/68
+  Running scriptlet: nginx-mod-stream-1:1.14.1-9.module+el8.4.0+542+815   65/68
+  Installing       : nginx-1:1.14.1-9.module+el8.4.0+542+81547229.x86_6   66/68
+  Running scriptlet: nginx-1:1.14.1-9.module+el8.4.0+542+81547229.x86_6   66/68
+  Installing       : nginx-mod-http-image-filter-1:1.14.1-9.module+el8.   67/68
+  Running scriptlet: nginx-mod-http-image-filter-1:1.14.1-9.module+el8.   67/68
+  Installing       : nginx-all-modules-1:1.14.1-9.module+el8.4.0+542+81   68/68
+  Running scriptlet: nginx-all-modules-1:1.14.1-9.module+el8.4.0+542+81   68/68
+  Running scriptlet: fontconfig-2.13.1-4.el8.x86_64                       68/68
+  Verifying        : gd-2.2.5-7.el8.x86_64                                 1/68
+  Verifying        : jbigkit-libs-2.1-14.el8.x86_64                        2/68
+  Verifying        : libX11-1.6.8-9.el8_10.x86_64                          3/68
+  Verifying        : libX11-common-1.6.8-9.el8_10.noarch                   4/68
+  Verifying        : libXau-1.0.9-3.el8.x86_64                             5/68
+  Verifying        : libXpm-3.5.12-11.el8.x86_64                           6/68
+  Verifying        : libjpeg-turbo-1.5.3-14.el8_10.x86_64                  7/68
+  Verifying        : libtiff-4.0.9-34.el8_10.x86_64                        8/68
+  Verifying        : libwebp-1.0.0-10.el8.x86_64                           9/68
+  Verifying        : libxcb-1.13.1-1.el8.x86_64                           10/68
+  Verifying        : nginx-1:1.14.1-9.module+el8.4.0+542+81547229.x86_6   11/68
+  Verifying        : nginx-all-modules-1:1.14.1-9.module+el8.4.0+542+81   12/68
+  Verifying        : nginx-filesystem-1:1.14.1-9.module+el8.4.0+542+815   13/68
+  Verifying        : nginx-mod-http-image-filter-1:1.14.1-9.module+el8.   14/68
+  Verifying        : nginx-mod-http-perl-1:1.14.1-9.module+el8.4.0+542+   15/68
+  Verifying        : nginx-mod-http-xslt-filter-1:1.14.1-9.module+el8.4   16/68
+  Verifying        : nginx-mod-mail-1:1.14.1-9.module+el8.4.0+542+81547   17/68
+  Verifying        : nginx-mod-stream-1:1.14.1-9.module+el8.4.0+542+815   18/68
+  Verifying        : perl-Digest-1.17-395.el8.noarch                      19/68
+  Verifying        : perl-Digest-MD5-2.55-396.el8.x86_64                  20/68
+  Verifying        : perl-IO-Socket-IP-0.39-5.el8.noarch                  21/68
+  Verifying        : perl-IO-Socket-SSL-2.066-4.module+el8.9.0+1517+e71   22/68
+  Verifying        : perl-Mozilla-CA-20160104-7.module+el8.9.0+1521+010   23/68
+  Verifying        : perl-Net-SSLeay-1.88-2.module+el8.9.0+1517+e71a7a6   24/68
+  Verifying        : perl-URI-1.73-3.el8.noarch                           25/68
+  Verifying        : perl-libnet-3.11-3.el8.noarch                        26/68
+  Verifying        : dejavu-fonts-common-2.35-7.el8.noarch                27/68
+  Verifying        : dejavu-sans-fonts-2.35-7.el8.noarch                  28/68
+  Verifying        : fontconfig-2.13.1-4.el8.x86_64                       29/68
+  Verifying        : fontpackages-filesystem-1.44-22.el8.noarch           30/68
+  Verifying        : freetype-2.9.1-10.el8_10.x86_64                      31/68
+  Verifying        : groff-base-1.22.3-18.el8.x86_64                      32/68
+  Verifying        : libpng-2:1.6.34-5.el8.x86_64                         33/68
+  Verifying        : libxslt-1.1.32-6.1.el8_10.x86_64                     34/68
+  Verifying        : ncurses-6.1-10.20180224.el8.x86_64                   35/68
+  Verifying        : perl-Carp-1.42-396.el8.noarch                        36/68
+  Verifying        : perl-Data-Dumper-2.167-399.el8.x86_64                37/68
+  Verifying        : perl-Encode-4:2.97-3.el8.x86_64                      38/68
+  Verifying        : perl-Errno-1.28-422.el8.x86_64                       39/68
+  Verifying        : perl-Exporter-5.72-396.el8.noarch                    40/68
+  Verifying        : perl-File-Path-2.15-2.el8.noarch                     41/68
+  Verifying        : perl-File-Temp-0.230.600-1.el8.noarch                42/68
+  Verifying        : perl-Getopt-Long-1:2.50-4.el8.noarch                 43/68
+  Verifying        : perl-HTTP-Tiny-0.074-3.el8.noarch                    44/68
+  Verifying        : perl-IO-1.38-422.el8.x86_64                          45/68
+  Verifying        : perl-MIME-Base64-3.15-396.el8.x86_64                 46/68
+  Verifying        : perl-PathTools-3.74-1.el8.x86_64                     47/68
+  Verifying        : perl-Pod-Escapes-1:1.07-395.el8.noarch               48/68
+  Verifying        : perl-Pod-Perldoc-3.28-396.el8.noarch                 49/68
+  Verifying        : perl-Pod-Simple-1:3.35-395.el8.noarch                50/68
+  Verifying        : perl-Pod-Usage-4:1.69-395.el8.noarch                 51/68
+  Verifying        : perl-Scalar-List-Utils-3:1.49-2.el8.x86_64           52/68
+  Verifying        : perl-Socket-4:2.027-3.el8.x86_64                     53/68
+  Verifying        : perl-Storable-1:3.11-3.el8.x86_64                    54/68
+  Verifying        : perl-Term-ANSIColor-4.06-396.el8.noarch              55/68
+  Verifying        : perl-Term-Cap-1.17-395.el8.noarch                    56/68
+  Verifying        : perl-Text-ParseWords-3.30-395.el8.noarch             57/68
+  Verifying        : perl-Text-Tabs+Wrap-2013.0523-395.el8.noarch         58/68
+  Verifying        : perl-Time-Local-1:1.280-1.el8.noarch                 59/68
+  Verifying        : perl-Unicode-Normalize-1.25-396.el8.x86_64           60/68
+  Verifying        : perl-constant-1.33-396.el8.noarch                    61/68
+  Verifying        : perl-interpreter-4:5.26.3-422.el8.x86_64             62/68
+  Verifying        : perl-libs-4:5.26.3-422.el8.x86_64                    63/68
+  Verifying        : perl-macros-4:5.26.3-422.el8.x86_64                  64/68
+  Verifying        : perl-parent-1:0.237-1.el8.noarch                     65/68
+  Verifying        : perl-podlators-4.11-1.el8.noarch                     66/68
+  Verifying        : perl-threads-1:2.21-2.el8.x86_64                     67/68
+  Verifying        : perl-threads-shared-1.58-2.el8.x86_64                68/68
+
+Installed:
+  dejavu-fonts-common-2.35-7.el8.noarch
+  dejavu-sans-fonts-2.35-7.el8.noarch
+  fontconfig-2.13.1-4.el8.x86_64
+  fontpackages-filesystem-1.44-22.el8.noarch
+  freetype-2.9.1-10.el8_10.x86_64
+  gd-2.2.5-7.el8.x86_64
+  groff-base-1.22.3-18.el8.x86_64
+  jbigkit-libs-2.1-14.el8.x86_64
+  libX11-1.6.8-9.el8_10.x86_64
+  libX11-common-1.6.8-9.el8_10.noarch
+  libXau-1.0.9-3.el8.x86_64
+  libXpm-3.5.12-11.el8.x86_64
+  libjpeg-turbo-1.5.3-14.el8_10.x86_64
+  libpng-2:1.6.34-5.el8.x86_64
+  libtiff-4.0.9-34.el8_10.x86_64
+  libwebp-1.0.0-10.el8.x86_64
+  libxcb-1.13.1-1.el8.x86_64
+  libxslt-1.1.32-6.1.el8_10.x86_64
+  ncurses-6.1-10.20180224.el8.x86_64
+  nginx-1:1.14.1-9.module+el8.4.0+542+81547229.x86_64
+  nginx-all-modules-1:1.14.1-9.module+el8.4.0+542+81547229.noarch
+  nginx-filesystem-1:1.14.1-9.module+el8.4.0+542+81547229.noarch
+  nginx-mod-http-image-filter-1:1.14.1-9.module+el8.4.0+542+81547229.x86_64
+  nginx-mod-http-perl-1:1.14.1-9.module+el8.4.0+542+81547229.x86_64
+  nginx-mod-http-xslt-filter-1:1.14.1-9.module+el8.4.0+542+81547229.x86_64
+  nginx-mod-mail-1:1.14.1-9.module+el8.4.0+542+81547229.x86_64
+  nginx-mod-stream-1:1.14.1-9.module+el8.4.0+542+81547229.x86_64
+  perl-Carp-1.42-396.el8.noarch
+  perl-Data-Dumper-2.167-399.el8.x86_64
+  perl-Digest-1.17-395.el8.noarch
+  perl-Digest-MD5-2.55-396.el8.x86_64
+  perl-Encode-4:2.97-3.el8.x86_64
+  perl-Errno-1.28-422.el8.x86_64
+  perl-Exporter-5.72-396.el8.noarch
+  perl-File-Path-2.15-2.el8.noarch
+  perl-File-Temp-0.230.600-1.el8.noarch
+  perl-Getopt-Long-1:2.50-4.el8.noarch
+  perl-HTTP-Tiny-0.074-3.el8.noarch
+  perl-IO-1.38-422.el8.x86_64
+  perl-IO-Socket-IP-0.39-5.el8.noarch
+  perl-IO-Socket-SSL-2.066-4.module+el8.9.0+1517+e71a7a62.noarch
+  perl-MIME-Base64-3.15-396.el8.x86_64
+  perl-Mozilla-CA-20160104-7.module+el8.9.0+1521+0101edce.noarch
+  perl-Net-SSLeay-1.88-2.module+el8.9.0+1517+e71a7a62.x86_64
+  perl-PathTools-3.74-1.el8.x86_64
+  perl-Pod-Escapes-1:1.07-395.el8.noarch
+  perl-Pod-Perldoc-3.28-396.el8.noarch
+  perl-Pod-Simple-1:3.35-395.el8.noarch
+  perl-Pod-Usage-4:1.69-395.el8.noarch
+  perl-Scalar-List-Utils-3:1.49-2.el8.x86_64
+  perl-Socket-4:2.027-3.el8.x86_64
+  perl-Storable-1:3.11-3.el8.x86_64
+  perl-Term-ANSIColor-4.06-396.el8.noarch
+  perl-Term-Cap-1.17-395.el8.noarch
+  perl-Text-ParseWords-3.30-395.el8.noarch
+  perl-Text-Tabs+Wrap-2013.0523-395.el8.noarch
+  perl-Time-Local-1:1.280-1.el8.noarch
+  perl-URI-1.73-3.el8.noarch
+  perl-Unicode-Normalize-1.25-396.el8.x86_64
+  perl-constant-1.33-396.el8.noarch
+  perl-interpreter-4:5.26.3-422.el8.x86_64
+  perl-libnet-3.11-3.el8.noarch
+  perl-libs-4:5.26.3-422.el8.x86_64
+  perl-macros-4:5.26.3-422.el8.x86_64
+  perl-parent-1:0.237-1.el8.noarch
+  perl-podlators-4.11-1.el8.noarch
+  perl-threads-1:2.21-2.el8.x86_64
+  perl-threads-shared-1.58-2.el8.x86_64
+
+Complete!

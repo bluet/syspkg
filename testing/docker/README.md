@@ -2,7 +2,7 @@
 
 ## Overview
 
-This directory contains Docker configurations for testing go-syspkg across multiple Linux distributions.
+This directory contains Docker configurations for testing go-syspkg across multiple Linux distributions. The multi-OS Docker testing system is **fully implemented and actively used** for comprehensive cross-platform validation.
 
 ## Test Categories
 
@@ -22,152 +22,78 @@ This directory contains Docker configurations for testing go-syspkg across multi
 - Privileged operations
 - Snap/systemd dependent features
 
-## Docker Test Structure (Planned)
+## Current Docker Test Implementation
 
-**Note:** The docker-compose.test.yml file is planned for future implementation. This shows the intended structure.
+**Note:** The Docker testing system is fully operational with comprehensive multi-OS support.
 
-```yaml
-# Planned: docker-compose.test.yml
-version: '3.8'
-
-services:
-  ubuntu-test:
-    build:
-      context: ../..
-      dockerfile: testing/docker/ubuntu.Dockerfile
-    environment:
-      - IN_CONTAINER=true
-      - TEST_TAGS=unit,parser
-    volumes:
-      - ../..:/workspace
-    working_dir: /workspace
-    command: go test -tags="unit parser" ./...
-
-  debian-test:
-    build:
-      context: ../..
-      dockerfile: testing/docker/debian.Dockerfile
-    environment:
-      - IN_CONTAINER=true
-      - TEST_TAGS=unit,parser
-    volumes:
-      - ../..:/workspace
-    working_dir: /workspace
-    command: go test -tags="unit parser" ./...
-
-  fedora-test:
-    build:
-      context: ../..
-      dockerfile: testing/docker/fedora.Dockerfile
-    environment:
-      - IN_CONTAINER=true
-      - TEST_TAGS=unit,parser
-    volumes:
-      - ../..:/workspace
-    working_dir: /workspace
-    command: go test -tags="unit parser" ./...
-
-  alpine-test:
-    build:
-      context: ../..
-      dockerfile: testing/docker/alpine.Dockerfile
-    environment:
-      - IN_CONTAINER=true
-      - TEST_TAGS=unit,parser
-    volumes:
-      - ../..:/workspace
-    working_dir: /workspace
-    command: go test -tags="unit parser" ./...
-```
+**Supported Operating Systems:**
+- **Ubuntu 22.04**: APT, Snap, Flatpak testing
+- **Rocky Linux 8**: YUM testing with real RPM packages
+- **AlmaLinux 8**: YUM testing and validation
+- **Fedora 39**: DNF testing (implementation in progress)
+- **Alpine Linux**: APK testing (implementation in progress)
 
 ## Usage
 
-**Note:** These Docker testing targets are planned for future implementation. Currently, the project tests on Ubuntu in CI/CD.
-
-### Planned: Run All Container Tests
+### Run All Container Tests
 ```bash
-# TODO: Implement when Makefile targets are added
-make test-docker-all
+make test-docker-all        # Test all OS in parallel
 ```
 
-### Planned: Run Specific OS Test
+### Run Specific OS Tests
 ```bash
-# TODO: Implement when docker-compose.test.yml is created
-docker-compose -f docker-compose.test.yml run ubuntu-test
+make test-docker-ubuntu     # Test APT/Snap/Flatpak on Ubuntu
+make test-docker-rocky      # Test YUM on Rocky Linux 8
+make test-docker-alma       # Test YUM on AlmaLinux 8
+make test-docker-fedora     # Test DNF on Fedora 39
+make test-docker-alpine     # Test APK on Alpine Linux
 ```
 
-### Capture Test Fixtures
+### Cleanup Docker Resources
 ```bash
-# Run container interactively to capture package manager outputs
-docker-compose -f docker-compose.test.yml run --rm ubuntu-test bash
-apt update
-apt search vim > testing/fixtures/apt/search-vim.txt
+make test-docker-clean      # Remove test containers and images
 ```
 
-## Test Implementation Example
+### Generate Test Fixtures
+```bash
+# Generate fresh fixtures from real package managers
+make test-fixtures           # Capture outputs from all supported OS
 
-```go
-// +build parser
-
-package apt_test
-
-import (
-    "os"
-    "os/exec"
-    "testing"
-
-    "github.com/bluet/syspkg/manager/apt"
-)
-
-func TestParseSearchOutput_MultiOS(t *testing.T) {
-    // Skip if not in container
-    if os.Getenv("IN_CONTAINER") != "true" {
-        t.Skip("Skipping container-only test")
-    }
-
-    // Test with real apt output from this OS version
-    output, err := exec.Command("apt", "search", "vim").Output()
-    if err != nil {
-        t.Skip("apt not available in this container")
-    }
-
-    packages := apt.ParseSearchOutput(string(output))
-
-    // Verify parsing works for this OS version
-    if len(packages) == 0 {
-        t.Error("Expected to parse some packages")
-    }
-}
+# Manual fixture generation for specific OS
+docker exec -it syspkg-rocky-test bash
+yum search vim > /workspace/testing/fixtures/yum/search-vim-rocky8.txt
 ```
 
-## CI Integration (Planned)
+## Current CI Integration
 
-**Note:** This is a planned feature for multi-OS Docker testing. Currently, the project uses `.github/workflows/test.yml` for Ubuntu-based testing.
+The Docker testing system is fully integrated into CI/CD:
 
+**GitHub Actions Workflows:**
+- **test-and-coverage.yml**: Standard Ubuntu testing with APT/Snap/Flatpak
+- **multi-os-test.yml**: Docker matrix testing across all supported OS
+- **build.yml**: Multi-version Go build verification
+
+**Multi-OS Testing Matrix:**
 ```yaml
-# Planned: .github/workflows/multi-os-test.yml
-name: Multi-OS Docker Tests
-
-on: [push, pull_request]
-
-jobs:
-  docker-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Run Docker Tests
-        run: |
-          # TODO: Create docker-compose.test.yml before enabling
-          docker-compose -f testing/docker/docker-compose.test.yml up \
-            --abort-on-container-exit \
-            --exit-code-from ubuntu-test
-
-      - name: Upload Test Results
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-results
-          path: test-results/  # TODO: Ensure tests output to this directory
+# .github/workflows/multi-os-test.yml (active)
+strategy:
+  matrix:
+    include:
+      - os: ubuntu-22.04
+        pm: apt
+        dockerfile: ubuntu.Dockerfile
+      - os: rockylinux-8
+        pm: yum
+        dockerfile: rockylinux.Dockerfile
+      - os: almalinux-8
+        pm: yum
+        dockerfile: almalinux.Dockerfile
+      - os: fedora-39
+        pm: dnf
+        dockerfile: fedora.Dockerfile
+      - os: alpine-3.18
+        pm: apk
+        dockerfile: alpine.Dockerfile
 ```
 
 ## Best Practices

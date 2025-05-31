@@ -76,6 +76,15 @@ syspkg --flatpak show upgradable
 
 # Install a package using YUM (on RHEL/CentOS/Rocky/AlmaLinux)
 syspkg --yum install vim
+
+# Show package information
+syspkg --apt show package vim
+
+# List installed packages
+syspkg --snap show installed
+
+# List upgradable packages
+syspkg --flatpak show upgradable
 ```
 
 Or, you can do operations without knowing the package manager:
@@ -92,6 +101,18 @@ syspkg search vim
 
 # Upgrade all packages using all available package manager
 syspkg upgrade
+
+# Refresh package lists
+syspkg refresh
+
+# Show package information
+syspkg show package vim
+
+# List installed packages
+syspkg show installed
+
+# List upgradable packages
+syspkg show upgradable
 ```
 
 For more examples and real use cases, see the [cmd/syspkg/](cmd/syspkg/) directory.
@@ -144,15 +165,15 @@ For more examples and real use cases, see the [cmd/syspkg/](cmd/syspkg/) directo
 
 ## Supported Package Managers
 
-| Package Manager | Install | Remove | Search | Upgrade | List Installed | List Upgradable | Get Package Info |
-| --------------- | ------- | ------ | ------ | ------- | -------------- | --------------- | ---------------- |
-| APT             | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               |
-| YUM             | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               |
-| SNAP            | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               |
-| Flatpak         | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               |
-| DNF             | 🚧      | 🚧    | 🚧     | 🚧     | 🚧             | 🚧             | 🚧               |
-| APK (Alpine)    | 🚧      | 🚧    | 🚧     | 🚧     | 🚧             | 🚧             | 🚧               |
-| Zypper (openSUSE) | 🚧   | 🚧    | 🚧     | 🚧     | 🚧             | 🚧             | 🚧               |
+| Package Manager | Install | Remove | Search | Upgrade | List Installed | List Upgradable | Get Package Info | AutoRemove | Clean | Refresh |
+| --------------- | ------- | ------ | ------ | ------- | -------------- | --------------- | ---------------- | ---------- | ----- | ------- |
+| APT             | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               | ✅         | ✅    | ✅      |
+| YUM             | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               | ✅         | ✅    | ✅      |
+| SNAP            | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               | ✅         | ✅    | ✅      |
+| Flatpak         | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               | ✅         | ✅    | ✅      |
+| DNF             | 🚧      | 🚧    | 🚧     | 🚧     | 🚧             | 🚧             | 🚧               | 🚧         | 🚧    | 🚧      |
+| APK (Alpine)    | 🚧      | 🚧    | 🚧     | 🚧     | 🚧             | 🚧             | 🚧               | 🚧         | 🚧    | 🚧      |
+| Zypper (openSUSE) | 🚧   | 🚧    | 🚧     | 🚧     | 🚧             | 🚧             | 🚧               | 🚧         | 🚧    | 🚧      |
 
 **Legend:** ✅ Implemented, 🚧 Planned, ❌ Not supported
 

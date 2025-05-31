@@ -1,6 +1,0 @@
-========================= Name & Summary Matched: vim ==========================
-vim-X11.x86_64 : The VIM version of the vi editor for the X Window System - GVim
-vim-common.x86_64 : The common files needed by any version of the VIM editor
-vim-enhanced.x86_64 : A version of the VIM editor which includes recent enhancements
-vim-filesystem.noarch : VIM filesystem layout
-vim-minimal.x86_64 : A minimal version of the VIM editor

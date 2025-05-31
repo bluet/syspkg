@@ -1,0 +1,5 @@
+No match for argument: nonexistent-package-12345
+No packages marked for removal.
+Dependencies resolved.
+Nothing to do.
+Complete!

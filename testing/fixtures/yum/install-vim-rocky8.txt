@@ -1,0 +1,55 @@
+Last metadata expiration check: 0:00:35 ago on Sat May 31 07:53:22 2025.
+Dependencies resolved.
+================================================================================
+ Package            Arch       Version                      Repository     Size
+================================================================================
+Installing:
+ vim-enhanced       x86_64     2:8.0.1763-19.el8_6.4        appstream     1.4 M
+Installing dependencies:
+ gpm-libs           x86_64     1.20.7-17.el8                appstream      38 k
+ vim-common         x86_64     2:8.0.1763-19.el8_6.4        appstream     6.3 M
+ vim-filesystem     noarch     2:8.0.1763-19.el8_6.4        appstream      49 k
+ which              x86_64     2.21-20.el8                  baseos         49 k
+
+Transaction Summary
+================================================================================
+Install  5 Packages
+
+Total download size: 7.8 M
+Installed size: 30 M
+Downloading Packages:
+(1/5): gpm-libs-1.20.7-17.el8.x86_64.rpm        173 kB/s |  38 kB     00:00
+(2/5): vim-filesystem-8.0.1763-19.el8_6.4.noarc 389 kB/s |  49 kB     00:00
+(3/5): vim-enhanced-8.0.1763-19.el8_6.4.x86_64. 1.8 MB/s | 1.4 MB     00:00
+(4/5): which-2.21-20.el8.x86_64.rpm             106 kB/s |  49 kB     00:00
+(5/5): vim-common-8.0.1763-19.el8_6.4.x86_64.rp 3.7 MB/s | 6.3 MB     00:01
+--------------------------------------------------------------------------------
+Total                                           2.7 MB/s | 7.8 MB     00:02
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                        1/1
+  Installing       : which-2.21-20.el8.x86_64                               1/5
+  Installing       : vim-filesystem-2:8.0.1763-19.el8_6.4.noarch            2/5
+  Installing       : vim-common-2:8.0.1763-19.el8_6.4.x86_64                3/5
+  Installing       : gpm-libs-1.20.7-17.el8.x86_64                          4/5
+  Running scriptlet: gpm-libs-1.20.7-17.el8.x86_64                          4/5
+  Installing       : vim-enhanced-2:8.0.1763-19.el8_6.4.x86_64              5/5
+  Running scriptlet: vim-enhanced-2:8.0.1763-19.el8_6.4.x86_64              5/5
+  Running scriptlet: vim-common-2:8.0.1763-19.el8_6.4.x86_64                5/5
+  Verifying        : gpm-libs-1.20.7-17.el8.x86_64                          1/5
+  Verifying        : vim-common-2:8.0.1763-19.el8_6.4.x86_64                2/5
+  Verifying        : vim-enhanced-2:8.0.1763-19.el8_6.4.x86_64              3/5
+  Verifying        : vim-filesystem-2:8.0.1763-19.el8_6.4.noarch            4/5
+  Verifying        : which-2.21-20.el8.x86_64                               5/5
+
+Installed:
+  gpm-libs-1.20.7-17.el8.x86_64
+  vim-common-2:8.0.1763-19.el8_6.4.x86_64
+  vim-enhanced-2:8.0.1763-19.el8_6.4.x86_64
+  vim-filesystem-2:8.0.1763-19.el8_6.4.noarch
+  which-2.21-20.el8.x86_64
+
+Complete!

@@ -78,7 +78,7 @@ func (s *sysPkgImpl) FindPackageManagers(include IncludeOptions) (map[string]Pac
 		{"apt", &apt.PackageManager{}, include.Apt},
 		{"flatpak", &flatpak.PackageManager{}, include.Flatpak},
 		{"snap", &snap.PackageManager{}, include.Snap},
-		{"yum", &yum.PackageManager{}, include.Yum},
+		{"yum", yum.NewPackageManager(), include.Yum},
 		// {"apk", &apk.PackageManager{}, include.Apk},
 		// {"dnf", &dnf.PackageManager{}, include.Dnf},
 		// {"zypper", &zypper.PackageManager{}, include.Zypper},

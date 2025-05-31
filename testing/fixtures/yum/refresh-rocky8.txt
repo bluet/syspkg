@@ -1,0 +1,9 @@
+Updating Subscription Management repositories.
+Unable to read consumer identity
+
+This system is not registered with an entitlement server. You can use subscription-manager to register.
+
+Rocky Linux 8 - AppStream                                                                                    3.2 kB/s | 4.8 kB     00:01
+Rocky Linux 8 - BaseOS                                                                                       3.1 kB/s | 4.3 kB     00:01
+Rocky Linux 8 - Extras                                                                                       2.9 kB/s | 3.5 kB     00:01
+Metadata cache created.
