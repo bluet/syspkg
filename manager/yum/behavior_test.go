@@ -130,14 +130,15 @@ func TestFind_BehaviorWithFixtures(t *testing.T) {
 					t.Error("Package architecture should not be empty")
 				}
 
-				// Test YUM enhancement: Status is now accurately detected using rpm -q
-				if pkg.Status != manager.PackageStatusAvailable && pkg.Status != manager.PackageStatusInstalled {
-					t.Errorf("YUM Find should return either available or installed status, got '%s'", pkg.Status)
+				// Test YUM limitation: Status is always available regardless of actual installation
+				if pkg.Status != manager.PackageStatusAvailable {
+					t.Errorf("YUM Find should always return PackageStatusAvailable due to output limitation, got '%s'", pkg.Status)
 				}
 
-				// Test YUM enhancement: Version fields may be populated for installed packages
-				// Version can be populated for installed packages detected via rpm -q
-				// NewVersion remains empty for Find operation (not provided by yum search)
+				// Test YUM limitation: Version fields are not populated by search
+				if pkg.Version != "" {
+					t.Errorf("YUM Find should not populate Version field, got '%s'", pkg.Version)
+				}
 				if pkg.NewVersion != "" {
 					t.Errorf("YUM Find should not populate NewVersion field, got '%s'", pkg.NewVersion)
 				}
