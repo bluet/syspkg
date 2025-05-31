@@ -185,9 +185,17 @@ Please open an issue (or PR ❤️) if you'd like to see support for any unliste
 
 ### Documentation
 - **CLAUDE.md** - Development guidelines, architecture, and project roadmap
+- **CONTRIBUTING.md** - Comprehensive contributor guide with multi-OS testing strategy
+- **docs/EXIT_CODES.md** - Exit code behavior across package managers (critical for implementation)
+- **manager/{pm}/EXIT_CODES.md** - Package manager specific exit code documentation
 - **testing/** - Test fixtures and Docker testing infrastructure
 - **.pre-commit-config.yaml** - Secure pre-commit hooks aligned with Go best practices
 - **.github/workflows/** - CI/CD pipelines for testing, linting, building, and releases
+
+### Known Issues & Bugs
+- **APT Exit Code Bug**: Incorrectly handles exit code 100 as "no packages found" (should be error)
+- **Snap Exit Code Bug**: Incorrectly handles exit code 64 as "no packages found" (should be usage error)
+- See [Issue #20](https://github.com/bluet/syspkg/issues/20) for CommandRunner refactoring to address these
 
 ### CI/CD Status
 

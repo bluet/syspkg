@@ -418,6 +418,15 @@ newos-family:
   test_tags: "unit,integration,newpm"
 ```
 
+### Step 7: Document Exit Codes
+Create `manager/newpm/EXIT_CODES.md` documenting:
+- Actual exit codes (not assumptions)
+- Verified behavior through testing
+- Special cases and edge behaviors
+- Testing commands for verification
+
+**Critical**: Never assume exit codes work like other package managers!
+
 ## 🧪 Testing Best Practices
 
 ### Writing Good Tests

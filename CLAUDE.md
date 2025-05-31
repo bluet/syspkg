@@ -141,6 +141,33 @@ Located in `.github/workflows/`:
 - `PackageManager` (interface.go): Defines methods all package managers must implement
 - `SysPkg` (interface.go): High-level interface for managing multiple package managers
 
+### Command Execution Architecture (Issue #20)
+
+**Current State**: Mixed patterns across package managers
+- **YUM**: Uses CommandRunner for some operations (Find), direct exec.Command for others
+- **APT/Snap/Flatpak**: All use direct exec.Command calls
+
+**Target Architecture**: CommandBuilder pattern (Option C)
+```go
+type CommandBuilder interface {
+    CommandContext(ctx context.Context, name string, args ...string) *exec.Cmd
+}
+```
+
+**Why CommandBuilder (not Extended CommandRunner)**:
+- **Exit code complexity**: Each PM has unique exit code behaviors (APT 100=error, YUM 100=success)
+- **Maximum flexibility**: Full access to exec.Cmd features (env, stdin/stdout, working dir)
+- **Simple interface**: Only 1 method vs multiple in extended interface
+- **Go idiomatic**: Returns standard `*exec.Cmd` type
+- **No generic helpers needed**: Each PM handles its own exit codes
+
+**Critical Discovery**: Package managers have wildly inconsistent exit codes:
+- APT: Exit code 100 = any error
+- YUM: Exit code 100 = updates available (success!)
+- Snap: Exit code 64 = usage error (not "no packages found")
+
+See `docs/EXIT_CODES.md` for comprehensive documentation.
+
 ### Package Structure
 - `/cmd/syspkg/`: CLI application using urfave/cli/v2 framework
 - `/manager/`: Package manager implementations
@@ -190,7 +217,7 @@ Options: `--debug`, `--assume-yes`, `--dry-run`, `--interactive`, `--verbose`
 
 *Note: To-do list consolidated 2025-05-30 - removed duplicates, feature creep items, and over-engineering. Focused on core security, testing, and platform support.*
 
-### 🔴 High Priority (Security & Critical Bugs) - 11 items
+### 🔴 High Priority (Security & Critical Bugs) - 15 items
 1. **Fix command injection vulnerability** - validate/sanitize package names before exec.Command
 2. **Implement input validation helper function** for package names and arguments
 3. **Fix resource leaks** in error handling paths
@@ -198,6 +225,10 @@ Options: `--debug`, `--assume-yes`, `--dry-run`, `--interactive`, `--verbose`
 5. **Review and merge PR #12** - fix GetPackageManager("") panic bug ✅
 6. **Cross-package manager status normalization** ✅ - APT config-files → available
 7. **GitHub workflow compatibility fixes** ✅ - Go 1.23.4, Docker multi-OS testing
+8. **Fix APT exit code bug** - Remove incorrect handling of exit code 100 as "no packages found" (it means error!)
+9. **Fix Snap exit code bug** - Remove incorrect handling of exit code 64 as "no packages found" (it means usage error!)
+10. **Implement CommandBuilder interface (Issue #20)** - Replace direct exec.Command calls with testable CommandBuilder pattern
+11. **Add exit code documentation** ✅ - Created comprehensive exit code docs for all package managers
 
 ### ✅ CRITICAL INVESTIGATION COMPLETED
 **Investigation Results: No design flaw found - tests are correct**
@@ -215,7 +246,7 @@ Options: `--debug`, `--assume-yes`, `--dry-run`, `--interactive`, `--verbose`
 **Testing:**
 - **Create integration tests** ✅ - Added `yum_integration_test.go` with three-layer testing approach
 - **Document testing strategy** ✅ - Added comprehensive testing documentation to CONTRIBUTING.md
-- **Implement CommandRunner dependency injection (Issue #20)** ✅ - YUM now uses CommandRunner for all operations
+- **Implement CommandRunner dependency injection (Issue #20)** 🚧 - YUM partially implemented, architecture decision updated to Option C (CommandBuilder)
 - Add unit tests for snap package manager
 - Add unit tests for flatpak package manager
 - **APT fixture cleanup and behavior testing** ✅ - Reduced 16→7 fixtures, full test coverage
