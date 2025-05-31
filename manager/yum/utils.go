@@ -64,6 +64,7 @@ func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 			packageInfo := manager.PackageInfo{
 				Name:           parts[0][:lastDotIndex],
 				Arch:           parts[0][lastDotIndex+1:],
+				Status:         manager.PackageStatusAvailable,
 				PackageManager: pm,
 			}
 
