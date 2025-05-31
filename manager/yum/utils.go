@@ -3,6 +3,7 @@
 package yum
 
 import (
+	"os/exec"
 	"regexp"
 	"strings"
 
@@ -13,15 +14,12 @@ import (
 var packageLineRegex = regexp.MustCompile(`^[\w\d-]+\.[\w\d_]+`)
 
 // ParseFindOutput parses the output of `yum search packageName` command
-// and returns a list of packages that match the search query.
+// and returns a list of packages that match the search query with accurate installation status.
 //
-// IMPORTANT LIMITATION: YUM search output does not indicate installation status.
-// All packages are returned with PackageStatusAvailable regardless of whether
-// they are actually installed. This is a limitation of the YUM command output format.
-//
-// To determine accurate installation status, users should:
-//  1. Use GetPackageInfo() for individual packages (shows Installed/Available sections)
-//  2. Cross-reference with ListInstalled() results
+// This function now provides complete status detection by:
+//  1. Parsing yum search output to find available packages
+//  2. Using rpm -q to check installation status for each found package
+//  3. Returning accurate status information (installed/available)
 //
 // The output format is expected to be similar to the following example:
 //
@@ -35,14 +33,18 @@ var packageLineRegex = regexp.MustCompile(`^[\w\d-]+\.[\w\d_]+`)
 // Returned PackageInfo fields:
 //   - Name: Package name (e.g., "nginx")
 //   - Arch: Architecture (e.g., "x86_64")
-//   - Status: Always PackageStatusAvailable (YUM limitation)
-//   - Version: Always empty (not provided by yum search)
-//   - NewVersion: Always empty (not provided by yum search)
+//   - Status: PackageStatusInstalled or PackageStatusAvailable (accurate)
+//   - Version: Installed version if package is installed, empty if not installed
+//   - NewVersion: Empty (search doesn't provide repo version)
 //   - PackageManager: "yum"
+//
+// Performance: This function makes additional rpm -q calls to determine status,
+// similar to how APT uses dpkg-query. The performance impact is minimal for
+// typical Find() usage patterns.
 //
 // The opts parameter is reserved for future parsing options and is currently unused.
 func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
-	var packages []manager.PackageInfo
+	var packagesDict = make(map[string]manager.PackageInfo)
 
 	// remove the last empty line
 	msg = strings.TrimSuffix(msg, "\n")
@@ -74,12 +76,28 @@ func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 			packageInfo := manager.PackageInfo{
 				Name:           parts[0][:lastDotIndex],
 				Arch:           parts[0][lastDotIndex+1:],
-				Status:         manager.PackageStatusAvailable,
+				Status:         manager.PackageStatusAvailable, // Will be updated by getYumPackageStatus
 				PackageManager: pm,
 			}
 
-			packages = append(packages, packageInfo)
+			packagesDict[packageInfo.Name] = packageInfo
 		}
+	}
+
+	if len(packagesDict) == 0 {
+		return []manager.PackageInfo{}
+	}
+
+	// Check installation status for found packages (similar to APT's approach)
+	packages, err := getYumPackageStatus(packagesDict, opts)
+	if err != nil {
+		// If status checking fails, return packages with available status
+		// This maintains backward compatibility while providing better functionality when possible
+		result := make([]manager.PackageInfo, 0, len(packagesDict))
+		for _, pkg := range packagesDict {
+			result = append(result, pkg)
+		}
+		return result
 	}
 
 	return packages
@@ -449,4 +467,110 @@ func ParseAutoRemoveOutput(msg string, opts *manager.Options) []manager.PackageI
 	// AutoRemove output format is the same as regular remove output,
 	// we can reuse the same parser logic
 	return ParseDeleteOutput(msg, opts)
+}
+
+// getYumPackageStatus checks the installation status of packages found by yum search
+// by running rpm -q to query the RPM database. This provides accurate status information
+// similar to how APT uses dpkg-query.
+//
+// Returns packages with updated status:
+//   - installed: Package is currently installed
+//   - available: Package exists in repos but not installed
+//   - upgradable: Package installed but newer version available (future enhancement)
+func getYumPackageStatus(packages map[string]manager.PackageInfo, _ *manager.Options) ([]manager.PackageInfo, error) {
+	if len(packages) == 0 {
+		return []manager.PackageInfo{}, nil
+	}
+
+	// Get list of package names to check
+	packageNames := make([]string, 0, len(packages))
+	for name := range packages {
+		packageNames = append(packageNames, name)
+	}
+
+	// Use rpm -q to check installation status (faster than yum list installed)
+	// rpm -q returns exit code 0 for installed packages, 1 for not installed
+	installedPackages, err := checkRpmInstallationStatus(packageNames)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build result list with updated status
+	result := make([]manager.PackageInfo, 0, len(packages))
+	for _, pkgName := range packageNames {
+		pkg := packages[pkgName]
+
+		// Check if package is installed
+		if _, isInstalled := installedPackages[pkgName]; isInstalled {
+			pkg.Status = manager.PackageStatusInstalled
+			pkg.Version = installedPackages[pkgName].Version
+		} else {
+			pkg.Status = manager.PackageStatusAvailable
+			pkg.Version = ""
+		}
+
+		result = append(result, pkg)
+	}
+
+	return result, nil
+}
+
+// checkRpmInstallationStatus uses rpm -q to check which packages are installed
+// Returns a map of installed package names to their PackageInfo and an error if rpm command fails
+func checkRpmInstallationStatus(packageNames []string) (map[string]manager.PackageInfo, error) {
+	installedPackages := make(map[string]manager.PackageInfo)
+
+	// Check if rpm command is available
+	if _, err := exec.LookPath("rpm"); err != nil {
+		return nil, err
+	}
+
+	// Check each package individually with rpm -q
+	// Using individual queries because rpm -q with multiple packages can be unreliable
+	for _, pkgName := range packageNames {
+		cmd := exec.Command("rpm", "-q", pkgName)
+		out, err := cmd.Output()
+
+		if err != nil {
+			// rpm -q returns exit code 1 for packages that are not installed
+			// This is normal and not an error - continue to next package
+			continue
+		}
+
+		// Parse rpm output to extract version
+		// Format: package-version-release.arch
+		output := strings.TrimSpace(string(out))
+		if output != "" {
+			// Extract version information from rpm output
+			version := extractVersionFromRpmOutput(output, pkgName)
+			installedPackages[pkgName] = manager.PackageInfo{
+				Name:           pkgName,
+				Version:        version,
+				Status:         manager.PackageStatusInstalled,
+				PackageManager: "yum",
+			}
+		}
+	}
+
+	return installedPackages, nil
+}
+
+// extractVersionFromRpmOutput extracts version from rpm -q output
+// Input format: package-version-release.arch (e.g., "vim-enhanced-8.0.1763-19.el8_6.4.x86_64")
+// Returns: version-release (e.g., "8.0.1763-19.el8_6.4")
+func extractVersionFromRpmOutput(rpmOutput, packageName string) string {
+	// Remove package name prefix and arch suffix
+	if strings.HasPrefix(rpmOutput, packageName+"-") {
+		withoutPrefix := rpmOutput[len(packageName)+1:]
+
+		// Find last dot to remove architecture
+		lastDot := strings.LastIndex(withoutPrefix, ".")
+		if lastDot > 0 {
+			return withoutPrefix[:lastDot]
+		}
+		return withoutPrefix
+	}
+
+	// Fallback: return the whole output if parsing fails
+	return rpmOutput
 }

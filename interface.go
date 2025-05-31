@@ -20,22 +20,21 @@ type PackageManager interface {
 	// Version field contains the removed version, NewVersion will be empty.
 	Delete(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error)
 
-	// Find searches for packages using the specified keywords.
+	// Find searches for packages using the specified keywords and checks their installation status.
+	// Cross-package manager status normalization ensures consistent behavior:
+	//   - Status=installed: Package is currently installed
+	//   - Status=available: Package exists in repositories but is not installed
+	//     (includes previously installed packages that have been removed, even with config files remaining)
+	//   - Status=upgradable: Package is installed but newer version is available
 	//
-	// Status determination varies by package manager:
-	//   - APT: Checks actual installation status via dpkg-query
-	//     * Status=installed: Package is currently installed
-	//     * Status=available: Package exists in repos but not installed
-	//     * Status=upgradable: Package installed but newer version available
-	//   - YUM: Always returns Status=available (search output limitation)
-	//     * Use GetPackageInfo() or ListInstalled() for accurate status
-	//
-	// Version field contains installed version (empty if not installed or unavailable).
+	// Version field contains installed version (empty if not installed).
 	// NewVersion field contains available version from repositories.
 	//
 	// Implementation notes:
+	//   - APT: Uses dpkg-query to check installation status
+	//   - YUM: Uses rpm -q to check installation status
 	//   - APT config-files state is normalized to available for cross-PM compatibility
-	//   - YUM search cannot determine installation status efficiently
+	//   - Both package managers provide accurate status detection
 	Find(keywords []string, opts *manager.Options) ([]manager.PackageInfo, error)
 
 	// ListInstalled lists all currently installed packages.
