@@ -215,6 +215,7 @@ Options: `--debug`, `--assume-yes`, `--dry-run`, `--interactive`, `--verbose`
 **Testing:**
 - **Create integration tests** ✅ - Added `yum_integration_test.go` with three-layer testing approach
 - **Document testing strategy** ✅ - Added comprehensive testing documentation to CONTRIBUTING.md
+- **Implement CommandRunner dependency injection (Issue #20)** ✅ - YUM now uses CommandRunner for all operations
 - Add unit tests for snap package manager
 - Add unit tests for flatpak package manager
 - **APT fixture cleanup and behavior testing** ✅ - Reduced 16→7 fixtures, full test coverage

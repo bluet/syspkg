@@ -54,7 +54,51 @@ const (
 )
 
 // PackageManager implements the manager.PackageManager interface for the yum package manager.
-type PackageManager struct{}
+type PackageManager struct {
+	// runner is the command execution interface (can be mocked for testing)
+	runner manager.CommandRunner
+}
+
+// NewPackageManager creates a new YUM package manager with default command runner
+func NewPackageManager() *PackageManager {
+	return &PackageManager{
+		runner: manager.NewOSCommandRunner(),
+	}
+}
+
+// NewPackageManagerWithRunner creates a new YUM package manager with custom command runner
+// This is primarily used for testing with mocked commands
+func NewPackageManagerWithRunner(runner manager.CommandRunner) *PackageManager {
+	return &PackageManager{
+		runner: runner,
+	}
+}
+
+// getRunner returns the command runner, creating a default one if not set
+func (a *PackageManager) getRunner() manager.CommandRunner {
+	if a.runner == nil {
+		a.runner = manager.NewOSCommandRunner()
+	}
+	return a.runner
+}
+
+// executeCommand handles command execution with support for both interactive and non-interactive modes
+// For interactive mode, it uses direct exec.Command to handle stdin/stdout/stderr
+// For non-interactive mode, it uses the CommandRunner interface for testability
+func (a *PackageManager) executeCommand(ctx context.Context, args []string, opts *manager.Options) ([]byte, error) {
+	if opts != nil && opts.Interactive {
+		// Interactive mode requires direct exec.Command for stdin/stdout/stderr handling
+		// CommandRunner interface doesn't support interactive execution
+		cmd := exec.CommandContext(ctx, pm, args...)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Stdin = os.Stdin
+		return nil, cmd.Run()
+	}
+
+	// Use CommandRunner for non-interactive execution
+	return a.getRunner().OutputWithContext(ctx, pm, args...)
+}
 
 // IsAvailable checks if the yum package manager is available on the system.
 func (a *PackageManager) IsAvailable() bool {
@@ -102,23 +146,15 @@ func (a *PackageManager) Install(pkgs []string, opts *manager.Options) ([]manage
 	}
 
 	args = append(args, pkgs...)
-	cmd := exec.CommandContext(ctx, pm, args...)
 
-	if opts.Interactive {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		err := cmd.Run()
-		if err != nil {
-			return nil, err
-		}
-		// For interactive mode, we can't parse output, return empty list
-		return []manager.PackageInfo{}, nil
-	}
-
-	out, err := cmd.Output()
+	out, err := a.executeCommand(ctx, args, opts)
 	if err != nil {
 		return nil, err
+	}
+
+	// For interactive mode, we can't parse output, return empty list
+	if opts.Interactive {
+		return []manager.PackageInfo{}, nil
 	}
 
 	if opts.Verbose {
@@ -162,23 +198,15 @@ func (a *PackageManager) Delete(pkgs []string, opts *manager.Options) ([]manager
 	}
 
 	args = append(args, pkgs...)
-	cmd := exec.CommandContext(ctx, pm, args...)
 
-	if opts.Interactive {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		err := cmd.Run()
-		if err != nil {
-			return nil, err
-		}
-		// For interactive mode, we can't parse output, return empty list
-		return []manager.PackageInfo{}, nil
-	}
-
-	out, err := cmd.Output()
+	out, err := a.executeCommand(ctx, args, opts)
 	if err != nil {
 		return nil, err
+	}
+
+	// For interactive mode, we can't parse output, return empty list
+	if opts.Interactive {
+		return []manager.PackageInfo{}, nil
 	}
 
 	if opts.Verbose {
@@ -210,24 +238,17 @@ func (a *PackageManager) Refresh(opts *manager.Options) error {
 	ctx, cancel := context.WithTimeout(context.Background(), cleanTimeout)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, pm, "clean", "expire-cache")
+	args := []string{"clean", "expire-cache"}
 
-	if opts.Interactive {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		err := cmd.Run()
+	out, err := a.executeCommand(ctx, args, opts)
+	if err != nil {
 		return err
-	} else {
-		out, err := cmd.Output()
-		if err != nil {
-			return err
-		}
-		if opts.Verbose {
-			log.Println(string(out))
-		}
-		return nil
 	}
+
+	if !opts.Interactive && opts.Verbose {
+		log.Println(string(out))
+	}
+	return nil
 }
 
 // Find searches for packages matching the provided keywords using the yum package manager.
@@ -250,9 +271,9 @@ func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manag
 	defer cancel()
 
 	args := append([]string{"search"}, keywords...)
-	cmd := exec.CommandContext(ctx, pm, args...)
 
-	out, err := cmd.Output()
+	// Use CommandRunner for search operation
+	out, err := a.getRunner().OutputWithContext(ctx, pm, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -277,8 +298,8 @@ func (a *PackageManager) ListInstalled(opts *manager.Options) ([]manager.Package
 	defer cancel()
 
 	args := []string{"list", "--installed"}
-	cmd := exec.CommandContext(ctx, pm, args...)
-	out, err := cmd.Output()
+	// Use CommandRunner for list operation
+	out, err := a.getRunner().OutputWithContext(ctx, pm, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -295,9 +316,9 @@ func (a *PackageManager) ListUpgradable(opts *manager.Options) ([]manager.Packag
 	defer cancel()
 
 	args := []string{"check-update"}
-	cmd := exec.CommandContext(ctx, pm, args...)
 
-	out, err := cmd.Output()
+	// Use CommandRunner for check-update operation
+	out, err := a.getRunner().OutputWithContext(ctx, pm, args...)
 	// YUM check-update returns exit code 100 when updates are available
 	// This is normal behavior, not an error
 	if err != nil {
@@ -340,23 +361,15 @@ func (a *PackageManager) Upgrade(pkgs []string, opts *manager.Options) ([]manage
 	}
 
 	args = append(args, pkgs...)
-	cmd := exec.CommandContext(ctx, pm, args...)
 
-	if opts.Interactive {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		err := cmd.Run()
-		if err != nil {
-			return nil, err
-		}
-		// For interactive mode, we can't parse output, return empty list
-		return []manager.PackageInfo{}, nil
-	}
-
-	out, err := cmd.Output()
+	out, err := a.executeCommand(ctx, args, opts)
 	if err != nil {
 		return nil, err
+	}
+
+	// For interactive mode, we can't parse output, return empty list
+	if opts.Interactive {
+		return []manager.PackageInfo{}, nil
 	}
 
 	if opts.Verbose {
@@ -393,23 +406,14 @@ func (a *PackageManager) UpgradeAll(opts *manager.Options) ([]manager.PackageInf
 		args = append(args, "-v")
 	}
 
-	cmd := exec.CommandContext(ctx, pm, args...)
-
-	if opts.Interactive {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		err := cmd.Run()
-		if err != nil {
-			return nil, err
-		}
-		// For interactive mode, we can't parse output, return empty list
-		return []manager.PackageInfo{}, nil
-	}
-
-	out, err := cmd.Output()
+	out, err := a.executeCommand(ctx, args, opts)
 	if err != nil {
 		return nil, err
+	}
+
+	// For interactive mode, we can't parse output, return empty list
+	if opts.Interactive {
+		return []manager.PackageInfo{}, nil
 	}
 
 	if opts.Verbose {
@@ -440,20 +444,14 @@ func (a *PackageManager) Clean(opts *manager.Options) error {
 	ctx, cancel := context.WithTimeout(context.Background(), cleanTimeout)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, pm, "clean", "all")
+	args := []string{"clean", "all"}
 
-	if opts.Interactive {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		return cmd.Run()
-	}
-
-	out, err := cmd.Output()
+	out, err := a.executeCommand(ctx, args, opts)
 	if err != nil {
 		return err
 	}
-	if opts.Verbose {
+
+	if !opts.Interactive && opts.Verbose {
 		log.Println(string(out))
 	}
 	return nil
@@ -475,8 +473,8 @@ func (a *PackageManager) GetPackageInfo(pkg string, opts *manager.Options) (mana
 	ctx, cancel := context.WithTimeout(context.Background(), readTimeout)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, pm, "info", pkg)
-	out, err := cmd.Output()
+	// Use CommandRunner for package info query
+	out, err := a.getRunner().OutputWithContext(ctx, pm, "info", pkg)
 	if err != nil {
 		return manager.PackageInfo{}, err
 	}
@@ -510,23 +508,14 @@ func (a *PackageManager) AutoRemove(opts *manager.Options) ([]manager.PackageInf
 		args = append(args, "-v")
 	}
 
-	cmd := exec.CommandContext(ctx, pm, args...)
-
-	if opts.Interactive {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		err := cmd.Run()
-		if err != nil {
-			return nil, err
-		}
-		// For interactive mode, we can't parse output, return empty list
-		return []manager.PackageInfo{}, nil
-	}
-
-	out, err := cmd.Output()
+	out, err := a.executeCommand(ctx, args, opts)
 	if err != nil {
 		return nil, err
+	}
+
+	// For interactive mode, we can't parse output, return empty list
+	if opts.Interactive {
+		return []manager.PackageInfo{}, nil
 	}
 
 	if opts.Verbose {
@@ -551,8 +540,8 @@ func (a *PackageManager) enhancePackagesWithStatus(packages []manager.PackageInf
 		packageNames = append(packageNames, pkg.Name)
 	}
 
-	// Create command runner (can be mocked in tests)
-	runner := manager.NewOSCommandRunner()
+	// Use the instance's command runner (can be mocked in tests)
+	runner := a.getRunner()
 
 	// Check installation status using rpm -q
 	installedPackages, err := checkRpmInstallationStatus(packageNames, runner)
