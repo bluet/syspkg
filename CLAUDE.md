@@ -89,6 +89,39 @@ Snyk (security scan):
   - `snyk test` command scans your project, tests dependencies for vulnerabilities, and reports how many vulnerabilities are found.
   - `snyk code test` analyzes source code for security issues, often referred to as Static Application Security Testing (SAST).
 
+### GitHub Sub-Issues REST API Reference
+**Documentation**: https://docs.github.com/en/rest/issues/sub-issues?apiVersion=2022-11-28
+
+**CRITICAL**: Use **issue ID** (not issue number) in API requests!
+
+**Working Commands**:
+```bash
+# List sub-issues
+curl -L -H "Accept: application/vnd.github+json" \
+     -H "Authorization: Bearer $(gh auth token)" \
+     -H "X-GitHub-Api-Version: 2022-11-28" \
+     https://api.github.com/repos/{owner}/{repo}/issues/{issue_number}/sub_issues
+
+# Add sub-issue (use issue ID, not number!)
+curl -L -X POST -H "Accept: application/vnd.github+json" \
+     -H "Authorization: Bearer $(gh auth token)" \
+     -H "X-GitHub-Api-Version: 2022-11-28" \
+     https://api.github.com/repos/{owner}/{repo}/issues/{issue_number}/sub_issues \
+     -d '{"sub_issue_id": {ISSUE_ID}}'
+
+# Remove sub-issue
+curl -L -X DELETE -H "Accept: application/vnd.github+json" \
+     -H "Authorization: Bearer $(gh auth token)" \
+     -H "X-GitHub-Api-Version: 2022-11-28" \
+     https://api.github.com/repos/{owner}/{repo}/issues/{issue_number}/sub_issue \
+     -d '{"sub_issue_id": {ISSUE_ID}}'
+
+# Get issue ID from issue number
+gh api repos/{owner}/{repo}/issues/{number} --jq '.id'
+```
+
+**Tested & Verified**: 2025-06-01 - All endpoints work correctly
+
 
 ## Development Commands
 
