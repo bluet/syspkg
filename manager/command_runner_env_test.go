@@ -2,6 +2,7 @@ package manager
 
 import (
 	"context"
+	"strings"
 	"testing"
 )
 
@@ -9,18 +10,20 @@ func TestCommandRunnerEnvironmentHandling(t *testing.T) {
 	t.Run("DefaultCommandRunner prepends LC_ALL=C", func(t *testing.T) {
 		runner := NewDefaultCommandRunner()
 
-		// Test that LC_ALL=C is prepended automatically
-		// We can test this by running a simple command
-		output, err := runner.Run("echo", "$LC_ALL")
+		// Test that LC_ALL=C is prepended automatically using 'env' command
+		// This is more reliable than echo "$LC_ALL" across different systems
+		output, err := runner.Run("env")
 		if err != nil {
-			t.Logf("Note: echo test failed (expected on some systems): %v", err)
-		} else {
-			t.Logf("Echo output: %s", output)
+			t.Fatalf("Failed to run 'env' command: %v", err)
 		}
 
-		t.Log("DefaultCommandRunner.Run() prepends LC_ALL=C automatically")
-		t.Log("DefaultCommandRunner.RunContext() prepends LC_ALL=C automatically")
-		t.Log("Users can override by passing LC_ALL=zh_TW.UTF-8 in env parameter")
+		// Verify that LC_ALL=C appears in the environment
+		envOutput := string(output)
+		if !strings.Contains(envOutput, "LC_ALL=C") {
+			t.Errorf("Expected LC_ALL=C in environment output, but not found. Output: %s", envOutput)
+		}
+
+		t.Log("✅ Verified: DefaultCommandRunner automatically prepends LC_ALL=C")
 	})
 
 	t.Run("MockCommandRunner tracks environment variables", func(t *testing.T) {
