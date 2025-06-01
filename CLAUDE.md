@@ -137,65 +137,14 @@ Located in `.github/workflows/`:
 
 ## Architecture Overview
 
-### Core Interfaces
-- `PackageManager` (interface.go): Defines methods all package managers must implement
-- `SysPkg` (interface.go): High-level interface for managing multiple package managers
+For detailed technical architecture, design patterns, and implementation guidelines, see **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.
 
-### Command Execution Architecture (Issue #20)
-
-**Current State**: Mixed patterns across package managers
-- **YUM**: Uses CommandRunner for some operations (Find), direct exec.Command for others
-- **APT/Snap/Flatpak**: All use direct exec.Command calls
-
-**Target Architecture**: CommandBuilder pattern (Option C)
-```go
-type CommandBuilder interface {
-    CommandContext(ctx context.Context, name string, args ...string) *exec.Cmd
-}
-```
-
-**Why CommandBuilder (not Extended CommandRunner)**:
-- **Exit code complexity**: Each PM has unique exit code behaviors (APT 100=error, YUM 100=success)
-- **Maximum flexibility**: Full access to exec.Cmd features (env, stdin/stdout, working dir)
-- **Simple interface**: Only 1 method vs multiple in extended interface
-- **Go idiomatic**: Returns standard `*exec.Cmd` type
-- **No generic helpers needed**: Each PM handles its own exit codes
-
-**Critical Discovery**: Package managers have wildly inconsistent exit codes:
-- APT: Exit code 100 = any error
-- YUM: Exit code 100 = updates available (success!)
-- Snap: Exit code 64 = usage error (not "no packages found")
-
-See `docs/EXIT_CODES.md` for comprehensive documentation.
-
-### Package Structure
-- `/cmd/syspkg/`: CLI application using urfave/cli/v2 framework
-- `/manager/`: Package manager implementations
-  - Each manager (apt, yum, snap, flatpak) has its own directory
-  - Common types in `options.go` and `packageinfo.go`
-- `/osinfo/`: OS detection utilities for determining available package managers
-
-### Key Design Patterns
-- Interface-based abstraction allows easy addition of new package managers
-- Factory pattern in `syspkg.go` for creating manager instances
-- Options pattern for configurable behavior (manager.Options)
-
-### Adding New Package Managers
-1. Create new directory under `/manager/`
-2. Implement the `PackageManager` interface
-3. Add to `initializePackageManagers()` in `syspkg.go`
-4. Add tests following existing patterns (parse functions, availability checks)
-
-### Testing Patterns
-- Unit tests use table-driven tests with mock data
-- Integration tests check actual package manager availability
-- Parse functions are heavily tested with real command output examples
-- Tests use `*_test` package naming for better encapsulation
-
-### CLI Command Structure
-Main commands: `install`, `delete`, `refresh`, `upgrade`, `find`, `show`
-Package manager flags: `--apt`, `--yum`, `--flatpak`, `--snap`
-Options: `--debug`, `--assume-yes`, `--dry-run`, `--interactive`, `--verbose`
+**Quick Reference:**
+- **Core Interfaces**: `PackageManager` and `SysPkg` (interface.go)
+- **CommandBuilder Pattern**: Target architecture for Issue #20
+- **Package Structure**: `/cmd`, `/manager`, `/osinfo`, `/testing`
+- **Testing Strategy**: Three-layer approach (unit, integration, mock)
+- **Exit Code Complexity**: Each PM has unique behaviors (see docs/EXIT_CODES.md)
 
 ## Important Notes
 

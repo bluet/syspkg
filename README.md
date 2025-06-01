@@ -184,18 +184,33 @@ Please open an issue (or PR ❤️) if you'd like to see support for any unliste
 ## Development
 
 ### Documentation
-- **CLAUDE.md** - Development guidelines, architecture, and project roadmap
-- **CONTRIBUTING.md** - Comprehensive contributor guide with multi-OS testing strategy
-- **docs/EXIT_CODES.md** - Exit code behavior across package managers (critical for implementation)
-- **manager/{pm}/EXIT_CODES.md** - Package manager specific exit code documentation
-- **testing/** - Test fixtures and Docker testing infrastructure
-- **.pre-commit-config.yaml** - Secure pre-commit hooks aligned with Go best practices
-- **.github/workflows/** - CI/CD pipelines for testing, linting, building, and releases
 
-### Known Issues & Bugs
-- **APT Exit Code Bug**: Incorrectly handles exit code 100 as "no packages found" (should be error)
-- **Snap Exit Code Bug**: Incorrectly handles exit code 64 as "no packages found" (should be usage error)
-- See [Issue #20](https://github.com/bluet/syspkg/issues/20) for CommandRunner refactoring to address these
+#### For Users
+- **[README.md](README.md)** - Getting started, usage examples, and features
+- **[Go Reference](https://pkg.go.dev/github.com/bluet/syspkg)** - Complete API documentation
+
+#### For Contributors
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development workflow and comprehensive testing guide
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Technical architecture, design patterns, and interfaces
+- **[docs/EXIT_CODES.md](docs/EXIT_CODES.md)** - Package manager exit code behavior (critical for implementation)
+- **[manager/{pm}/EXIT_CODES.md](manager/)** - Package manager specific exit code documentation
+
+#### For AI Assistants
+- **[CLAUDE.md](CLAUDE.md)** - Development guidelines and AI-specific instructions
+
+#### Infrastructure
+- **[testing/](testing/)** - Test fixtures and Docker testing infrastructure
+- **[.pre-commit-config.yaml](.pre-commit-config.yaml)** - Secure pre-commit hooks
+- **[.github/workflows/](.github/workflows/)** - CI/CD pipelines
+
+### Recent Fixes
+- ✅ **APT Exit Code Bug**: Fixed in commit 3751f45 - now properly propagates errors (Issue #21)
+- ✅ **Snap Exit Code Bug**: Fixed in commit 3751f45 - now properly handles usage errors (Issue #22)
+- ✅ **Flatpak Exit Code Bug**: Fixed in commit 3751f45 - now properly handles general errors (Issue #24)
+
+### Active Development
+- **CommandBuilder Architecture**: Ongoing refactoring for Issue #20 to improve testability
+- **Security Enhancements**: Input validation for package names (Issue #23)
 
 ### CI/CD Status
 
