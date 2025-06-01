@@ -56,6 +56,11 @@ func (a *PackageManager) GetPackageManager() string {
 
 // Install installs the specified packages using the snap package manager with the provided options.
 func (a *PackageManager) Install(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+	// Validate package names to prevent command injection
+	if err := manager.ValidatePackageNames(pkgs); err != nil {
+		return nil, err
+	}
+
 	args := append([]string{"install", ArgsFixBroken}, pkgs...)
 
 	if opts == nil {
@@ -102,6 +107,11 @@ func (a *PackageManager) Install(pkgs []string, opts *manager.Options) ([]manage
 
 // Delete removes the specified packages using the snap package manager with the provided options.
 func (a *PackageManager) Delete(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+	// Validate package names to prevent command injection
+	if err := manager.ValidatePackageNames(pkgs); err != nil {
+		return nil, err
+	}
+
 	args := append([]string{"remove", ArgsFixBroken}, pkgs...)
 
 	if opts == nil {
@@ -153,6 +163,11 @@ func (a *PackageManager) Refresh(opts *manager.Options) error {
 
 // Find searches for packages matching the provided keywords using the snap package manager.
 func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+	// Validate keywords to prevent command injection
+	if err := manager.ValidatePackageNames(keywords); err != nil {
+		return nil, err
+	}
+
 	args := append([]string{"search"}, keywords...)
 	cmd := exec.Command("snap", args...)
 	cmd.Env = ENV_NonInteractive
@@ -189,6 +204,13 @@ func (a *PackageManager) ListUpgradable(opts *manager.Options) ([]manager.Packag
 
 // Upgrade upgrades the specified packages using the snap package manager with the provided options.
 func (a *PackageManager) Upgrade(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+	// Validate package names to prevent command injection
+	if len(pkgs) > 0 {
+		if err := manager.ValidatePackageNames(pkgs); err != nil {
+			return nil, err
+		}
+	}
+
 	args := []string{"refresh"}
 	if len(pkgs) > 0 {
 		args = append(args, pkgs...)
@@ -244,6 +266,11 @@ func (a *PackageManager) UpgradeAll(opts *manager.Options) ([]manager.PackageInf
 
 // GetPackageInfo retrieves information about the specified package using the snap package manager.
 func (a *PackageManager) GetPackageInfo(pkg string, opts *manager.Options) (manager.PackageInfo, error) {
+	// Validate package name to prevent command injection
+	if err := manager.ValidatePackageName(pkg); err != nil {
+		return manager.PackageInfo{}, err
+	}
+
 	cmd := exec.Command("snap", "info", pkg)
 	cmd.Env = ENV_NonInteractive
 	out, err := cmd.Output()

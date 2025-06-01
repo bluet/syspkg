@@ -61,6 +61,11 @@ func (a *PackageManager) GetPackageManager() string {
 
 // Install installs the given packages using Flatpak with the provided options.
 func (a *PackageManager) Install(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+	// Validate package names to prevent command injection
+	if err := manager.ValidatePackageNames(pkgs); err != nil {
+		return nil, err
+	}
+
 	args := append([]string{"install", ArgsFixBroken, ArgsUpsert, ArgsVerbose}, pkgs...)
 
 	if opts == nil {
@@ -104,6 +109,11 @@ func (a *PackageManager) Install(pkgs []string, opts *manager.Options) ([]manage
 
 // Delete removes the given packages using Flatpak with the provided options.
 func (a *PackageManager) Delete(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+	// Validate package names to prevent command injection
+	if err := manager.ValidatePackageNames(pkgs); err != nil {
+		return nil, err
+	}
+
 	args := append([]string{"uninstall", ArgsFixBroken, ArgsVerbose}, pkgs...)
 
 	if opts == nil {
@@ -154,6 +164,11 @@ func (a *PackageManager) Refresh(opts *manager.Options) error {
 
 // Find searches for packages matching the given keywords using Flatpak with the provided options.
 func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+	// Validate keywords to prevent command injection
+	if err := manager.ValidatePackageNames(keywords); err != nil {
+		return nil, err
+	}
+
 	args := append([]string{"search", ArgsVerbose}, keywords...)
 
 	if opts == nil {
@@ -248,6 +263,11 @@ func (a *PackageManager) UpgradeAll(opts *manager.Options) ([]manager.PackageInf
 
 // GetPackageInfo retrieves package information for a single package using Flatpak with the provided options.
 func (a *PackageManager) GetPackageInfo(pkg string, opts *manager.Options) (manager.PackageInfo, error) {
+	// Validate package name to prevent command injection
+	if err := manager.ValidatePackageName(pkg); err != nil {
+		return manager.PackageInfo{}, err
+	}
+
 	cmd := exec.Command(pm, "info", pkg)
 	cmd.Env = ENV_NonInteractive
 	out, err := cmd.Output()

@@ -162,13 +162,17 @@ For detailed technical architecture, design patterns, and implementation guideli
 
 **Cross-Package Manager Compatibility**: SysPkg normalizes package states for consistent behavior across different package managers. For example, APT's "config-files" state (packages removed but with configuration files remaining) is normalized to "available" status to match the semantics used by other package managers like YUM and Snap.
 
+## Current Session Todos
+
+@TODO.md
+
 ## Project Improvement Roadmap
 
 *Note: To-do list consolidated 2025-05-30 - removed duplicates, feature creep items, and over-engineering. Focused on core security, testing, and platform support.*
 
 ### 🔴 High Priority (Security & Critical Bugs) - 15 items
-1. **Fix command injection vulnerability** - validate/sanitize package names before exec.Command
-2. **Implement input validation helper function** for package names and arguments
+1. **Fix command injection vulnerability** ✅ - validate/sanitize package names before exec.Command (PR #25)
+2. **Implement input validation helper function** ✅ for package names and arguments (PR #25)
 3. **Fix resource leaks** in error handling paths
 4. **Add security scanning with Snyk** to CI/CD pipeline
 5. **Review and merge PR #12** - fix GetPackageManager("") panic bug ✅
@@ -179,64 +183,42 @@ For detailed technical architecture, design patterns, and implementation guideli
 10. **Implement CommandBuilder interface (Issue #20)** - Replace direct exec.Command calls with testable CommandBuilder pattern
 11. **Add exit code documentation** ✅ - Created comprehensive exit code docs for all package managers
 
-### ✅ CRITICAL INVESTIGATION COMPLETED
+### ✅ COMPLETED INVESTIGATIONS (Collapsed)
+<details>
+<summary>Critical investigation results - tests are correctly implemented</summary>
+
 **Investigation Results: No design flaw found - tests are correct**
-8. **RESOLVED: Tests are correctly testing parser functions** ✅ - `behavior_test.go` tests `ParseFindOutput()` directly, not `Find()` method
-9. **RESOLVED: ParseFindOutput() vs Find() distinction clarified** ✅:
-   - `ParseFindOutput()`: Pure parser, returns all packages as "available" (YUM limitation)
-   - `Find()`: Enhanced method that adds rpm -q status detection for accurate results
-10. **RESOLVED: CommandRunner interface verified** ✅ - Correctly implemented in `enhancePackagesWithStatus()`
-11. **RESOLVED: Test execution paths confirmed** ✅ - Tests correctly test parsers, not enhanced methods
-12. **RESOLVED: Fixtures validated as authentic** ✅ - Real YUM output that correctly lacks status info
-13. **RESOLVED: Interface implementation verified** ✅ - All methods properly implemented and registered
-14. **RESOLVED: Created integration tests** ✅ - Added `yum_integration_test.go` demonstrating three-layer testing approach
+- ✅ **Parser vs enhanced method distinction clarified**
+- ✅ **CommandRunner interface verified**
+- ✅ **Test execution paths confirmed**
+- ✅ **Fixtures validated as authentic**
+- ✅ **Integration tests created**
+</details>
 
-### 🟡 Medium Priority (Code Quality & Testing) - 8 items
-**Testing:**
-- **Create integration tests** ✅ - Added `yum_integration_test.go` with three-layer testing approach
-- **Document testing strategy** ✅ - Added comprehensive testing documentation to CONTRIBUTING.md
-- **Implement CommandRunner dependency injection (Issue #20)** 🚧 - YUM partially implemented, architecture decision updated to Option C (CommandBuilder)
-- Add unit tests for snap package manager
-- Add unit tests for flatpak package manager
-- **APT fixture cleanup and behavior testing** ✅ - Reduced 16→7 fixtures, full test coverage
-- **Cross-platform parsing robustness** ✅ - CRLF/whitespace handling, regex optimization
-- **YUM fixture analysis and cleanup** ✅ **COMPLETED** (Issue #16) - Following APT pattern:
-  - ✅ Analyzed YUM fixtures to determine what's needed for comprehensive testing
-  - ✅ Removed redundant/duplicate files (search-vim-rockylinux.txt)
-  - ✅ Standardized fixture naming convention (rocky8 vs rockylinux inconsistency)
-  - ✅ Renamed info-vim-rockylinux.txt → info-vim-installed-rocky8.txt for clarity
-  - ✅ Added missing edge case fixtures (empty results, not found, clean, refresh)
-  - ✅ Created comprehensive behavior_test.go following APT fixture pattern
-  - ✅ Converted YUM tests from inline data to fixture-based tests
-  - ✅ Verified fixture compatibility and completeness with all tests passing
-- **YUM operations implementation** ✅ **COMPLETED** - Comprehensive YUM package manager:
-  - ✅ Implemented all missing operations: Install, Delete, ListUpgradable, Upgrade, UpgradeAll, AutoRemove
-  - ✅ Added complete parser functions for all operation outputs
-  - ✅ Created comprehensive behavior tests covering all operations and edge cases
-  - ✅ Generated real fixtures using Rocky Linux Docker for authentic test data
-  - ✅ Documented YUM-specific behaviors and cross-package manager compatibility
-  - ✅ **YUM Find() status detection** - Implemented rpm -q integration for accurate installation status
-  - ✅ **Cross-package manager API consistency** - YUM Find() now matches APT behavior exactly
-  - ✅ All tests passing with 100% security scan clearance
+### 🟡 Medium Priority & Completed Items (Collapsed)
+<details>
+<summary>Code quality, testing achievements, and removed items</summary>
 
-**Documentation:**
-- **API and behavior documentation** ✅ - Enhanced interface docs, status normalization, cross-PM compatibility
-- **Error handling best practices** ✅ - Fixed ignored errors in documentation examples
-- **Accuracy improvements** ✅ - Fixed misleading comments about status handling
-- **YUM documentation updates** ✅ - Updated all outdated behavior comments to reflect Find() status detection capabilities
+**Completed Testing Work:**
+- ✅ YUM comprehensive implementation (Issue #16)
+- ✅ APT fixture cleanup and behavior testing
+- ✅ Integration tests and testing strategy documentation
+- ✅ Cross-platform parsing robustness
 
-**Code Improvements:**
-- Implement context support for cancellation and timeouts
-- Create custom error types for better error handling
-- Extract common parsing logic to shared utilities (DRY principle)
-- Replace magic strings/numbers with named constants
-- **Fix APT multi-arch package parsing** (Issue #15) - cosmetic fix for empty package names
+**Completed Documentation:**
+- ✅ API and behavior documentation enhanced
+- ✅ Error handling best practices documented
+- ✅ YUM documentation updates
 
-**Removed from roadmap (2025-05-30):**
-- ~~Structured logging~~ (over-engineering for project scope)
-- ~~Progress indicators~~ (feature creep for CLI/library)
-- ~~Architecture diagrams~~ (low ROI for library project)
-- ~~TODO comment fixes~~ (covered by security improvements)
+**Remaining Code Improvements:**
+- Context support for cancellation and timeouts
+- Custom error types for better error handling
+- Extract common parsing logic (DRY principle)
+- Replace magic strings/numbers with constants
+
+**Items Removed from Roadmap (2025-05-30):**
+- ~~Structured logging, progress indicators, architecture diagrams~~ (over-engineering/feature creep)
+</details>
 
 ### 🟢 Low Priority (Platform Support) - 3 items
 **New Package Managers:**

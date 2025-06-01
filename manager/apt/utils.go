@@ -311,6 +311,11 @@ func logDebugPackages(packages map[string]manager.PackageInfo, opts *manager.Opt
 
 // runDpkgQuery executes dpkg-query command and handles errors appropriately
 func runDpkgQuery(packageNames []string, opts *manager.Options) ([]byte, error) {
+	// Validate package names to prevent command injection
+	if err := manager.ValidatePackageNames(packageNames); err != nil {
+		return nil, err
+	}
+
 	args := []string{"-W", "--showformat", "${binary:Package} ${Status} ${Version}\n"}
 	args = append(args, packageNames...)
 	cmd := exec.Command("dpkg-query", args...)

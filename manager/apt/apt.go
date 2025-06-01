@@ -86,6 +86,11 @@ func (a *PackageManager) GetPackageManager() string {
 
 // Install installs the provided packages using the apt package manager.
 func (a *PackageManager) Install(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+	// Validate package names to prevent command injection
+	if err := manager.ValidatePackageNames(pkgs); err != nil {
+		return nil, err
+	}
+
 	args := append([]string{"install", ArgsFixBroken}, pkgs...)
 
 	if opts == nil {
@@ -125,6 +130,11 @@ func (a *PackageManager) Install(pkgs []string, opts *manager.Options) ([]manage
 
 // Delete removes the provided packages using the apt package manager.
 func (a *PackageManager) Delete(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+	// Validate package names to prevent command injection
+	if err := manager.ValidatePackageNames(pkgs); err != nil {
+		return nil, err
+	}
+
 	// args := append([]string{"remove", ArgsFixBroken, ArgsPurge, ArgsAutoRemove}, pkgs...)
 	args := append([]string{"remove", ArgsFixBroken, ArgsAutoRemove}, pkgs...)
 	if opts == nil {
@@ -192,6 +202,11 @@ func (a *PackageManager) Refresh(opts *manager.Options) error {
 
 // Find searches for packages matching the provided keywords using the apt package manager.
 func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+	// Validate keywords to prevent command injection
+	if err := manager.ValidatePackageNames(keywords); err != nil {
+		return nil, err
+	}
+
 	args := append([]string{"search"}, keywords...)
 	cmd := exec.Command("apt", args...)
 	cmd.Env = append(os.Environ(), ENV_NonInteractive...)
@@ -229,6 +244,13 @@ func (a *PackageManager) ListUpgradable(opts *manager.Options) ([]manager.Packag
 
 // Upgrade upgrades the provided packages using the apt package manager.
 func (a *PackageManager) Upgrade(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+	// Validate package names to prevent command injection
+	if len(pkgs) > 0 {
+		if err := manager.ValidatePackageNames(pkgs); err != nil {
+			return nil, err
+		}
+	}
+
 	args := []string{"upgrade"}
 	if len(pkgs) > 0 {
 		args = append(args, pkgs...)
@@ -307,6 +329,11 @@ func (a *PackageManager) Clean(opts *manager.Options) error {
 
 // GetPackageInfo retrieves package information for the specified package using the apt package manager.
 func (a *PackageManager) GetPackageInfo(pkg string, opts *manager.Options) (manager.PackageInfo, error) {
+	// Validate package name to prevent command injection
+	if err := manager.ValidatePackageName(pkg); err != nil {
+		return manager.PackageInfo{}, err
+	}
+
 	cmd := exec.Command("apt-cache", "show", pkg)
 	cmd.Env = ENV_NonInteractive
 	out, err := cmd.Output()
