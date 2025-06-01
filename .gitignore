@@ -52,6 +52,11 @@ bin/
 tmp/
 **/*.log.dccache
 
+# Vim swap files
+*.swp
+*.swo
+*~
+
 # Development cache and temporary files
 .dccache
 *.log
