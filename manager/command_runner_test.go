@@ -44,7 +44,7 @@ func TestMockCommandRunner(t *testing.T) {
 			testCommand:    "unknown",
 			testArgs:       []string{"command"},
 			expectedOutput: nil,
-			expectedError:  errors.New("no mock found for command: unknown"),
+			expectedError:  errors.New("no mock found for command: unknown command"),
 		},
 	}
 

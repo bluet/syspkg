@@ -125,7 +125,7 @@ func (m *MockCommandRunner) RunContext(ctx context.Context, name string, args []
 	}
 
 	// Default: return error when no mock is found (catches missing mocks in tests)
-	return nil, errors.New("no mock found for command: " + name)
+	return nil, errors.New("no mock found for command: " + cmdKey)
 }
 
 // RunInteractive simulates interactive command execution
