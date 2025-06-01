@@ -162,60 +162,13 @@ For detailed technical architecture, design patterns, and implementation guideli
 
 **Cross-Package Manager Compatibility**: SysPkg normalizes package states for consistent behavior across different package managers. For example, APT's "config-files" state (packages removed but with configuration files remaining) is normalized to "available" status to match the semantics used by other package managers like YUM and Snap.
 
-## 🚨 CURRENT SESSION TODOS (2025-06-01)
-
-### 🔴 CRITICAL SECURITY ACTIONS (IMMEDIATE)
-- [ ] **Remove .swo file**: `git rm .swo && git commit -m "security: remove incorrectly committed .swo file"`
-- [ ] **Command injection fix**: Implement `validatePackageName()` function with regex validation **(Issue #23)**
-- [ ] **Create validatePackageName() helper**: Add to manager package with regex validation **(Issue #23)**
-- [ ] **Create security branch**: `git checkout -b issue-23-security-input-validation` **(Issue #23)**
-
-### 🟡 HIGH PRIORITY DEVELOPMENT
-- [ ] **CommandBuilder pattern**: Implement unified interface for cross-platform testing **(Issue #20)**
-- [ ] **Replace YUM's CommandRunner**: Migrate to CommandBuilder interface for consistency **(Issue #20)**
-- [ ] **Update APT, Snap, Flatpak**: Use CommandBuilder pattern instead of direct exec.Command **(Issue #20)**
-- [ ] **Create CommandBuilder branch**: `git checkout -b issue-20-commandbuilder-pattern` **(Issue #20)**
-
-### 🟢 MEDIUM PRIORITY FEATURES
-- [ ] **CLI upgrade display**: Fix packages not shown in CLI output **(Issue #3)**
-- [ ] **Mac apt conflict**: Use apt-get instead of apt on macOS **(Issue #2)**
-- [ ] **Snap test suite**: Create comprehensive test suite for Snap package manager (0% coverage)
-- [ ] **Flatpak test suite**: Create comprehensive test suite for Flatpak package manager (0% coverage)
-- [ ] **Security tests**: Add security-focused tests for input validation **(Issue #23)**
-- [ ] **Create feature branches**:
-  - `git checkout -b issue-3-cli-upgrade-output` **(Issue #3)**
-  - `git checkout -b issue-2-mac-apt-conflict` **(Issue #2)**
-
-### 🔵 LOW PRIORITY ENHANCEMENTS
-- [ ] **APT multi-arch parsing**: Fix empty package names for multi-arch packages **(Issue #15)**
-- [ ] **Create APT branch**: `git checkout -b issue-15-apt-multiarch-parsing` **(Issue #15)**
-- [ ] **PR #17 follow-ups**:
-  - Improve version parsing with robust regex patterns
-  - Enhance Flatpak/Snap AutoRemove methods to parse output
-  - Make timeout configuration configurable
-  - Document YUM version detection limitations
-- [ ] **Documentation improvements**:
-  - Create CHANGELOG.md following Keep a Changelog format
-  - Add dedicated security documentation section to CONTRIBUTING.md
-  - Continue Phase 2 documentation reorganization (create docs/TESTING.md)
-
-### ✅ COMPLETED THIS SESSION
-- [x] Optimize CLAUDE.md organization for better Claude Code tool usage
-- [x] Verify all docs, todos, and issues are synchronized with CommandBuilder decision
-- [x] Update Issue #20 title and add cross-platform testing benefit
-- [x] Add feature branch creation todos for remaining GitHub issues
-- [x] Close duplicate GitHub issues (#11, #18, #19) and consolidate security issue #23
-
-### ⚠️ COMMIT SAFETY REMINDER
-**NEVER use `git add .` or `git add -A`** - Use specific file paths: `git add manager/security.go`
-
 ## Project Improvement Roadmap
 
 *Note: To-do list consolidated 2025-05-30 - removed duplicates, feature creep items, and over-engineering. Focused on core security, testing, and platform support.*
 
 ### 🔴 High Priority (Security & Critical Bugs) - 15 items
-1. **Fix command injection vulnerability** - validate/sanitize package names before exec.Command
-2. **Implement input validation helper function** for package names and arguments
+1. **Fix command injection vulnerability** ✅ - validate/sanitize package names before exec.Command (PR #25)
+2. **Implement input validation helper function** ✅ for package names and arguments (PR #25)
 3. **Fix resource leaks** in error handling paths
 4. **Add security scanning with Snyk** to CI/CD pipeline
 5. **Review and merge PR #12** - fix GetPackageManager("") panic bug ✅
