@@ -462,6 +462,11 @@ func ParseAutoRemoveOutput(msg string, opts *manager.Options) []manager.PackageI
 // checkRpmInstallationStatus uses rpm -q to check which packages are installed
 // Returns a map of installed package names to their PackageInfo using the provided CommandRunner
 func checkRpmInstallationStatus(packageNames []string, runner manager.CommandRunner) (map[string]manager.PackageInfo, error) {
+	// Validate package names to prevent command injection
+	if err := manager.ValidatePackageNames(packageNames); err != nil {
+		return nil, err
+	}
+
 	installedPackages := make(map[string]manager.PackageInfo)
 
 	// Check if rpm command is available by trying to run rpm --version

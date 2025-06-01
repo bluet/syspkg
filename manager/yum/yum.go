@@ -121,6 +121,11 @@ func (a *PackageManager) GetPackageManager() string {
 //   - Uses -y flag to automatically answer yes to prompts
 //   - Respects DryRun, Interactive, and Verbose options
 func (a *PackageManager) Install(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+	// Validate package names to prevent command injection
+	if err := manager.ValidatePackageNames(pkgs); err != nil {
+		return nil, err
+	}
+
 	if opts == nil {
 		opts = &manager.Options{
 			DryRun:      false,
@@ -173,6 +178,11 @@ func (a *PackageManager) Install(pkgs []string, opts *manager.Options) ([]manage
 //   - Uses -y flag to automatically answer yes to prompts
 //   - Respects DryRun, Interactive, and Verbose options
 func (a *PackageManager) Delete(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+	// Validate package names to prevent command injection
+	if err := manager.ValidatePackageNames(pkgs); err != nil {
+		return nil, err
+	}
+
 	if opts == nil {
 		opts = &manager.Options{
 			DryRun:      false,
@@ -267,6 +277,11 @@ func (a *PackageManager) Refresh(opts *manager.Options) error {
 //   - Version: Installed version (if installed) or empty
 //   - NewVersion: Available version from repositories
 func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+	// Validate keywords to prevent command injection
+	if err := manager.ValidatePackageNames(keywords); err != nil {
+		return nil, err
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), readTimeout)
 	defer cancel()
 
@@ -336,6 +351,13 @@ func (a *PackageManager) ListUpgradable(opts *manager.Options) ([]manager.Packag
 // Upgrade upgrades the specified packages using the yum package manager.
 // Returns PackageInfo for each successfully upgraded package with new version information.
 func (a *PackageManager) Upgrade(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+	// Validate package names to prevent command injection
+	if len(pkgs) > 0 {
+		if err := manager.ValidatePackageNames(pkgs); err != nil {
+			return nil, err
+		}
+	}
+
 	if opts == nil {
 		opts = &manager.Options{
 			DryRun:      false,
@@ -470,6 +492,11 @@ func (a *PackageManager) Clean(opts *manager.Options) error {
 //     PackageStatusAvailable if under "Available Packages" section
 //   - PackageManager: "yum"
 func (a *PackageManager) GetPackageInfo(pkg string, opts *manager.Options) (manager.PackageInfo, error) {
+	// Validate package name to prevent command injection
+	if err := manager.ValidatePackageName(pkg); err != nil {
+		return manager.PackageInfo{}, err
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), readTimeout)
 	defer cancel()
 
