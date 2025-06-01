@@ -193,7 +193,7 @@ func TestValidatePackageName(t *testing.T) {
 				return
 			}
 			if err != nil && tt.errMsg != "" {
-				if !contains(err.Error(), tt.errMsg) {
+				if !strings.Contains(err.Error(), tt.errMsg) {
 					t.Errorf("ValidatePackageName(%q) error = %v, want error containing %q", tt.input, err, tt.errMsg)
 				}
 			}
@@ -237,9 +237,4 @@ func TestValidatePackageNames(t *testing.T) {
 			}
 		})
 	}
-}
-
-// Helper function to check if a string contains a substring
-func contains(s, substr string) bool {
-	return strings.Contains(s, substr)
 }
