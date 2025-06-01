@@ -252,3 +252,53 @@ func ParsePackageInfoOutput(msg string, opts *manager.Options) manager.PackageIn
 
 	return pkg
 }
+
+// ParseAutoRemoveOutput parses the output of the flatpak uninstall --unused command
+// and returns a list of successfully removed packages.
+//
+// Expected output format:
+//
+//	Uninstalling: org.freedesktop.Platform.Locale/x86_64/22.08
+//	Uninstalling: org.gtk.Gtk3theme.Yaru/x86_64/3.22
+//
+// Returns all removed packages with Status=available.
+// The opts parameter is reserved for future parsing options and is currently unused.
+func ParseAutoRemoveOutput(msg string, opts *manager.Options) []manager.PackageInfo {
+	var packages []manager.PackageInfo
+
+	if opts != nil && opts.Verbose {
+		log.Printf("Parsing flatpak autoremove output: %s", msg)
+	}
+
+	msg = strings.TrimSuffix(msg, "\n")
+	lines := strings.Split(msg, "\n")
+
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+
+		// Look for "Uninstalling:" lines
+		if strings.HasPrefix(line, "Uninstalling: ") {
+			packagePath := strings.TrimPrefix(line, "Uninstalling: ")
+
+			// Parse package path format: name/arch/version
+			parts := strings.Split(packagePath, "/")
+			if len(parts) >= 3 {
+				name := parts[0]
+				arch := parts[1]
+				version := parts[2]
+
+				packageInfo := manager.PackageInfo{
+					Name:           name,
+					Arch:           arch,
+					Version:        version,
+					NewVersion:     "",
+					Status:         manager.PackageStatusAvailable, // Removed packages are now available
+					PackageManager: pm,
+				}
+				packages = append(packages, packageInfo)
+			}
+		}
+	}
+
+	return packages
+}

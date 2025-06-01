@@ -352,6 +352,6 @@ func (a *PackageManager) AutoRemove(opts *manager.Options) ([]manager.PackageInf
 	}
 
 	// Parse flatpak uninstall output to return removed packages
-	// For now, return empty list as flatpak uninstall --unused output is minimal
-	return []manager.PackageInfo{}, nil
+	// Enhancement: Parse and return information about removed packages
+	return ParseAutoRemoveOutput(string(out), opts), nil
 }

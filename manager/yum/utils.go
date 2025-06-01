@@ -427,6 +427,11 @@ func ParseListUpgradableOutput(msg string, opts *manager.Options) []manager.Pack
 // Returns all upgraded packages with new version information.
 // The opts parameter is reserved for future parsing options and is currently unused.
 func ParseUpgradeOutput(msg string, opts *manager.Options) []manager.PackageInfo {
+	// TODO: YUM upgrade operations currently reuse install output parsing.
+	// Limitation: Version transitions (old→new) are not captured from upgrade output.
+	// Future enhancement: Parse 'Upgrading:' section to capture version transitions.
+	// Current behavior: Shows final installed version only (like Install operation).
+
 	// Upgrade output format is very similar to install output,
 	// we can reuse the same parser logic
 	return ParseInstallOutput(msg, opts)
