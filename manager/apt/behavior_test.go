@@ -25,7 +25,10 @@ func TestPackageManager_ImplementsInterface(t *testing.T) {
 func TestFind_BehaviorWithFixtures(t *testing.T) {
 	fixture := loadFixture(t, "search-vim.txt")
 
-	packages := apt.ParseFindOutput(fixture, &manager.Options{})
+	// Create mock runner for testing - status detection not needed for this parsing test
+	mockRunner := manager.NewMockCommandRunner()
+	pm := apt.NewPackageManagerWithCustomRunner(mockRunner)
+	packages := pm.ParseFindOutput(fixture, &manager.Options{})
 
 	// Test behavior: Find should return available packages
 	if len(packages) == 0 {

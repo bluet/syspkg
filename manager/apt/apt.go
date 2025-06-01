@@ -15,10 +15,11 @@
 package apt
 
 import (
+	"context"
 	"log"
-	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	// "github.com/rs/zerolog"
 	// "github.com/rs/zerolog/log"
@@ -40,11 +41,38 @@ const (
 	ArgsShowProgress string = "--show-progress"
 )
 
-// ENV_NonInteractive contains environment variables used to set non-interactive mode for apt and dpkg.
-var ENV_NonInteractive []string = []string{"LC_ALL=C", "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true"}
+// NOTE: Environment variables for non-interactive mode are now handled automatically by CommandRunner
+// LC_ALL=C is set automatically, and DEBIAN_FRONTEND=noninteractive, DEBCONF_NONINTERACTIVE_SEEN=true
+// are passed as additional environment variables to each RunContext/RunInteractive call
 
 // PackageManager implements the manager.PackageManager interface for the apt package manager.
-type PackageManager struct{}
+type PackageManager struct {
+	// runner is the command execution interface (can be mocked for testing)
+	runner manager.CommandRunner
+}
+
+// NewPackageManager creates a new APT package manager with default command runner
+func NewPackageManager() *PackageManager {
+	return &PackageManager{
+		runner: manager.NewDefaultCommandRunner(),
+	}
+}
+
+// NewPackageManagerWithCustomRunner creates a new APT package manager with custom command runner
+// This is primarily used for testing with mocked commands
+func NewPackageManagerWithCustomRunner(runner manager.CommandRunner) *PackageManager {
+	return &PackageManager{
+		runner: runner,
+	}
+}
+
+// getRunner returns the command runner, creating a default one if not set
+func (a *PackageManager) getRunner() manager.CommandRunner {
+	if a.runner == nil {
+		a.runner = manager.NewDefaultCommandRunner()
+	}
+	return a.runner
+}
 
 // IsAvailable checks if the apt package manager is available on the system.
 // It verifies both that apt exists and that it's the Debian apt package manager
@@ -64,8 +92,7 @@ func (a *PackageManager) IsAvailable() bool {
 
 	// Test if this is actually functional Debian apt by trying a safe command
 	// This approach: if apt+dpkg work together, support them regardless of platform
-	cmd := exec.Command("apt", "--version")
-	output, err := cmd.Output()
+	output, err := a.getRunner().Run("apt", "--version")
 	if err != nil {
 		return false
 	}
@@ -110,17 +137,14 @@ func (a *PackageManager) Install(pkgs []string, opts *manager.Options) ([]manage
 		args = append(args, ArgsAssumeYes)
 	}
 
-	cmd := exec.Command(pm, args...)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	defer cancel()
 
 	if opts.Interactive {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		err := cmd.Run()
+		err := a.getRunner().RunInteractive(ctx, pm, args, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
 		return []manager.PackageInfo{}, err
 	} else {
-		cmd.Env = ENV_NonInteractive
-		out, err := cmd.Output()
+		out, err := a.getRunner().RunContext(ctx, pm, args, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
 		if err != nil {
 			return nil, err
 		}
@@ -152,17 +176,14 @@ func (a *PackageManager) Delete(pkgs []string, opts *manager.Options) ([]manager
 		args = append(args, ArgsAssumeYes)
 	}
 
-	cmd := exec.Command(pm, args...)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	defer cancel()
 
 	if opts.Interactive {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		err := cmd.Run()
+		err := a.getRunner().RunInteractive(ctx, pm, args, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
 		return []manager.PackageInfo{}, err
 	} else {
-		cmd.Env = ENV_NonInteractive
-		out, err := cmd.Output()
+		out, err := a.getRunner().RunContext(ctx, pm, args, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
 		if err != nil {
 			return nil, err
 		}
@@ -172,8 +193,8 @@ func (a *PackageManager) Delete(pkgs []string, opts *manager.Options) ([]manager
 
 // Refresh updates the package list using the apt package manager.
 func (a *PackageManager) Refresh(opts *manager.Options) error {
-	cmd := exec.Command(pm, "update")
-	cmd.Env = ENV_NonInteractive
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
 
 	if opts == nil {
 		opts = &manager.Options{
@@ -183,13 +204,10 @@ func (a *PackageManager) Refresh(opts *manager.Options) error {
 		}
 	}
 	if opts.Interactive {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		err := cmd.Run()
+		err := a.getRunner().RunInteractive(ctx, pm, []string{"update"}, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
 		return err
 	} else {
-		out, err := cmd.Output()
+		out, err := a.getRunner().RunContext(ctx, pm, []string{"update"}, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
 		if err != nil {
 			return err
 		}
@@ -208,23 +226,24 @@ func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manag
 	}
 
 	args := append([]string{"search"}, keywords...)
-	cmd := exec.Command("apt", args...)
-	cmd.Env = append(os.Environ(), ENV_NonInteractive...)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer cancel()
 
-	out, err := cmd.Output()
+	out, err := a.getRunner().RunContext(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
 	if err != nil {
 		return nil, err
 	}
 
-	return ParseFindOutput(string(out), opts), nil
+	return a.ParseFindOutput(string(out), opts), nil
 }
 
 // ListInstalled lists all installed packages using the apt package manager.
 func (a *PackageManager) ListInstalled(opts *manager.Options) ([]manager.PackageInfo, error) {
-	cmd := exec.Command("dpkg-query", "-W", "-f", "${binary:Package} ${Version}\n")
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer cancel()
+
 	// NOTE: can also use `apt list --installed`, but it's slower
-	cmd.Env = ENV_NonInteractive
-	out, err := cmd.Output()
+	out, err := a.getRunner().RunContext(ctx, "dpkg-query", []string{"-W", "-f", "${binary:Package} ${Version}\n"}, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
 	if err != nil {
 		return nil, err
 	}
@@ -233,9 +252,10 @@ func (a *PackageManager) ListInstalled(opts *manager.Options) ([]manager.Package
 
 // ListUpgradable lists all upgradable packages using the apt package manager.
 func (a *PackageManager) ListUpgradable(opts *manager.Options) ([]manager.PackageInfo, error) {
-	cmd := exec.Command(pm, "list", "--upgradable")
-	cmd.Env = ENV_NonInteractive
-	out, err := cmd.Output()
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer cancel()
+
+	out, err := a.getRunner().RunContext(ctx, pm, []string{"list", "--upgradable"}, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
 	if err != nil {
 		return nil, err
 	}
@@ -271,20 +291,17 @@ func (a *PackageManager) Upgrade(pkgs []string, opts *manager.Options) ([]manage
 		args = append(args, ArgsAssumeYes)
 	}
 
-	cmd := exec.Command(pm, args...)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+	defer cancel()
 
 	log.Printf("Running command: %s %s", pm, args)
 
 	if opts.Interactive {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		err := cmd.Run()
+		err := a.getRunner().RunInteractive(ctx, pm, args, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
 		return []manager.PackageInfo{}, err
 	}
 
-	cmd.Env = ENV_NonInteractive
-	out, err := cmd.Output()
+	out, err := a.getRunner().RunContext(ctx, pm, args, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
 	if err != nil {
 		return nil, err
 	}
@@ -299,8 +316,8 @@ func (a *PackageManager) UpgradeAll(opts *manager.Options) ([]manager.PackageInf
 
 // Clean cleans the local package cache used by the apt package manager.
 func (a *PackageManager) Clean(opts *manager.Options) error {
-	cmd := exec.Command(pm, "autoclean")
-	cmd.Env = ENV_NonInteractive
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
 
 	if opts == nil {
 		opts = &manager.Options{
@@ -310,13 +327,10 @@ func (a *PackageManager) Clean(opts *manager.Options) error {
 		}
 	}
 	if opts.Interactive {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		err := cmd.Run()
+		err := a.getRunner().RunInteractive(ctx, pm, []string{"autoclean"}, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
 		return err
 	} else {
-		out, err := cmd.Output()
+		out, err := a.getRunner().RunContext(ctx, pm, []string{"autoclean"}, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
 		if err != nil {
 			return err
 		}
@@ -334,9 +348,10 @@ func (a *PackageManager) GetPackageInfo(pkg string, opts *manager.Options) (mana
 		return manager.PackageInfo{}, err
 	}
 
-	cmd := exec.Command("apt-cache", "show", pkg)
-	cmd.Env = ENV_NonInteractive
-	out, err := cmd.Output()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	out, err := a.getRunner().RunContext(ctx, "apt-cache", []string{"show", pkg}, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
 	if err != nil {
 		return manager.PackageInfo{}, err
 	}
@@ -361,17 +376,14 @@ func (a *PackageManager) AutoRemove(opts *manager.Options) ([]manager.PackageInf
 		args = append(args, ArgsAssumeYes)
 	}
 
-	cmd := exec.Command(pm, args...)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	defer cancel()
 
 	if opts.Interactive {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		err := cmd.Run()
+		err := a.getRunner().RunInteractive(ctx, pm, args, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
 		return []manager.PackageInfo{}, err
 	} else {
-		cmd.Env = ENV_NonInteractive
-		out, err := cmd.Output()
+		out, err := a.getRunner().RunContext(ctx, pm, args, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
 		if err != nil {
 			return nil, err
 		}

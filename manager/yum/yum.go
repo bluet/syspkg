@@ -26,7 +26,6 @@ package yum
 import (
 	"context"
 	"log"
-	"os"
 	"os/exec"
 	"time"
 
@@ -62,13 +61,13 @@ type PackageManager struct {
 // NewPackageManager creates a new YUM package manager with default command runner
 func NewPackageManager() *PackageManager {
 	return &PackageManager{
-		runner: manager.NewOSCommandRunner(),
+		runner: manager.NewDefaultCommandRunner(),
 	}
 }
 
-// NewPackageManagerWithRunner creates a new YUM package manager with custom command runner
+// NewPackageManagerWithCustomRunner creates a new YUM package manager with custom command runner
 // This is primarily used for testing with mocked commands
-func NewPackageManagerWithRunner(runner manager.CommandRunner) *PackageManager {
+func NewPackageManagerWithCustomRunner(runner manager.CommandRunner) *PackageManager {
 	return &PackageManager{
 		runner: runner,
 	}
@@ -77,27 +76,23 @@ func NewPackageManagerWithRunner(runner manager.CommandRunner) *PackageManager {
 // getRunner returns the command runner, creating a default one if not set
 func (a *PackageManager) getRunner() manager.CommandRunner {
 	if a.runner == nil {
-		a.runner = manager.NewOSCommandRunner()
+		a.runner = manager.NewDefaultCommandRunner()
 	}
 	return a.runner
 }
 
 // executeCommand handles command execution with support for both interactive and non-interactive modes
-// For interactive mode, it uses direct exec.Command to handle stdin/stdout/stderr
-// For non-interactive mode, it uses the CommandRunner interface for testability
+// For interactive mode, it uses RunInteractive to handle stdin/stdout/stderr
+// For non-interactive mode, it uses RunContext for testability
 func (a *PackageManager) executeCommand(ctx context.Context, args []string, opts *manager.Options) ([]byte, error) {
 	if opts != nil && opts.Interactive {
-		// Interactive mode requires direct exec.Command for stdin/stdout/stderr handling
-		// CommandRunner interface doesn't support interactive execution
-		cmd := exec.CommandContext(ctx, pm, args...)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		return nil, cmd.Run()
+		// Interactive mode uses RunInteractive for stdin/stdout/stderr handling
+		err := a.getRunner().RunInteractive(ctx, pm, args)
+		return nil, err
 	}
 
-	// Use CommandRunner for non-interactive execution
-	return a.getRunner().OutputWithContext(ctx, pm, args...)
+	// Use RunContext for non-interactive execution (automatically includes LC_ALL=C)
+	return a.getRunner().RunContext(ctx, pm, args)
 }
 
 // IsAvailable checks if the yum package manager is available on the system.
@@ -287,8 +282,8 @@ func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manag
 
 	args := append([]string{"search"}, keywords...)
 
-	// Use CommandRunner for search operation
-	out, err := a.getRunner().OutputWithContext(ctx, pm, args...)
+	// Use CommandRunner for search operation (automatically includes LC_ALL=C)
+	out, err := a.getRunner().RunContext(ctx, pm, args)
 	if err != nil {
 		return nil, err
 	}
@@ -313,8 +308,8 @@ func (a *PackageManager) ListInstalled(opts *manager.Options) ([]manager.Package
 	defer cancel()
 
 	args := []string{"list", "--installed"}
-	// Use CommandRunner for list operation
-	out, err := a.getRunner().OutputWithContext(ctx, pm, args...)
+	// Use CommandRunner for list operation (automatically includes LC_ALL=C)
+	out, err := a.getRunner().RunContext(ctx, pm, args)
 	if err != nil {
 		return nil, err
 	}
@@ -332,8 +327,8 @@ func (a *PackageManager) ListUpgradable(opts *manager.Options) ([]manager.Packag
 
 	args := []string{"check-update"}
 
-	// Use CommandRunner for check-update operation
-	out, err := a.getRunner().OutputWithContext(ctx, pm, args...)
+	// Use CommandRunner for check-update operation (automatically includes LC_ALL=C)
+	out, err := a.getRunner().RunContext(ctx, pm, args)
 	// YUM check-update returns exit code 100 when updates are available
 	// This is normal behavior, not an error
 	if err != nil {
@@ -500,8 +495,8 @@ func (a *PackageManager) GetPackageInfo(pkg string, opts *manager.Options) (mana
 	ctx, cancel := context.WithTimeout(context.Background(), readTimeout)
 	defer cancel()
 
-	// Use CommandRunner for package info query
-	out, err := a.getRunner().OutputWithContext(ctx, pm, "info", pkg)
+	// Use CommandRunner for package info query (automatically includes LC_ALL=C)
+	out, err := a.getRunner().RunContext(ctx, pm, []string{"info", pkg})
 	if err != nil {
 		return manager.PackageInfo{}, err
 	}
@@ -567,11 +562,8 @@ func (a *PackageManager) enhancePackagesWithStatus(packages []manager.PackageInf
 		packageNames = append(packageNames, pkg.Name)
 	}
 
-	// Use the instance's command runner (can be mocked in tests)
-	runner := a.getRunner()
-
 	// Check installation status using rpm -q
-	installedPackages, err := checkRpmInstallationStatus(packageNames, runner)
+	installedPackages, err := a.checkRpmInstallationStatus(packageNames)
 	if err != nil {
 		return nil, err
 	}

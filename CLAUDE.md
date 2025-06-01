@@ -141,7 +141,7 @@ For detailed technical architecture, design patterns, and implementation guideli
 
 **Quick Reference:**
 - **Core Interfaces**: `PackageManager` and `SysPkg` (interface.go)
-- **CommandBuilder Pattern**: Target architecture for Issue #20
+- **CommandRunner Pattern**: Unified architecture for all package managers (Issue #20)
 - **Package Structure**: `/cmd`, `/manager`, `/osinfo`, `/testing`
 - **Testing Strategy**: Three-layer approach (unit, integration, mock)
 - **Exit Code Complexity**: Each PM has unique behaviors (see docs/EXIT_CODES.md)
@@ -180,7 +180,7 @@ For detailed technical architecture, design patterns, and implementation guideli
 7. **GitHub workflow compatibility fixes** ✅ - Go 1.23.4, Docker multi-OS testing
 8. **Fix APT exit code bug** - Remove incorrect handling of exit code 100 as "no packages found" (it means error!)
 9. **Fix Snap exit code bug** - Remove incorrect handling of exit code 64 as "no packages found" (it means usage error!)
-10. **Implement CommandBuilder interface (Issue #20)** - Replace direct exec.Command calls with testable CommandBuilder pattern
+10. **Migrate to CommandRunner interface (Issue #20)** - Achieve architectural consistency across all package managers
 11. **Add exit code documentation** ✅ - Created comprehensive exit code docs for all package managers
 
 ### ✅ COMPLETED INVESTIGATIONS (Collapsed)

@@ -19,19 +19,19 @@ func TestYUM_WithMockedCommands(t *testing.T) {
 vim-enhanced.x86_64 : A version of the VIM editor which includes recent enhancements
 vim-minimal.x86_64 : A minimal version of the VIM editor
 `
-		mock.AddCommand("yum", []string{"search", "vim"}, []byte(searchOutput))
+		mock.AddCommand("yum", []string{"search", "vim"}, []byte(searchOutput), nil)
 
 		// Mock rpm --version (for status check)
-		mock.AddCommand("rpm", []string{"--version"}, []byte("RPM version 4.14.3\n"))
+		mock.AddCommand("rpm", []string{"--version"}, []byte("RPM version 4.14.3\n"), nil)
 
 		// Mock rpm -q for status detection
 		mock.AddCommand("rpm", []string{"-q", "vim-enhanced"},
-			[]byte("vim-enhanced-8.0.1763-19.el8_6.4.x86_64\n"))
-		mock.AddError("rpm", []string{"-q", "vim-minimal"},
+			[]byte("vim-enhanced-8.0.1763-19.el8_6.4.x86_64\n"), nil)
+		mock.AddCommand("rpm", []string{"-q", "vim-minimal"}, nil,
 			errors.New("package vim-minimal is not installed"))
 
 		// Create YUM package manager with mocked runner
-		pm := yum.NewPackageManagerWithRunner(mock)
+		pm := yum.NewPackageManagerWithCustomRunner(mock)
 
 		// Execute Find operation
 		packages, err := pm.Find([]string{"vim"}, &manager.Options{})
@@ -85,10 +85,10 @@ Installed:
 Complete!
 `
 		mock.AddCommand("yum", []string{"install", "-y", "vim-enhanced"},
-			[]byte(installOutput))
+			[]byte(installOutput), nil)
 
 		// Create YUM package manager with mocked runner
-		pm := yum.NewPackageManagerWithRunner(mock)
+		pm := yum.NewPackageManagerWithCustomRunner(mock)
 
 		// Execute Install operation
 		packages, err := pm.Install([]string{"vim-enhanced"}, &manager.Options{})
@@ -118,11 +118,11 @@ Complete!
 		mock := manager.NewMockCommandRunner()
 
 		// Mock command failure
-		mock.AddError("yum", []string{"install", "-y", "nonexistent-package"},
+		mock.AddCommand("yum", []string{"install", "-y", "nonexistent-package"}, nil,
 			errors.New("No package nonexistent-package available"))
 
 		// Create YUM package manager with mocked runner
-		pm := yum.NewPackageManagerWithRunner(mock)
+		pm := yum.NewPackageManagerWithCustomRunner(mock)
 
 		// Execute Install operation that should fail
 		_, err := pm.Install([]string{"nonexistent-package"}, &manager.Options{})
