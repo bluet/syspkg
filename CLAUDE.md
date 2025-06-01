@@ -162,6 +162,10 @@ For detailed technical architecture, design patterns, and implementation guideli
 
 **Cross-Package Manager Compatibility**: SysPkg normalizes package states for consistent behavior across different package managers. For example, APT's "config-files" state (packages removed but with configuration files remaining) is normalized to "available" status to match the semantics used by other package managers like YUM and Snap.
 
+## Current Session Todos
+
+@TODO.md
+
 ## Project Improvement Roadmap
 
 *Note: To-do list consolidated 2025-05-30 - removed duplicates, feature creep items, and over-engineering. Focused on core security, testing, and platform support.*
