@@ -469,6 +469,11 @@ func (a *PackageManager) checkRpmInstallationStatus(packageNames []string) (map[
 
 	installedPackages := make(map[string]manager.PackageInfo)
 
+	// Early return for empty package list - no need to check rpm availability
+	if len(packageNames) == 0 {
+		return installedPackages, nil
+	}
+
 	// Check if rpm command is available by trying to run rpm --version
 	_, err := a.getRunner().Run("rpm", "--version")
 	if err != nil {

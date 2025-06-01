@@ -27,6 +27,7 @@ import (
 	"context"
 	"log"
 	"os/exec"
+	"sync"
 	"time"
 
 	"github.com/bluet/syspkg/manager"
@@ -55,7 +56,8 @@ const (
 // PackageManager implements the manager.PackageManager interface for the yum package manager.
 type PackageManager struct {
 	// runner is the command execution interface (can be mocked for testing)
-	runner manager.CommandRunner
+	runner     manager.CommandRunner
+	runnerOnce sync.Once
 }
 
 // NewPackageManager creates a new YUM package manager with default command runner
@@ -75,9 +77,11 @@ func NewPackageManagerWithCustomRunner(runner manager.CommandRunner) *PackageMan
 
 // getRunner returns the command runner, creating a default one if not set
 func (a *PackageManager) getRunner() manager.CommandRunner {
-	if a.runner == nil {
-		a.runner = manager.NewDefaultCommandRunner()
-	}
+	a.runnerOnce.Do(func() {
+		if a.runner == nil {
+			a.runner = manager.NewDefaultCommandRunner()
+		}
+	})
 	return a.runner
 }
 

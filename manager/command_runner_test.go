@@ -39,12 +39,12 @@ func TestMockCommandRunner(t *testing.T) {
 			expectedError:  errors.New("package nonexistent is not installed"),
 		},
 		{
-			name:           "command not mocked returns empty",
+			name:           "command not mocked returns error",
 			commands:       map[string][]byte{},
 			testCommand:    "unknown",
 			testArgs:       []string{"command"},
-			expectedOutput: []byte{},
-			expectedError:  nil,
+			expectedOutput: nil,
+			expectedError:  errors.New("no mock found for command: unknown"),
 		},
 	}
 

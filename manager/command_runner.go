@@ -3,6 +3,7 @@ package manager
 
 import (
 	"context"
+	"errors"
 	"os"
 	"os/exec"
 	"time"
@@ -123,8 +124,8 @@ func (m *MockCommandRunner) RunContext(ctx context.Context, name string, args []
 		return output, nil
 	}
 
-	// Default: return empty output with no error
-	return []byte{}, nil
+	// Default: return error when no mock is found (catches missing mocks in tests)
+	return nil, errors.New("no mock found for command: " + name)
 }
 
 // RunInteractive simulates interactive command execution
