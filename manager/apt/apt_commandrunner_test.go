@@ -198,6 +198,9 @@ curl 7.81.0-1ubuntu1.4
 		// Note: MockCommandRunner doesn't track this since Run() method doesn't accept extra env
 		// But we can test methods that do use RunContext with env vars
 
+		// Mock apt update command for Refresh
+		mockRunner.AddCommand("apt", []string{"update"}, []byte("Hit:1 http://archive.ubuntu.com/ubuntu jammy InRelease\nReading package lists..."), nil)
+
 		// Test Refresh (uses RunContext with environment variables)
 		err := pm.Refresh(&manager.Options{})
 		if err != nil {
