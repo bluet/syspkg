@@ -56,7 +56,9 @@ const (
 // PackageManager implements the manager.PackageManager interface for the yum package manager.
 type PackageManager struct {
 	// runner is the command execution interface (can be mocked for testing)
-	runner     manager.CommandRunner
+	runner manager.CommandRunner
+	// runnerOnce protects lazy initialization for zero-value struct usage (e.g., &PackageManager{})
+	// This enables defensive programming and backward compatibility with existing test patterns
 	runnerOnce sync.Once
 }
 
@@ -75,7 +77,12 @@ func NewPackageManagerWithCustomRunner(runner manager.CommandRunner) *PackageMan
 	}
 }
 
-// getRunner returns the command runner, creating a default one if not set
+// getRunner returns the command runner, creating a default one if not set.
+// Uses sync.Once for thread-safe lazy initialization to support zero-value struct usage:
+//   - Production: NewPackageManager() pre-initializes runner
+//   - Testing: &PackageManager{} uses lazy initialization here
+//
+// This pattern enables defensive programming and prevents panics on zero-value usage.
 func (a *PackageManager) getRunner() manager.CommandRunner {
 	a.runnerOnce.Do(func() {
 		if a.runner == nil {
