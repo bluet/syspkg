@@ -56,20 +56,24 @@ func TestMockCommandRunner(t *testing.T) {
 			for cmd, output := range tt.commands {
 				// Parse the command string to extract name and args
 				parts := strings.Fields(cmd)
-				if len(parts) > 0 {
-					name := parts[0]
-					args := parts[1:]
-					runner.AddCommand(name, args, output, nil)
+				if len(parts) == 0 {
+					t.Errorf("Invalid empty command string: %q", cmd)
+					continue
 				}
+				name := parts[0]
+				args := parts[1:]
+				runner.AddCommand(name, args, output, nil)
 			}
 			for cmd, err := range tt.errors {
 				// Parse the command string to extract name and args
 				parts := strings.Fields(cmd)
-				if len(parts) > 0 {
-					name := parts[0]
-					args := parts[1:]
-					runner.AddCommand(name, args, nil, err)
+				if len(parts) == 0 {
+					t.Errorf("Invalid empty command string: %q", cmd)
+					continue
 				}
+				name := parts[0]
+				args := parts[1:]
+				runner.AddCommand(name, args, nil, err)
 			}
 
 			// Test the command execution
