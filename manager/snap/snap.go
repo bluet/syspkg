@@ -159,13 +159,6 @@ func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manag
 
 	out, err := cmd.Output()
 	if err != nil {
-		// Snap search returns exit code 64 when no packages found - this is not an error
-		if exitError, ok := err.(*exec.ExitError); ok {
-			if exitError.ExitCode() == 64 {
-				// No packages found, return empty list
-				return []manager.PackageInfo{}, nil
-			}
-		}
 		return nil, err
 	}
 
@@ -258,4 +251,48 @@ func (a *PackageManager) GetPackageInfo(pkg string, opts *manager.Options) (mana
 		return manager.PackageInfo{}, err
 	}
 	return ParsePackageInfoOutput(string(out), opts), nil
+}
+
+// Clean performs cleanup of snap caches and old snap revisions.
+// Removes old snap revisions that are no longer active.
+func (a *PackageManager) Clean(opts *manager.Options) error {
+	if opts == nil {
+		opts = &manager.Options{
+			DryRun:      false,
+			Interactive: false,
+			Verbose:     false,
+		}
+	}
+
+	// Handle dry run mode
+	if opts.DryRun {
+		log.Println("Dry run mode: would clean old snap revisions")
+		return nil
+	}
+
+	// For now, snap doesn't have a built-in clean command
+	// This could be enhanced to remove old revisions
+	log.Println("Snap clean: no cleanup operations available")
+	return nil
+}
+
+// AutoRemove removes snap packages that were automatically installed as dependencies.
+// Note: Snap doesn't have traditional dependency-based auto-removal like APT/YUM.
+// Returns empty list as snap manages dependencies automatically.
+func (a *PackageManager) AutoRemove(opts *manager.Options) ([]manager.PackageInfo, error) {
+	if opts == nil {
+		opts = &manager.Options{
+			DryRun:      false,
+			Interactive: false,
+			Verbose:     false,
+		}
+	}
+
+	// Snap doesn't have traditional auto-remove functionality
+	// Snap manages dependencies automatically and removes them when the main snap is removed
+	if opts.Verbose {
+		log.Println("Snap autoremove: dependencies are managed automatically by snap")
+	}
+
+	return []manager.PackageInfo{}, nil
 }

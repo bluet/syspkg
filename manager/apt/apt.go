@@ -112,7 +112,7 @@ func (a *PackageManager) Install(pkgs []string, opts *manager.Options) ([]manage
 		cmd.Stderr = os.Stderr
 		cmd.Stdin = os.Stdin
 		err := cmd.Run()
-		return nil, err
+		return []manager.PackageInfo{}, err
 	} else {
 		cmd.Env = ENV_NonInteractive
 		out, err := cmd.Output()
@@ -149,7 +149,7 @@ func (a *PackageManager) Delete(pkgs []string, opts *manager.Options) ([]manager
 		cmd.Stderr = os.Stderr
 		cmd.Stdin = os.Stdin
 		err := cmd.Run()
-		return nil, err
+		return []manager.PackageInfo{}, err
 	} else {
 		cmd.Env = ENV_NonInteractive
 		out, err := cmd.Output()
@@ -198,13 +198,6 @@ func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manag
 
 	out, err := cmd.Output()
 	if err != nil {
-		// APT search returns exit code 100 when no packages found - this is not an error
-		if exitError, ok := err.(*exec.ExitError); ok {
-			if exitError.ExitCode() == 100 {
-				// No packages found, return empty list
-				return []manager.PackageInfo{}, nil
-			}
-		}
 		return nil, err
 	}
 
@@ -265,7 +258,7 @@ func (a *PackageManager) Upgrade(pkgs []string, opts *manager.Options) ([]manage
 		cmd.Stderr = os.Stderr
 		cmd.Stdin = os.Stdin
 		err := cmd.Run()
-		return nil, err
+		return []manager.PackageInfo{}, err
 	}
 
 	cmd.Env = ENV_NonInteractive
@@ -348,7 +341,7 @@ func (a *PackageManager) AutoRemove(opts *manager.Options) ([]manager.PackageInf
 		cmd.Stderr = os.Stderr
 		cmd.Stdin = os.Stdin
 		err := cmd.Run()
-		return nil, err
+		return []manager.PackageInfo{}, err
 	} else {
 		cmd.Env = ENV_NonInteractive
 		out, err := cmd.Output()
