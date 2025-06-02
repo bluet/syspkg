@@ -44,6 +44,29 @@ All package managers now use the unified CommandRunner interface for consistent,
 
 **Current State**: APT ✅ Complete, YUM ✅ Complete, Snap ❌ No DI, Flatpak ❌ No DI
 
+#### executeCommand Pattern ✅ COMPLETED (2025-06-02)
+
+Both APT and YUM now implement centralized command execution through the `executeCommand()` helper method:
+
+```go
+// Centralized command execution for both interactive and non-interactive modes
+func (a *PackageManager) executeCommand(ctx context.Context, args []string, opts *manager.Options) ([]byte, error) {
+    if opts != nil && opts.Interactive {
+        // Interactive mode uses RunInteractive for stdin/stdout/stderr handling
+        err := a.getRunner().RunInteractive(ctx, pm, args, aptNonInteractiveEnv...)
+        return nil, err
+    }
+    // Use RunContext for non-interactive execution (automatically includes LC_ALL=C)
+    return a.getRunner().RunContext(ctx, pm, args, aptNonInteractiveEnv...)
+}
+```
+
+**Benefits**:
+- **DRY Principle**: Eliminated repeated interactive/non-interactive logic
+- **Maintainability**: Command execution changes in one place
+- **Consistency**: APT and YUM follow identical patterns
+- **Code Reduction**: APT reduced from 17 to 7 direct `getRunner()` calls
+
 ```go
 type CommandRunner interface {
     // Run executes a command with automatic LC_ALL=C for consistent English output

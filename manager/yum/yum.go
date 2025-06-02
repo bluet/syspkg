@@ -300,7 +300,7 @@ func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manag
 	}
 
 	// Parse the search output to get basic package info
-	packages := ParseFindOutput(string(out), opts)
+	packages := a.ParseFindOutput(string(out), opts)
 
 	// Enhance with accurate status information using rpm -q
 	// This provides cross-package manager API consistency

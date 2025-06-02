@@ -40,6 +40,17 @@ const (
 	ArgsPurge        string = "--purge"
 	ArgsAutoRemove   string = "--autoremove"
 	ArgsShowProgress string = "--show-progress"
+
+	// dpkgQueryCmd is the command used to query package information
+	dpkgQueryCmd string = "dpkg-query"
+)
+
+// Environment variables for non-interactive mode
+var (
+	aptNonInteractiveEnv = []string{
+		"DEBIAN_FRONTEND=noninteractive",
+		"DEBCONF_NONINTERACTIVE_SEEN=true",
+	}
 )
 
 // NOTE: Environment variables for non-interactive mode are now handled automatically by CommandRunner
@@ -83,6 +94,20 @@ func (a *PackageManager) getRunner() manager.CommandRunner {
 		}
 	})
 	return a.runner
+}
+
+// executeCommand handles command execution with support for both interactive and non-interactive modes
+// For interactive mode, it uses RunInteractive to handle stdin/stdout/stderr
+// For non-interactive mode, it uses RunContext for testability
+func (a *PackageManager) executeCommand(ctx context.Context, args []string, opts *manager.Options) ([]byte, error) {
+	if opts != nil && opts.Interactive {
+		// Interactive mode uses RunInteractive for stdin/stdout/stderr handling
+		err := a.getRunner().RunInteractive(ctx, pm, args, aptNonInteractiveEnv...)
+		return nil, err
+	}
+
+	// Use RunContext for non-interactive execution (automatically includes LC_ALL=C)
+	return a.getRunner().RunContext(ctx, pm, args, aptNonInteractiveEnv...)
 }
 
 // IsAvailable checks if the apt package manager is available on the system.
@@ -151,16 +176,17 @@ func (a *PackageManager) Install(pkgs []string, opts *manager.Options) ([]manage
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	defer cancel()
 
-	if opts.Interactive {
-		err := a.getRunner().RunInteractive(ctx, pm, args, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
-		return []manager.PackageInfo{}, err
-	} else {
-		out, err := a.getRunner().RunContext(ctx, pm, args, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
-		if err != nil {
-			return nil, err
-		}
-		return ParseInstallOutput(string(out), opts), nil
+	out, err := a.executeCommand(ctx, args, opts)
+	if err != nil {
+		return nil, err
 	}
+
+	// Interactive mode returns empty slice (output goes directly to user)
+	if opts != nil && opts.Interactive {
+		return []manager.PackageInfo{}, nil
+	}
+
+	return ParseInstallOutput(string(out), opts), nil
 }
 
 // Delete removes the provided packages using the apt package manager.
@@ -190,16 +216,17 @@ func (a *PackageManager) Delete(pkgs []string, opts *manager.Options) ([]manager
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	defer cancel()
 
-	if opts.Interactive {
-		err := a.getRunner().RunInteractive(ctx, pm, args, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
-		return []manager.PackageInfo{}, err
-	} else {
-		out, err := a.getRunner().RunContext(ctx, pm, args, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
-		if err != nil {
-			return nil, err
-		}
-		return ParseDeletedOutput(string(out), opts), nil
+	out, err := a.executeCommand(ctx, args, opts)
+	if err != nil {
+		return nil, err
 	}
+
+	// Interactive mode returns empty slice (output goes directly to user)
+	if opts != nil && opts.Interactive {
+		return []manager.PackageInfo{}, nil
+	}
+
+	return ParseDeletedOutput(string(out), opts), nil
 }
 
 // Refresh updates the package list using the apt package manager.
@@ -214,19 +241,21 @@ func (a *PackageManager) Refresh(opts *manager.Options) error {
 			Verbose:     false,
 		}
 	}
-	if opts.Interactive {
-		err := a.getRunner().RunInteractive(ctx, pm, []string{"update"}, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
+	args := []string{"update"}
+	out, err := a.executeCommand(ctx, args, opts)
+	if err != nil {
 		return err
-	} else {
-		out, err := a.getRunner().RunContext(ctx, pm, []string{"update"}, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
-		if err != nil {
-			return err
-		}
-		if opts.Verbose {
-			log.Println(string(out))
-		}
+	}
+
+	// Interactive mode output goes directly to user, no need to process
+	if opts != nil && opts.Interactive {
 		return nil
 	}
+
+	if opts.Verbose {
+		log.Println(string(out))
+	}
+	return nil
 }
 
 // Find searches for packages matching the provided keywords using the apt package manager.
@@ -240,7 +269,7 @@ func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manag
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer cancel()
 
-	out, err := a.getRunner().RunContext(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
+	out, err := a.getRunner().RunContext(ctx, pm, args, aptNonInteractiveEnv...)
 	if err != nil {
 		return nil, err
 	}
@@ -254,7 +283,7 @@ func (a *PackageManager) ListInstalled(opts *manager.Options) ([]manager.Package
 	defer cancel()
 
 	// NOTE: can also use `apt list --installed`, but it's slower
-	out, err := a.getRunner().RunContext(ctx, "dpkg-query", []string{"-W", "-f", "${binary:Package} ${Version}\n"}, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
+	out, err := a.getRunner().RunContext(ctx, dpkgQueryCmd, []string{"-W", "-f", "${binary:Package} ${Version}\n"}, aptNonInteractiveEnv...)
 	if err != nil {
 		return nil, err
 	}
@@ -266,7 +295,7 @@ func (a *PackageManager) ListUpgradable(opts *manager.Options) ([]manager.Packag
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer cancel()
 
-	out, err := a.getRunner().RunContext(ctx, pm, []string{"list", "--upgradable"}, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
+	out, err := a.getRunner().RunContext(ctx, pm, []string{"list", "--upgradable"}, aptNonInteractiveEnv...)
 	if err != nil {
 		return nil, err
 	}
@@ -307,15 +336,16 @@ func (a *PackageManager) Upgrade(pkgs []string, opts *manager.Options) ([]manage
 
 	log.Printf("Running command: %s %s", pm, args)
 
-	if opts.Interactive {
-		err := a.getRunner().RunInteractive(ctx, pm, args, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
-		return []manager.PackageInfo{}, err
-	}
-
-	out, err := a.getRunner().RunContext(ctx, pm, args, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
+	out, err := a.executeCommand(ctx, args, opts)
 	if err != nil {
 		return nil, err
 	}
+
+	// Interactive mode returns empty slice (output goes directly to user)
+	if opts != nil && opts.Interactive {
+		return []manager.PackageInfo{}, nil
+	}
+
 	return ParseInstallOutput(string(out), opts), nil
 }
 
@@ -337,19 +367,21 @@ func (a *PackageManager) Clean(opts *manager.Options) error {
 			Verbose:     false,
 		}
 	}
-	if opts.Interactive {
-		err := a.getRunner().RunInteractive(ctx, pm, []string{"autoclean"}, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
+	args := []string{"autoclean"}
+	out, err := a.executeCommand(ctx, args, opts)
+	if err != nil {
 		return err
-	} else {
-		out, err := a.getRunner().RunContext(ctx, pm, []string{"autoclean"}, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
-		if err != nil {
-			return err
-		}
-		if opts.Verbose {
-			log.Println(string(out))
-		}
+	}
+
+	// Interactive mode output goes directly to user, no need to process
+	if opts != nil && opts.Interactive {
 		return nil
 	}
+
+	if opts.Verbose {
+		log.Println(string(out))
+	}
+	return nil
 }
 
 // GetPackageInfo retrieves package information for the specified package using the apt package manager.
@@ -362,7 +394,7 @@ func (a *PackageManager) GetPackageInfo(pkg string, opts *manager.Options) (mana
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	out, err := a.getRunner().RunContext(ctx, "apt-cache", []string{"show", pkg}, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
+	out, err := a.getRunner().RunContext(ctx, "apt-cache", []string{"show", pkg}, aptNonInteractiveEnv...)
 	if err != nil {
 		return manager.PackageInfo{}, err
 	}
@@ -390,14 +422,15 @@ func (a *PackageManager) AutoRemove(opts *manager.Options) ([]manager.PackageInf
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	defer cancel()
 
-	if opts.Interactive {
-		err := a.getRunner().RunInteractive(ctx, pm, args, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
-		return []manager.PackageInfo{}, err
-	} else {
-		out, err := a.getRunner().RunContext(ctx, pm, args, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
-		if err != nil {
-			return nil, err
-		}
-		return ParseDeletedOutput(string(out), opts), nil
+	out, err := a.executeCommand(ctx, args, opts)
+	if err != nil {
+		return nil, err
 	}
+
+	// Interactive mode returns empty slice (output goes directly to user)
+	if opts != nil && opts.Interactive {
+		return []manager.PackageInfo{}, nil
+	}
+
+	return ParseDeletedOutput(string(out), opts), nil
 }

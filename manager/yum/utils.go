@@ -39,7 +39,7 @@ var packageLineRegex = regexp.MustCompile(`^[\w\d-]+\.[\w\d_]+`)
 //   - PackageManager: "yum"
 //
 // The opts parameter is reserved for future parsing options and is currently unused.
-func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
+func (a *PackageManager) ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packagesDict = make(map[string]manager.PackageInfo)
 
 	// remove the last empty line

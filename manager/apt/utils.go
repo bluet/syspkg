@@ -330,7 +330,7 @@ func (a *PackageManager) runDpkgQuery(packageNames []string, opts *manager.Optio
 		log.Printf("Running dpkg-query with args: %v", args)
 	}
 
-	out, err := a.getRunner().RunContext(ctx, "dpkg-query", args, "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true")
+	out, err := a.getRunner().RunContext(ctx, dpkgQueryCmd, args, aptNonInteractiveEnv...)
 	if err != nil {
 		if opts != nil && opts.Debug {
 			log.Printf("dpkg-query error: %v, output: %q", err, string(out))

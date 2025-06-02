@@ -169,7 +169,9 @@ vim-common.x86_64 : Common files for vim
 vim-filesystem.noarch : VIM filesystem layout
 vim-minimal.x86_64 : A minimal version of the VIM editor`
 
-	packages := ParseFindOutput(searchOutput, nil)
+	// Create a PackageManager instance to test the method
+	pm := NewPackageManager()
+	packages := pm.ParseFindOutput(searchOutput, nil)
 
 	expectedPackages := []string{"vim-enhanced", "vim-common", "vim-filesystem", "vim-minimal"}
 

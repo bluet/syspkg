@@ -95,7 +95,8 @@ func TestParseFindOutput_BehaviorWithFixtures(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			fixture := loadFixture(t, tc.fixture)
-			packages := yum.ParseFindOutput(fixture, &manager.Options{})
+			pm := yum.NewPackageManager()
+			packages := pm.ParseFindOutput(fixture, &manager.Options{})
 
 			// Test behavior expectations
 			if tc.expectPackages && len(packages) == 0 {
@@ -283,7 +284,8 @@ func TestGetPackageInfo_BehaviorWithFixtures(t *testing.T) {
 func TestParseEdgeCases_BehaviorWithFixtures(t *testing.T) {
 	t.Run("search no results", func(t *testing.T) {
 		fixture := loadFixture(t, "search-empty-rocky8.txt")
-		packages := yum.ParseFindOutput(fixture, &manager.Options{})
+		pm := yum.NewPackageManager()
+		packages := pm.ParseFindOutput(fixture, &manager.Options{})
 
 		// Test behavior: Should handle empty results gracefully
 		if len(packages) != 0 {
@@ -306,7 +308,8 @@ func TestParseEdgeCases_BehaviorWithFixtures(t *testing.T) {
 func TestComplexPackageNames(t *testing.T) {
 	t.Run("packages with dots in names", func(t *testing.T) {
 		fixture := loadFixture(t, "search-nginx-rocky8.txt")
-		packages := yum.ParseFindOutput(fixture, &manager.Options{})
+		pm := yum.NewPackageManager()
+		packages := pm.ParseFindOutput(fixture, &manager.Options{})
 
 		// Test critical parsing: packages with dots should be handled correctly
 		foundPerlDBD := false
@@ -334,7 +337,8 @@ func TestYUM_CrossPackageManagerCompatibility(t *testing.T) {
 	t.Run("Find operation status detection", func(t *testing.T) {
 		// Document YUM's enhanced status detection capability
 		fixture := loadFixture(t, "search-vim-rocky8.txt")
-		packages := yum.ParseFindOutput(fixture, &manager.Options{})
+		pm := yum.NewPackageManager()
+		packages := pm.ParseFindOutput(fixture, &manager.Options{})
 
 		if len(packages) == 0 {
 			t.Fatal("Expected packages in search results")

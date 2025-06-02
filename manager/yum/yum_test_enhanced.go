@@ -149,7 +149,8 @@ func TestYumParsingWithRealOutput(t *testing.T) {
 		fixturePath := env.GetFixturePath("yum", "search-vim")
 
 		if data, err := os.ReadFile(fixturePath); err == nil {
-			packages := ParseFindOutput(string(data), nil)
+			pm := NewPackageManager()
+			packages := pm.ParseFindOutput(string(data), nil)
 
 			if len(packages) == 0 {
 				t.Error("Failed to parse any packages from fixture")
