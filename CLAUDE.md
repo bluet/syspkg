@@ -89,6 +89,39 @@ Snyk (security scan):
   - `snyk test` command scans your project, tests dependencies for vulnerabilities, and reports how many vulnerabilities are found.
   - `snyk code test` analyzes source code for security issues, often referred to as Static Application Security Testing (SAST).
 
+### GitHub Sub-Issues REST API Reference
+**Documentation**: https://docs.github.com/en/rest/issues/sub-issues?apiVersion=2022-11-28
+
+**CRITICAL**: Use **issue ID** (not issue number) in API requests!
+
+**Working Commands**:
+```bash
+# List sub-issues
+curl -L -H "Accept: application/vnd.github+json" \
+     -H "Authorization: Bearer $(gh auth token)" \
+     -H "X-GitHub-Api-Version: 2022-11-28" \
+     https://api.github.com/repos/{owner}/{repo}/issues/{issue_number}/sub_issues
+
+# Add sub-issue (use issue ID, not number!)
+curl -L -X POST -H "Accept: application/vnd.github+json" \
+     -H "Authorization: Bearer $(gh auth token)" \
+     -H "X-GitHub-Api-Version: 2022-11-28" \
+     https://api.github.com/repos/{owner}/{repo}/issues/{issue_number}/sub_issues \
+     -d '{"sub_issue_id": {ISSUE_ID}}'
+
+# Remove sub-issue
+curl -L -X DELETE -H "Accept: application/vnd.github+json" \
+     -H "Authorization: Bearer $(gh auth token)" \
+     -H "X-GitHub-Api-Version: 2022-11-28" \
+     https://api.github.com/repos/{owner}/{repo}/issues/{issue_number}/sub_issue \
+     -d '{"sub_issue_id": {ISSUE_ID}}'
+
+# Get issue ID from issue number
+gh api repos/{owner}/{repo}/issues/{number} --jq '.id'
+```
+
+**Tested & Verified**: 2025-06-01 - All endpoints work correctly
+
 
 ## Development Commands
 
@@ -141,7 +174,7 @@ For detailed technical architecture, design patterns, and implementation guideli
 
 **Quick Reference:**
 - **Core Interfaces**: `PackageManager` and `SysPkg` (interface.go)
-- **CommandBuilder Pattern**: Target architecture for Issue #20
+- **CommandRunner Pattern**: Unified architecture for all package managers (Issue #20)
 - **Package Structure**: `/cmd`, `/manager`, `/osinfo`, `/testing`
 - **Testing Strategy**: Three-layer approach (unit, integration, mock)
 - **Exit Code Complexity**: Each PM has unique behaviors (see docs/EXIT_CODES.md)
@@ -180,7 +213,7 @@ For detailed technical architecture, design patterns, and implementation guideli
 7. **GitHub workflow compatibility fixes** ✅ - Go 1.23.4, Docker multi-OS testing
 8. **Fix APT exit code bug** - Remove incorrect handling of exit code 100 as "no packages found" (it means error!)
 9. **Fix Snap exit code bug** - Remove incorrect handling of exit code 64 as "no packages found" (it means usage error!)
-10. **Implement CommandBuilder interface (Issue #20)** - Replace direct exec.Command calls with testable CommandBuilder pattern
+10. **Migrate to CommandRunner interface (Issue #20)** - Achieve architectural consistency across all package managers
 11. **Add exit code documentation** ✅ - Created comprehensive exit code docs for all package managers
 
 ### ✅ COMPLETED INVESTIGATIONS (Collapsed)

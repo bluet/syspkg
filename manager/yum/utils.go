@@ -39,7 +39,7 @@ var packageLineRegex = regexp.MustCompile(`^[\w\d-]+\.[\w\d_]+`)
 //   - PackageManager: "yum"
 //
 // The opts parameter is reserved for future parsing options and is currently unused.
-func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
+func (a *PackageManager) ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packagesDict = make(map[string]manager.PackageInfo)
 
 	// remove the last empty line
@@ -460,8 +460,8 @@ func ParseAutoRemoveOutput(msg string, opts *manager.Options) []manager.PackageI
 }
 
 // checkRpmInstallationStatus uses rpm -q to check which packages are installed
-// Returns a map of installed package names to their PackageInfo using the provided CommandRunner
-func checkRpmInstallationStatus(packageNames []string, runner manager.CommandRunner) (map[string]manager.PackageInfo, error) {
+// Returns a map of installed package names to their PackageInfo
+func (a *PackageManager) checkRpmInstallationStatus(packageNames []string) (map[string]manager.PackageInfo, error) {
 	// Validate package names to prevent command injection
 	if err := manager.ValidatePackageNames(packageNames); err != nil {
 		return nil, err
@@ -469,8 +469,13 @@ func checkRpmInstallationStatus(packageNames []string, runner manager.CommandRun
 
 	installedPackages := make(map[string]manager.PackageInfo)
 
+	// Early return for empty package list - no need to check rpm availability
+	if len(packageNames) == 0 {
+		return installedPackages, nil
+	}
+
 	// Check if rpm command is available by trying to run rpm --version
-	_, err := runner.Output("rpm", "--version")
+	_, err := a.getRunner().Run("rpm", "--version")
 	if err != nil {
 		return nil, err
 	}
@@ -478,7 +483,7 @@ func checkRpmInstallationStatus(packageNames []string, runner manager.CommandRun
 	// Check each package individually with rpm -q
 	// Using individual queries because rpm -q with multiple packages can be unreliable
 	for _, pkgName := range packageNames {
-		out, err := runner.Output("rpm", "-q", pkgName)
+		out, err := a.getRunner().Run("rpm", "-q", pkgName)
 
 		if err != nil {
 			// rpm -q returns exit code 1 for packages that are not installed

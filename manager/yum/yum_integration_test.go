@@ -124,7 +124,8 @@ func TestYUMOperations_Integration(t *testing.T) {
 func TestYUMParsers_UnitWithFixtures(t *testing.T) {
 	t.Run("ParseFindOutput", func(t *testing.T) {
 		fixture := loadFixture(t, "search-vim-rocky8.txt")
-		packages := yum.ParseFindOutput(fixture, &manager.Options{})
+		pm := yum.NewPackageManager()
+		packages := pm.ParseFindOutput(fixture, &manager.Options{})
 
 		if len(packages) != 5 {
 			t.Errorf("Expected 5 packages, got %d", len(packages))

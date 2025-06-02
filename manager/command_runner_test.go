@@ -3,6 +3,7 @@ package manager
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 )
@@ -38,12 +39,12 @@ func TestMockCommandRunner(t *testing.T) {
 			expectedError:  errors.New("package nonexistent is not installed"),
 		},
 		{
-			name:           "command not mocked returns empty",
+			name:           "command not mocked returns error",
 			commands:       map[string][]byte{},
 			testCommand:    "unknown",
 			testArgs:       []string{"command"},
-			expectedOutput: []byte{},
-			expectedError:  nil,
+			expectedOutput: nil,
+			expectedError:  errors.New("no mock found for command: unknown command"),
 		},
 	}
 
@@ -51,16 +52,32 @@ func TestMockCommandRunner(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			runner := NewMockCommandRunner()
 
-			// Set up mocked commands
+			// Set up mocked commands using the proper methods
 			for cmd, output := range tt.commands {
-				runner.Commands[cmd] = output
+				// Parse the command string to extract name and args
+				parts := strings.Fields(cmd)
+				if len(parts) == 0 {
+					t.Errorf("Invalid empty command string: %q", cmd)
+					continue
+				}
+				name := parts[0]
+				args := parts[1:]
+				runner.AddCommand(name, args, output, nil)
 			}
 			for cmd, err := range tt.errors {
-				runner.Errors[cmd] = err
+				// Parse the command string to extract name and args
+				parts := strings.Fields(cmd)
+				if len(parts) == 0 {
+					t.Errorf("Invalid empty command string: %q", cmd)
+					continue
+				}
+				name := parts[0]
+				args := parts[1:]
+				runner.AddCommand(name, args, nil, err)
 			}
 
 			// Test the command execution
-			output, err := runner.Output(tt.testCommand, tt.testArgs...)
+			output, err := runner.Run(tt.testCommand, tt.testArgs...)
 
 			// Verify results
 			if string(output) != string(tt.expectedOutput) {
@@ -82,8 +99,8 @@ func TestMockCommandRunnerAddMethods(t *testing.T) {
 	runner := NewMockCommandRunner()
 
 	// Test AddCommand
-	runner.AddCommand("rpm", []string{"-q", "vim"}, []byte("vim-8.0.1763\n"))
-	output, err := runner.Output("rpm", "-q", "vim")
+	runner.AddCommand("rpm", []string{"-q", "vim"}, []byte("vim-8.0.1763\n"), nil)
+	output, err := runner.Run("rpm", "-q", "vim")
 
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
@@ -95,7 +112,7 @@ func TestMockCommandRunnerAddMethods(t *testing.T) {
 	// Test AddError
 	testErr := errors.New("test error")
 	runner.AddError("rpm", []string{"-q", "missing"}, testErr)
-	_, err = runner.Output("rpm", "-q", "missing")
+	_, err = runner.Run("rpm", "-q", "missing")
 
 	if err == nil {
 		t.Error("Expected error, got nil")
@@ -105,8 +122,8 @@ func TestMockCommandRunnerAddMethods(t *testing.T) {
 	}
 }
 
-func TestOSCommandRunner(t *testing.T) {
-	runner := NewOSCommandRunner()
+func TestDefaultCommandRunner(t *testing.T) {
+	runner := NewDefaultCommandRunner()
 
 	// Test that timeout is set
 	if runner.Timeout != 30*time.Second {
@@ -114,21 +131,22 @@ func TestOSCommandRunner(t *testing.T) {
 	}
 
 	// Test a simple command that should exist on most systems
-	output, err := runner.Output("echo", "test")
+	output, err := runner.Run("echo", "test")
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
+	// Note: With LC_ALL=C prepended, output should still be "test\n"
 	if string(output) != "test\n" {
 		t.Errorf("Expected 'test\\n', got %q", string(output))
 	}
 }
 
-func TestOSCommandRunnerWithContext(t *testing.T) {
-	runner := NewOSCommandRunner()
+func TestDefaultCommandRunnerWithContext(t *testing.T) {
+	runner := NewDefaultCommandRunner()
 
 	// Test with a normal context
 	ctx := context.Background()
-	output, err := runner.OutputWithContext(ctx, "echo", "test")
+	output, err := runner.RunContext(ctx, "echo", []string{"test"})
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
@@ -140,7 +158,7 @@ func TestOSCommandRunnerWithContext(t *testing.T) {
 	cancelledCtx, cancel := context.WithCancel(context.Background())
 	cancel() // Cancel immediately
 
-	_, err = runner.OutputWithContext(cancelledCtx, "sleep", "10")
+	_, err = runner.RunContext(cancelledCtx, "sleep", []string{"10"})
 	if err == nil {
 		t.Error("Expected error due to cancelled context")
 	}

@@ -15,10 +15,12 @@
 package apt
 
 import (
+	"context"
 	"log"
-	"os"
 	"os/exec"
 	"strings"
+	"sync"
+	"time"
 
 	// "github.com/rs/zerolog"
 	// "github.com/rs/zerolog/log"
@@ -38,13 +40,75 @@ const (
 	ArgsPurge        string = "--purge"
 	ArgsAutoRemove   string = "--autoremove"
 	ArgsShowProgress string = "--show-progress"
+
+	// dpkgQueryCmd is the command used to query package information
+	dpkgQueryCmd string = "dpkg-query"
 )
 
-// ENV_NonInteractive contains environment variables used to set non-interactive mode for apt and dpkg.
-var ENV_NonInteractive []string = []string{"LC_ALL=C", "DEBIAN_FRONTEND=noninteractive", "DEBCONF_NONINTERACTIVE_SEEN=true"}
+// Environment variables for non-interactive mode
+var (
+	aptNonInteractiveEnv = []string{
+		"DEBIAN_FRONTEND=noninteractive",
+		"DEBCONF_NONINTERACTIVE_SEEN=true",
+	}
+)
+
+// NOTE: Environment variables for non-interactive mode are now handled automatically by CommandRunner
+// LC_ALL=C is set automatically, and DEBIAN_FRONTEND=noninteractive, DEBCONF_NONINTERACTIVE_SEEN=true
+// are passed as additional environment variables to each RunContext/RunInteractive call
 
 // PackageManager implements the manager.PackageManager interface for the apt package manager.
-type PackageManager struct{}
+type PackageManager struct {
+	// runner is the command execution interface (can be mocked for testing)
+	runner manager.CommandRunner
+	// runnerOnce protects lazy initialization for zero-value struct usage (e.g., &PackageManager{})
+	// This enables defensive programming and backward compatibility with existing test patterns
+	runnerOnce sync.Once
+}
+
+// NewPackageManager creates a new APT package manager with default command runner
+func NewPackageManager() *PackageManager {
+	return &PackageManager{
+		runner: manager.NewDefaultCommandRunner(),
+	}
+}
+
+// NewPackageManagerWithCustomRunner creates a new APT package manager with custom command runner
+// This is primarily used for testing with mocked commands
+func NewPackageManagerWithCustomRunner(runner manager.CommandRunner) *PackageManager {
+	return &PackageManager{
+		runner: runner,
+	}
+}
+
+// getRunner returns the command runner, creating a default one if not set.
+// Uses sync.Once for thread-safe lazy initialization to support zero-value struct usage:
+//   - Production: NewPackageManager() pre-initializes runner
+//   - Testing: &PackageManager{} uses lazy initialization here
+//
+// This pattern enables defensive programming and prevents panics on zero-value usage.
+func (a *PackageManager) getRunner() manager.CommandRunner {
+	a.runnerOnce.Do(func() {
+		if a.runner == nil {
+			a.runner = manager.NewDefaultCommandRunner()
+		}
+	})
+	return a.runner
+}
+
+// executeCommand handles command execution with support for both interactive and non-interactive modes
+// For interactive mode, it uses RunInteractive to handle stdin/stdout/stderr
+// For non-interactive mode, it uses RunContext for testability
+func (a *PackageManager) executeCommand(ctx context.Context, args []string, opts *manager.Options) ([]byte, error) {
+	if opts != nil && opts.Interactive {
+		// Interactive mode uses RunInteractive for stdin/stdout/stderr handling
+		err := a.getRunner().RunInteractive(ctx, pm, args, aptNonInteractiveEnv...)
+		return nil, err
+	}
+
+	// Use RunContext for non-interactive execution (automatically includes LC_ALL=C)
+	return a.getRunner().RunContext(ctx, pm, args, aptNonInteractiveEnv...)
+}
 
 // IsAvailable checks if the apt package manager is available on the system.
 // It verifies both that apt exists and that it's the Debian apt package manager
@@ -64,8 +128,7 @@ func (a *PackageManager) IsAvailable() bool {
 
 	// Test if this is actually functional Debian apt by trying a safe command
 	// This approach: if apt+dpkg work together, support them regardless of platform
-	cmd := exec.Command("apt", "--version")
-	output, err := cmd.Output()
+	output, err := a.getRunner().Run("apt", "--version")
 	if err != nil {
 		return false
 	}
@@ -110,22 +173,20 @@ func (a *PackageManager) Install(pkgs []string, opts *manager.Options) ([]manage
 		args = append(args, ArgsAssumeYes)
 	}
 
-	cmd := exec.Command(pm, args...)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	defer cancel()
 
-	if opts.Interactive {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		err := cmd.Run()
-		return []manager.PackageInfo{}, err
-	} else {
-		cmd.Env = ENV_NonInteractive
-		out, err := cmd.Output()
-		if err != nil {
-			return nil, err
-		}
-		return ParseInstallOutput(string(out), opts), nil
+	out, err := a.executeCommand(ctx, args, opts)
+	if err != nil {
+		return nil, err
 	}
+
+	// Interactive mode returns empty slice (output goes directly to user)
+	if opts != nil && opts.Interactive {
+		return []manager.PackageInfo{}, nil
+	}
+
+	return ParseInstallOutput(string(out), opts), nil
 }
 
 // Delete removes the provided packages using the apt package manager.
@@ -152,28 +213,26 @@ func (a *PackageManager) Delete(pkgs []string, opts *manager.Options) ([]manager
 		args = append(args, ArgsAssumeYes)
 	}
 
-	cmd := exec.Command(pm, args...)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	defer cancel()
 
-	if opts.Interactive {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		err := cmd.Run()
-		return []manager.PackageInfo{}, err
-	} else {
-		cmd.Env = ENV_NonInteractive
-		out, err := cmd.Output()
-		if err != nil {
-			return nil, err
-		}
-		return ParseDeletedOutput(string(out), opts), nil
+	out, err := a.executeCommand(ctx, args, opts)
+	if err != nil {
+		return nil, err
 	}
+
+	// Interactive mode returns empty slice (output goes directly to user)
+	if opts != nil && opts.Interactive {
+		return []manager.PackageInfo{}, nil
+	}
+
+	return ParseDeletedOutput(string(out), opts), nil
 }
 
 // Refresh updates the package list using the apt package manager.
 func (a *PackageManager) Refresh(opts *manager.Options) error {
-	cmd := exec.Command(pm, "update")
-	cmd.Env = ENV_NonInteractive
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
 
 	if opts == nil {
 		opts = &manager.Options{
@@ -182,22 +241,21 @@ func (a *PackageManager) Refresh(opts *manager.Options) error {
 			Verbose:     false,
 		}
 	}
-	if opts.Interactive {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		err := cmd.Run()
+	args := []string{"update"}
+	out, err := a.executeCommand(ctx, args, opts)
+	if err != nil {
 		return err
-	} else {
-		out, err := cmd.Output()
-		if err != nil {
-			return err
-		}
-		if opts.Verbose {
-			log.Println(string(out))
-		}
+	}
+
+	// Interactive mode output goes directly to user, no need to process
+	if opts != nil && opts.Interactive {
 		return nil
 	}
+
+	if opts.Verbose {
+		log.Println(string(out))
+	}
+	return nil
 }
 
 // Find searches for packages matching the provided keywords using the apt package manager.
@@ -208,23 +266,24 @@ func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manag
 	}
 
 	args := append([]string{"search"}, keywords...)
-	cmd := exec.Command("apt", args...)
-	cmd.Env = append(os.Environ(), ENV_NonInteractive...)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer cancel()
 
-	out, err := cmd.Output()
+	out, err := a.getRunner().RunContext(ctx, pm, args, aptNonInteractiveEnv...)
 	if err != nil {
 		return nil, err
 	}
 
-	return ParseFindOutput(string(out), opts), nil
+	return a.ParseFindOutput(string(out), opts), nil
 }
 
 // ListInstalled lists all installed packages using the apt package manager.
 func (a *PackageManager) ListInstalled(opts *manager.Options) ([]manager.PackageInfo, error) {
-	cmd := exec.Command("dpkg-query", "-W", "-f", "${binary:Package} ${Version}\n")
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer cancel()
+
 	// NOTE: can also use `apt list --installed`, but it's slower
-	cmd.Env = ENV_NonInteractive
-	out, err := cmd.Output()
+	out, err := a.getRunner().RunContext(ctx, dpkgQueryCmd, []string{"-W", "-f", "${binary:Package} ${Version}\n"}, aptNonInteractiveEnv...)
 	if err != nil {
 		return nil, err
 	}
@@ -233,9 +292,10 @@ func (a *PackageManager) ListInstalled(opts *manager.Options) ([]manager.Package
 
 // ListUpgradable lists all upgradable packages using the apt package manager.
 func (a *PackageManager) ListUpgradable(opts *manager.Options) ([]manager.PackageInfo, error) {
-	cmd := exec.Command(pm, "list", "--upgradable")
-	cmd.Env = ENV_NonInteractive
-	out, err := cmd.Output()
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer cancel()
+
+	out, err := a.getRunner().RunContext(ctx, pm, []string{"list", "--upgradable"}, aptNonInteractiveEnv...)
 	if err != nil {
 		return nil, err
 	}
@@ -271,23 +331,21 @@ func (a *PackageManager) Upgrade(pkgs []string, opts *manager.Options) ([]manage
 		args = append(args, ArgsAssumeYes)
 	}
 
-	cmd := exec.Command(pm, args...)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+	defer cancel()
 
 	log.Printf("Running command: %s %s", pm, args)
 
-	if opts.Interactive {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		err := cmd.Run()
-		return []manager.PackageInfo{}, err
-	}
-
-	cmd.Env = ENV_NonInteractive
-	out, err := cmd.Output()
+	out, err := a.executeCommand(ctx, args, opts)
 	if err != nil {
 		return nil, err
 	}
+
+	// Interactive mode returns empty slice (output goes directly to user)
+	if opts != nil && opts.Interactive {
+		return []manager.PackageInfo{}, nil
+	}
+
 	return ParseInstallOutput(string(out), opts), nil
 }
 
@@ -299,8 +357,8 @@ func (a *PackageManager) UpgradeAll(opts *manager.Options) ([]manager.PackageInf
 
 // Clean cleans the local package cache used by the apt package manager.
 func (a *PackageManager) Clean(opts *manager.Options) error {
-	cmd := exec.Command(pm, "autoclean")
-	cmd.Env = ENV_NonInteractive
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
 
 	if opts == nil {
 		opts = &manager.Options{
@@ -309,22 +367,21 @@ func (a *PackageManager) Clean(opts *manager.Options) error {
 			Verbose:     false,
 		}
 	}
-	if opts.Interactive {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		err := cmd.Run()
+	args := []string{"autoclean"}
+	out, err := a.executeCommand(ctx, args, opts)
+	if err != nil {
 		return err
-	} else {
-		out, err := cmd.Output()
-		if err != nil {
-			return err
-		}
-		if opts.Verbose {
-			log.Println(string(out))
-		}
+	}
+
+	// Interactive mode output goes directly to user, no need to process
+	if opts != nil && opts.Interactive {
 		return nil
 	}
+
+	if opts.Verbose {
+		log.Println(string(out))
+	}
+	return nil
 }
 
 // GetPackageInfo retrieves package information for the specified package using the apt package manager.
@@ -334,9 +391,10 @@ func (a *PackageManager) GetPackageInfo(pkg string, opts *manager.Options) (mana
 		return manager.PackageInfo{}, err
 	}
 
-	cmd := exec.Command("apt-cache", "show", pkg)
-	cmd.Env = ENV_NonInteractive
-	out, err := cmd.Output()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	out, err := a.getRunner().RunContext(ctx, "apt-cache", []string{"show", pkg}, aptNonInteractiveEnv...)
 	if err != nil {
 		return manager.PackageInfo{}, err
 	}
@@ -361,20 +419,18 @@ func (a *PackageManager) AutoRemove(opts *manager.Options) ([]manager.PackageInf
 		args = append(args, ArgsAssumeYes)
 	}
 
-	cmd := exec.Command(pm, args...)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	defer cancel()
 
-	if opts.Interactive {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		err := cmd.Run()
-		return []manager.PackageInfo{}, err
-	} else {
-		cmd.Env = ENV_NonInteractive
-		out, err := cmd.Output()
-		if err != nil {
-			return nil, err
-		}
-		return ParseDeletedOutput(string(out), opts), nil
+	out, err := a.executeCommand(ctx, args, opts)
+	if err != nil {
+		return nil, err
 	}
+
+	// Interactive mode returns empty slice (output goes directly to user)
+	if opts != nil && opts.Interactive {
+		return []manager.PackageInfo{}, nil
+	}
+
+	return ParseDeletedOutput(string(out), opts), nil
 }

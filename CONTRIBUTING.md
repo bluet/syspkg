@@ -466,7 +466,8 @@ SysPkg follows modern testing best practices with a three-layer approach that al
   ```go
   func TestParseFindOutput_BehaviorWithFixtures(t *testing.T) {
       fixture := loadFixture(t, "search-vim-rocky8.txt")
-      packages := yum.ParseFindOutput(fixture, &manager.Options{})
+      pm := yum.NewPackageManager()
+      packages := pm.ParseFindOutput(fixture, &manager.Options{})
       // Test parser behavior with real output
   }
   ```

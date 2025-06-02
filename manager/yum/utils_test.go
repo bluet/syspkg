@@ -2,6 +2,7 @@ package yum
 
 import (
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/bluet/syspkg/manager"
@@ -95,16 +96,29 @@ func TestCheckRpmInstallationStatus(t *testing.T) {
 			// Create mock command runner
 			runner := manager.NewMockCommandRunner()
 
-			// Set up mocked commands and errors
+			// Set up mocked commands and errors using the proper methods
 			for cmd, output := range tt.mockedCommands {
-				runner.Commands[cmd] = output
+				// Parse the command string to extract name and args
+				parts := strings.Fields(cmd)
+				if len(parts) > 0 {
+					name := parts[0]
+					args := parts[1:]
+					runner.AddCommand(name, args, output, nil)
+				}
 			}
 			for cmd, err := range tt.mockedErrors {
-				runner.Errors[cmd] = err
+				// Parse the command string to extract name and args
+				parts := strings.Fields(cmd)
+				if len(parts) > 0 {
+					name := parts[0]
+					args := parts[1:]
+					runner.AddCommand(name, args, nil, err)
+				}
 			}
 
-			// Test the function
-			result, err := checkRpmInstallationStatus(tt.packageNames, runner)
+			// Test the method using PackageManager
+			pm := NewPackageManagerWithCustomRunner(runner)
+			result, err := pm.checkRpmInstallationStatus(tt.packageNames)
 
 			// Check error expectation
 			if tt.expectedError && err == nil {
@@ -155,7 +169,9 @@ vim-common.x86_64 : Common files for vim
 vim-filesystem.noarch : VIM filesystem layout
 vim-minimal.x86_64 : A minimal version of the VIM editor`
 
-	packages := ParseFindOutput(searchOutput, nil)
+	// Create a PackageManager instance to test the method
+	pm := NewPackageManager()
+	packages := pm.ParseFindOutput(searchOutput, nil)
 
 	expectedPackages := []string{"vim-enhanced", "vim-common", "vim-filesystem", "vim-minimal"}
 

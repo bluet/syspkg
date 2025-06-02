@@ -4,12 +4,14 @@ package apt
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"log"
 	"os/exec"
 	"regexp"
 	"sort"
 	"strings"
+	"time"
 
 	// "github.com/rs/zerolog"
 	// "github.com/rs/zerolog/log"
@@ -128,7 +130,7 @@ func ParseDeletedOutput(msg string, opts *manager.Options) []manager.PackageInfo
 // ParseFindOutput parses the output of `apt search packageName` command
 // and returns a list of packages that match the search query with their installation status.
 //
-// This function performs two operations:
+// This method performs two operations:
 // 1. Parses APT search output to extract package information
 // 2. Checks installation status via dpkg-query for each found package
 //
@@ -149,7 +151,7 @@ func ParseDeletedOutput(msg string, opts *manager.Options) []manager.PackageInfo
 // Version field usage:
 //   - installed packages: Version=installed_version, NewVersion=repo_version
 //   - available packages: Version="", NewVersion=repo_version
-func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
+func (a *PackageManager) ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 	var packages []manager.PackageInfo
 	var packagesDict = make(map[string]manager.PackageInfo)
 
@@ -195,7 +197,7 @@ func ParseFindOutput(msg string, opts *manager.Options) []manager.PackageInfo {
 		return packages
 	}
 
-	packages, err := getPackageStatus(packagesDict, opts)
+	packages, err := a.getPackageStatus(packagesDict, opts)
 	if err != nil {
 		log.Printf("apt: getPackageStatus error: %s\n", err)
 	}
@@ -310,22 +312,25 @@ func logDebugPackages(packages map[string]manager.PackageInfo, opts *manager.Opt
 }
 
 // runDpkgQuery executes dpkg-query command and handles errors appropriately
-func runDpkgQuery(packageNames []string, opts *manager.Options) ([]byte, error) {
+func (a *PackageManager) runDpkgQuery(packageNames []string, opts *manager.Options) ([]byte, error) {
 	// Validate package names to prevent command injection
 	if err := manager.ValidatePackageNames(packageNames); err != nil {
 		return nil, err
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
 	args := []string{"-W", "--showformat", "${binary:Package} ${Status} ${Version}\n"}
 	args = append(args, packageNames...)
-	cmd := exec.Command("dpkg-query", args...)
-	cmd.Env = ENV_NonInteractive
+
+	// Use CommandRunner with automatic LC_ALL=C and additional APT env vars
 
 	if opts != nil && opts.Debug {
 		log.Printf("Running dpkg-query with args: %v", args)
 	}
 
-	out, err := cmd.CombinedOutput()
+	out, err := a.getRunner().RunContext(ctx, dpkgQueryCmd, args, aptNonInteractiveEnv...)
 	if err != nil {
 		if opts != nil && opts.Debug {
 			log.Printf("dpkg-query error: %v, output: %q", err, string(out))
@@ -362,7 +367,7 @@ func addUnprocessedPackages(packagesList []manager.PackageInfo, packages map[str
 // of manager.PackageInfo objects with their statuses updated using the output of `dpkg-query` command.
 // It also adds any packages not found by dpkg-query to the list; their status is initially set to unknown,
 // but then converted to available for cross-package manager compatibility.
-func getPackageStatus(packages map[string]manager.PackageInfo, opts *manager.Options) ([]manager.PackageInfo, error) {
+func (a *PackageManager) getPackageStatus(packages map[string]manager.PackageInfo, opts *manager.Options) ([]manager.PackageInfo, error) {
 	var packageNames []string
 	var packagesList []manager.PackageInfo
 
@@ -379,7 +384,7 @@ func getPackageStatus(packages map[string]manager.PackageInfo, opts *manager.Opt
 	// Sort package names to ensure deterministic output order
 	sort.Strings(packageNames)
 
-	out, err := runDpkgQuery(packageNames, opts)
+	out, err := a.runDpkgQuery(packageNames, opts)
 	if err != nil {
 		return nil, err
 	}
