@@ -94,6 +94,10 @@ type CommandRunner interface {
 - ✅ **Easy mocking** for comprehensive test coverage
 - ✅ **Constructor standardization** - clear production vs testing patterns
 
+**APT Upgrade Method Fix** (2025-06-02): Fixed critical bug where APT Upgrade method incorrectly upgraded all packages instead of specific ones. Now correctly uses:
+- `apt install package` for upgrading specific packages
+- `apt upgrade` for upgrading all packages
+
 **Exit Code Handling**: Each package manager still handles its own exit codes appropriately:
 - APT: Exit code 100 = any error
 - YUM: Exit code 100 = updates available (success!)

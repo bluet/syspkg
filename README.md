@@ -203,14 +203,18 @@ Please open an issue (or PR ❤️) if you'd like to see support for any unliste
 - **[.pre-commit-config.yaml](.pre-commit-config.yaml)** - Secure pre-commit hooks
 - **[.github/workflows/](.github/workflows/)** - CI/CD pipelines
 
-### Recent Fixes
+### Recent Achievements ✅ 
+- ✅ **CommandRunner Architecture**: Complete architectural consistency (Issue #20, PR #26)
+- ✅ **APT & YUM executeCommand Pattern**: Centralized command execution, eliminated code duplication
+- ✅ **Security Enhancements**: Input validation for package names (Issue #23, PR #25)
+- ✅ **Technical Debt Cleanup**: Fixed APT Upgrade method bug, removed misleading TODOs, verified no resource leaks
 - ✅ **APT Exit Code Bug**: Fixed in commit 3751f45 - now properly propagates errors (Issue #21)
 - ✅ **Snap Exit Code Bug**: Fixed in commit 3751f45 - now properly handles usage errors (Issue #22)
 - ✅ **Flatpak Exit Code Bug**: Fixed in commit 3751f45 - now properly handles general errors (Issue #24)
 
 ### Active Development
-- **CommandBuilder Architecture**: Ongoing refactoring for Issue #20 to improve testability
-- **Security Enhancements**: Input validation for package names (Issue #23)
+- **Test Coverage Improvements**: YUM gaps (Issue #32), Snap & Flatpak comprehensive suites (Issues #28, #29)
+- **CommandRunner Migration**: Snap and Flatpak to complete architectural consistency (Issues #28, #29)
 
 ### CI/CD Status
 

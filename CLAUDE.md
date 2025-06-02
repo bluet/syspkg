@@ -203,18 +203,17 @@ For detailed technical architecture, design patterns, and implementation guideli
 
 *Note: To-do list consolidated 2025-05-30 - removed duplicates, feature creep items, and over-engineering. Focused on core security, testing, and platform support.*
 
-### 🔴 High Priority (Security & Critical Bugs) - 15 items
+### 🔴 High Priority (Security & Critical Bugs) - 14 items
 1. **Fix command injection vulnerability** ✅ - validate/sanitize package names before exec.Command (PR #25)
 2. **Implement input validation helper function** ✅ for package names and arguments (PR #25)
-3. **Fix resource leaks** in error handling paths
-4. **Add security scanning with Snyk** to CI/CD pipeline
-5. **Review and merge PR #12** - fix GetPackageManager("") panic bug ✅
-6. **Cross-package manager status normalization** ✅ - APT config-files → available
-7. **GitHub workflow compatibility fixes** ✅ - Go 1.23.4, Docker multi-OS testing
-8. **Fix APT exit code bug** - Remove incorrect handling of exit code 100 as "no packages found" (it means error!)
-9. **Fix Snap exit code bug** - Remove incorrect handling of exit code 64 as "no packages found" (it means usage error!)
-10. **Migrate to CommandRunner interface (Issue #20)** - Achieve architectural consistency across all package managers
-11. **Add exit code documentation** ✅ - Created comprehensive exit code docs for all package managers
+3. **Add security scanning with Snyk** to CI/CD pipeline
+4. **Review and merge PR #12** - fix GetPackageManager("") panic bug ✅
+5. **Cross-package manager status normalization** ✅ - APT config-files → available
+6. **GitHub workflow compatibility fixes** ✅ - Go 1.23.4, Docker multi-OS testing
+7. **Fix APT exit code bug** - Remove incorrect handling of exit code 100 as "no packages found" (it means error!)
+8. **Fix Snap exit code bug** - Remove incorrect handling of exit code 64 as "no packages found" (it means usage error!)
+9. **Migrate to CommandRunner interface (Issue #20)** - Achieve architectural consistency across all package managers
+10. **Add exit code documentation** ✅ - Created comprehensive exit code docs for all package managers
 
 ### ✅ COMPLETED INVESTIGATIONS (Collapsed)
 <details>

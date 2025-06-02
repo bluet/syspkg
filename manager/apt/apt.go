@@ -311,9 +311,13 @@ func (a *PackageManager) Upgrade(pkgs []string, opts *manager.Options) ([]manage
 		}
 	}
 
-	args := []string{"upgrade"}
+	// For specific packages, use 'apt install' since 'apt upgrade package' upgrades all packages
+	// For all packages upgrade, use 'apt upgrade' (when pkgs is empty)
+	var args []string
 	if len(pkgs) > 0 {
-		args = append(args, pkgs...)
+		args = append([]string{"install"}, pkgs...)
+	} else {
+		args = []string{"upgrade"}
 	}
 
 	if opts == nil {
@@ -351,7 +355,6 @@ func (a *PackageManager) Upgrade(pkgs []string, opts *manager.Options) ([]manage
 
 // UpgradeAll upgrades all installed packages using the apt package manager.
 func (a *PackageManager) UpgradeAll(opts *manager.Options) ([]manager.PackageInfo, error) {
-	// TODO: add support for upgrade specific packages
 	return a.Upgrade(nil, opts)
 }
 
