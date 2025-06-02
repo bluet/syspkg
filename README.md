@@ -185,51 +185,34 @@ Please open an issue (or PR ❤️) if you'd like to see support for any unliste
 
 ### Documentation
 
-#### For Users
-- **[README.md](README.md)** - Getting started, usage examples, and features
+### For Users 👥
+- **[README.md](README.md)** (you are here) - Project overview and quick start
 - **[Go Reference](https://pkg.go.dev/github.com/bluet/syspkg)** - Complete API documentation
+- **[CHANGELOG.md](CHANGELOG.md)** - Recent achievements and version history
 
-#### For Contributors
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development workflow and comprehensive testing guide
-- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Technical architecture, design patterns, and interfaces
-- **[docs/EXIT_CODES.md](docs/EXIT_CODES.md)** - Package manager exit code behavior (critical for implementation)
-- **[manager/{pm}/EXIT_CODES.md](manager/)** - Package manager specific exit code documentation
+### For Developers 🛠️
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development workflow and testing guide
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Technical design and interfaces
+- **[docs/EXIT_CODES.md](docs/EXIT_CODES.md)** - Package manager exit code behaviors
+- **[testing/docker/README.md](testing/docker/README.md)** - Multi-OS testing strategy
 
-#### For AI Assistants
-- **[CLAUDE.md](CLAUDE.md)** - Development guidelines and AI-specific instructions
+### For AI Assistants 🤖
+- **[CLAUDE.md](CLAUDE.md)** - Development guidelines and project rules
 
-#### Infrastructure
-- **[testing/](testing/)** - Test fixtures and Docker testing infrastructure
-- **[.pre-commit-config.yaml](.pre-commit-config.yaml)** - Secure pre-commit hooks
-- **[.github/workflows/](.github/workflows/)** - CI/CD pipelines
+## Project Status
 
-### Recent Achievements ✅ 
-- ✅ **CommandRunner Architecture**: Complete architectural consistency (Issue #20, PR #26)
-- ✅ **APT & YUM executeCommand Pattern**: Centralized command execution, eliminated code duplication
-- ✅ **Security Enhancements**: Input validation for package names (Issue #23, PR #25)
-- ✅ **Technical Debt Cleanup**: Fixed APT Upgrade method bug, removed misleading TODOs, verified no resource leaks
-- ✅ **APT Exit Code Bug**: Fixed in commit 3751f45 - now properly propagates errors (Issue #21)
-- ✅ **Snap Exit Code Bug**: Fixed in commit 3751f45 - now properly handles usage errors (Issue #22)
-- ✅ **Flatpak Exit Code Bug**: Fixed in commit 3751f45 - now properly handles general errors (Issue #24)
+**Current Version**: [Latest Release](https://github.com/bluet/syspkg/releases)
 
-### Active Development
-- **Test Coverage Improvements**: YUM gaps (Issue #32), Snap & Flatpak comprehensive suites (Issues #28, #29)
-- **CommandRunner Migration**: Snap and Flatpak to complete architectural consistency (Issues #28, #29)
+**Stability**: Production ready with comprehensive testing across multiple OS distributions
 
-### CI/CD Status
+**Active Development**: See [Issues](https://github.com/bluet/syspkg/issues) for roadmap and current work
 
-| Workflow | Status | Description |
-| -------- | ------ | ----------- |
-| **Test and Coverage** | ✅ | Go 1.23/1.24 testing with coverage reporting |
-| **Lint and Format** | ✅ | golangci-lint, gofmt, go vet quality checks |
-| **Build** | ✅ | Multi-version build verification |
-| **Multi-OS Tests** | ✅ | Docker-based testing across Ubuntu, Rocky Linux, Alpine |
-| **Release Binaries** | ✅ | Cross-platform binary releases |
+### Current Priorities
+- **Test Coverage**: Improving YUM, Snap, and Flatpak test coverage
+- **Architecture**: Complete CommandRunner migration for Snap and Flatpak
+- **Platform Support**: DNF and APK package manager implementations
 
-- ✅ **Pre-commit hooks**: Automated code quality and security checks
-- ✅ **Go mod verification**: Dependency integrity validation
-- ✅ **Multi-OS compatibility**: Docker testing with Go 1.23.4 across distributions
-- ✅ **Fixture-based testing**: Real package manager output validation
+See [CHANGELOG.md](CHANGELOG.md) for recent achievements and [CLAUDE.md](CLAUDE.md) for detailed development roadmap.
 
 ## Contributing
 
@@ -240,24 +223,18 @@ We welcome contributions to SysPkg!
 - **Feature requests**: Please let us know what package managers or features you'd like to see
 
 ### For Developers
-- **Quick start**: See [CONTRIBUTING.md](CONTRIBUTING.md) for a comprehensive development guide
-- **Architecture**: See [CLAUDE.md](CLAUDE.md) for detailed technical documentation
-- **Testing strategy**: Multi-OS Docker testing with environment-aware test execution
+- **Quick start**: See [CONTRIBUTING.md](CONTRIBUTING.md) for complete development workflow
+- **Architecture**: See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for technical design details
 
-**Development workflow:**
+**Quick development setup:**
 ```bash
 git clone https://github.com/bluet/syspkg.git
 cd syspkg
-make test          # ✅ Smart testing - works on any OS (30s)
-make check         # ✅ Code quality checks (15s)
-
-# Working on package managers? See CONTRIBUTING.md for:
-# make test-docker-rocky   # 🐳 Test YUM on Rocky Linux (5min)
-# make test-docker-fedora  # 🐳 Test DNF on Fedora (5min)
-# make test-docker-all     # 🐳 Test all OS (15min)
+make test          # Smart testing - detects your OS
+make check         # Code quality checks
 ```
 
-**🎯 Quick decision:** Always start with `make test` - it automatically detects your OS and tests what's available!
+For advanced testing across multiple OS, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

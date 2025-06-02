@@ -195,73 +195,82 @@ For detailed technical architecture, design patterns, and implementation guideli
 
 **Cross-Package Manager Compatibility**: SysPkg normalizes package states for consistent behavior across different package managers. For example, APT's "config-files" state (packages removed but with configuration files remaining) is normalized to "available" status to match the semantics used by other package managers like YUM and Snap.
 
-## Current Session Todos
+## Current Project Priorities
 
-@TODO.md
+For current development tasks, see [GitHub Issues](https://github.com/bluet/syspkg/issues) and [GitHub Projects](https://github.com/bluet/syspkg/projects).
 
 ## Project Improvement Roadmap
 
-*Note: To-do list consolidated 2025-05-30 - removed duplicates, feature creep items, and over-engineering. Focused on core security, testing, and platform support.*
+*Note: Roadmap consolidated 2025-05-30 - removed duplicates, feature creep items, and over-engineering. Focused on core security, testing, and platform support.*
 
-### 🔴 High Priority (Security & Critical Bugs) - 14 items
-1. **Fix command injection vulnerability** ✅ - validate/sanitize package names before exec.Command (PR #25)
-2. **Implement input validation helper function** ✅ for package names and arguments (PR #25)
+### 🔴 High Priority (Security & Critical Bugs)
+1. **Command injection vulnerability** ✅ - validate/sanitize package names before exec.Command (PR #25)
+2. **Input validation helper function** ✅ for package names and arguments (PR #25)
 3. **Add security scanning with Snyk** to CI/CD pipeline
-4. **Review and merge PR #12** - fix GetPackageManager("") panic bug ✅
-5. **Cross-package manager status normalization** ✅ - APT config-files → available
-6. **GitHub workflow compatibility fixes** ✅ - Go 1.23.4, Docker multi-OS testing
-7. **Fix APT exit code bug** - Remove incorrect handling of exit code 100 as "no packages found" (it means error!)
-8. **Fix Snap exit code bug** - Remove incorrect handling of exit code 64 as "no packages found" (it means usage error!)
-9. **Migrate to CommandRunner interface (Issue #20)** - Achieve architectural consistency across all package managers
-10. **Add exit code documentation** ✅ - Created comprehensive exit code docs for all package managers
+4. **Cross-package manager status normalization** ✅ - APT config-files → available
+5. **GitHub workflow compatibility fixes** ✅ - Go 1.23.4, Docker multi-OS testing
+6. **Exit code bugs** ✅ - Fixed APT, Snap, Flatpak exit code handling (Issues #21, #22, #24)
+7. **CommandRunner interface migration** ✅ - APT & YUM complete (Issue #20)
+8. **Exit code documentation** ✅ - Created comprehensive exit code docs for all package managers
 
-### ✅ COMPLETED INVESTIGATIONS (Collapsed)
-<details>
-<summary>Critical investigation results - tests are correctly implemented</summary>
+### 🟠 Pending High Priority Items
+- **Add security scanning with Snyk** to CI/CD pipeline
+- **Complete CommandRunner migration**: Snap and Flatpak (Issues #28, #29)
 
-**Investigation Results: No design flaw found - tests are correct**
-- ✅ **Parser vs enhanced method distinction clarified**
-- ✅ **CommandRunner interface verified**
-- ✅ **Test execution paths confirmed**
-- ✅ **Fixtures validated as authentic**
-- ✅ **Integration tests created**
-</details>
+### 🟡 Medium Priority (Code Quality & Features)
+**Test Coverage & Architecture:**
+- **Test coverage improvements**: YUM gaps (Issue #32), Snap & Flatpak comprehensive suites
+- **CommandRunner migration completion**: Snap and Flatpak (Issues #28, #29)
 
-### 🟡 Medium Priority & Completed Items (Collapsed)
-<details>
-<summary>Code quality, testing achievements, and removed items</summary>
+**CLI & User Experience:**
+- **CLI upgrade display**: Fix packages not shown in CLI output (Issue #3)
+- **Mac apt conflict**: Use apt-get instead of apt on macOS (Issue #2)
+
+**Code Quality Improvements:**
+- **Context support** for cancellation and timeouts
+- **Custom error types** for better error handling
+- **Extract common parsing logic** (DRY principle)
+- **Replace magic strings/numbers** with constants
+
+### 🟢 Low Priority (Platform Support)
+**New Package Managers:**
+- **DNF package manager** support (Red Hat/Fedora) - uses yum backend
+- **APK package manager** support (Alpine Linux)
+- **Homebrew support** for macOS
+- **Windows package managers** (chocolatey/scoop/winget)
+
+**Bug Fixes & Enhancements:**
+- **APT multi-arch parsing**: Fix empty package names for multi-arch packages (Issue #15)
+- **Version parsing improvements**: Robust regex patterns (PR #17 follow-ups)
+- **Flatpak/Snap AutoRemove**: Enhanced output parsing (PR #17 follow-ups)
+- **Timeout configuration**: Make timeouts configurable (PR #17 follow-ups)
+
+### ✅ COMPLETED INVESTIGATIONS
+**Investigation Results: No design flaw found - tests are correctly implemented**
+- ✅ **Parser vs enhanced method distinction** clarified
+- ✅ **CommandRunner interface** verified
+- ✅ **Test execution paths** confirmed
+- ✅ **Fixtures validated** as authentic
+- ✅ **Integration tests** created
 
 **Completed Testing Work:**
-- ✅ YUM comprehensive implementation (Issue #16)
-- ✅ APT fixture cleanup and behavior testing
-- ✅ Integration tests and testing strategy documentation
-- ✅ Cross-platform parsing robustness
+- ✅ **YUM comprehensive implementation** (Issue #16)
+- ✅ **APT fixture cleanup** and behavior testing
+- ✅ **Integration tests** and testing strategy documentation
+- ✅ **Cross-platform parsing** robustness
 
 **Completed Documentation:**
-- ✅ API and behavior documentation enhanced
-- ✅ Error handling best practices documented
-- ✅ YUM documentation updates
+- ✅ **API and behavior documentation** enhanced
+- ✅ **Error handling best practices** documented
+- ✅ **YUM documentation** updates
+- ✅ **Documentation reorganization** with proper cross-references
 
-**Remaining Code Improvements:**
-- Context support for cancellation and timeouts
-- Custom error types for better error handling
-- Extract common parsing logic (DRY principle)
-- Replace magic strings/numbers with constants
+## Active Development Tracking
 
-**Items Removed from Roadmap (2025-05-30):**
-- ~~Structured logging, progress indicators, architecture diagrams~~ (over-engineering/feature creep)
-</details>
-
-### 🟢 Low Priority (Platform Support) - 3 items
-**New Package Managers:**
-- Add proper macOS support with brew package manager implementation
-- Add Windows support with chocolatey/scoop/winget package managers
-- Implement dnf package manager support (Red Hat/Fedora) - uses yum backend
-- ~~Implement yum package manager support (Red Hat/Fedora)~~ ✅ **COMPLETED**
-
-**Removed from roadmap (2025-05-30):**
-- ~~zypper, apk support~~ (lower priority than core platforms)
-- ~~Parallel operations~~ (premature optimization)
+Current active work (tracked in local TODO.md and GitHub Issues):
+- **Test Coverage Improvements**: YUM gaps (Issue #32), Snap & Flatpak comprehensive suites (Issues #28, #29)
+- **CommandRunner Migration**: Snap and Flatpak to complete architectural consistency (Issues #28, #29)
+- **Documentation**: Continued improvements and maintenance
 
 ## Testing Strategy Notes
 

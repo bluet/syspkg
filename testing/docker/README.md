@@ -4,6 +4,13 @@
 
 This directory contains Docker configurations for testing go-syspkg across multiple Linux distributions. The multi-OS Docker testing system is **fully implemented and actively used** for comprehensive cross-platform validation.
 
+## 📖 Related Documentation
+
+- **[../../README.md](../../README.md)** - Project overview
+- **[../../CONTRIBUTING.md](../../CONTRIBUTING.md)** - Complete development workflow and testing guide
+- **[../../docs/ARCHITECTURE.md](../../docs/ARCHITECTURE.md)** - Technical design and interfaces
+- **[../../docs/EXIT_CODES.md](../../docs/EXIT_CODES.md)** - Package manager exit code behavior
+
 ## Test Categories
 
 ### 1. Unit Tests (Run Everywhere)

@@ -3,6 +3,14 @@
 This document provides a high-level overview of exit code behavior across package managers.
 **For detailed information, see the EXIT_CODES.md file in each package manager directory.**
 
+## 📖 Related Documentation
+
+- **[../README.md](../README.md)** - Project overview
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Technical design and interfaces
+- **[../CONTRIBUTING.md](../CONTRIBUTING.md)** - Development workflow and testing guide
+- **[../manager/apt/EXIT_CODES.md](../manager/apt/EXIT_CODES.md)** - APT-specific exit codes
+- **[../manager/yum/EXIT_CODES.md](../manager/yum/EXIT_CODES.md)** - YUM-specific exit codes
+
 ## Critical Insights
 
 ### Exit Codes Are NOT Consistent

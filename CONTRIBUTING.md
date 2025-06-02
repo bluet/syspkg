@@ -2,6 +2,15 @@
 
 Thank you for your interest in contributing to SysPkg! This guide will help you understand our development workflow, testing strategy, and contribution process.
 
+## 📖 Documentation Navigation
+
+- **[README.md](README.md)** - Project overview and user guide
+- **[CHANGELOG.md](CHANGELOG.md)** - Recent achievements and version history
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Technical design and interfaces
+- **[testing/docker/README.md](testing/docker/README.md)** - Multi-OS testing infrastructure
+- **[docs/EXIT_CODES.md](docs/EXIT_CODES.md)** - Package manager exit code behavior
+- **[CLAUDE.md](CLAUDE.md)** - AI assistant development guidelines
+
 ## 📋 Quick Start for Contributors
 
 ### Prerequisites
@@ -46,6 +55,27 @@ go install golang.org/x/tools/cmd/goimports@latest
 pip install pre-commit
 # Note: pre-commit install was already done in step 3 of the basic workflow
 ```
+
+### Technical Infrastructure
+
+#### CI/CD Pipeline Status
+Our continuous integration ensures code quality and cross-platform compatibility:
+
+| Workflow | Status | Description |
+| -------- | ------ | ----------- |
+| **Test and Coverage** | ✅ | Go 1.23/1.24 testing with coverage reporting |
+| **Lint and Format** | ✅ | golangci-lint, gofmt, go vet quality checks |
+| **Build** | ✅ | Multi-version build verification |
+| **Multi-OS Tests** | ✅ | Docker-based testing across Ubuntu, Rocky Linux, Alpine |
+| **Release Binaries** | ✅ | Cross-platform binary releases |
+
+#### Infrastructure Features
+- ✅ **Pre-commit hooks**: Automated code quality and security checks
+- ✅ **Go mod verification**: Dependency integrity validation
+- ✅ **Multi-OS compatibility**: Docker testing with Go 1.23.4 across distributions
+- ✅ **Fixture-based testing**: Real package manager output validation
+- ✅ **Security scanning**: Input validation and command injection prevention
+- ✅ **Cross-platform builds**: Support for multiple architectures and operating systems
 
 ### Project Structure
 ```

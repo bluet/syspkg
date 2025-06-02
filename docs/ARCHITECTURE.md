@@ -2,6 +2,13 @@
 
 This document describes the technical architecture, design patterns, and core interfaces of the SysPkg project.
 
+## 📖 Related Documentation
+
+- **[README.md](../README.md)** - Project overview and usage examples
+- **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Development workflow and testing guide
+- **[EXIT_CODES.md](EXIT_CODES.md)** - Package manager exit code behavior
+- **[../testing/docker/README.md](../testing/docker/README.md)** - Multi-OS testing infrastructure
+
 ## Core Interfaces
 
 ### PackageManager Interface
@@ -42,11 +49,11 @@ type SysPkg interface {
 
 All package managers now use the unified CommandRunner interface for consistent, testable command execution:
 
-**Current State**: APT ✅ Complete, YUM ✅ Complete, Snap ❌ No DI, Flatpak ❌ No DI
+**Current State**: APT and YUM have complete CommandRunner integration, Snap and Flatpak pending migration
 
-#### executeCommand Pattern ✅ COMPLETED (2025-06-02)
+#### executeCommand Pattern
 
-Both APT and YUM now implement centralized command execution through the `executeCommand()` helper method:
+Both APT and YUM implement centralized command execution through the `executeCommand()` helper method:
 
 ```go
 // Centralized command execution for both interactive and non-interactive modes
@@ -88,15 +95,11 @@ type CommandRunner interface {
 - **Proven success**: YUM migration demonstrated robustness and maintainability
 
 **Benefits Achieved**:
-- ✅ **Consistent architecture** across APT and YUM package managers
-- ✅ **Better encapsulation** - utility functions converted to methods
-- ✅ **Simplified signatures** - eliminated parameter explosion through function chains
-- ✅ **Easy mocking** for comprehensive test coverage
-- ✅ **Constructor standardization** - clear production vs testing patterns
-
-**APT Upgrade Method Fix** (2025-06-02): Fixed critical bug where APT Upgrade method incorrectly upgraded all packages instead of specific ones. Now correctly uses:
-- `apt install package` for upgrading specific packages
-- `apt upgrade` for upgrading all packages
+- **Consistent architecture** across APT and YUM package managers
+- **Better encapsulation** - utility functions converted to methods
+- **Simplified signatures** - eliminated parameter explosion through function chains
+- **Easy mocking** for comprehensive test coverage
+- **Constructor standardization** - clear production vs testing patterns
 
 **Exit Code Handling**: Each package manager still handles its own exit codes appropriately:
 - APT: Exit code 100 = any error
@@ -295,9 +298,9 @@ SysPkg normalizes package states for consistent behavior across different packag
 ### Interface-Driven Design
 Clear interfaces allow for easy testing, mocking, and extension while maintaining backward compatibility.
 
-## Related Documentation
+## See Also
 
 - **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Development workflow and testing guide
 - **[EXIT_CODES.md](EXIT_CODES.md)** - Package manager exit code behavior
 - **[../README.md](../README.md)** - Project overview and usage examples
-- **[../CLAUDE.md](../CLAUDE.md)** - AI assistant development guidelines
+- **[../testing/docker/README.md](../testing/docker/README.md)** - Multi-OS testing infrastructure
