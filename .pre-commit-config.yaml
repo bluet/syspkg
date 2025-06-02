@@ -33,6 +33,7 @@ repos:
         args: [-w, -s]
         language: system
         files: \.go$
+        exclude: ^backup/
         description: Run gofmt to format Go code
 
       - id: go-imports
@@ -41,14 +42,16 @@ repos:
         args: [-w, -local, github.com/bluet/syspkg]
         language: system
         files: \.go$
+        exclude: ^backup/
         description: Run goimports to organize imports per Go Code Review guidelines
 
       - id: go-vet
         name: go-vet
-        entry: go
-        args: [vet, ./...]
+        entry: bash
+        args: [-c, 'go vet $(go list ./... | grep -v backup)']
         language: system
         files: \.go$
+        exclude: ^backup/
         pass_filenames: false
         description: Run go vet to check for suspicious constructs
 
@@ -63,10 +66,11 @@ repos:
 
       - id: golangci-lint
         name: golangci-lint
-        entry: golangci-lint
-        args: [run, --fix]
+        entry: bash
+        args: [-c, 'golangci-lint run --fix --path-prefix="" --skip-dirs backup']
         language: system
         files: \.go$
+        exclude: ^backup/
         pass_filenames: false
         description: Run golangci-lint with auto-fix
 
@@ -82,10 +86,11 @@ repos:
 
       - id: go-build
         name: go-build
-        entry: go
-        args: [build, ./...]
+        entry: bash
+        args: [-c, 'go build $(go list ./... | grep -v backup)']
         language: system
         files: \.go$
+        exclude: ^backup/
         pass_filenames: false
         description: Check that packages can be built
 

@@ -56,7 +56,7 @@ func ParseInstallOutput(msg string, opts *manager.Options) []manager.PackageInfo
 			log.Printf("%s: %s", pm, line)
 		}
 		if strings.HasPrefix(line, "marking op ") {
-			var status manager.PackageStatus = manager.PackageStatusInstalled
+			var status string = manager.PackageStatusInstalled
 			var msgParts []string = strings.Split(line, " ")
 			var action string = strings.Split(msgParts[3], ":")[0]
 			var pkgString string = strings.TrimPrefix(msgParts[3], action+":")

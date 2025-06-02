@@ -40,6 +40,11 @@ func (b *BaseManager) GetType() string {
 	return b.managerType
 }
 
+// GetRunner returns the command runner for subclasses
+func (b *BaseManager) GetRunner() CommandRunner {
+	return b.runner
+}
+
 func (b *BaseManager) IsAvailable() bool {
 	// Default: try to run the command with --version or --help
 	// Subclasses should override this with specific logic
@@ -140,11 +145,6 @@ func (b *BaseManager) Status(ctx context.Context, opts *Options) (ManagerStatus,
 }
 
 // === HELPER METHODS ===
-
-// GetRunner returns the command runner (useful for subclasses)
-func (b *BaseManager) GetRunner() CommandRunner {
-	return b.runner
-}
 
 // LogVerbose logs a message only if verbose mode is enabled
 func (b *BaseManager) LogVerbose(opts *Options, format string, args ...interface{}) {

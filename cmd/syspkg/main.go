@@ -1,439 +1,558 @@
-// Package main contains the syspkg CLI tool, a universal system package manager.
+// syspkg - Universal package manager CLI
 package main
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"strings"
+	"time"
 
-	// "github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
-
-	"github.com/bluet/syspkg"
 	"github.com/bluet/syspkg/manager"
+
+	// Import all available package managers
+	_ "github.com/bluet/syspkg/manager/apt"
 )
 
-// main function initializes syspkg and sets up the CLI application.
+const (
+	version = "2.0.0"
+	usage   = `syspkg - Universal Package Manager
+
+USAGE:
+    syspkg <command> [options] [packages...]
+
+COMMANDS:
+    search <query>        Search for packages
+    list [filter]         List packages (installed, upgradable, all)
+    install <packages>    Install packages
+    remove <packages>     Remove packages
+    info <package>        Show package information
+    update               Update package lists
+    upgrade [packages]    Upgrade packages (all if none specified)
+    clean                Clean package cache
+    autoremove           Remove orphaned packages
+    verify <packages>    Verify package integrity
+    status               Show package manager status
+    managers             List available package managers
+
+OPTIONS:
+    -m, --manager TYPE   Use specific manager type (system, language, etc.)
+    -n, --name NAME      Use specific manager by name (apt, npm, etc.)
+    -d, --dry-run        Show what would be done without executing
+    -v, --verbose        Show detailed output
+    -q, --quiet          Minimal output
+    -j, --json           Output in JSON format
+    -y, --yes            Assume yes to all prompts
+    -h, --help           Show this help
+    --version            Show version
+
+EXAMPLES:
+    syspkg search vim                    # Search for vim across all managers
+    syspkg install vim curl -m system   # Install using system package manager
+    syspkg list installed                # List all installed packages
+    syspkg upgrade --dry-run             # Show what would be upgraded
+    syspkg managers                      # Show available package managers
+`
+)
+
+type Config struct {
+	Manager     string
+	ManagerType string
+	DryRun      bool
+	Verbose     bool
+	Quiet       bool
+	JSON        bool
+	AssumeYes   bool
+}
+
 func main() {
-	// Check if this is a read-only command that doesn't need root
-	isReadOnlyCommand := false
-	// Look for the actual command, skipping flags
-	for i := 1; i < len(os.Args); i++ {
-		arg := os.Args[i]
-		// Skip flags (start with -)
+	if len(os.Args) < 2 {
+		fmt.Println(usage)
+		os.Exit(1)
+	}
+
+	config := parseArgs()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+
+	registry := manager.GetGlobalRegistry()
+
+	// Get package manager based on config
+	pm, err := selectPackageManager(registry, config)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+
+	opts := &manager.Options{
+		DryRun:    config.DryRun,
+		Verbose:   config.Verbose,
+		Quiet:     config.Quiet,
+		AssumeYes: config.AssumeYes,
+	}
+
+	// Execute command
+	err = executeCommand(ctx, pm, config, opts)
+	if err != nil {
+		if !config.Quiet {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		}
+		os.Exit(1)
+	}
+}
+
+func parseArgs() *Config {
+	config := &Config{}
+	args := os.Args[1:]
+
+	// Simple argument parsing
+	for i := 0; i < len(args); i++ {
+		arg := args[i]
+
+		switch arg {
+		case "-m", "--manager":
+			if i+1 < len(args) {
+				config.ManagerType = args[i+1]
+				i++
+			}
+		case "-n", "--name":
+			if i+1 < len(args) {
+				config.Manager = args[i+1]
+				i++
+			}
+		case "-d", "--dry-run":
+			config.DryRun = true
+		case "-v", "--verbose":
+			config.Verbose = true
+		case "-q", "--quiet":
+			config.Quiet = true
+		case "-j", "--json":
+			config.JSON = true
+		case "-y", "--yes":
+			config.AssumeYes = true
+		case "-h", "--help":
+			fmt.Println(usage)
+			os.Exit(0)
+		case "--version":
+			fmt.Printf("syspkg version %s\n", version)
+			os.Exit(0)
+		}
+	}
+
+	return config
+}
+
+func selectPackageManager(registry *manager.Registry, config *Config) (manager.PackageManager, error) {
+	// Get by specific name if provided
+	if config.Manager != "" {
+		managers := registry.GetAvailable()
+		if pm, exists := managers[config.Manager]; exists {
+			return pm, nil
+		}
+		return nil, fmt.Errorf("package manager '%s' not found", config.Manager)
+	}
+
+	// Get by type if provided
+	if config.ManagerType != "" {
+		pm := registry.GetBestMatch(config.ManagerType)
+		if pm == nil {
+			return nil, fmt.Errorf("no package manager found for type '%s'", config.ManagerType)
+		}
+		return pm, nil
+	}
+
+	// Default: get best system package manager
+	pm := registry.GetBestMatch(manager.TypeSystem)
+	if pm == nil {
+		return nil, fmt.Errorf("no package managers available")
+	}
+
+	return pm, nil
+}
+
+func executeCommand(ctx context.Context, pm manager.PackageManager, config *Config, opts *manager.Options) error {
+	args := getCommandArgs()
+	if len(args) == 0 {
+		return fmt.Errorf("no command specified")
+	}
+
+	command := args[0]
+
+	switch command {
+	case "search":
+		if len(args) < 2 {
+			return fmt.Errorf("search requires a query")
+		}
+		return handleSearch(ctx, pm, args[1:], config, opts)
+
+	case "list":
+		filter := manager.FilterInstalled
+		if len(args) > 1 {
+			switch args[1] {
+			case "installed":
+				filter = manager.FilterInstalled
+			case "upgradable":
+				filter = manager.FilterUpgradable
+			case "all":
+				filter = manager.FilterAll
+			default:
+				return fmt.Errorf("invalid filter: %s", args[1])
+			}
+		}
+		return handleList(ctx, pm, filter, config, opts)
+
+	case "install":
+		if len(args) < 2 {
+			return fmt.Errorf("install requires package names")
+		}
+		return handleInstall(ctx, pm, args[1:], config, opts)
+
+	case "remove":
+		if len(args) < 2 {
+			return fmt.Errorf("remove requires package names")
+		}
+		return handleRemove(ctx, pm, args[1:], config, opts)
+
+	case "info":
+		if len(args) < 2 {
+			return fmt.Errorf("info requires a package name")
+		}
+		return handleInfo(ctx, pm, args[1], config, opts)
+
+	case "update":
+		return handleUpdate(ctx, pm, config, opts)
+
+	case "upgrade":
+		packages := []string{}
+		if len(args) > 1 {
+			packages = args[1:]
+		}
+		return handleUpgrade(ctx, pm, packages, config, opts)
+
+	case "clean":
+		return handleClean(ctx, pm, config, opts)
+
+	case "autoremove":
+		return handleAutoRemove(ctx, pm, config, opts)
+
+	case "verify":
+		if len(args) < 2 {
+			return fmt.Errorf("verify requires package names")
+		}
+		return handleVerify(ctx, pm, args[1:], config, opts)
+
+	case "status":
+		return handleStatus(ctx, pm, config, opts)
+
+	case "managers":
+		return handleManagers(config)
+
+	default:
+		return fmt.Errorf("unknown command: %s", command)
+	}
+}
+
+func getCommandArgs() []string {
+	args := os.Args[1:]
+	var result []string
+
+	// Skip flags and extract command + args
+	for i := 0; i < len(args); i++ {
+		arg := args[i]
+
+		// Skip flags that take values
+		if (arg == "-m" || arg == "--manager" || arg == "-n" || arg == "--name") && i+1 < len(args) {
+			i++ // Skip the value too
+			continue
+		}
+
+		// Skip single flags
 		if strings.HasPrefix(arg, "-") {
 			continue
 		}
-		// First non-flag argument is the command
-		switch arg {
-		case "find", "search", "f", "show", "s":
-			isReadOnlyCommand = true
-		case "help", "h":
-			isReadOnlyCommand = true
-		}
-		break
-	}
-	// Also handle help flags specifically
-	for _, arg := range os.Args[1:] {
-		if arg == "--help" || arg == "-h" {
-			isReadOnlyCommand = true
-			break
-		}
+
+		// This is a command or argument
+		result = append(result, arg)
 	}
 
-	// Check if the user has root privileges for commands that need it
-	if os.Geteuid() != 0 && !isReadOnlyCommand {
-		fmt.Println("(This command must be run with root privileges. If you got exist codes 100 or 101, please run this command with sudo.)")
+	return result
+}
+
+func outputResult(data interface{}, config *Config) {
+	if config.JSON {
+		json.NewEncoder(os.Stdout).Encode(data)
+	} else {
+		switch v := data.(type) {
+		case []manager.PackageInfo:
+			for _, pkg := range v {
+				if config.Quiet {
+					fmt.Println(pkg.Name)
+				} else {
+					fmt.Printf("%-30s %-15s %s\n", pkg.Name, pkg.Version, pkg.Status)
+				}
+			}
+		case manager.PackageInfo:
+			if config.Quiet {
+				fmt.Println(v.Name)
+			} else {
+				fmt.Printf("Name: %s\n", v.Name)
+				fmt.Printf("Version: %s\n", v.Version)
+				fmt.Printf("Status: %s\n", v.Status)
+				if v.Description != "" {
+					fmt.Printf("Description: %s\n", v.Description)
+				}
+			}
+		case string:
+			fmt.Println(v)
+		default:
+			fmt.Printf("%+v\n", v)
+		}
+	}
+}
+
+func handleSearch(ctx context.Context, pm manager.PackageManager, query []string, config *Config, opts *manager.Options) error {
+	if !config.Quiet {
+		fmt.Printf("Searching for '%s' using %s...\n", strings.Join(query, " "), pm.GetName())
 	}
 
-	// Initialize syspkg and find available package managers.
-	s, err := syspkg.New(syspkg.IncludeOptions{
-		AllAvailable: true,
-	})
+	packages, err := pm.Search(ctx, query, opts)
 	if err != nil {
-		fmt.Printf("Error while initializing syspkg: %+v\n", err)
-		os.Exit(1)
+		return err
 	}
-	pms, err := s.FindPackageManagers(syspkg.IncludeOptions{
-		AllAvailable: true,
-	})
+
+	if !config.Quiet {
+		fmt.Printf("Found %d packages:\n", len(packages))
+	}
+
+	outputResult(packages, config)
+	return nil
+}
+
+func handleList(ctx context.Context, pm manager.PackageManager, filter manager.ListFilter, config *Config, opts *manager.Options) error {
+	if !config.Quiet {
+		fmt.Printf("Listing %s packages using %s...\n", filter, pm.GetName())
+	}
+
+	packages, err := pm.List(ctx, filter, opts)
 	if err != nil {
-		fmt.Printf("Error while initializing package managers: %+v\n", err)
-		os.Exit(1)
+		return err
 	}
 
-	// Set up the CLI application.
-	app := &cli.App{
-		Name:                   "syspkg",
-		Usage:                  "A universal system package manager",
-		EnableBashCompletion:   true,
-		UseShortOptionHandling: true,
-		Suggest:                true,
-		// Action: func(c *cli.Context) error {
-		// 	var opts = getOptions(c)
-		// 	pms = filterPackageManager(pms, c)
-
-		// 	log.Printf("Listing upgradable packages for %T...\n", pms)
-		// 	listUpgradablePackages(pms, opts)
-		// 	return nil
-		// },
-		// DefaultCommand: "show upgradable",
-		Commands: []*cli.Command{
-			{
-				Name:    "install",
-				Aliases: []string{"i"},
-				Usage:   "Install packages",
-				Action: func(c *cli.Context) error {
-					var opts = getOptions(c)
-					pms = filterPackageManager(pms, c)
-
-					log.Printf("Installing packages for %T...\n", pms)
-
-					pkgNames := c.Args().Slice()
-					for _, pm := range pms {
-						log.Printf("Installing packages for %T...\n", pm)
-						packages, err := pm.Install(pkgNames, opts)
-						if err != nil {
-							fmt.Printf("Error while installing packages for %T: %+v\n%+v", pm, err, packages)
-							continue
-						}
-						log.Printf("Installed packages for %T:\n%+v\n", pm, packages)
-					}
-					return nil
-				},
-			},
-			{
-				Name:    "delete",
-				Aliases: []string{"remove", "uninstall", "d", "rm", "un"},
-				Usage:   "Delete packages",
-				Action: func(c *cli.Context) error {
-					var opts = getOptions(c)
-					pms = filterPackageManager(pms, c)
-					pkgNames := c.Args().Slice()
-
-					log.Printf("Deleting packages... for %T\n", pms)
-
-					for _, pm := range pms {
-						log.Printf("Deleting packages for %T...\n", pm)
-						packages, err := pm.Delete(pkgNames, opts)
-						if err != nil {
-							fmt.Printf("Error while deleting packages for %T: %+v\n%+v\n", pm, err, packages)
-							continue
-						}
-						log.Printf("Deleted packages for %T:\n%+v\n", pm, packages)
-					}
-					return nil
-				},
-			},
-			{
-				Name:    "refresh",
-				Aliases: []string{"update", "r", "re", "u", "up"},
-				Usage:   "Refresh package list",
-				Action: func(c *cli.Context) error {
-					var opts = getOptions(c)
-					pms = filterPackageManager(pms, c)
-
-					log.Printf("Refreshing package list... for %T\n", pms)
-					for _, pm := range pms {
-						log.Printf("Refreshing package list for %T...\n", pm)
-						err := pm.Refresh(opts)
-						if err != nil {
-							fmt.Printf("Error while updating package list for %T: %+v\n", pm, err)
-							continue
-						}
-						log.Printf("Refreshed package list for %T\n", pm)
-					}
-					return nil
-				},
-			},
-			{
-				Name:    "upgrade",
-				Aliases: []string{"U", "ug"},
-				Usage:   "Upgrade packages",
-				Action: func(c *cli.Context) error {
-					var opts = getOptions(c)
-					pms = filterPackageManager(pms, c)
-
-					log.Printf("Upgrading packages... for %T\n", pms)
-
-					listUpgradablePackages(pms, opts)
-					if !opts.AssumeYes {
-						fmt.Print("\nDo you want to perform the system package upgrade? [Y/n]: ")
-						input := ""
-						_, _ = fmt.Scanln(&input)
-						input = strings.ToLower(input)
-
-						if input != "y" && input != "" {
-							fmt.Println("Upgrade cancelled.")
-							return nil
-						}
-						log.Println("User confirmed upgrade.")
-					}
-
-					return performUpgrade(pms, opts)
-				},
-			},
-			{
-				Name:    "find",
-				Aliases: []string{"search", "f"},
-				Usage:   "Find matching packages",
-				Action: func(c *cli.Context) error {
-					var opts = getOptions(c)
-					pms = filterPackageManager(pms, c)
-					keywords := c.Args().Slice()
-
-					if len(keywords) == 0 {
-						fmt.Println("Please specify keywords to search.")
-						return nil
-					}
-					log.Printf("Finding packages for %T: %+v\n", pms, keywords)
-
-					for _, pm := range pms {
-						pkgs, err := pm.Find(keywords, opts)
-						if err != nil {
-							fmt.Printf("Error while searching packages for %T: %+v\n", pm, err)
-							continue
-						}
-
-						fmt.Printf("Found results for %T:\n", pm)
-						for _, pkg := range pkgs {
-							fmt.Printf("%s: %s [%s][%s] (%s)\n", pkg.PackageManager, pkg.Name, pkg.Version, pkg.NewVersion, pkg.Status)
-						}
-					}
-					return nil
-				},
-			},
-			{
-				Name:        "show",
-				Aliases:     []string{"s"},
-				Usage:       "Please specify a subcommand. " + "Use `syspkg show --help` to see the subcommands.",
-				Description: `Show information. Please specify a subcommand. Use ` + "`syspkg show --help`" + ` to see the subcommands. Usage: ` + "`syspkg show [subcommand]`",
-				Subcommands: []*cli.Command{
-					{
-						Name:    "upgradable",
-						Aliases: []string{"u"},
-						Usage:   "Show upgradable packages",
-						Action: func(c *cli.Context) error {
-							var opts = getOptions(c)
-							pms = filterPackageManager(pms, c)
-
-							log.Println("Showing upgradable packages...")
-
-							listUpgradablePackages(pms, opts)
-							return nil
-						},
-					},
-					{
-						Name:    "package",
-						Aliases: []string{"p"},
-						Usage:   "Show package information",
-						Action: func(c *cli.Context) error {
-							var opts = getOptions(c)
-							pms = filterPackageManager(pms, c)
-							pkgNames := c.Args().Slice()
-
-							if len(pkgNames) != 1 {
-								fmt.Println("Please specify one and only one package name.")
-								return nil
-							}
-
-							log.Println("Showing package information...")
-
-							for _, pm := range pms {
-								log.Printf("Showing package information for %T...\n", pm)
-								pkg, err := pm.GetPackageInfo(pkgNames[0], opts)
-								if err != nil {
-									fmt.Printf("Error while showing package info for %T: %+v\n", pm, err)
-									continue
-								}
-
-								fmt.Printf("Search results for %T:\n", pm)
-								fmt.Printf("%s: %s [%s][%s] (%s) %s:%s\n", pkg.PackageManager, pkg.Name, pkg.Version, pkg.NewVersion, pkg.Status, pkg.Category, pkg.Arch)
-							}
-							return nil
-						},
-					},
-					{
-						Name:    "installed",
-						Aliases: []string{"i"},
-						Usage:   "Show installed packages",
-						Action: func(c *cli.Context) error {
-							var opts = getOptions(c)
-							pms = filterPackageManager(pms, c)
-
-							log.Println("Showing installed packages...")
-
-							for _, pm := range pms {
-								log.Printf("Showing installed packages for %T...\n", pm)
-								pkgs, err := pm.ListInstalled(opts)
-								if err != nil {
-									fmt.Printf("Error while showing installed packages for %T: %+v\n", pm, err)
-									continue
-								}
-
-								fmt.Printf("Search results for %T:\n", pm)
-								for _, pkg := range pkgs {
-									fmt.Printf("%s: %s [%s][%s] (%s)\n", pkg.PackageManager, pkg.Name, pkg.Version, pkg.NewVersion, pkg.Status)
-								}
-							}
-							return nil
-						},
-					},
-				},
-			},
-		},
-		Flags: []cli.Flag{
-			// &cli.StringSliceFlag{
-			// 	Name:    "package-manager",
-			// 	Aliases: []string{"pm"},
-			// 	Usage:   "Specify package manager to use. (e.g. apt, apk, pacman, dnf, snap, yum, zypper)",
-			// },
-			&cli.BoolFlag{
-				Name:    "debug",
-				Aliases: []string{"dbg"},
-				Usage:   "Enable debug mode",
-			},
-			&cli.BoolFlag{
-				Name:    "assume-yes",
-				Aliases: []string{"y"},
-				Usage:   "Assume yes - Assume 'yes' as answer to all prompts. (if -i is not set, this is implied)",
-			},
-			&cli.BoolFlag{
-				Name:    "dry-run",
-				Aliases: []string{"dry"},
-				Usage:   "Dry run - Do not actually install anything, but show what would be done.",
-			},
-			&cli.BoolFlag{
-				Name:    "interactive",
-				Aliases: []string{"i"},
-				Usage:   "Interactive - Ask questions interactively.",
-			},
-			&cli.BoolFlag{
-				Name:    "verbose",
-				Aliases: []string{"v"},
-				Usage:   "Verbose - Show more information.",
-			},
-			&cli.BoolFlag{
-				Name:   "apt",
-				Usage:  "Use apt package manager",
-				Hidden: false,
-			},
-			&cli.BoolFlag{
-				Name:   "yum",
-				Usage:  "Use yum package manager",
-				Hidden: false,
-			},
-			&cli.BoolFlag{
-				Name:   "dnf",
-				Usage:  "Use dnf package manager",
-				Hidden: true,
-			},
-			&cli.BoolFlag{
-				Name:   "pacman",
-				Usage:  "Use pacman package manager",
-				Hidden: true,
-			},
-			&cli.BoolFlag{
-				Name:   "apk",
-				Usage:  "Use apk package manager",
-				Hidden: true,
-			},
-			&cli.BoolFlag{
-				Name:   "zypper",
-				Usage:  "Use zypper package manager",
-				Hidden: true,
-			},
-			&cli.BoolFlag{
-				Name:   "flatpak",
-				Usage:  "Use flatpak package manager",
-				Hidden: false,
-			},
-			&cli.BoolFlag{
-				Name:   "snap",
-				Usage:  "Use snap package manager",
-				Hidden: false,
-			},
-		},
+	if !config.Quiet {
+		fmt.Printf("Found %d packages:\n", len(packages))
 	}
 
-	// Run the CLI application.
-	err = app.Run(os.Args)
+	outputResult(packages, config)
+	return nil
+}
+
+func handleInstall(ctx context.Context, pm manager.PackageManager, packages []string, config *Config, opts *manager.Options) error {
+	if !config.Quiet {
+		verb := "Installing"
+		if config.DryRun {
+			verb = "Would install"
+		}
+		fmt.Printf("%s packages: %s\n", verb, strings.Join(packages, ", "))
+	}
+
+	results, err := pm.Install(ctx, packages, opts)
 	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
+		return err
 	}
+
+	if !config.Quiet {
+		fmt.Printf("Successfully processed %d packages:\n", len(results))
+	}
+
+	outputResult(results, config)
+	return nil
 }
 
-// getOptions extracts options from the CLI context and returns a manager.Options struct.
-func getOptions(c *cli.Context) *manager.Options {
-	var opts manager.Options
-	opts.Verbose = c.Bool("verbose")
-	opts.DryRun = c.Bool("dry-run")
-	opts.Interactive = c.Bool("interactive")
-	opts.Debug = c.Bool("debug")
-
-	if !opts.Interactive {
-		opts.AssumeYes = true
+func handleRemove(ctx context.Context, pm manager.PackageManager, packages []string, config *Config, opts *manager.Options) error {
+	if !config.Quiet {
+		verb := "Removing"
+		if config.DryRun {
+			verb = "Would remove"
+		}
+		fmt.Printf("%s packages: %s\n", verb, strings.Join(packages, ", "))
 	}
 
-	return &opts
+	results, err := pm.Remove(ctx, packages, opts)
+	if err != nil {
+		return err
+	}
+
+	if !config.Quiet {
+		fmt.Printf("Successfully processed %d packages:\n", len(results))
+	}
+
+	outputResult(results, config)
+	return nil
 }
 
-// filterPackageManager filters the available package managers based on user input.
-func filterPackageManager(availablePMs map[string]syspkg.PackageManager, c *cli.Context) map[string]syspkg.PackageManager {
-	if len(availablePMs) == 0 {
-		log.Fatal("No package managers available!")
+func handleInfo(ctx context.Context, pm manager.PackageManager, packageName string, config *Config, opts *manager.Options) error {
+	pkg, err := pm.GetInfo(ctx, packageName, opts)
+	if err != nil {
+		return err
 	}
 
-	// if no specific package manager is specified, use all available
-	if !c.Bool("apt") && !c.Bool("flatpak") && !c.Bool("snap") && !c.Bool("yum") && !c.Bool("dnf") && !c.Bool("pacman") && !c.Bool("apk") && !c.Bool("zypper") {
-		return availablePMs
-	}
-
-	var wantedPMs = make(map[string]syspkg.PackageManager)
-	for name, pm := range availablePMs {
-		if c.Bool(name) {
-			wantedPMs[name] = pm
-		}
-	}
-	return wantedPMs
+	outputResult(pkg, config)
+	return nil
 }
 
-// listUpgradablePackages lists upgradable packages for the given package managers.
-func listUpgradablePackages(pms map[string]syspkg.PackageManager, opts *manager.Options) {
-	for _, pm := range pms {
-		log.Printf("Listing upgradable packages for %T...\n", pm)
-		upgradablePackages, err := pm.ListUpgradable(opts)
-		if err != nil {
-			fmt.Printf("Error while listing upgradable packages for %T: %+v\n", pm, err)
-			continue
-		}
-
-		fmt.Printf("Upgradable packages for %T:\n", pm)
-		for _, pkg := range upgradablePackages {
-			fmt.Printf("%s: %s %s -> %s (%s)\n", pkg.PackageManager, pkg.Name, pkg.Version, pkg.NewVersion, pkg.Status)
-		}
+func handleUpdate(ctx context.Context, pm manager.PackageManager, config *Config, opts *manager.Options) error {
+	if !config.Quiet {
+		fmt.Printf("Updating package lists using %s...\n", pm.GetName())
 	}
+
+	err := pm.Refresh(ctx, opts)
+	if err != nil {
+		return err
+	}
+
+	if !config.Quiet {
+		fmt.Println("Package lists updated successfully")
+	}
+
+	return nil
 }
 
-// performUpgrade upgrades packages for the given package managers.
-func performUpgrade(pms map[string]syspkg.PackageManager, opts *manager.Options) error {
-	fmt.Println("Performing package upgrade...")
+func handleUpgrade(ctx context.Context, pm manager.PackageManager, packages []string, config *Config, opts *manager.Options) error {
+	target := "all packages"
+	if len(packages) > 0 {
+		target = strings.Join(packages, ", ")
+	}
 
-	for _, pm := range pms {
-		packages, err := pm.UpgradeAll(opts)
-		if err != nil {
-			fmt.Printf("Error while upgrading packages for %T: %+v\n%+v", pm, err, packages)
-			continue
+	if !config.Quiet {
+		verb := "Upgrading"
+		if config.DryRun {
+			verb = "Would upgrade"
 		}
-		// log.Printf("Upgraded packages for %T: %+v", pm, packages)
-		log.Printf("Packages upgraded for %T:\n", pm)
-		for _, pkg := range packages {
-			fmt.Printf("%s: %s -> %s (%s)\n", pkg.PackageManager, pkg.Name, pkg.NewVersion, pkg.Status)
+		fmt.Printf("%s %s...\n", verb, target)
+	}
+
+	results, err := pm.Upgrade(ctx, packages, opts)
+	if err != nil {
+		return err
+	}
+
+	if !config.Quiet {
+		fmt.Printf("Successfully processed %d packages:\n", len(results))
+	}
+
+	outputResult(results, config)
+	return nil
+}
+
+func handleClean(ctx context.Context, pm manager.PackageManager, config *Config, opts *manager.Options) error {
+	if !config.Quiet {
+		fmt.Printf("Cleaning package cache using %s...\n", pm.GetName())
+	}
+
+	err := pm.Clean(ctx, opts)
+	if err != nil {
+		return err
+	}
+
+	if !config.Quiet {
+		fmt.Println("Package cache cleaned successfully")
+	}
+
+	return nil
+}
+
+func handleAutoRemove(ctx context.Context, pm manager.PackageManager, config *Config, opts *manager.Options) error {
+	if !config.Quiet {
+		verb := "Removing"
+		if config.DryRun {
+			verb = "Would remove"
+		}
+		fmt.Printf("%s orphaned packages...\n", verb)
+	}
+
+	results, err := pm.AutoRemove(ctx, opts)
+	if err != nil {
+		return err
+	}
+
+	if !config.Quiet {
+		fmt.Printf("Successfully processed %d packages:\n", len(results))
+	}
+
+	outputResult(results, config)
+	return nil
+}
+
+func handleVerify(ctx context.Context, pm manager.PackageManager, packages []string, config *Config, opts *manager.Options) error {
+	if !config.Quiet {
+		fmt.Printf("Verifying packages: %s\n", strings.Join(packages, ", "))
+	}
+
+	results, err := pm.Verify(ctx, packages, opts)
+	if err != nil {
+		return err
+	}
+
+	outputResult(results, config)
+	return nil
+}
+
+func handleStatus(ctx context.Context, pm manager.PackageManager, config *Config, opts *manager.Options) error {
+	status, err := pm.Status(ctx, opts)
+	if err != nil {
+		return err
+	}
+
+	if config.JSON {
+		outputResult(status, config)
+	} else {
+		fmt.Printf("Package Manager: %s\n", pm.GetName())
+		fmt.Printf("Type: %s\n", pm.GetType())
+		fmt.Printf("Available: %v\n", status.Available)
+		fmt.Printf("Healthy: %v\n", status.Healthy)
+		if status.Version != "" {
+			fmt.Printf("Version: %s\n", status.Version)
+		}
+		if len(status.Issues) > 0 {
+			fmt.Printf("Issues: %s\n", strings.Join(status.Issues, ", "))
 		}
 	}
 
-	fmt.Println("Upgrade completed.")
+	return nil
+}
+
+func handleManagers(config *Config) error {
+	registry := manager.GetGlobalRegistry()
+	managers := registry.GetAvailable()
+
+	if config.JSON {
+		type ManagerInfo struct {
+			Name      string `json:"name"`
+			Type      string `json:"type"`
+			Available bool   `json:"available"`
+		}
+
+		var infos []ManagerInfo
+		for name, pm := range managers {
+			infos = append(infos, ManagerInfo{
+				Name:      name,
+				Type:      pm.GetType(),
+				Available: pm.IsAvailable(),
+			})
+		}
+
+		outputResult(infos, config)
+	} else {
+		fmt.Println("Available Package Managers:")
+		for name, pm := range managers {
+			status := "❌"
+			if pm.IsAvailable() {
+				status = "✅"
+			}
+			fmt.Printf("  %s %-10s (%s)\n", status, name, pm.GetType())
+		}
+	}
+
 	return nil
 }

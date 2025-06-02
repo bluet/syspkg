@@ -58,7 +58,10 @@ func (m *MyManager) Search(ctx context.Context, query []string, opts *manager.Op
         opts = manager.DefaultOptions()
     }
 
-    // Handle dry run automatically
+    if err := m.ValidatePackageNames(query); err != nil {
+        return nil, err
+    }
+
     m.HandleDryRun(opts, "search", query)
     if opts.DryRun {
         return []manager.PackageInfo{}, nil
@@ -75,15 +78,22 @@ func (m *MyManager) Search(ctx context.Context, query []string, opts *manager.Op
 
 // Install implements package installation
 func (m *MyManager) Install(ctx context.Context, packages []string, opts *manager.Options) ([]manager.PackageInfo, error) {
-    // Input validation is handled automatically
+    if opts == nil {
+        opts = manager.DefaultOptions()
+    }
+
     if err := m.ValidatePackageNames(packages); err != nil {
         return nil, err
     }
 
-    // Dry run handling
     m.HandleDryRun(opts, "install", packages)
     if opts.DryRun {
-        return m.createDryRunResults(packages, "would-install"), nil
+        // Create dry-run results manually
+        results := make([]manager.PackageInfo, len(packages))
+        for i, pkg := range packages {
+            results[i] = manager.NewPackageInfo(pkg, "unknown", "would-install", m.GetType())
+        }
+        return results, nil
     }
 
     // Your installation logic here

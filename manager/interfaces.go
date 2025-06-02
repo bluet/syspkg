@@ -4,6 +4,7 @@ package manager
 import (
 	"context"
 	"errors"
+	"fmt"
 )
 
 // Standard error for unsupported operations
@@ -12,6 +13,25 @@ var (
 	ErrPackageNotFound       = errors.New("package not found")
 	ErrInvalidPackageName    = errors.New("invalid package name")
 )
+
+// OperationError provides structured error information for better debugging
+type OperationError struct {
+	Manager   string   // Package manager name
+	Operation string   // Operation being performed
+	Packages  []string // Packages involved
+	Cause     error    // Underlying error
+}
+
+func (e *OperationError) Error() string {
+	if len(e.Packages) > 0 {
+		return fmt.Sprintf("%s %s failed for packages %v: %v", e.Manager, e.Operation, e.Packages, e.Cause)
+	}
+	return fmt.Sprintf("%s %s failed: %v", e.Manager, e.Operation, e.Cause)
+}
+
+func (e *OperationError) Unwrap() error {
+	return e.Cause
+}
 
 // PackageManager defines the unified interface that ALL package managers must implement.
 // If a manager doesn't support an operation, it should return ErrOperationNotSupported
@@ -168,3 +188,23 @@ func DefaultOptions() *Options {
 		Tags:        []string{},
 	}
 }
+
+// Standard package status values
+const (
+	StatusInstalled  = "installed"
+	StatusAvailable  = "available"
+	StatusUpgradable = "upgradable"
+	StatusUnknown    = "unknown"
+)
+
+// Standard manager types
+const (
+	TypeSystem     = "system"     // APT, YUM, DNF, Pacman, etc.
+	TypeLanguage   = "language"   // npm, pip, cargo, gem, etc.
+	TypeVersion    = "version"    // nvm, asdf, pyenv, rbenv, etc.
+	TypeContainer  = "container"  // docker, podman, helm, etc.
+	TypeGame       = "game"       // steam, lutris, gog, etc.
+	TypeScientific = "scientific" // conda, mamba, bioconda, etc.
+	TypeBuild      = "build"      // vcpkg, conan, cmake, etc.
+	TypeApp        = "app"        // flatpak, snap, appimage, etc.
+)

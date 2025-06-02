@@ -55,8 +55,8 @@ func NewBaseManager(name, managerType string) *BaseManager {
 	}
 }
 
-func (b *BaseManager) GetName() string { return b.name }
-func (b *BaseManager) GetType() string { return b.managerType }
+func (b *BaseManager) GetName() string   { return b.name }
+func (b *BaseManager) GetType() string   { return b.managerType }
 func (b *BaseManager) IsAvailable() bool { return true } // Default: available
 
 // Default implementations return "not supported"
@@ -90,7 +90,7 @@ func NewMockAPTManager() *MockAPTManager {
 // Override only the operations APT supports
 func (m *MockAPTManager) Search(ctx context.Context, query []string) ([]PackageInfo, error) {
 	var results []PackageInfo
-	
+
 	for name, version := range m.packages {
 		for _, q := range query {
 			if strings.Contains(name, strings.ToLower(q)) {
@@ -106,13 +106,13 @@ func (m *MockAPTManager) Search(ctx context.Context, query []string) ([]PackageI
 			}
 		}
 	}
-	
+
 	return results, nil
 }
 
 func (m *MockAPTManager) Install(ctx context.Context, packages []string) ([]PackageInfo, error) {
 	var results []PackageInfo
-	
+
 	for _, pkg := range packages {
 		if version, exists := m.packages[pkg]; exists {
 			result := PackageInfo{
@@ -127,7 +127,7 @@ func (m *MockAPTManager) Install(ctx context.Context, packages []string) ([]Pack
 			return nil, fmt.Errorf("package '%s' not found in APT repositories", pkg)
 		}
 	}
-	
+
 	return results, nil
 }
 
@@ -148,9 +148,9 @@ func NewMockNPMManager() *MockNPMManager {
 	return &MockNPMManager{
 		BaseManager: NewBaseManager("mock-npm", "language"),
 		packages: map[string]string{
-			"react":     "18.2.0",
-			"lodash":    "4.17.21",
-			"express":   "4.18.2",
+			"react":      "18.2.0",
+			"lodash":     "4.17.21",
+			"express":    "4.18.2",
 			"typescript": "4.9.5",
 		},
 	}
@@ -158,7 +158,7 @@ func NewMockNPMManager() *MockNPMManager {
 
 func (m *MockNPMManager) Search(ctx context.Context, query []string) ([]PackageInfo, error) {
 	var results []PackageInfo
-	
+
 	for name, version := range m.packages {
 		for _, q := range query {
 			if strings.Contains(name, strings.ToLower(q)) {
@@ -168,7 +168,7 @@ func (m *MockNPMManager) Search(ctx context.Context, query []string) ([]PackageI
 					Status:      "available",
 					Description: fmt.Sprintf("npm package %s", name),
 					Metadata: map[string]interface{}{
-						"source": "npm",
+						"source":   "npm",
 						"registry": "https://registry.npmjs.org",
 					},
 				}
@@ -177,13 +177,13 @@ func (m *MockNPMManager) Search(ctx context.Context, query []string) ([]PackageI
 			}
 		}
 	}
-	
+
 	return results, nil
 }
 
 func (m *MockNPMManager) Install(ctx context.Context, packages []string) ([]PackageInfo, error) {
 	var results []PackageInfo
-	
+
 	for _, pkg := range packages {
 		if version, exists := m.packages[pkg]; exists {
 			result := PackageInfo{
@@ -201,7 +201,7 @@ func (m *MockNPMManager) Install(ctx context.Context, packages []string) ([]Pack
 			return nil, fmt.Errorf("package '%s' not found in npm registry", pkg)
 		}
 	}
-	
+
 	return results, nil
 }
 
@@ -232,7 +232,7 @@ func NewMockSteamManager() *MockSteamManager {
 
 func (m *MockSteamManager) Search(ctx context.Context, query []string) ([]PackageInfo, error) {
 	var results []PackageInfo
-	
+
 	for appid, name := range m.games {
 		for _, q := range query {
 			if strings.Contains(strings.ToLower(name), strings.ToLower(q)) {
@@ -252,18 +252,18 @@ func (m *MockSteamManager) Search(ctx context.Context, query []string) ([]Packag
 			}
 		}
 	}
-	
+
 	return results, nil
 }
 
 func (m *MockSteamManager) Install(ctx context.Context, packages []string) ([]PackageInfo, error) {
 	var results []PackageInfo
-	
+
 	for _, pkg := range packages {
 		// Steam uses app IDs, but for demo we'll accept game names
 		var appid, gameName string
 		var found bool
-		
+
 		// Try to find by name or appid
 		for id, gameNameLoop := range m.games {
 			if gameNameLoop == pkg || id == pkg {
@@ -273,7 +273,7 @@ func (m *MockSteamManager) Install(ctx context.Context, packages []string) ([]Pa
 				break
 			}
 		}
-		
+
 		if found {
 			result := PackageInfo{
 				Name:        gameName,
@@ -281,7 +281,7 @@ func (m *MockSteamManager) Install(ctx context.Context, packages []string) ([]Pa
 				Status:      "installed",
 				Description: fmt.Sprintf("Successfully installed %s via Steam", gameName),
 				Metadata: map[string]interface{}{
-					"appid":        appid,
+					"appid":           appid,
 					"download_method": "steam",
 					"install_size":    "15.2 GB",
 				},
@@ -291,7 +291,7 @@ func (m *MockSteamManager) Install(ctx context.Context, packages []string) ([]Pa
 			return nil, fmt.Errorf("game '%s' not found in Steam library", pkg)
 		}
 	}
-	
+
 	return results, nil
 }
 
@@ -306,31 +306,31 @@ func (p *SteamPlugin) GetPriority() int              { return 60 } // Lower prio
 func main() {
 	fmt.Println("🚀 go-syspkg Unified Interface Architecture Demo")
 	fmt.Println("================================================")
-	
+
 	// Register plugins (in real implementation this would be via init())
 	Register("mock-apt", &APTPlugin{})
 	Register("mock-npm", &NPMPlugin{})
 	Register("mock-steam", &SteamPlugin{})
-	
+
 	// Get available managers
 	fmt.Println("\n📦 Available Package Managers:")
 	for _, plugin := range registry {
 		mgr := plugin.CreateManager()
-		fmt.Printf("   • %s (%s) - Priority: %d\n", 
+		fmt.Printf("   • %s (%s) - Priority: %d\n",
 			mgr.GetName(), mgr.GetType(), plugin.GetPriority())
 	}
-	
+
 	ctx := context.Background()
-	
+
 	// Demo 1: Search across all managers
 	fmt.Println("\n🔍 Demo 1: Search for 'git' across all managers")
 	fmt.Println("----------------------------------------------")
 	searchTerm := []string{"git"}
-	
+
 	for _, plugin := range registry {
 		mgr := plugin.CreateManager()
 		results, err := mgr.Search(ctx, searchTerm)
-		
+
 		if err != nil {
 			fmt.Printf("   %s: %v\n", mgr.GetName(), err)
 		} else if len(results) > 0 {
@@ -342,11 +342,11 @@ func main() {
 			fmt.Printf("   %s: no packages found\n", mgr.GetName())
 		}
 	}
-	
+
 	// Demo 2: Install packages using specific managers
 	fmt.Println("\n💾 Demo 2: Install packages using different managers")
 	fmt.Println("---------------------------------------------------")
-	
+
 	// Install system package via APT
 	aptMgr := registry["mock-apt"].CreateManager()
 	aptResults, err := aptMgr.Install(ctx, []string{"vim"})
@@ -355,7 +355,7 @@ func main() {
 	} else {
 		fmt.Printf("   APT installed: %s v%s\n", aptResults[0].Name, aptResults[0].Version)
 	}
-	
+
 	// Install language package via npm
 	npmMgr := registry["mock-npm"].CreateManager()
 	npmResults, err := npmMgr.Install(ctx, []string{"react"})
@@ -364,42 +364,42 @@ func main() {
 	} else {
 		fmt.Printf("   npm installed: %s v%s\n", npmResults[0].Name, npmResults[0].Version)
 	}
-	
+
 	// Install game via Steam
 	steamMgr := registry["mock-steam"].CreateManager()
 	steamResults, err := steamMgr.Install(ctx, []string{"Team Fortress 2"})
 	if err != nil {
 		fmt.Printf("   Steam install failed: %v\n", err)
 	} else {
-		fmt.Printf("   Steam installed: %s (%s)\n", 
+		fmt.Printf("   Steam installed: %s (%s)\n",
 			steamResults[0].Name, steamResults[0].Metadata["appid"])
 	}
-	
+
 	// Demo 3: Show how unsupported operations work
 	fmt.Println("\n❌ Demo 3: Unsupported operations return clear errors")
 	fmt.Println("----------------------------------------------------")
-	
+
 	// Create a minimal manager that only supports search
 	type MinimalManager struct {
 		*BaseManager
 	}
-	
+
 	minimalMgr := &MinimalManager{
 		BaseManager: NewBaseManager("minimal", "demo"),
 	}
-	
+
 	// Search works (inherited from BaseManager default)
 	_, err = minimalMgr.Search(ctx, []string{"test"})
 	fmt.Printf("   Minimal manager search: %v\n", err)
-	
+
 	// Install doesn't work (returns clear error)
 	_, err = minimalMgr.Install(ctx, []string{"test"})
 	fmt.Printf("   Minimal manager install: %v\n", err)
-	
+
 	// Demo 4: Show metadata flexibility
 	fmt.Println("\n📋 Demo 4: Package-specific metadata")
 	fmt.Println("------------------------------------")
-	
+
 	reactResults, _ := npmMgr.Search(ctx, []string{"react"})
 	if len(reactResults) > 0 {
 		pkg := reactResults[0]
@@ -409,7 +409,7 @@ func main() {
 			fmt.Printf("     %s: %v\n", key, value)
 		}
 	}
-	
+
 	fmt.Println("\n✅ Demo Complete!")
 	fmt.Println("==================")
 	fmt.Println("Key Benefits Demonstrated:")

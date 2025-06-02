@@ -190,14 +190,4 @@ func GetGlobalRegistry() *Registry {
 	return globalRegistry
 }
 
-// === Common manager types ===
-const (
-	TypeSystem     = "system"     // OS package managers (apt, yum, etc.)
-	TypeLanguage   = "language"   // Language-specific (npm, pip, cargo, etc.)
-	TypeVersion    = "version"    // Version managers (nvm, asdf, pyenv, etc.)
-	TypeContainer  = "container"  // Container management (docker, podman, etc.)
-	TypeGame       = "game"       // Game managers (steam, lutris, etc.)
-	TypeScientific = "scientific" // Scientific computing (conda, mamba, etc.)
-	TypeBuild      = "build"      // Build tools (vcpkg, conan, etc.)
-	TypeApp        = "app"        // Application stores (flatpak, snap, etc.)
-)
+// Manager types are now defined in interfaces.go
