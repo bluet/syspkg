@@ -19,8 +19,7 @@ import (
 // The pattern requires at least one valid character
 var packageNameRegex = regexp.MustCompile(`^[a-zA-Z0-9\-_.+:/]+$`)
 
-// ErrInvalidPackageName is returned when a package name contains invalid characters
-var ErrInvalidPackageName = errors.New("invalid package name: contains potentially dangerous characters")
+// Note: ErrInvalidPackageName is now defined in interfaces.go
 
 // ValidatePackageName validates that a package name only contains safe characters
 // to prevent command injection attacks.

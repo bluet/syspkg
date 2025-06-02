@@ -1,0 +1,643 @@
+# Plugin Development Guide
+
+This guide explains how to create new package manager plugins for go-syspkg using the unified interface.
+
+## Overview
+
+The go-syspkg unified interface makes it incredibly easy to add support for any package management system. Whether you want to support:
+
+- **Version Managers**: nvm, asdf, pyenv, rbenv
+- **Language Package Managers**: npm, pip, cargo, gem, composer
+- **Scientific Computing**: conda, mamba, bioconda
+- **Build Tools**: vcpkg, conan, cmake
+- **Game Managers**: Steam, Lutris, GOG
+- **Container Tools**: Docker, Podman, Helm
+- **System Tools**: systemd, homebrew
+
+The process is the same: implement the unified interface and register your plugin.
+
+## Quick Start
+
+### 1. Create Your Manager
+
+```go
+package mymanager
+
+import (
+    "context"
+    "github.com/bluet/syspkg/manager"
+)
+
+// MyManager implements the unified PackageManager interface
+type MyManager struct {
+    *manager.BaseManager // Provides 90% of functionality for free
+}
+
+// NewMyManager creates a new instance
+func NewMyManager() *MyManager {
+    // BaseManager handles common operations, logging, validation, etc.
+    base := manager.NewBaseManager("my-tool", manager.TypeLanguage, manager.NewDefaultCommandRunner())
+    return &MyManager{
+        BaseManager: base,
+    }
+}
+```
+
+### 2. Override Methods You Need
+
+```go
+// IsAvailable checks if your tool is installed
+func (m *MyManager) IsAvailable() bool {
+    _, err := m.GetRunner().Run("my-tool", "--version")
+    return err == nil
+}
+
+// Search implements package search (only if your tool supports it)
+func (m *MyManager) Search(ctx context.Context, query []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+    if opts == nil {
+        opts = manager.DefaultOptions()
+    }
+
+    // Handle dry run automatically
+    m.HandleDryRun(opts, "search", query)
+    if opts.DryRun {
+        return []manager.PackageInfo{}, nil
+    }
+
+    // Your search logic here
+    output, err := m.GetRunner().RunContext(ctx, "my-tool", append([]string{"search"}, query...))
+    if err != nil {
+        return nil, err
+    }
+
+    return m.parseSearchOutput(string(output))
+}
+
+// Install implements package installation
+func (m *MyManager) Install(ctx context.Context, packages []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+    // Input validation is handled automatically
+    if err := m.ValidatePackageNames(packages); err != nil {
+        return nil, err
+    }
+
+    // Dry run handling
+    m.HandleDryRun(opts, "install", packages)
+    if opts.DryRun {
+        return m.createDryRunResults(packages, "would-install"), nil
+    }
+
+    // Your installation logic here
+    args := append([]string{"install"}, packages...)
+    output, err := m.GetRunner().RunContext(ctx, "my-tool", args)
+    if err != nil {
+        return nil, err
+    }
+
+    return m.parseInstallOutput(string(output))
+}
+```
+
+### 3. Create Plugin Registration
+
+```go
+// Plugin represents your package manager plugin
+type Plugin struct{}
+
+func (p *Plugin) CreateManager() manager.PackageManager {
+    return NewMyManager()
+}
+
+func (p *Plugin) GetPriority() int {
+    return 70 // Medium priority - adjust based on your use case
+}
+
+// Auto-register when package is imported
+func init() {
+    if err := manager.Register("my-tool", &Plugin{}); err != nil {
+        panic("Failed to register my-tool plugin: " + err.Error())
+    }
+}
+```
+
+### 4. That's It!
+
+Your package manager is now available:
+
+```go
+import _ "your-package/mymanager"  // Auto-registers
+
+managers := manager.GetAvailableManagers()
+myMgr := managers["my-tool"]
+```
+
+## Interface Reference
+
+### Required Methods
+
+All package managers must implement these methods from the `PackageManager` interface:
+
+```go
+type PackageManager interface {
+    // Basic info
+    GetName() string
+    GetType() string
+    IsAvailable() bool
+    GetVersion() (string, error)
+
+    // Core operations
+    Search(ctx context.Context, query []string, opts *Options) ([]PackageInfo, error)
+    List(ctx context.Context, filter ListFilter, opts *Options) ([]PackageInfo, error)
+    Install(ctx context.Context, packages []string, opts *Options) ([]PackageInfo, error)
+    Remove(ctx context.Context, packages []string, opts *Options) ([]PackageInfo, error)
+    GetInfo(ctx context.Context, packageName string, opts *Options) (PackageInfo, error)
+
+    // Update operations
+    Refresh(ctx context.Context, opts *Options) error
+    Upgrade(ctx context.Context, packages []string, opts *Options) ([]PackageInfo, error)
+
+    // Cleanup
+    Clean(ctx context.Context, opts *Options) error
+    AutoRemove(ctx context.Context, opts *Options) ([]PackageInfo, error)
+
+    // Health
+    Verify(ctx context.Context, packages []string, opts *Options) ([]PackageInfo, error)
+    Status(ctx context.Context, opts *Options) (ManagerStatus, error)
+}
+```
+
+### BaseManager Provides
+
+The `BaseManager` provides sensible defaults for all methods:
+
+- **Unsupported operations** return `ErrOperationNotSupported`
+- **Input validation** via `ValidatePackageNames()`
+- **Logging helpers** via `LogVerbose()`, `LogDebug()`
+- **Dry run handling** via `HandleDryRun()`
+- **Timeout management** via `GetTimeoutContext()`
+- **Basic status** via default `Status()` implementation
+
+### Only Override What You Need
+
+```go
+// Minimal implementation - only search and install
+type MinimalManager struct {
+    *manager.BaseManager
+}
+
+func (m *MinimalManager) Search(ctx context.Context, query []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+    // Your search implementation
+}
+
+func (m *MinimalManager) Install(ctx context.Context, packages []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+    // Your install implementation
+}
+
+// All other methods (Remove, Upgrade, etc.) automatically return "not supported"
+```
+
+## Manager Types
+
+Use these predefined types for consistency:
+
+```go
+const (
+    TypeSystem     = "system"     // OS package managers (apt, yum)
+    TypeLanguage   = "language"   // Language-specific (npm, pip, cargo)
+    TypeVersion    = "version"    // Version managers (nvm, asdf, pyenv)
+    TypeContainer  = "container"  // Container management (docker, podman)
+    TypeGame       = "game"       // Game managers (steam, lutris)
+    TypeScientific = "scientific" // Scientific computing (conda, mamba)
+    TypeBuild      = "build"      // Build tools (vcpkg, conan)
+    TypeApp        = "app"        // Application stores (flatpak, snap)
+)
+```
+
+## Package Info Structure
+
+Use the flexible `PackageInfo` structure:
+
+```go
+type PackageInfo struct {
+    Name        string                 `json:"name"`
+    Version     string                 `json:"version"`     // Current version
+    NewVersion  string                 `json:"new_version"` // Available version (for upgrades)
+    Status      string                 `json:"status"`      // installed, available, upgradable
+    Description string                 `json:"description"`
+    Category    string                 `json:"category"`
+    ManagerType string                 `json:"manager_type"`
+    Metadata    map[string]interface{} `json:"metadata"`    // Tool-specific data
+}
+```
+
+### Using Metadata for Tool-Specific Data
+
+```go
+pkg := manager.NewPackageInfo("my-package", "1.0.0", "installed", m.GetType())
+
+// Add tool-specific metadata
+pkg.Metadata["repository"] = "my-repo"
+pkg.Metadata["arch"] = "amd64"
+pkg.Metadata["download_size"] = 1024000
+
+// For Steam games
+pkg.Metadata["appid"] = "123456"
+pkg.Metadata["playtime"] = 3600
+
+// For npm packages
+pkg.Metadata["global"] = true
+pkg.Metadata["dependencies"] = []string{"dep1", "dep2"}
+```
+
+## Options Handling
+
+Always handle options properly:
+
+```go
+func (m *MyManager) SomeOperation(ctx context.Context, opts *manager.Options) error {
+    if opts == nil {
+        opts = manager.DefaultOptions()
+    }
+
+    // Use options
+    if opts.Verbose {
+        m.LogVerbose(opts, "Doing something...")
+    }
+
+    if opts.DryRun {
+        m.LogVerbose(opts, "Would do something")
+        return nil
+    }
+
+    // Use timeout
+    ctx, cancel := m.GetTimeoutContext(ctx, opts)
+    defer cancel()
+
+    // Your implementation
+}
+```
+
+## Error Handling
+
+Return appropriate errors:
+
+```go
+func (m *MyManager) Install(ctx context.Context, packages []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+    // Validation errors
+    if err := m.ValidatePackageNames(packages); err != nil {
+        return nil, err
+    }
+
+    // Command execution errors
+    output, err := m.GetRunner().RunContext(ctx, "my-tool", []string{"install"}...)
+    if err != nil {
+        return nil, fmt.Errorf("installation failed: %w", err)
+    }
+
+    // Package not found
+    if strings.Contains(string(output), "not found") {
+        return nil, manager.ErrPackageNotFound
+    }
+
+    return results, nil
+}
+```
+
+## Testing Your Plugin
+
+```go
+func TestMyManager(t *testing.T) {
+    // Use mock command runner for testing
+    mockRunner := manager.NewMockCommandRunner()
+    manager := NewMyManagerWithRunner(mockRunner)
+
+    // Set up mock responses
+    mockRunner.AddCommand("my-tool", []string{"search", "test"},
+        []byte("test-package 1.0.0"), nil)
+
+    // Test search
+    ctx := context.Background()
+    results, err := manager.Search(ctx, []string{"test"}, nil)
+
+    assert.NoError(t, err)
+    assert.Len(t, results, 1)
+    assert.Equal(t, "test-package", results[0].Name)
+}
+```
+
+## Advanced Examples
+
+### Version Manager (like nvm)
+
+```go
+type NVMManager struct {
+    *manager.BaseManager
+}
+
+func (m *NVMManager) List(ctx context.Context, filter manager.ListFilter, opts *manager.Options) ([]manager.PackageInfo, error) {
+    switch filter {
+    case manager.FilterInstalled:
+        return m.listInstalled(ctx, opts)
+    case manager.FilterAvailable:
+        return m.listAvailable(ctx, opts)
+    default:
+        return nil, fmt.Errorf("filter %s not supported", filter)
+    }
+}
+
+// Custom operation for version managers
+func (m *NVMManager) SetActiveVersion(version string, opts *manager.Options) error {
+    _, err := m.GetRunner().Run("nvm", "use", version)
+    return err
+}
+```
+
+### Game Manager (like Steam)
+
+```go
+type SteamManager struct {
+    *manager.BaseManager
+}
+
+func (m *SteamManager) Install(ctx context.Context, packages []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+    // Steam uses app IDs instead of package names
+    for _, appID := range packages {
+        _, err := m.GetRunner().RunContext(ctx, "steamcmd", "+app_update", appID, "+quit")
+        if err != nil {
+            return nil, err
+        }
+    }
+
+    // Return results with Steam-specific metadata
+    var results []manager.PackageInfo
+    for _, appID := range packages {
+        pkg := manager.NewPackageInfo(appID, "unknown", "installed", m.GetType())
+        pkg.Metadata["appid"] = appID
+        pkg.Metadata["platform"] = "steam"
+        results = append(results, pkg)
+    }
+
+    return results, nil
+}
+
+// Custom Steam operations
+func (m *SteamManager) VerifyGameIntegrity(appID string) error {
+    _, err := m.GetRunner().Run("steamcmd", "+app_update", appID, "validate", "+quit")
+    return err
+}
+```
+
+## Best Practices
+
+### 1. Follow the "Less is More" Principle
+
+- Only implement operations your tool actually supports
+- Use `BaseManager` for everything else
+- Don't try to fake unsupported operations
+
+### 2. Consistent Naming
+
+```go
+// Good
+manager.NewBaseManager("npm", manager.TypeLanguage, runner)
+manager.NewBaseManager("steam", manager.TypeGame, runner)
+manager.NewBaseManager("apt", manager.TypeSystem, runner)
+
+// Bad
+manager.NewBaseManager("Node Package Manager", "nodejs", runner)
+```
+
+### 3. Proper Error Messages
+
+```go
+// Good
+return nil, fmt.Errorf("failed to install %s: package not found in registry", pkg)
+
+// Bad
+return nil, errors.New("error")
+```
+
+### 4. Use Metadata Wisely
+
+```go
+// Store tool-specific data in metadata
+pkg.Metadata["repository_url"] = "https://registry.npmjs.org"
+pkg.Metadata["license"] = "MIT"
+pkg.Metadata["download_count"] = 1000000
+
+// Don't abuse it for core data
+pkg.Name = "package-name"        // Good
+pkg.Metadata["name"] = "package-name"  // Bad
+```
+
+### 5. Handle Edge Cases
+
+```go
+func (m *MyManager) Search(ctx context.Context, query []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+    // Handle empty query
+    if len(query) == 0 {
+        return []manager.PackageInfo{}, nil
+    }
+
+    // Handle network issues
+    output, err := m.GetRunner().RunContext(ctx, "my-tool", "search", strings.Join(query, " "))
+    if err != nil {
+        if strings.Contains(err.Error(), "network") {
+            return nil, fmt.Errorf("network error: %w", err)
+        }
+        return nil, fmt.Errorf("search failed: %w", err)
+    }
+
+    // Handle no results
+    if strings.TrimSpace(string(output)) == "" {
+        return []manager.PackageInfo{}, nil
+    }
+
+    return m.parseOutput(string(output))
+}
+```
+
+## Complete Example: pip Manager
+
+```go
+package pip
+
+import (
+    "context"
+    "encoding/json"
+    "fmt"
+    "strings"
+
+    "github.com/bluet/syspkg/manager"
+)
+
+type PipManager struct {
+    *manager.BaseManager
+}
+
+func NewPipManager() *PipManager {
+    base := manager.NewBaseManager("pip", manager.TypeLanguage, manager.NewDefaultCommandRunner())
+    return &PipManager{BaseManager: base}
+}
+
+func (m *PipManager) IsAvailable() bool {
+    _, err := m.GetRunner().Run("pip", "--version")
+    return err == nil
+}
+
+func (m *PipManager) Search(ctx context.Context, query []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+    if opts == nil {
+        opts = manager.DefaultOptions()
+    }
+
+    if len(query) == 0 {
+        return []manager.PackageInfo{}, nil
+    }
+
+    m.HandleDryRun(opts, "search", query)
+    if opts.DryRun {
+        return []manager.PackageInfo{}, nil
+    }
+
+    ctx, cancel := m.GetTimeoutContext(ctx, opts)
+    defer cancel()
+
+    // Use pip search (note: deprecated in newer pip versions)
+    searchTerm := strings.Join(query, " ")
+    output, err := m.GetRunner().RunContext(ctx, "pip", []string{"search", searchTerm})
+    if err != nil {
+        return nil, fmt.Errorf("pip search failed: %w", err)
+    }
+
+    return m.parseSearchOutput(string(output))
+}
+
+func (m *PipManager) Install(ctx context.Context, packages []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+    if opts == nil {
+        opts = manager.DefaultOptions()
+    }
+
+    if err := m.ValidatePackageNames(packages); err != nil {
+        return nil, err
+    }
+
+    m.HandleDryRun(opts, "install", packages)
+    if opts.DryRun {
+        results := make([]manager.PackageInfo, len(packages))
+        for i, pkg := range packages {
+            results[i] = manager.NewPackageInfo(pkg, "unknown", "would-install", m.GetType())
+        }
+        return results, nil
+    }
+
+    ctx, cancel := m.GetTimeoutContext(ctx, opts)
+    defer cancel()
+
+    args := []string{"install"}
+    if opts.GlobalScope {
+        args = append(args, "--user")
+    }
+    args = append(args, packages...)
+
+    output, err := m.GetRunner().RunContext(ctx, "pip", args)
+    if err != nil {
+        return nil, fmt.Errorf("pip install failed: %w", err)
+    }
+
+    m.LogVerbose(opts, "Install output: %s", string(output))
+
+    // Assume successful installation
+    results := make([]manager.PackageInfo, len(packages))
+    for i, pkg := range packages {
+        results[i] = manager.NewPackageInfo(pkg, "unknown", "installed", m.GetType())
+    }
+
+    return results, nil
+}
+
+func (m *PipManager) List(ctx context.Context, filter manager.ListFilter, opts *manager.Options) ([]manager.PackageInfo, error) {
+    if filter != manager.FilterInstalled {
+        return nil, fmt.Errorf("pip only supports listing installed packages")
+    }
+
+    ctx, cancel := m.GetTimeoutContext(ctx, opts)
+    defer cancel()
+
+    output, err := m.GetRunner().RunContext(ctx, "pip", []string{"list", "--format=json"})
+    if err != nil {
+        return nil, fmt.Errorf("pip list failed: %w", err)
+    }
+
+    return m.parseListOutput(string(output))
+}
+
+// Parsing helpers
+func (m *PipManager) parseSearchOutput(output string) ([]manager.PackageInfo, error) {
+    var packages []manager.PackageInfo
+    lines := strings.Split(output, "\n")
+
+    for _, line := range lines {
+        if strings.TrimSpace(line) == "" {
+            continue
+        }
+
+        // Simple parsing - real implementation would be more robust
+        parts := strings.Fields(line)
+        if len(parts) >= 2 {
+            pkg := manager.NewPackageInfo(parts[0], parts[1], "available", m.GetType())
+            if len(parts) > 2 {
+                pkg.Description = strings.Join(parts[2:], " ")
+            }
+            packages = append(packages, pkg)
+        }
+    }
+
+    return packages, nil
+}
+
+func (m *PipManager) parseListOutput(output string) ([]manager.PackageInfo, error) {
+    var packages []manager.PackageInfo
+
+    // pip list --format=json returns array of objects
+    var pipPackages []map[string]string
+    if err := json.Unmarshal([]byte(output), &pipPackages); err != nil {
+        return nil, fmt.Errorf("failed to parse pip list output: %w", err)
+    }
+
+    for _, pipPkg := range pipPackages {
+        if name, ok := pipPkg["name"]; ok {
+            pkg := manager.NewPackageInfo(name, pipPkg["version"], "installed", m.GetType())
+            packages = append(packages, pkg)
+        }
+    }
+
+    return packages, nil
+}
+
+// Plugin registration
+type Plugin struct{}
+
+func (p *Plugin) CreateManager() manager.PackageManager {
+    return NewPipManager()
+}
+
+func (p *Plugin) GetPriority() int {
+    return 80 // High priority for Python environments
+}
+
+func init() {
+    if err := manager.Register("pip", &Plugin{}); err != nil {
+        panic("Failed to register pip plugin: " + err.Error())
+    }
+}
+```
+
+## Conclusion
+
+The unified interface makes adding new package managers incredibly straightforward:
+
+1. **Embed `BaseManager`** for 90% of functionality
+2. **Override only what you need** - search, install, etc.
+3. **Register your plugin** with auto-initialization
+4. **Done!** Your manager works with the entire syspkg ecosystem
+
+The architecture follows the "Less is more" principle by providing a minimal but powerful interface that doesn't force unnecessary complexity on plugin developers while ensuring a consistent user experience across all package managers.
