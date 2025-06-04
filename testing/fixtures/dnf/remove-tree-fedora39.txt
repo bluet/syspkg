@@ -1,0 +1,25 @@
+Dependencies resolved.
+================================================================================
+ Package        Architecture     Version                Repository         Size
+================================================================================
+Removing:
+ tree           x86_64           2.1.0-4.fc39           @fedora           118 k
+
+Transaction Summary
+================================================================================
+Remove  1 Package
+
+Freed space: 118 k
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                        1/1 
+  Erasing          : tree-2.1.0-4.fc39.x86_64                               1/1 
+  Verifying        : tree-2.1.0-4.fc39.x86_64                               1/1 
+
+Removed:
+  tree-2.1.0-4.fc39.x86_64                                                      
+
+Complete!

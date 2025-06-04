@@ -6,7 +6,8 @@ Thank you for your interest in contributing to SysPkg! This guide will help you 
 
 - **[README.md](README.md)** - Project overview and user guide
 - **[CHANGELOG.md](CHANGELOG.md)** - Recent achievements and version history
-- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Technical design and interfaces
+- **[docs/ARCHITECTURE_OVERVIEW.md](docs/ARCHITECTURE_OVERVIEW.md)** - Technical design and interfaces
+- **[testing/fixtures/README.md](testing/fixtures/README.md)** - Comprehensive fixture generation with Docker entrypoints
 - **[testing/docker/README.md](testing/docker/README.md)** - Multi-OS testing infrastructure
 - **[docs/EXIT_CODES.md](docs/EXIT_CODES.md)** - Package manager exit code behavior
 - **[CLAUDE.md](CLAUDE.md)** - AI assistant development guidelines
@@ -330,8 +331,10 @@ make test-docker-alma      # Test YUM on AlmaLinux 8
 # Test all OS at once
 make test-docker-all       # Parallel testing across all OS
 
-# Generate fresh test fixtures
-make test-fixtures         # Capture real package manager outputs
+# Generate fresh test fixtures using entrypoint approach
+make test-fixtures         # All package managers with realistic scenarios
+make test-fixtures-apt     # APT only - fast iteration
+make test-fixtures-yum     # YUM only - Rocky Linux scenarios
 
 # Cleanup Docker resources
 make test-docker-clean     # Remove test containers and images
@@ -348,7 +351,8 @@ make test-docker-clean     # Remove test containers and images
 | **DNF development (any OS)** | `make test-docker-fedora` | 🐌 5min | 🎯 Required |
 | **Before major PR** | `make test-docker-all` | 🐌 15min | 🚀 Recommended |
 | **CI debugging** | `make test-integration` | 🐌 2min | 🐛 When needed |
-| **Update fixtures** | `make test-fixtures` | 🐌 10min | 📁 Occasionally |
+| **Update fixtures** | `make test-fixtures` | 🐌 5min | 📁 Occasionally |
+| **APT fixtures only** | `make test-fixtures-apt` | ⚡ 1min | 🎯 APT development |
 
 ## **GOLDEN RULE:**
 **Always start with `make test` - it's smart enough to test what's available on your system and skip the rest!**
@@ -458,6 +462,52 @@ Create `manager/newpm/EXIT_CODES.md` documenting:
 **Critical**: Never assume exit codes work like other package managers!
 
 ## 🧪 Testing Best Practices
+
+### Core Testing Principles
+
+1. **Fixtures are Real-World Data**
+   - Fixtures contain full dumps of raw command outputs
+   - They reflect real-world status and should be used in unit tests
+   - Located in `testing/fixtures/` organized by package manager
+   - Keep fixtures up-to-date with actual command outputs
+
+2. **Docker for Safety and Isolation**
+   - Use Docker for BOTH fixture generation AND actual testing
+   - Protects your development system from package operations
+   - Enables testing multiple OS/package manager combinations
+   - Essential for testing destructive operations (install/remove)
+
+3. **Testing Hierarchy**
+   - **Unit Tests**: Use fixtures first, inline mocks for edge cases
+   - **Integration Tests**: Run in Docker containers for safety
+   - **System Tests**: Only in CI or dedicated test environments
+
+4. **Fixture Usage in Tests**
+   ```go
+   // ✅ Good: Use real fixtures for realistic testing
+   func TestSearchWithFixture(t *testing.T) {
+       fixture := loadFixture(t, "apt/search-vim.txt")
+       packages := parseSearchOutput(fixture)
+       // Test with real-world data
+   }
+
+   // ✅ Also Good: Inline data for specific edge cases
+   func TestSearchEdgeCase(t *testing.T) {
+       output := "specific-edge-case-output"
+       packages := parseSearchOutput(output)
+       // Test specific behavior
+   }
+   ```
+
+5. **Docker Testing Commands**
+   ```bash
+   # Generate fixtures safely
+   make test-docker-ubuntu  # Capture APT outputs
+   make test-docker-rocky   # Capture YUM outputs
+
+   # Run tests in isolation
+   make test-docker-all     # Full test suite in containers
+   ```
 
 ### Writing Good Tests
 ```go

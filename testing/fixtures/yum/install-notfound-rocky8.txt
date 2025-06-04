@@ -1,3 +1,3 @@
-Last metadata expiration check: 0:00:57 ago on Sat May 31 07:53:22 2025.
-No match for argument: nonexistent-package-12345
-Error: Unable to find a match: nonexistent-package-12345
+Last metadata expiration check: 0:00:35 ago on Tue Jun  3 22:10:50 2025.
+No match for argument: nonexistentpackage
+Error: Unable to find a match: nonexistentpackage

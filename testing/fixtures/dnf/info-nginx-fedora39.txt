@@ -1,0 +1,17 @@
+Last metadata expiration check: 0:00:19 ago on Tue Jun  3 22:15:28 2025.
+Available Packages
+Name         : nginx
+Epoch        : 2
+Version      : 1.26.2
+Release      : 1.fc39
+Architecture : x86_64
+Size         : 32 k
+Source       : nginx-1.26.2-1.fc39.src.rpm
+Repository   : updates
+Summary      : A high performance web server and reverse proxy server
+URL          : https://nginx.org
+License      : BSD-2-Clause
+Description  : Nginx is a web server and a reverse proxy server for HTTP, SMTP, POP3 and
+             : IMAP protocols, with a strong focus on high concurrency, performance and low
+             : memory usage.
+

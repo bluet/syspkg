@@ -1,0 +1,31 @@
+========================= Name Exactly Matched: nginx ==========================
+nginx.x86_64 : A high performance web server and reverse proxy server
+======================== Name & Summary Matched: nginx =========================
+collectd-nginx.x86_64 : Nginx plugin for collectd
+mogstored-backend-nginx.noarch : Nginx back-end for mogstored
+munin-nginx.noarch : NGINX support for Munin resource monitoring
+nextcloud-nginx.noarch : Nginx integration for NextCloud
+nginx-all-modules.noarch : A meta package that installs all available Nginx modules
+nginx-core.x86_64 : nginx minimal core
+nginx-filesystem.noarch : The basic directory layout for the Nginx server
+nginx-mimetypes.noarch : MIME type mappings for nginx
+nginx-mod-devel.i686 : Nginx module development files
+nginx-mod-devel.x86_64 : Nginx module development files
+nginx-mod-fancyindex.x86_64 : Nginx FancyIndex module
+nginx-mod-http-image-filter.x86_64 : Nginx HTTP image filter module
+nginx-mod-http-perl.x86_64 : Nginx HTTP perl module
+nginx-mod-http-xslt-filter.x86_64 : Nginx XSLT module
+nginx-mod-mail.x86_64 : Nginx mail modules
+nginx-mod-modsecurity.x86_64 : ModSecurity v3 nginx connector
+nginx-mod-naxsi.x86_64 : nginx web application firewall module
+nginx-mod-stream.x86_64 : Nginx stream modules
+nginx-mod-vts.x86_64 : Nginx virtual host traffic status module
+openqa-single-instance-nginx.noarch : Convenience package for a single-instance setup using nginx proxy
+pagure-web-nginx.noarch : Nginx configuration for Pagure
+pcp-pmda-nginx.x86_64 : Performance Co-Pilot (PCP) metrics for the Nginx Webserver
+python3-certbot-nginx.noarch : The nginx plugin for certbot
+sympa-nginx.x86_64 : Sympa with nginx
+web-assets-nginx.noarch : Web Assets aliases for the nginx daemon
+============================ Summary Matched: nginx ============================
+golang-github-valyala-goloris-devel.noarch : Slowloris for NGINX DoS
+goloris.x86_64 : Slowloris for NGINX DoS

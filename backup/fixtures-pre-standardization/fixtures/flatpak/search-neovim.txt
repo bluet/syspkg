@@ -1,0 +1,3 @@
+Neovim	Vim-fork focused on extensibility and usability	io.neovim.nvim	0.11.2	stable	flathub
+neovide	Advanced graphical interface for Neovim	dev.neovide.neovide	0.15.0	stable	flathub
+Helix	A post-modern text editor	com.helix_editor.Helix	25.01	stable	flathub

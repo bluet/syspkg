@@ -13,6 +13,9 @@ import (
 
 	// Import all available package managers
 	_ "github.com/bluet/syspkg/manager/apt"
+	_ "github.com/bluet/syspkg/manager/flatpak"
+	_ "github.com/bluet/syspkg/manager/snap"
+	_ "github.com/bluet/syspkg/manager/yum"
 )
 
 const (
@@ -37,6 +40,12 @@ COMMANDS:
     managers             List available package managers
 
 OPTIONS:
+    # Multi-Manager Control
+    --apt, --snap, --flatpak    Use only specific manager(s)
+    --all                       Use all available managers (default)
+    --status                    Show real package status (installed/available/upgradable)
+
+    # Standard Options
     -m, --manager TYPE   Use specific manager type (system, language, etc.)
     -n, --name NAME      Use specific manager by name (apt, npm, etc.)
     -d, --dry-run        Show what would be done without executing
@@ -48,7 +57,15 @@ OPTIONS:
     --version            Show version
 
 EXAMPLES:
-    syspkg search vim                    # Search for vim across all managers
+    # Fast repository search (default)
+    syspkg search vim                    # Search across all managers (fast)
+    syspkg search vim --apt              # Search only APT (fast)
+
+    # Status-aware search (slower but accurate)
+    syspkg search vim --status           # Show real installation status
+    syspkg search vim --apt --status     # APT with status information
+
+    # Other operations
     syspkg install vim curl -m system   # Install using system package manager
     syspkg list installed                # List all installed packages
     syspkg upgrade --dry-run             # Show what would be upgraded
@@ -57,18 +74,21 @@ EXAMPLES:
 )
 
 type Config struct {
-	Manager     string
-	ManagerType string
-	DryRun      bool
-	Verbose     bool
-	Quiet       bool
-	JSON        bool
-	AssumeYes   bool
+	Manager        string
+	ManagerType    string
+	ManagerFilters map[string]bool // apt, snap, flatpak specific filters
+	UseAllManagers bool            // Default: true (user's original superior approach)
+	ShowStatus     bool            // --status flag for status-aware search
+	DryRun         bool
+	Verbose        bool
+	Quiet          bool
+	JSON           bool
+	AssumeYes      bool
 }
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println(usage)
+		fmt.Print(usage)
 		os.Exit(1)
 	}
 
@@ -78,22 +98,23 @@ func main() {
 
 	registry := manager.GetGlobalRegistry()
 
-	// Get package manager based on config
-	pm, err := selectPackageManager(registry, config)
+	// Get package managers based on config
+	managers, err := selectPackageManagers(registry, config)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 	}
 
 	opts := &manager.Options{
-		DryRun:    config.DryRun,
-		Verbose:   config.Verbose,
-		Quiet:     config.Quiet,
-		AssumeYes: config.AssumeYes,
+		DryRun:     config.DryRun,
+		Verbose:    config.Verbose,
+		Quiet:      config.Quiet,
+		AssumeYes:  config.AssumeYes,
+		ShowStatus: config.ShowStatus,
 	}
 
-	// Execute command
-	err = executeCommand(ctx, pm, config, opts)
+	// Execute command with multi-manager support
+	err = executeMultiCommand(ctx, managers, config, opts)
 	if err != nil {
 		if !config.Quiet {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
@@ -103,7 +124,10 @@ func main() {
 }
 
 func parseArgs() *Config {
-	config := &Config{}
+	config := &Config{
+		ManagerFilters: make(map[string]bool),
+		UseAllManagers: true, // User's original superior default
+	}
 	args := os.Args[1:]
 
 	// Simple argument parsing
@@ -111,6 +135,21 @@ func parseArgs() *Config {
 		arg := args[i]
 
 		switch arg {
+		// Multi-manager selection (user's original superior approach)
+		case "--apt":
+			config.ManagerFilters["apt"] = true
+			config.UseAllManagers = false
+		case "--snap":
+			config.ManagerFilters["snap"] = true
+			config.UseAllManagers = false
+		case "--flatpak":
+			config.ManagerFilters["flatpak"] = true
+			config.UseAllManagers = false
+		case "--all":
+			config.UseAllManagers = true
+			config.ManagerFilters = make(map[string]bool) // Clear filters
+		case "--status":
+			config.ShowStatus = true
 		case "-m", "--manager":
 			if i+1 < len(args) {
 				config.ManagerType = args[i+1]
@@ -119,6 +158,7 @@ func parseArgs() *Config {
 		case "-n", "--name":
 			if i+1 < len(args) {
 				config.Manager = args[i+1]
+				config.UseAllManagers = false
 				i++
 			}
 		case "-d", "--dry-run":
@@ -132,7 +172,7 @@ func parseArgs() *Config {
 		case "-y", "--yes":
 			config.AssumeYes = true
 		case "-h", "--help":
-			fmt.Println(usage)
+			fmt.Print(usage)
 			os.Exit(0)
 		case "--version":
 			fmt.Printf("syspkg version %s\n", version)
@@ -143,35 +183,176 @@ func parseArgs() *Config {
 	return config
 }
 
-func selectPackageManager(registry *manager.Registry, config *Config) (manager.PackageManager, error) {
-	// Get by specific name if provided
+// formatPackageInfo formats a single package for display
+func formatPackageInfo(pkg manager.PackageInfo, config *Config) {
+	if config.Quiet {
+		fmt.Println(pkg.Name)
+		return
+	}
+
+	// Format version string
+	versionStr := ""
+	if pkg.Version != "" {
+		versionStr = fmt.Sprintf("[%s]", pkg.Version)
+	}
+	if pkg.NewVersion != "" && pkg.NewVersion != pkg.Version {
+		versionStr += fmt.Sprintf("[%s]", pkg.NewVersion)
+	}
+
+	// Add description if available (truncated)
+	desc := ""
+	if pkg.Description != "" {
+		if len(pkg.Description) > 50 {
+			desc = fmt.Sprintf(" - %s...", pkg.Description[:47])
+		} else {
+			desc = fmt.Sprintf(" - %s", pkg.Description)
+		}
+	}
+
+	// Display with or without status based on config
+	if config.ShowStatus {
+		fmt.Printf("  %-25s %-18s (%s)%s\n", pkg.Name, versionStr, pkg.Status, desc)
+	} else {
+		fmt.Printf("  %-25s %-18s%s\n", pkg.Name, versionStr, desc)
+	}
+}
+
+func selectPackageManagers(registry *manager.Registry, config *Config) (map[string]manager.PackageManager, error) {
+	available := registry.GetAvailable()
+
+	// Single manager specified by name
 	if config.Manager != "" {
-		managers := registry.GetAvailable()
-		if pm, exists := managers[config.Manager]; exists {
-			return pm, nil
+		if pm, exists := available[config.Manager]; exists {
+			return map[string]manager.PackageManager{config.Manager: pm}, nil
 		}
 		return nil, fmt.Errorf("package manager '%s' not found", config.Manager)
 	}
 
-	// Get by type if provided
+	// Single manager by type
 	if config.ManagerType != "" {
 		pm := registry.GetBestMatch(config.ManagerType)
 		if pm == nil {
 			return nil, fmt.Errorf("no package manager found for type '%s'", config.ManagerType)
 		}
-		return pm, nil
+		return map[string]manager.PackageManager{pm.GetName(): pm}, nil
 	}
 
-	// Default: get best system package manager
-	pm := registry.GetBestMatch(manager.TypeSystem)
-	if pm == nil {
+	// All managers (user's original superior default)
+	if config.UseAllManagers {
+		return available, nil
+	}
+
+	// Filtered managers (user's original superior user control)
+	result := make(map[string]manager.PackageManager)
+	for name, enabled := range config.ManagerFilters {
+		if enabled {
+			if pm, exists := available[name]; exists {
+				result[name] = pm
+			}
+		}
+	}
+
+	if len(result) == 0 {
 		return nil, fmt.Errorf("no package managers available")
 	}
 
-	return pm, nil
+	return result, nil
 }
 
-func executeCommand(ctx context.Context, pm manager.PackageManager, config *Config, opts *manager.Options) error {
+// getManagerEmoji returns appropriate emoji for each package manager
+func getManagerEmoji(managerName string) string {
+	switch managerName {
+	case "apt":
+		return "📦"
+	case "snap":
+		return "🫰"
+	case "flatpak":
+		return "📦"
+	case "yum":
+		return "🔴"
+	case "dnf":
+		return "🔴"
+	default:
+		return "📦"
+	}
+}
+
+// handleSearchUnified implements unified search display for both single and multi-manager scenarios
+func handleSearchUnified(ctx context.Context, managers map[string]manager.PackageManager, query []string, config *Config, opts *manager.Options) error {
+	if len(managers) == 0 {
+		return fmt.Errorf("no package managers available")
+	}
+
+	// Print initial search message
+	if !config.Quiet {
+		if len(managers) == 1 {
+			// Single manager
+			for name, pm := range managers {
+				emoji := getManagerEmoji(name)
+				statusInfo := ""
+				if config.ShowStatus {
+					statusInfo = " (with status)"
+				}
+				fmt.Printf("🔍 Searching for '%s' using %s %s%s...\n\n", strings.Join(query, " "), emoji, strings.ToUpper(pm.GetName()), statusInfo)
+			}
+		} else {
+			// Multi-manager
+			managerNames := make([]string, 0, len(managers))
+			for name := range managers {
+				managerNames = append(managerNames, name)
+			}
+			fmt.Printf("🔍 Searching for '%s' across %d package managers (%s)...\n\n",
+				strings.Join(query, " "), len(managers), strings.Join(managerNames, ", "))
+		}
+	}
+
+	totalPackages := 0
+	for name, pm := range managers {
+		packages, err := pm.Search(ctx, query, opts)
+		if err != nil {
+			if !config.Quiet {
+				fmt.Printf("❌ Error searching %s: %v\n", name, err)
+			}
+			continue
+		}
+
+		if len(packages) == 0 {
+			if !config.Quiet {
+				if len(managers) == 1 {
+					fmt.Printf("No packages found.\n")
+				} else {
+					fmt.Printf("📦 %s: No results found\n", strings.ToUpper(name))
+				}
+			}
+			continue
+		}
+
+		// Display header with emoji and count
+		if !config.Quiet {
+			emoji := getManagerEmoji(name)
+			fmt.Printf("%s %s (%d packages):\n", emoji, strings.ToUpper(name), len(packages))
+		}
+
+		// Display packages using unified logic
+		for _, pkg := range packages {
+			formatPackageInfo(pkg, config)
+		}
+
+		if !config.Quiet && len(packages) > 0 {
+			fmt.Println()
+		}
+		totalPackages += len(packages)
+	}
+
+	// Summary for multi-manager searches
+	if !config.Quiet && len(managers) > 1 && totalPackages > 0 {
+		fmt.Printf("📊 Summary: %d packages found across %d managers\n", totalPackages, len(managers))
+	}
+
+	return nil
+}
+
+func executeMultiCommand(ctx context.Context, managers map[string]manager.PackageManager, config *Config, opts *manager.Options) error {
 	args := getCommandArgs()
 	if len(args) == 0 {
 		return fmt.Errorf("no command specified")
@@ -179,78 +360,142 @@ func executeCommand(ctx context.Context, pm manager.PackageManager, config *Conf
 
 	command := args[0]
 
+	// For multi-manager operations (search is the main one)
 	switch command {
 	case "search":
 		if len(args) < 2 {
 			return fmt.Errorf("search requires a query")
 		}
-		return handleSearch(ctx, pm, args[1:], config, opts)
-
-	case "list":
-		filter := manager.FilterInstalled
-		if len(args) > 1 {
-			switch args[1] {
-			case "installed":
-				filter = manager.FilterInstalled
-			case "upgradable":
-				filter = manager.FilterUpgradable
-			case "all":
-				filter = manager.FilterAll
-			default:
-				return fmt.Errorf("invalid filter: %s", args[1])
-			}
-		}
-		return handleList(ctx, pm, filter, config, opts)
-
-	case "install":
-		if len(args) < 2 {
-			return fmt.Errorf("install requires package names")
-		}
-		return handleInstall(ctx, pm, args[1:], config, opts)
-
-	case "remove":
-		if len(args) < 2 {
-			return fmt.Errorf("remove requires package names")
-		}
-		return handleRemove(ctx, pm, args[1:], config, opts)
-
-	case "info":
-		if len(args) < 2 {
-			return fmt.Errorf("info requires a package name")
-		}
-		return handleInfo(ctx, pm, args[1], config, opts)
-
-	case "update":
-		return handleUpdate(ctx, pm, config, opts)
-
-	case "upgrade":
-		packages := []string{}
-		if len(args) > 1 {
-			packages = args[1:]
-		}
-		return handleUpgrade(ctx, pm, packages, config, opts)
-
-	case "clean":
-		return handleClean(ctx, pm, config, opts)
-
-	case "autoremove":
-		return handleAutoRemove(ctx, pm, config, opts)
-
-	case "verify":
-		if len(args) < 2 {
-			return fmt.Errorf("verify requires package names")
-		}
-		return handleVerify(ctx, pm, args[1:], config, opts)
-
-	case "status":
-		return handleStatus(ctx, pm, config, opts)
+		return handleSearchUnified(ctx, managers, args[1:], config, opts)
 
 	case "managers":
 		return handleManagers(config)
 
 	default:
+		// For single-manager operations, use the first available manager
+		// or let user specify with -n flag
+		var pm manager.PackageManager
+		if len(managers) == 1 {
+			for _, mgr := range managers {
+				pm = mgr
+				break
+			}
+		} else {
+			// Multiple managers available, use the first one or require user to specify
+			if config.Manager == "" {
+				return fmt.Errorf("multiple package managers available (%d), please specify one with -n flag", len(managers))
+			}
+			var exists bool
+			pm, exists = managers[config.Manager]
+			if !exists {
+				return fmt.Errorf("specified manager '%s' not available", config.Manager)
+			}
+		}
+		return executeSingleCommand(ctx, pm, config, opts)
+	}
+}
+
+func executeSingleCommand(ctx context.Context, pm manager.PackageManager, config *Config, opts *manager.Options) error {
+	args := getCommandArgs()
+	if len(args) == 0 {
+		return fmt.Errorf("no command specified")
+	}
+
+	command := args[0]
+	return executeCommand(ctx, pm, command, args, config, opts)
+}
+
+func executeCommand(ctx context.Context, pm manager.PackageManager, command string, args []string, config *Config, opts *manager.Options) error {
+	switch command {
+	case "search":
+		return executeSearchCommand(ctx, pm, args, config, opts)
+	case "list":
+		return executeListCommand(ctx, pm, args, config, opts)
+	case "install":
+		return executeInstallCommand(ctx, pm, args, config, opts)
+	case "remove":
+		return executeRemoveCommand(ctx, pm, args, config, opts)
+	case "info":
+		return executeInfoCommand(ctx, pm, args, config, opts)
+	case "update":
+		return handleUpdate(ctx, pm, config, opts)
+	case "upgrade":
+		return executeUpgradeCommand(ctx, pm, args, config, opts)
+	case "clean":
+		return handleClean(ctx, pm, config, opts)
+	case "autoremove":
+		return handleAutoRemove(ctx, pm, config, opts)
+	case "verify":
+		return executeVerifyCommand(ctx, pm, args, config, opts)
+	case "status":
+		return handleStatus(ctx, pm, config, opts)
+	case "managers":
+		return handleManagers(config)
+	default:
 		return fmt.Errorf("unknown command: %s", command)
 	}
+}
+
+func executeSearchCommand(ctx context.Context, pm manager.PackageManager, args []string, config *Config, opts *manager.Options) error {
+	if len(args) < 2 {
+		return fmt.Errorf("search requires a query")
+	}
+	// Convert single manager to map for unified handling
+	managers := map[string]manager.PackageManager{pm.GetName(): pm}
+	return handleSearchUnified(ctx, managers, args[1:], config, opts)
+}
+
+func executeListCommand(ctx context.Context, pm manager.PackageManager, args []string, config *Config, opts *manager.Options) error {
+	filter := manager.FilterInstalled
+	if len(args) > 1 {
+		switch args[1] {
+		case "installed":
+			filter = manager.FilterInstalled
+		case "upgradable":
+			filter = manager.FilterUpgradable
+		case "all":
+			filter = manager.FilterAll
+		default:
+			return fmt.Errorf("invalid filter: %s", args[1])
+		}
+	}
+	return handleList(ctx, pm, filter, config, opts)
+}
+
+func executeInstallCommand(ctx context.Context, pm manager.PackageManager, args []string, config *Config, opts *manager.Options) error {
+	if len(args) < 2 {
+		return fmt.Errorf("install requires package names")
+	}
+	return handleInstall(ctx, pm, args[1:], config, opts)
+}
+
+func executeRemoveCommand(ctx context.Context, pm manager.PackageManager, args []string, config *Config, opts *manager.Options) error {
+	if len(args) < 2 {
+		return fmt.Errorf("remove requires package names")
+	}
+	return handleRemove(ctx, pm, args[1:], config, opts)
+}
+
+func executeInfoCommand(ctx context.Context, pm manager.PackageManager, args []string, config *Config, opts *manager.Options) error {
+	if len(args) < 2 {
+		return fmt.Errorf("info requires a package name")
+	}
+	return handleInfo(ctx, pm, args[1], config, opts)
+}
+
+func executeUpgradeCommand(ctx context.Context, pm manager.PackageManager, args []string, config *Config, opts *manager.Options) error {
+	packages := []string{}
+	if len(args) > 1 {
+		packages = args[1:]
+	}
+	return handleUpgrade(ctx, pm, packages, config, opts)
+}
+
+func executeVerifyCommand(ctx context.Context, pm manager.PackageManager, args []string, config *Config, opts *manager.Options) error {
+	if len(args) < 2 {
+		return fmt.Errorf("verify requires package names")
+	}
+	return handleVerify(ctx, pm, args[1:], config, opts)
 }
 
 func getCommandArgs() []string {
@@ -281,16 +526,12 @@ func getCommandArgs() []string {
 
 func outputResult(data interface{}, config *Config) {
 	if config.JSON {
-		json.NewEncoder(os.Stdout).Encode(data)
+		_ = json.NewEncoder(os.Stdout).Encode(data)
 	} else {
 		switch v := data.(type) {
 		case []manager.PackageInfo:
 			for _, pkg := range v {
-				if config.Quiet {
-					fmt.Println(pkg.Name)
-				} else {
-					fmt.Printf("%-30s %-15s %s\n", pkg.Name, pkg.Version, pkg.Status)
-				}
+				formatPackageInfo(pkg, config)
 			}
 		case manager.PackageInfo:
 			if config.Quiet {
@@ -309,24 +550,6 @@ func outputResult(data interface{}, config *Config) {
 			fmt.Printf("%+v\n", v)
 		}
 	}
-}
-
-func handleSearch(ctx context.Context, pm manager.PackageManager, query []string, config *Config, opts *manager.Options) error {
-	if !config.Quiet {
-		fmt.Printf("Searching for '%s' using %s...\n", strings.Join(query, " "), pm.GetName())
-	}
-
-	packages, err := pm.Search(ctx, query, opts)
-	if err != nil {
-		return err
-	}
-
-	if !config.Quiet {
-		fmt.Printf("Found %d packages:\n", len(packages))
-	}
-
-	outputResult(packages, config)
-	return nil
 }
 
 func handleList(ctx context.Context, pm manager.PackageManager, filter manager.ListFilter, config *Config, opts *manager.Options) error {

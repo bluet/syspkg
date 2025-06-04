@@ -1,0 +1,660 @@
+// syspkg - Universal package manager CLI (Improved Design)
+// Combines unified interface architecture with superior multi-manager CLI behavior
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"sort"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/bluet/syspkg/manager"
+
+	// Import all available package managers
+	_ "github.com/bluet/syspkg/manager/apt"
+	_ "github.com/bluet/syspkg/manager/yum"
+)
+
+const (
+	version = "2.1.0"
+	usage   = `syspkg - Universal Package Manager (Improved)
+
+USAGE:
+    syspkg <command> [options] [packages...]
+
+COMMANDS:
+    search <query>        Search for packages across all managers (default) or specific ones
+    list [filter]         List packages (installed, upgradable, all)
+    install <packages>    Install packages (shows sources, allows selection)
+    remove <packages>     Remove packages
+    info <package>        Show package information across all sources
+    update               Update package lists for all managers
+    upgrade [packages]    Upgrade packages
+    clean                Clean package cache for all managers
+    autoremove           Remove orphaned packages
+    verify <packages>    Verify package integrity
+    status               Show status of all package managers
+    managers             List available package managers
+
+OPTIONS:
+    # Multi-Manager Control (your original superior approach)
+    --apt, --yum, --snap, --flatpak    Use only specific manager(s)
+    --all                              Force comprehensive search (default behavior)
+
+    # Performance & UX (research-based improvements)
+    --parallel                         Use parallel queries (default)
+    --timeout=5s                       Set query timeout
+    --cache                           Use cached results when available
+    --summary                         Show summary view (less verbose)
+    --details                         Show detailed view (more verbose)
+
+    # Standard Options
+    -m, --manager TYPE   Use specific manager type (system, language, etc.)
+    -n, --name NAME      Use specific manager by name
+    -d, --dry-run        Show what would be done without executing
+    -v, --verbose        Show detailed output
+    -q, --quiet          Minimal output
+    -j, --json           Output in JSON format
+    -y, --yes            Assume yes to all prompts
+    -h, --help           Show this help
+    --version            Show version
+
+EXAMPLES:
+    # Multi-manager discovery (your superior default behavior)
+    syspkg search vim                    # Search ALL managers, grouped results
+    syspkg search vim --summary          # Condensed view with highlights
+
+    # User filtering (your superior user control)
+    syspkg search vim --apt              # Only APT (fast)
+    syspkg search vim --apt --snap       # Only APT + Snap
+
+    # Enhanced installation with source selection
+    syspkg install vim                   # Shows all sources, asks user to choose
+    syspkg install vim --apt            # Direct APT installation
+
+    # Cross-manager operations
+    syspkg list installed --cross-ref    # Show alternatives for installed packages
+    syspkg status                        # Status of all managers
+    syspkg update                        # Update all managers in parallel
+`
+)
+
+type ImprovedConfig struct {
+	// Manager Selection (your original approach)
+	ManagerFilters map[string]bool // apt, yum, snap, flatpak, etc.
+	UseAllManagers bool            // Default: true (your superior approach)
+
+	// Performance (research-based improvements)
+	UseParallel bool
+	UseCache    bool
+	Timeout     time.Duration
+
+	// UX (research-based improvements)
+	ShowSummary   bool // Progressive disclosure
+	ShowDetails   bool
+	ShowCrossRef  bool
+
+	// Standard options
+	Manager     string
+	ManagerType string
+	DryRun      bool
+	Verbose     bool
+	Quiet       bool
+	JSON        bool
+	AssumeYes   bool
+}
+
+type SearchResult struct {
+	ManagerName string                `json:"manager"`
+	Packages    []manager.PackageInfo `json:"packages"`
+	Error       error                 `json:"error,omitempty"`
+	Duration    time.Duration         `json:"duration"`
+}
+
+type MultiManagerResult struct {
+	Results     []SearchResult `json:"results"`
+	TotalCount  int           `json:"total_count"`
+	Duration    time.Duration `json:"total_duration"`
+	QueryTerms  []string      `json:"query_terms"`
+}
+
+func main() {
+	if len(os.Args) < 2 {
+		fmt.Println(usage)
+		os.Exit(1)
+	}
+
+	config := parseImprovedArgs()
+	ctx, cancel := context.WithTimeout(context.Background(), config.Timeout)
+	defer cancel()
+
+	// Execute command with improved multi-manager approach
+	err := executeImprovedCommand(ctx, config)
+	if err != nil {
+		if !config.Quiet {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		}
+		os.Exit(1)
+	}
+}
+
+func parseImprovedArgs() *ImprovedConfig {
+	config := &ImprovedConfig{
+		ManagerFilters: make(map[string]bool),
+		UseAllManagers: true,  // Your superior default
+		UseParallel:    true,  // Performance optimization
+		UseCache:       true,  // Performance optimization
+		Timeout:        30 * time.Second,
+		ShowSummary:    false, // Default to comprehensive (your approach)
+	}
+
+	args := os.Args[1:]
+
+	for i := 0; i < len(args); i++ {
+		arg := args[i]
+
+		switch arg {
+		// Multi-manager selection (your original superior approach)
+		case "--apt":
+			config.ManagerFilters["apt"] = true
+			config.UseAllManagers = false
+		case "--yum":
+			config.ManagerFilters["yum"] = true
+			config.UseAllManagers = false
+		case "--snap":
+			config.ManagerFilters["snap"] = true
+			config.UseAllManagers = false
+		case "--flatpak":
+			config.ManagerFilters["flatpak"] = true
+			config.UseAllManagers = false
+		case "--all":
+			config.UseAllManagers = true
+			config.ManagerFilters = make(map[string]bool) // Clear filters
+
+		// Performance options (research-based improvements)
+		case "--parallel":
+			config.UseParallel = true
+		case "--no-parallel":
+			config.UseParallel = false
+		case "--cache":
+			config.UseCache = true
+		case "--no-cache":
+			config.UseCache = false
+		case "--timeout":
+			if i+1 < len(args) {
+				if dur, err := time.ParseDuration(args[i+1]); err == nil {
+					config.Timeout = dur
+				}
+				i++
+			}
+
+		// UX options (research-based improvements)
+		case "--summary":
+			config.ShowSummary = true
+		case "--details":
+			config.ShowDetails = true
+		case "--cross-ref":
+			config.ShowCrossRef = true
+
+		// Standard options
+		case "-m", "--manager":
+			if i+1 < len(args) {
+				config.ManagerType = args[i+1]
+				i++
+			}
+		case "-n", "--name":
+			if i+1 < len(args) {
+				config.Manager = args[i+1]
+				config.UseAllManagers = false
+				i++
+			}
+		case "-d", "--dry-run":
+			config.DryRun = true
+		case "-v", "--verbose":
+			config.Verbose = true
+		case "-q", "--quiet":
+			config.Quiet = true
+		case "-j", "--json":
+			config.JSON = true
+		case "-y", "--yes":
+			config.AssumeYes = true
+		case "-h", "--help":
+			fmt.Println(usage)
+			os.Exit(0)
+		case "--version":
+			fmt.Printf("syspkg version %s (improved)\n", version)
+			os.Exit(0)
+		}
+	}
+
+	return config
+}
+
+func getSelectedManagers(registry *manager.Registry, config *ImprovedConfig) map[string]manager.PackageManager {
+	available := registry.GetAvailable()
+
+	// Single manager specified
+	if config.Manager != "" {
+		if pm, exists := available[config.Manager]; exists {
+			return map[string]manager.PackageManager{config.Manager: pm}
+		}
+		return nil
+	}
+
+	// All managers (your original superior default)
+	if config.UseAllManagers {
+		return available
+	}
+
+	// Filtered managers (your original superior user control)
+	result := make(map[string]manager.PackageManager)
+	for name, enabled := range config.ManagerFilters {
+		if enabled {
+			if pm, exists := available[name]; exists {
+				result[name] = pm
+			}
+		}
+	}
+
+	return result
+}
+
+func executeImprovedCommand(ctx context.Context, config *ImprovedConfig) error {
+	args := getCommandArgs()
+	if len(args) == 0 {
+		return fmt.Errorf("no command specified")
+	}
+
+	command := args[0]
+
+	registry := manager.GetGlobalRegistry()
+	managers := getSelectedManagers(registry, config)
+
+	if len(managers) == 0 {
+		return fmt.Errorf("no package managers available")
+	}
+
+	opts := &manager.Options{
+		DryRun:    config.DryRun,
+		Verbose:   config.Verbose,
+		Quiet:     config.Quiet,
+		AssumeYes: config.AssumeYes,
+	}
+
+	switch command {
+	case "search":
+		if len(args) < 2 {
+			return fmt.Errorf("search requires a query")
+		}
+		return handleImprovedSearch(ctx, managers, args[1:], config, opts)
+
+	case "list":
+		filter := manager.FilterInstalled
+		if len(args) > 1 {
+			switch args[1] {
+			case "installed":
+				filter = manager.FilterInstalled
+			case "upgradable":
+				filter = manager.FilterUpgradable
+			case "all":
+				filter = manager.FilterAll
+			default:
+				return fmt.Errorf("invalid filter: %s", args[1])
+			}
+		}
+		return handleImprovedList(ctx, managers, filter, config, opts)
+
+	case "install":
+		if len(args) < 2 {
+			return fmt.Errorf("install requires package names")
+		}
+		return handleImprovedInstall(ctx, managers, args[1:], config, opts)
+
+	case "info":
+		if len(args) < 2 {
+			return fmt.Errorf("info requires a package name")
+		}
+		return handleImprovedInfo(ctx, managers, args[1], config, opts)
+
+	case "status":
+		return handleImprovedStatus(ctx, managers, config, opts)
+
+	case "managers":
+		return handleImprovedManagers(config)
+
+	case "update":
+		return handleImprovedUpdate(ctx, managers, config, opts)
+
+	default:
+		return fmt.Errorf("unknown command: %s", command)
+	}
+}
+
+// Improved multi-manager search with parallel queries and progressive disclosure
+func handleImprovedSearch(ctx context.Context, managers map[string]manager.PackageManager, query []string, config *ImprovedConfig, opts *manager.Options) error {
+	startTime := time.Now()
+
+	if !config.Quiet {
+		managerNames := make([]string, 0, len(managers))
+		for name := range managers {
+			managerNames = append(managerNames, name)
+		}
+		sort.Strings(managerNames)
+
+		if len(managers) == 1 {
+			fmt.Printf("Searching for '%s' using %s...\n", strings.Join(query, " "), managerNames[0])
+		} else {
+			fmt.Printf("Searching for '%s' across %d managers (%s)...\n",
+				strings.Join(query, " "), len(managers), strings.Join(managerNames, ", "))
+		}
+	}
+
+	var results []SearchResult
+
+	if config.UseParallel && len(managers) > 1 {
+		// Parallel queries (research-based performance improvement)
+		results = searchParallel(ctx, managers, query, opts)
+	} else {
+		// Sequential queries (your original approach)
+		results = searchSequential(ctx, managers, query, opts)
+	}
+
+	totalDuration := time.Since(startTime)
+
+	// Build result
+	totalCount := 0
+	for _, result := range results {
+		totalCount += len(result.Packages)
+	}
+
+	multiResult := MultiManagerResult{
+		Results:    results,
+		TotalCount: totalCount,
+		Duration:   totalDuration,
+		QueryTerms: query,
+	}
+
+	if config.JSON {
+		return json.NewEncoder(os.Stdout).Encode(multiResult)
+	}
+
+	// Display results with progressive disclosure
+	if config.ShowSummary {
+		return displaySearchSummary(multiResult, config)
+	} else {
+		return displaySearchDetailed(multiResult, config)
+	}
+}
+
+func searchParallel(ctx context.Context, managers map[string]manager.PackageManager, query []string, opts *manager.Options) []SearchResult {
+	results := make([]SearchResult, 0, len(managers))
+	resultChan := make(chan SearchResult, len(managers))
+	var wg sync.WaitGroup
+
+	// Launch parallel searches
+	for name, pm := range managers {
+		wg.Add(1)
+		go func(managerName string, packageManager manager.PackageManager) {
+			defer wg.Done()
+
+			startTime := time.Now()
+			packages, err := packageManager.Search(ctx, query, opts)
+			duration := time.Since(startTime)
+
+			resultChan <- SearchResult{
+				ManagerName: managerName,
+				Packages:    packages,
+				Error:       err,
+				Duration:    duration,
+			}
+		}(name, pm)
+	}
+
+	// Wait for all searches to complete
+	go func() {
+		wg.Wait()
+		close(resultChan)
+	}()
+
+	// Collect results
+	for result := range resultChan {
+		results = append(results, result)
+	}
+
+	// Sort results by manager name for consistent output
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].ManagerName < results[j].ManagerName
+	})
+
+	return results
+}
+
+func searchSequential(ctx context.Context, managers map[string]manager.PackageManager, query []string, opts *manager.Options) []SearchResult {
+	results := make([]SearchResult, 0, len(managers))
+
+	// Sort manager names for consistent output
+	names := make([]string, 0, len(managers))
+	for name := range managers {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	for _, name := range names {
+		pm := managers[name]
+		startTime := time.Now()
+		packages, err := pm.Search(ctx, query, opts)
+		duration := time.Since(startTime)
+
+		results = append(results, SearchResult{
+			ManagerName: name,
+			Packages:    packages,
+			Error:       err,
+			Duration:    duration,
+		})
+	}
+
+	return results
+}
+
+// Progressive disclosure: Summary view (research-based UX improvement)
+func displaySearchSummary(result MultiManagerResult, config *ImprovedConfig) error {
+	if !config.Quiet {
+		fmt.Printf("\n🔍 Search Results Summary\n")
+		fmt.Printf("Query: %s\n", strings.Join(result.QueryTerms, " "))
+		fmt.Printf("Total: %d packages across %d managers (%.2fs)\n\n",
+			result.TotalCount, len(result.Results), result.Duration.Seconds())
+	}
+
+	for _, mgr := range result.Results {
+		if mgr.Error != nil {
+			if !config.Quiet {
+				fmt.Printf("❌ %s: %v\n", mgr.ManagerName, mgr.Error)
+			}
+			continue
+		}
+
+		if len(mgr.Packages) == 0 {
+			continue
+		}
+
+		// Show manager header with count
+		emoji := getManagerEmoji(mgr.ManagerName)
+		fmt.Printf("%s %s (%d packages)\n", emoji, strings.ToUpper(mgr.ManagerName), len(mgr.Packages))
+
+		// Show top 3 results with highlights
+		count := len(mgr.Packages)
+		if count > 3 {
+			count = 3
+		}
+
+		for i := 0; i < count; i++ {
+			pkg := mgr.Packages[i]
+			fmt.Printf("  ✓ %s %s - %s\n", pkg.Name, pkg.Version, truncateDescription(pkg.Description, 50))
+		}
+
+		if len(mgr.Packages) > 3 {
+			fmt.Printf("  • %d more packages...\n", len(mgr.Packages)-3)
+		}
+		fmt.Println()
+	}
+
+	if !config.Quiet {
+		fmt.Printf("💡 Use --details for full results, --apt/--snap/etc for specific managers\n")
+	}
+
+	return nil
+}
+
+// Detailed view (your original comprehensive approach)
+func displaySearchDetailed(result MultiManagerResult, config *ImprovedConfig) error {
+	if !config.Quiet {
+		fmt.Printf("Found %d packages across %d managers (%.2fs):\n\n",
+			result.TotalCount, len(result.Results), result.Duration.Seconds())
+	}
+
+	for _, mgr := range result.Results {
+		if mgr.Error != nil {
+			fmt.Printf("Error searching %s: %v\n", mgr.ManagerName, mgr.Error)
+			continue
+		}
+
+		if len(mgr.Packages) == 0 && !config.Quiet {
+			fmt.Printf("No results from %s\n", mgr.ManagerName)
+			continue
+		}
+
+		fmt.Printf("Found results for %s (%d packages, %.2fs):\n",
+			mgr.ManagerName, len(mgr.Packages), mgr.Duration.Seconds())
+
+		for _, pkg := range mgr.Packages {
+			if config.Quiet {
+				fmt.Printf("%s\n", pkg.Name)
+			} else {
+				fmt.Printf("%s: %s [%s] (%s)\n",
+					mgr.ManagerName, pkg.Name, pkg.Version, pkg.Status)
+			}
+		}
+		fmt.Println()
+	}
+
+	return nil
+}
+
+// Helper functions for improved UX
+func getManagerEmoji(managerName string) string {
+	switch managerName {
+	case "apt":
+		return "📦"
+	case "snap":
+		return "🫰"
+	case "flatpak":
+		return "📦"
+	case "yum":
+		return "🔴"
+	default:
+		return "📦"
+	}
+}
+
+func truncateDescription(desc string, maxLen int) string {
+	if len(desc) <= maxLen {
+		return desc
+	}
+	return desc[:maxLen-3] + "..."
+}
+
+// Placeholder implementations for other improved commands
+func handleImprovedList(ctx context.Context, managers map[string]manager.PackageManager, filter manager.ListFilter, config *ImprovedConfig, opts *manager.Options) error {
+	// Similar multi-manager approach for listing
+	fmt.Printf("Multi-manager list not implemented yet\n")
+	return nil
+}
+
+func handleImprovedInstall(ctx context.Context, managers map[string]manager.PackageManager, packages []string, config *ImprovedConfig, opts *manager.Options) error {
+	// Show package sources and let user choose (if multiple managers)
+	fmt.Printf("Improved install with source selection not implemented yet\n")
+	return nil
+}
+
+func handleImprovedInfo(ctx context.Context, managers map[string]manager.PackageManager, packageName string, config *ImprovedConfig, opts *manager.Options) error {
+	// Show package info from all managers
+	fmt.Printf("Multi-manager info not implemented yet\n")
+	return nil
+}
+
+func handleImprovedStatus(ctx context.Context, managers map[string]manager.PackageManager, config *ImprovedConfig, opts *manager.Options) error {
+	// Show status of all managers
+	fmt.Printf("Multi-manager status not implemented yet\n")
+	return nil
+}
+
+func handleImprovedManagers(config *ImprovedConfig) error {
+	registry := manager.GetGlobalRegistry()
+	managers := registry.GetAvailable()
+
+	if config.JSON {
+		type ManagerInfo struct {
+			Name      string `json:"name"`
+			Type      string `json:"type"`
+			Available bool   `json:"available"`
+		}
+
+		var infos []ManagerInfo
+		for name, pm := range managers {
+			infos = append(infos, ManagerInfo{
+				Name:      name,
+				Type:      pm.GetType(),
+				Available: pm.IsAvailable(),
+			})
+		}
+
+		return json.NewEncoder(os.Stdout).Encode(infos)
+	}
+
+	fmt.Println("Available Package Managers:")
+	for name, pm := range managers {
+		status := "❌"
+		if pm.IsAvailable() {
+			status = "✅"
+		}
+		fmt.Printf("  %s %-10s (%s)\n", status, name, pm.GetType())
+	}
+
+	return nil
+}
+
+func handleImprovedUpdate(ctx context.Context, managers map[string]manager.PackageManager, config *ImprovedConfig, opts *manager.Options) error {
+	// Update all managers in parallel
+	fmt.Printf("Parallel update not implemented yet\n")
+	return nil
+}
+
+func getCommandArgs() []string {
+	args := os.Args[1:]
+	var result []string
+
+	// Skip flags and extract command + args
+	for i := 0; i < len(args); i++ {
+		arg := args[i]
+
+		// Skip flags that take values
+		if (arg == "-m" || arg == "--manager" || arg == "-n" || arg == "--name" || arg == "--timeout") && i+1 < len(args) {
+			i++ // Skip the value too
+			continue
+		}
+
+		// Skip single flags
+		if strings.HasPrefix(arg, "-") {
+			continue
+		}
+
+		// This is a command or argument
+		result = append(result, arg)
+	}
+
+	return result
+}

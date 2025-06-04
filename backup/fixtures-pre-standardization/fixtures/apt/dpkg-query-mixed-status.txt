@@ -1,0 +1,4 @@
+dpkg-query: no packages found matching vim-tiny
+adduser	install ok installed	3.118ubuntu5
+apt	install ok installed	2.4.13
+package not found

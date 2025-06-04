@@ -1,0 +1,9 @@
+git-2.40.4-r0 description:
+Distributed version control system
+
+git-2.40.4-r0 webpage:
+https://www.git-scm.com/
+
+git-2.40.4-r0 installed size:
+5948 KiB
+

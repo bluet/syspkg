@@ -1,0 +1,17 @@
+Last metadata expiration check: 0:00:15 ago on Tue Jun  3 22:15:28 2025.
+Dependencies resolved.
+================================================================================
+ Package                         Arch       Version           Repository   Size
+================================================================================
+Upgrading:
+ elfutils-default-yama-scope     noarch     0.192-4.fc39      updates      12 k
+ krb5-libs                       x86_64     1.21.3-2.fc39     updates     766 k
+ librepo                         x86_64     1.19.0-1.fc39     updates      99 k
+ libtirpc                        x86_64     1.3.6-0.fc39      updates      94 k
+
+Transaction Summary
+================================================================================
+Upgrade  4 Packages
+
+Total download size: 971 k
+Operation aborted.

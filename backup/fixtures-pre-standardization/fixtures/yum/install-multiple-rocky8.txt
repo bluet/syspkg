@@ -1,0 +1,47 @@
+Last metadata expiration check: 0:00:58 ago on Sat May 31 07:53:22 2025.
+Package curl-7.61.1-34.el8_10.3.x86_64 is already installed.
+Dependencies resolved.
+================================================================================
+ Package                    Arch      Version                Repository    Size
+================================================================================
+Installing:
+ wget                       x86_64    1.19.5-12.el8_10       appstream    733 k
+Installing dependencies:
+ libmetalink                x86_64    0.1.3-7.el8            baseos        31 k
+ libpsl                     x86_64    0.20.2-6.el8           baseos        60 k
+ publicsuffix-list-dafsa    noarch    20180723-1.el8         baseos        55 k
+
+Transaction Summary
+================================================================================
+Install  4 Packages
+
+Total download size: 879 k
+Installed size: 3.0 M
+Downloading Packages:
+(1/4): libmetalink-0.1.3-7.el8.x86_64.rpm       264 kB/s |  31 kB     00:00
+(2/4): libpsl-0.20.2-6.el8.x86_64.rpm           493 kB/s |  60 kB     00:00
+(3/4): publicsuffix-list-dafsa-20180723-1.el8.n 1.2 MB/s |  55 kB     00:00
+(4/4): wget-1.19.5-12.el8_10.x86_64.rpm         1.1 MB/s | 733 kB     00:00
+--------------------------------------------------------------------------------
+Total                                           472 kB/s | 879 kB     00:01
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                        1/1
+  Installing       : publicsuffix-list-dafsa-20180723-1.el8.noarch          1/4
+  Installing       : libpsl-0.20.2-6.el8.x86_64                             2/4
+  Installing       : libmetalink-0.1.3-7.el8.x86_64                         3/4
+  Installing       : wget-1.19.5-12.el8_10.x86_64                           4/4
+  Running scriptlet: wget-1.19.5-12.el8_10.x86_64                           4/4
+  Verifying        : wget-1.19.5-12.el8_10.x86_64                           1/4
+  Verifying        : libmetalink-0.1.3-7.el8.x86_64                         2/4
+  Verifying        : libpsl-0.20.2-6.el8.x86_64                             3/4
+  Verifying        : publicsuffix-list-dafsa-20180723-1.el8.noarch          4/4
+
+Installed:
+  libmetalink-0.1.3-7.el8.x86_64                  libpsl-0.20.2-6.el8.x86_64
+  publicsuffix-list-dafsa-20180723-1.el8.noarch   wget-1.19.5-12.el8_10.x86_64
+
+Complete!

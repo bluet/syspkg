@@ -1,0 +1,100 @@
+Last metadata expiration check: 0:00:01 ago on Tue Jun  3 22:11:51 2025.
+Dependencies resolved.
+======================================================================================
+ Package                       Arch    Version                        Repo        Size
+======================================================================================
+Upgrading:
+ acl                           x86_64  2.2.53-3.el8                   baseos      80 k
+ audit-libs                    x86_64  3.1.2-1.el8                    baseos     124 k
+ bash                          x86_64  4.4.20-5.el8                   baseos     1.5 M
+ binutils                      x86_64  2.30-125.el8_10                baseos     5.8 M
+ bzip2-libs                    x86_64  1.0.6-28.el8_10                baseos      47 k
+ ca-certificates               noarch  2024.2.69_v8.0.303-80.0.el8_10 baseos     981 k
+ device-mapper                 x86_64  8:1.02.181-15.el8_10           baseos     378 k
+ device-mapper-libs            x86_64  8:1.02.181-15.el8_10           baseos     410 k
+ dnf                           noarch  4.7.0-21.el8_10                baseos     542 k
+ dnf-data                      noarch  4.7.0-21.el8_10                baseos     156 k
+ elfutils-default-yama-scope   noarch  0.190-2.el8                    baseos      52 k
+ elfutils-libelf               x86_64  0.190-2.el8                    baseos     232 k
+ elfutils-libs                 x86_64  0.190-2.el8                    baseos     304 k
+ expat                         x86_64  2.2.5-17.el8_10                baseos     114 k
+ file-libs                     x86_64  5.33-26.el8                    baseos     543 k
+ glib2                         x86_64  2.56.4-165.el8_10              baseos     2.5 M
+ gmp                           x86_64  1:6.1.2-12.el8                 baseos     317 k
+ gnutls                        x86_64  3.6.16-8.el8_10.3              baseos     1.0 M
+ gpgme                         x86_64  1.13.1-12.el8                  baseos     335 k
+ kmod-libs                     x86_64  25-20.el8                      baseos      67 k
+ krb5-libs                     x86_64  1.18.2-31.el8_10               baseos     844 k
+ less                          x86_64  530-3.el8_10                   baseos     163 k
+ libacl                        x86_64  2.2.53-3.el8                   baseos      34 k
+ libblkid                      x86_64  2.32.1-46.el8                  baseos     220 k
+ libcap                        x86_64  2.48-6.el8_9                   baseos      73 k
+ libdnf                        x86_64  0.63.0-21.el8_10               baseos     711 k
+ libfdisk                      x86_64  2.32.1-46.el8                  baseos     253 k
+ libmount                      x86_64  2.32.1-46.el8                  baseos     236 k
+ libnghttp2                    x86_64  1.33.0-6.el8_10.1              baseos      77 k
+ librepo                       x86_64  1.14.2-5.el8                   baseos      92 k
+ libselinux                    x86_64  2.9-10.el8_10                  baseos     165 k
+ libsemanage                   x86_64  2.9-11.el8_10                  baseos     168 k
+ libsmartcols                  x86_64  2.32.1-46.el8                  baseos     179 k
+ libstdc++                     x86_64  8.5.0-26.el8_10                baseos     472 k
+ libtasn1                      x86_64  4.13-5.el8_10                  baseos      76 k
+ libtirpc                      x86_64  1.1.4-12.el8_10                baseos     113 k
+ libuuid                       x86_64  2.32.1-46.el8                  baseos      98 k
+ libxml2                       x86_64  2.9.7-19.el8_10                baseos     696 k
+ openldap                      x86_64  2.4.46-21.el8_10               baseos     353 k
+ openssl-libs                  x86_64  1:1.1.1k-14.el8_10             baseos     1.5 M
+ p11-kit                       x86_64  0.23.22-2.el8                  baseos     326 k
+ p11-kit-trust                 x86_64  0.23.22-2.el8                  baseos     137 k
+ pam                           x86_64  1.3.1-36.el8_10                baseos     746 k
+ platform-python               x86_64  3.6.8-69.el8_10.rocky.0        baseos      87 k
+ platform-python-setuptools    noarch  39.2.0-8.el8_10                baseos     631 k
+ python3-dnf                   noarch  4.7.0-21.el8_10                baseos     550 k
+ python3-gpg                   x86_64  1.13.1-12.el8                  baseos     243 k
+ python3-hawkey                x86_64  0.63.0-21.el8_10               baseos     118 k
+ python3-libdnf                x86_64  0.63.0-21.el8_10               baseos     779 k
+ python3-libs                  x86_64  3.6.8-69.el8_10.rocky.0        baseos     7.9 M
+ python3-pip-wheel             noarch  9.0.3-24.el8.rocky.0           baseos     865 k
+ python3-rpm                   x86_64  4.14.3-32.el8_10               baseos     154 k
+ python3-setuptools-wheel      noarch  39.2.0-8.el8_10                baseos     288 k
+ rocky-gpg-keys                noarch  8.10-1.10.el8                  baseos      14 k
+ rocky-release                 noarch  8.10-1.10.el8                  baseos      23 k
+ rocky-repos                   noarch  8.10-1.10.el8                  baseos      16 k
+ rpm                           x86_64  4.14.3-32.el8_10               baseos     543 k
+ rpm-build-libs                x86_64  4.14.3-32.el8_10               baseos     157 k
+ rpm-libs                      x86_64  4.14.3-32.el8_10               baseos     347 k
+ setup                         noarch  2.12.2-11.el8                  baseos     180 k
+ shadow-utils                  x86_64  2:4.6-22.el8                   baseos     1.2 M
+ sqlite-libs                   x86_64  3.26.0-19.el8_9                baseos     580 k
+ systemd                       x86_64  239-82.el8_10.5                baseos     3.6 M
+ systemd-libs                  x86_64  239-82.el8_10.5                baseos     1.1 M
+ systemd-pam                   x86_64  239-82.el8_10.5                baseos     513 k
+ tpm2-tss                      x86_64  2.3.2-6.el8                    baseos     274 k
+ tzdata                        noarch  2025b-1.el8                    baseos     476 k
+ util-linux                    x86_64  2.32.1-46.el8                  baseos     2.5 M
+ yum                           noarch  4.7.0-21.el8_10                baseos     205 k
+ zlib                          x86_64  1.2.11-26.el8                  baseos     102 k
+Installing dependencies:
+ libevent                      x86_64  2.1.8-5.el8                    baseos     252 k
+ openssl                       x86_64  1:1.1.1k-14.el8_10             baseos     710 k
+ trousers-lib                  x86_64  0.3.15-2.el8                   baseos     167 k
+ unbound-libs                  x86_64  1.16.2-5.8.el8_10              appstream  576 k
+ xkeyboard-config              noarch  2.28-1.el8                     appstream  781 k
+Installing weak dependencies:
+ diffutils                     x86_64  3.6-6.el8                      baseos     358 k
+ elfutils-debuginfod-client    x86_64  0.190-2.el8                    baseos      76 k
+ libxkbcommon                  x86_64  0.9.1-1.el8                    appstream  115 k
+ openssl-pkcs11                x86_64  0.4.10-3.el8                   baseos      65 k
+ platform-python-pip           noarch  9.0.3-24.el8.rocky.0           baseos     1.6 M
+ python3-unbound               x86_64  1.16.2-5.8.el8_10              appstream  129 k
+ rpm-plugin-systemd-inhibit    x86_64  4.14.3-32.el8_10               baseos      78 k
+ shared-mime-info              x86_64  1.9-4.el8                      baseos     328 k
+ trousers                      x86_64  0.3.15-2.el8                   baseos     152 k
+
+Transaction Summary
+======================================================================================
+Install  14 Packages
+Upgrade  70 Packages
+
+Total download size: 52 M
+Operation aborted.

@@ -1,0 +1,68 @@
+Dependencies resolved.
+================================================================================
+ Package                       Arch     Version                Repository  Size
+================================================================================
+Removing:
+ nginx                         x86_64   2:1.26.2-1.fc39        @updates   119 k
+Removing unused dependencies:
+ fedora-logos-httpd            noarch   38.1.0-2.fc39          @fedora     12 k
+ fonts-filesystem              noarch   1:2.0.5-12.fc39        @fedora      0  
+ gperftools-libs               x86_64   2.9.1-6.fc39           @fedora    1.4 M
+ julietaula-montserrat-fonts   noarch   1:7.222-8.fc39         @updates   4.2 M
+ libunwind                     x86_64   1.7.0-0.2.rc2.fc39     @fedora    163 k
+ logrotate                     x86_64   3.21.0-4.fc39          @fedora    152 k
+ nginx-core                    x86_64   2:1.26.2-1.fc39        @updates   1.8 M
+ nginx-filesystem              noarch   2:1.26.2-1.fc39        @updates     0  
+ nginx-mimetypes               noarch   2.1.54-2.fc39          @fedora     47 k
+
+Transaction Summary
+================================================================================
+Remove  10 Packages
+
+Freed space: 7.8 M
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                        1/1 
+  Running scriptlet: nginx-2:1.26.2-1.fc39.x86_64                          1/10 
+  Erasing          : nginx-2:1.26.2-1.fc39.x86_64                          1/10 
+  Running scriptlet: nginx-2:1.26.2-1.fc39.x86_64                          1/10 
+  Erasing          : fedora-logos-httpd-38.1.0-2.fc39.noarch               2/10 
+  Erasing          : nginx-core-2:1.26.2-1.fc39.x86_64                     3/10 
+  Erasing          : nginx-mimetypes-2.1.54-2.fc39.noarch                  4/10 
+  Erasing          : julietaula-montserrat-fonts-1:7.222-8.fc39.noarch     5/10 
+  Erasing          : gperftools-libs-2.9.1-6.fc39.x86_64                   6/10 
+  Erasing          : fonts-filesystem-1:2.0.5-12.fc39.noarch               7/10 
+  Erasing          : nginx-filesystem-2:1.26.2-1.fc39.noarch               8/10 
+  Erasing          : libunwind-1.7.0-0.2.rc2.fc39.x86_64                   9/10 
+  Running scriptlet: logrotate-3.21.0-4.fc39.x86_64                       10/10 
+Removed "/etc/systemd/system/timers.target.wants/logrotate.timer".
+
+  Erasing          : logrotate-3.21.0-4.fc39.x86_64                       10/10 
+  Running scriptlet: logrotate-3.21.0-4.fc39.x86_64                       10/10 
+  Verifying        : fedora-logos-httpd-38.1.0-2.fc39.noarch               1/10 
+  Verifying        : fonts-filesystem-1:2.0.5-12.fc39.noarch               2/10 
+  Verifying        : gperftools-libs-2.9.1-6.fc39.x86_64                   3/10 
+  Verifying        : julietaula-montserrat-fonts-1:7.222-8.fc39.noarch     4/10 
+  Verifying        : libunwind-1.7.0-0.2.rc2.fc39.x86_64                   5/10 
+  Verifying        : logrotate-3.21.0-4.fc39.x86_64                        6/10 
+  Verifying        : nginx-2:1.26.2-1.fc39.x86_64                          7/10 
+  Verifying        : nginx-core-2:1.26.2-1.fc39.x86_64                     8/10 
+  Verifying        : nginx-filesystem-2:1.26.2-1.fc39.noarch               9/10 
+  Verifying        : nginx-mimetypes-2.1.54-2.fc39.noarch                 10/10 
+
+Removed:
+  fedora-logos-httpd-38.1.0-2.fc39.noarch                                       
+  fonts-filesystem-1:2.0.5-12.fc39.noarch                                       
+  gperftools-libs-2.9.1-6.fc39.x86_64                                           
+  julietaula-montserrat-fonts-1:7.222-8.fc39.noarch                             
+  libunwind-1.7.0-0.2.rc2.fc39.x86_64                                           
+  logrotate-3.21.0-4.fc39.x86_64                                                
+  nginx-2:1.26.2-1.fc39.x86_64                                                  
+  nginx-core-2:1.26.2-1.fc39.x86_64                                             
+  nginx-filesystem-2:1.26.2-1.fc39.noarch                                       
+  nginx-mimetypes-2.1.54-2.fc39.noarch                                          
+
+Complete!

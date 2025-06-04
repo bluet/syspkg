@@ -100,13 +100,13 @@ func (b *BaseManager) Upgrade(ctx context.Context, packages []string, opts *Opti
 
 func (b *BaseManager) Clean(ctx context.Context, opts *Options) error {
 	// Default: no-op for cleanup (many managers don't need this)
-	b.LogVerbose(opts, "Clean operation not needed for %s", b.name)
+	b.LogVerbosef(opts, "Clean operation not needed for %s", b.name)
 	return nil
 }
 
 func (b *BaseManager) AutoRemove(ctx context.Context, opts *Options) ([]PackageInfo, error) {
 	// Default: no-op (return empty list)
-	b.LogVerbose(opts, "AutoRemove not supported for %s", b.name)
+	b.LogVerbosef(opts, "AutoRemove not supported for %s", b.name)
 	return []PackageInfo{}, nil
 }
 
@@ -146,15 +146,15 @@ func (b *BaseManager) Status(ctx context.Context, opts *Options) (ManagerStatus,
 
 // === HELPER METHODS ===
 
-// LogVerbose logs a message only if verbose mode is enabled
-func (b *BaseManager) LogVerbose(opts *Options, format string, args ...interface{}) {
+// LogVerbosef logs a message only if verbose mode is enabled
+func (b *BaseManager) LogVerbosef(opts *Options, format string, args ...interface{}) {
 	if opts != nil && opts.Verbose {
 		log.Printf("[%s] "+format, append([]interface{}{b.name}, args...)...)
 	}
 }
 
-// LogDebug logs a message only if debug mode is enabled
-func (b *BaseManager) LogDebug(opts *Options, format string, args ...interface{}) {
+// LogDebugf logs a message only if debug mode is enabled
+func (b *BaseManager) LogDebugf(opts *Options, format string, args ...interface{}) {
 	if opts != nil && opts.Debug {
 		log.Printf("[%s DEBUG] "+format, append([]interface{}{b.name}, args...)...)
 	}

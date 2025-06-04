@@ -5,10 +5,7 @@ matrix:
   # Debian-based distributions
   debian-family:
     distributions:
-      - ubuntu:20.04
       - ubuntu:22.04
-      - ubuntu:24.04
-      - debian:11
       - debian:12
     package_managers:
       apt:
@@ -29,25 +26,15 @@ matrix:
   # RHEL-based distributions
   rhel-family:
     distributions:
-      - rockylinux:8
       - rockylinux:9
-      - almalinux:8
       - almalinux:9
-      - fedora:38
       - fedora:39
-      - centos:stream8
-      - centos:stream9
     package_managers:
-      yum:
-        available: true
-        operations: [search, list, show, clean, refresh]
-        test_priority: high
-        distributions: ["rockylinux:8", "almalinux:8", "centos:stream8"]
       dnf:
         available: true
         operations: [search, list, install, remove, upgrade, show]
         test_priority: high
-        distributions: ["rockylinux:9", "almalinux:9", "fedora:38", "fedora:39", "centos:stream9"]
+        distributions: ["rockylinux:9", "almalinux:9", "fedora:39"]
       flatpak:
         available: true
         operations: [search, list, show]
@@ -57,11 +44,19 @@ matrix:
   # Alpine-based
   alpine-family:
     distributions:
-      - alpine:3.17
       - alpine:3.18
-      - alpine:3.19
     package_managers:
       apk:
+        available: true
+        operations: [search, list, install, remove, upgrade, show]
+        test_priority: medium
+
+  # SUSE-based
+  suse-family:
+    distributions:
+      - opensuse/leap:15.5
+    package_managers:
+      zypper:
         available: true
         operations: [search, list, install, remove, upgrade, show]
         test_priority: medium
@@ -99,11 +94,10 @@ test_strategy:
 
 # Primary distributions for CI (to limit resource usage)
 primary_distributions:
-  - ubuntu:22.04      # APT testing
-  - rockylinux:9      # DNF testing
-  - almalinux:8       # YUM testing
-  - alpine:3.18       # APK testing
-  - fedora:39         # Latest DNF
+  - ubuntu:22.04       # APT testing
+  - fedora:39          # DNF testing
+  - alpine:3.18        # APK testing
+  - opensuse/leap:15.5 # Zypper testing
 
 # Test fixtures to generate per OS
 fixtures:
@@ -132,3 +126,10 @@ fixtures:
       - "apk search vim"
       - "apk info vim"
       - "apk list --installed"
+
+  zypper:
+    commands:
+      - "zypper search vim"
+      - "zypper info vim"
+      - "zypper list-installed | head -20"
+      - "zypper list-updates"

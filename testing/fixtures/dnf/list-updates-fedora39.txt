@@ -1,0 +1,6 @@
+Last metadata expiration check: 0:00:24 ago on Tue Jun  3 22:15:28 2025.
+Available Upgrades
+elfutils-default-yama-scope.noarch             0.192-4.fc39              updates
+krb5-libs.x86_64                               1.21.3-2.fc39             updates
+librepo.x86_64                                 1.19.0-1.fc39             updates
+libtirpc.x86_64                                1.3.6-0.fc39              updates

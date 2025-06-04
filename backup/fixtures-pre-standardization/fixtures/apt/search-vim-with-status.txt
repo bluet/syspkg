@@ -1,0 +1,55 @@
+Sorting...
+Full Text Search...
+apvlv/jammy 0.4.0-2 amd64
+  PDF viewer with Vim-like behaviour
+
+biosyntax-vim/jammy 1.0.0b-2 all
+  Syntax Highlighting for Computational Biology (vim)
+
+cream/jammy 0.43-3.1 all
+  VIM macros that make the VIM easier to use for beginners
+
+dh-vim-addon/jammy 0.4 all
+  debhelper addon to help package Vim/Neovim addons
+
+neovim/jammy 0.6.1-3 amd64
+  heavily refactored vim fork
+
+neovim-runtime/jammy 0.6.1-3 all
+  heavily refactored vim fork (runtime files)
+
+vim/jammy-updates,jammy-security,now 2:8.2.3995-1ubuntu2.24 amd64 [installed]
+  Vi IMproved - enhanced vi editor
+
+vim-addon-manager/jammy 0.5.10 all
+  manager of addons for the Vim editor
+
+vim-airline/jammy 0.11-1 all
+  Lean & mean status/tabline for vim that's light as air
+
+vim-common/jammy-updates,jammy-security,now 2:8.2.3995-1ubuntu2.24 all [installed]
+  Vi IMproved - Common files
+
+vim-ctrlp/jammy 1.81-1 all
+  fuzzy file, buffer, mru, tag, etc. finder for Vim
+
+vim-doc/jammy-updates,jammy-security 2:8.2.3995-1ubuntu2.24 all
+  Vi IMproved - HTML documentation
+
+vim-fugitive/jammy 3.4-1 all
+  Vim plugin to work with Git
+
+vim-gtk3/jammy-updates,jammy-security 2:8.2.3995-1ubuntu2.24 amd64
+  Vi IMproved - enhanced vi editor - with GTK3 GUI
+
+vim-nox/jammy-updates,jammy-security 2:8.2.3995-1ubuntu2.24 amd64
+  Vi IMproved - enhanced vi editor - with scripting languages support
+
+vim-runtime/jammy-updates,jammy-security,now 2:8.2.3995-1ubuntu2.24 all [installed]
+  Vi IMproved - Runtime files
+
+vim-scripts/jammy 20210124.2 all
+  plugins for vim, adding bells and whistles
+
+vim-tiny/jammy-updates,jammy-security 2:8.2.3995-1ubuntu2.24 amd64
+  Vi IMproved - enhanced vi editor - compact version

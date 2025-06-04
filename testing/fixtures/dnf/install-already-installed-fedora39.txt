@@ -1,0 +1,5 @@
+Last metadata expiration check: 0:01:02 ago on Tue Jun  3 22:13:03 2025.
+Package vim-enhanced-2:9.1.825-1.fc39.x86_64 is already installed.
+Dependencies resolved.
+Nothing to do.
+Complete!

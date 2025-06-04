@@ -80,6 +80,28 @@ Read ~/.claude/CLAUDE.md
 - Don't test third-party libraries
 - Follow modern testing principles and best practices
 
+### Testing Rules (IMPORTANT)
+1. **Fixtures are Primary Test Data**
+   - Use real fixture files from `testing/fixtures/` in unit tests
+   - Fixtures contain full raw outputs from actual package managers
+   - Inline mocks are for quick tests and edge cases only
+
+2. **Docker is Required for Safety**
+   - ALWAYS use Docker for fixture generation
+   - ALWAYS use Docker for integration testing
+   - NEVER run package manager operations on the development system
+   - Use `make test-docker-*` commands for safe testing
+
+3. **Testing Hierarchy**
+   - Unit tests: Use fixtures (safe, fast, realistic)
+   - Integration tests: Run in Docker containers
+   - System tests: Only in CI or dedicated environments
+
+4. **Snap Testing Limitations**
+   - Snap doesn't work in Docker (requires snapd daemon)
+   - Use GitHub Actions native runners for Snap
+   - Consider LXC/VM for local Snap testing
+
 ## Helper Tools
 Suggest and use suitable tools if applicable. If not installed yet, plan the installation in Todo and ask if user want to install the tool(s).
 If the language/framework has built-in tool as officially recommend, and the best practice is to use it (ex, gofmt), please always remember to use them, follow official suggestions.
@@ -170,7 +192,7 @@ Located in `.github/workflows/`:
 
 ## Architecture Overview
 
-For detailed technical architecture, design patterns, and implementation guidelines, see **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.
+For detailed technical architecture, design patterns, and implementation guidelines, see **[docs/ARCHITECTURE_OVERVIEW.md](docs/ARCHITECTURE_OVERVIEW.md)**.
 
 **Quick Reference:**
 - **Core Interfaces**: `PackageManager` and `SysPkg` (interface.go)
@@ -206,21 +228,32 @@ For current development tasks, see [GitHub Issues](https://github.com/bluet/sysp
 ### 🔴 High Priority (Security & Critical Bugs)
 1. **Command injection vulnerability** ✅ - validate/sanitize package names before exec.Command (PR #25)
 2. **Input validation helper function** ✅ for package names and arguments (PR #25)
-3. **Add security scanning with Snyk** to CI/CD pipeline
-4. **Cross-package manager status normalization** ✅ - APT config-files → available
-5. **GitHub workflow compatibility fixes** ✅ - Go 1.23.4, Docker multi-OS testing
-6. **Exit code bugs** ✅ - Fixed APT, Snap, Flatpak exit code handling (Issues #21, #22, #24)
-7. **CommandRunner interface migration** ✅ - APT & YUM complete (Issue #20)
-8. **Exit code documentation** ✅ - Created comprehensive exit code docs for all package managers
+3. **Unified interface architecture** ✅ - Complete APT implementation with all 13 operations
+4. **Real fixture testing** ✅ - Docker entrypoint approach for comprehensive test coverage
+5. **Cross-package manager status normalization** ✅ - APT config-files → available
+6. **GitHub workflow compatibility fixes** ✅ - Go 1.23.4, Docker multi-OS testing
+7. **Exit code bugs** ✅ - Fixed APT, Snap, Flatpak exit code handling (Issues #21, #22, #24)
+8. **CommandRunner interface migration** ✅ - APT complete, YUM pending (Issue #20)
+9. **Exit code documentation** ✅ - Created comprehensive exit code docs for all package managers
+10. **Add security scanning with Snyk** to CI/CD pipeline
 
 ### 🟠 Pending High Priority Items
+- **Branch integration**: Merge refactor-unified-interface to main (testing phase complete)
+- **Snap/Flatpak migration**: Convert to unified interface architecture
 - **Add security scanning with Snyk** to CI/CD pipeline
-- **Complete CommandRunner migration**: Snap and Flatpak (Issues #28, #29)
+
+### ✅ COMPLETED (2025-06-04)
+- **Legacy code cleanup**: ✅ Resolved backup directory compilation issues
+- **YUM parser coverage gaps**: ✅ Fixed (57% → 100% coverage)
+- **YUM security validation**: ✅ Added comprehensive input validation testing
+- **APT category parsing**: ✅ Fixed GetInfo method and parser architecture
+- **Code quality**: ✅ Fixed all linting errors (errcheck, gofmt, unused functions)
+- **Testing strategy validation**: ✅ Confirmed excellent approach with proper implementation
 
 ### 🟡 Medium Priority (Code Quality & Features)
 **Test Coverage & Architecture:**
-- **Test coverage improvements**: YUM gaps (Issue #32), Snap & Flatpak comprehensive suites
-- **CommandRunner migration completion**: Snap and Flatpak (Issues #28, #29)
+- **Test coverage improvements**: ✅ YUM gaps resolved (Issue #32), Snap & Flatpak suites pending
+- **CommandRunner migration completion**: YUM, Snap and Flatpak (Issues #20, #28, #29)
 
 **CLI & User Experience:**
 - **CLI upgrade display**: Fix packages not shown in CLI output (Issue #3)

@@ -1,0 +1,5 @@
+fetch https://dl-cdn.alpinelinux.org/alpine/v3.18/main/x86_64/APKINDEX.tar.gz
+fetch https://dl-cdn.alpinelinux.org/alpine/v3.18/community/x86_64/APKINDEX.tar.gz
+v3.18.12-136-gf28e1c9c9f8 [https://dl-cdn.alpinelinux.org/alpine/v3.18/main]
+v3.18.12-132-ge2ea6f61358 [https://dl-cdn.alpinelinux.org/alpine/v3.18/community]
+OK: 20070 distinct packages available

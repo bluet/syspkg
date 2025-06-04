@@ -1,0 +1,7 @@
+Listing...
+apt/jammy-updates 2.4.14 amd64 [upgradable from: 2.4.13]
+gpgv/jammy-updates,jammy-security 2.2.27-3ubuntu2.3 amd64 [upgradable from: 2.2.27-3ubuntu2.1]
+libapt-pkg6.0/jammy-updates 2.4.14 amd64 [upgradable from: 2.4.13]
+vim/jammy-updates,jammy-security 2:8.2.3995-1ubuntu2.24 amd64 [upgradable from: 2:8.2.3995-1ubuntu2.23]
+vim-common/jammy-updates,jammy-security 2:8.2.3995-1ubuntu2.24 all [upgradable from: 2:8.2.3995-1ubuntu2.23]
+vim-runtime/jammy-updates,jammy-security 2:8.2.3995-1ubuntu2.24 all [upgradable from: 2:8.2.3995-1ubuntu2.23]

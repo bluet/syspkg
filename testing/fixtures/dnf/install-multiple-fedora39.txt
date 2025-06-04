@@ -1,0 +1,105 @@
+Last metadata expiration check: 0:00:01 ago on Tue Jun  3 22:15:28 2025.
+Dependencies resolved.
+================================================================================
+ Package                      Arch    Version                    Repo      Size
+================================================================================
+Installing:
+ git                          x86_64  2.47.0-1.fc39              updates   51 k
+ htop                         x86_64  3.3.0-1.fc39               updates  200 k
+ nginx                        x86_64  2:1.26.2-1.fc39            updates   32 k
+Installing dependencies:
+ fedora-logos-httpd           noarch  38.1.0-2.fc39              fedora    15 k
+ fonts-filesystem             noarch  1:2.0.5-12.fc39            fedora   8.2 k
+ git-core                     x86_64  2.47.0-1.fc39              updates  4.8 M
+ git-core-doc                 noarch  2.47.0-1.fc39              updates  3.0 M
+ gperftools-libs              x86_64  2.9.1-6.fc39               fedora   307 k
+ groff-base                   x86_64  1.23.0-3.fc39              updates  1.1 M
+ hwloc-libs                   x86_64  2.11.1-1.fc39              updates  2.1 M
+ less                         x86_64  633-4.fc39                 updates  175 k
+ libcbor                      x86_64  0.10.2-2.fc39              fedora    58 k
+ libedit                      x86_64  3.1-53.20240808cvs.fc39    updates  107 k
+ libfido2                     x86_64  1.13.0-3.fc39              fedora    98 k
+ libnl3                       x86_64  3.9.0-1.fc39               updates  350 k
+ libunwind                    x86_64  1.7.0-0.2.rc2.fc39         fedora    70 k
+ libutempter                  x86_64  1.2.1-10.fc39              fedora    26 k
+ ncurses                      x86_64  6.4-7.20230520.fc39.1      updates  416 k
+ nginx-core                   x86_64  2:1.26.2-1.fc39            updates  658 k
+ nginx-filesystem             noarch  2:1.26.2-1.fc39            updates   11 k
+ nginx-mimetypes              noarch  2.1.54-2.fc39              fedora    21 k
+ openssh                      x86_64  9.3p1-11.fc39              updates  437 k
+ openssh-clients              x86_64  9.3p1-11.fc39              updates  734 k
+ perl-AutoLoader              noarch  5.74-502.fc39              updates   21 k
+ perl-B                       x86_64  1.88-502.fc39              updates  177 k
+ perl-Carp                    noarch  1.54-500.fc39              fedora    29 k
+ perl-Class-Struct            noarch  0.68-502.fc39              updates   22 k
+ perl-Data-Dumper             x86_64  2.188-501.fc39             fedora    56 k
+ perl-Digest                  noarch  1.20-500.fc39              fedora    25 k
+ perl-Digest-MD5              x86_64  2.58-500.fc39              fedora    35 k
+ perl-DynaLoader              x86_64  1.54-502.fc39              updates   26 k
+ perl-Encode                  x86_64  4:3.19-500.fc39            fedora   1.7 M
+ perl-Errno                   x86_64  1.37-502.fc39              updates   15 k
+ perl-Error                   noarch  1:0.17029-13.fc39          fedora    40 k
+ perl-Exporter                noarch  5.77-500.fc39              fedora    31 k
+ perl-Fcntl                   x86_64  1.15-502.fc39              updates   21 k
+ perl-File-Basename           noarch  2.86-502.fc39              updates   17 k
+ perl-File-Find               noarch  1.43-502.fc39              updates   25 k
+ perl-File-Path               noarch  2.18-500.fc39              fedora    35 k
+ perl-File-Temp               noarch  1:0.231.100-500.fc39       fedora    58 k
+ perl-File-stat               noarch  1.13-502.fc39              updates   17 k
+ perl-FileHandle              noarch  2.05-502.fc39              updates   16 k
+ perl-Getopt-Long             noarch  1:2.54-500.fc39            fedora    60 k
+ perl-Getopt-Std              noarch  1.13-502.fc39              updates   16 k
+ perl-Git                     noarch  2.47.0-1.fc39              updates   38 k
+ perl-HTTP-Tiny               noarch  0.088-3.fc39               fedora    56 k
+ perl-IO                      x86_64  1.52-502.fc39              updates   82 k
+ perl-IO-Socket-IP            noarch  0.42-1.fc39                fedora    42 k
+ perl-IO-Socket-SSL           noarch  2.083-3.fc39               fedora   225 k
+ perl-IPC-Open3               noarch  1.22-502.fc39              updates   22 k
+ perl-MIME-Base64             x86_64  3.16-500.fc39              fedora    29 k
+ perl-Mozilla-CA              noarch  20230801-1.fc39            fedora    13 k
+ perl-Net-SSLeay              x86_64  1.92-10.fc39               fedora   360 k
+ perl-POSIX                   x86_64  2.13-502.fc39              updates   97 k
+ perl-PathTools               x86_64  3.89-500.fc39              fedora    87 k
+ perl-Pod-Escapes             noarch  1:1.07-500.fc39            fedora    20 k
+ perl-Pod-Perldoc             noarch  3.28.01-501.fc39           fedora    86 k
+ perl-Pod-Simple              noarch  1:3.45-4.fc39              fedora   218 k
+ perl-Pod-Usage               noarch  4:2.03-500.fc39            fedora    39 k
+ perl-Scalar-List-Utils       x86_64  5:1.63-500.fc39            fedora    72 k
+ perl-SelectSaver             noarch  1.02-502.fc39              updates   12 k
+ perl-Socket                  x86_64  4:2.037-3.fc39             fedora    55 k
+ perl-Storable                x86_64  1:3.32-500.fc39            fedora    99 k
+ perl-Symbol                  noarch  1.09-502.fc39              updates   14 k
+ perl-Term-ANSIColor          noarch  5.01-501.fc39              fedora    47 k
+ perl-Term-Cap                noarch  1.18-500.fc39              fedora    22 k
+ perl-TermReadKey             x86_64  2.38-18.fc39               fedora    35 k
+ perl-Text-ParseWords         noarch  3.31-500.fc39              fedora    16 k
+ perl-Text-Tabs+Wrap          noarch  2023.0511-3.fc39           fedora    22 k
+ perl-Time-Local              noarch  2:1.350-3.fc39             fedora    34 k
+ perl-URI                     noarch  5.21-1.fc39                fedora   125 k
+ perl-base                    noarch  2.27-502.fc39              updates   16 k
+ perl-constant                noarch  1.33-501.fc39              fedora    22 k
+ perl-if                      noarch  0.61.000-502.fc39          updates   14 k
+ perl-interpreter             x86_64  4:5.38.2-502.fc39          updates   72 k
+ perl-lib                     x86_64  0.65-502.fc39              updates   15 k
+ perl-libnet                  noarch  3.15-501.fc39              fedora   129 k
+ perl-libs                    x86_64  4:5.38.2-502.fc39          updates  2.4 M
+ perl-locale                  noarch  1.10-502.fc39              updates   14 k
+ perl-mro                     x86_64  1.28-502.fc39              updates   29 k
+ perl-overload                noarch  1.37-502.fc39              updates   46 k
+ perl-overloading             noarch  0.02-502.fc39              updates   13 k
+ perl-parent                  noarch  1:0.241-500.fc39           fedora    14 k
+ perl-podlators               noarch  1:5.01-500.fc39            fedora   125 k
+ perl-vars                    noarch  1.05-502.fc39              updates   13 k
+ util-linux                   x86_64  2.39.4-1.fc39              updates  1.2 M
+Installing weak dependencies:
+ julietaula-montserrat-fonts  noarch  1:7.222-8.fc39             updates  1.6 M
+ logrotate                    x86_64  3.21.0-4.fc39              fedora    75 k
+ perl-NDBM_File               x86_64  1.16-502.fc39              updates   23 k
+
+Transaction Summary
+================================================================================
+Install  89 Packages
+
+Total download size: 25 M
+Installed size: 92 M
+Operation aborted.

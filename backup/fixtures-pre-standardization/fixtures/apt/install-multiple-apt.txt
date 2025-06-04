@@ -1,0 +1,79 @@
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+Reading package lists...
+Building dependency tree...
+Reading state information...
+curl is already the newest version (7.81.0-1ubuntu1.20).
+The following packages were automatically installed and are no longer required:
+  javascript-common libexpat1-dev libjs-jquery libjs-sphinxdoc
+  libjs-underscore libpython3-dev libpython3-stdlib libpython3.10-dev python3
+  python3-dev python3-distutils python3-lib2to3 python3-minimal
+  python3-pkg-resources python3-setuptools python3-wheel python3.10
+  python3.10-dev python3.10-minimal zlib1g-dev
+Use 'apt autoremove' to remove them.
+The following additional packages will be installed:
+  iproute2 libatm1 libbpf0 libcap2-bin libelf1 libicu70 libmaxminddb0 libmnl0
+  libnginx-mod-http-geoip2 libnginx-mod-http-image-filter
+  libnginx-mod-http-xslt-filter libnginx-mod-mail libnginx-mod-stream
+  libnginx-mod-stream-geoip2 libnl-3-200 libnl-genl-3-200 libpam-cap libxml2
+  libxslt1.1 libxtables12 nginx-common nginx-core
+Suggested packages:
+  lm-sensors lsof strace iproute2-doc mmdb-bin fcgiwrap nginx-doc ssl-cert
+The following NEW packages will be installed:
+  htop iproute2 libatm1 libbpf0 libcap2-bin libelf1 libicu70 libmaxminddb0
+  libmnl0 libnginx-mod-http-geoip2 libnginx-mod-http-image-filter
+  libnginx-mod-http-xslt-filter libnginx-mod-mail libnginx-mod-stream
+  libnginx-mod-stream-geoip2 libnl-3-200 libnl-genl-3-200 libpam-cap libxml2
+  libxslt1.1 libxtables12 nginx nginx-common nginx-core wget
+0 upgraded, 25 newly installed, 0 to remove and 18 not upgraded.
+Inst libelf1 (0.186-1ubuntu0.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libbpf0 (1:0.5.0-1ubuntu22.04.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libmnl0 (1.0.4-3build2 Ubuntu:22.04/jammy [amd64])
+Inst libxtables12 (1.8.7-1ubuntu5.2 Ubuntu:22.04/jammy-updates [amd64])
+Inst libcap2-bin (1:2.44-1ubuntu0.22.04.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst iproute2 (5.15.0-1ubuntu2 Ubuntu:22.04/jammy [amd64])
+Inst libatm1 (1:2.5.1-4build2 Ubuntu:22.04/jammy [amd64])
+Inst libicu70 (70.1-2 Ubuntu:22.04/jammy [amd64])
+Inst libpam-cap (1:2.44-1ubuntu0.22.04.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libxml2 (2.9.13+dfsg-1ubuntu0.7 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libmaxminddb0 (1.5.2-1build2 Ubuntu:22.04/jammy [amd64])
+Inst wget (1.21.2-2ubuntu1.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libnl-3-200 (3.5.0-0.1 Ubuntu:22.04/jammy [amd64])
+Inst libnl-genl-3-200 (3.5.0-0.1 Ubuntu:22.04/jammy [amd64])
+Inst htop (3.0.5-7build2 Ubuntu:22.04/jammy [amd64])
+Inst nginx-common (1.18.0-6ubuntu14.6 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Inst libnginx-mod-http-geoip2 (1.18.0-6ubuntu14.6 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libnginx-mod-http-image-filter (1.18.0-6ubuntu14.6 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libxslt1.1 (1.1.34-4ubuntu0.22.04.3 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libnginx-mod-http-xslt-filter (1.18.0-6ubuntu14.6 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libnginx-mod-mail (1.18.0-6ubuntu14.6 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libnginx-mod-stream (1.18.0-6ubuntu14.6 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libnginx-mod-stream-geoip2 (1.18.0-6ubuntu14.6 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst nginx-core (1.18.0-6ubuntu14.6 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst nginx (1.18.0-6ubuntu14.6 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libelf1 (0.186-1ubuntu0.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libbpf0 (1:0.5.0-1ubuntu22.04.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libmnl0 (1.0.4-3build2 Ubuntu:22.04/jammy [amd64])
+Conf libxtables12 (1.8.7-1ubuntu5.2 Ubuntu:22.04/jammy-updates [amd64])
+Conf libcap2-bin (1:2.44-1ubuntu0.22.04.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf iproute2 (5.15.0-1ubuntu2 Ubuntu:22.04/jammy [amd64])
+Conf libatm1 (1:2.5.1-4build2 Ubuntu:22.04/jammy [amd64])
+Conf libicu70 (70.1-2 Ubuntu:22.04/jammy [amd64])
+Conf libpam-cap (1:2.44-1ubuntu0.22.04.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libxml2 (2.9.13+dfsg-1ubuntu0.7 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libmaxminddb0 (1.5.2-1build2 Ubuntu:22.04/jammy [amd64])
+Conf wget (1.21.2-2ubuntu1.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libnl-3-200 (3.5.0-0.1 Ubuntu:22.04/jammy [amd64])
+Conf libnl-genl-3-200 (3.5.0-0.1 Ubuntu:22.04/jammy [amd64])
+Conf htop (3.0.5-7build2 Ubuntu:22.04/jammy [amd64])
+Conf nginx-common (1.18.0-6ubuntu14.6 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Conf libnginx-mod-http-geoip2 (1.18.0-6ubuntu14.6 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libnginx-mod-http-image-filter (1.18.0-6ubuntu14.6 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libxslt1.1 (1.1.34-4ubuntu0.22.04.3 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libnginx-mod-http-xslt-filter (1.18.0-6ubuntu14.6 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libnginx-mod-mail (1.18.0-6ubuntu14.6 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libnginx-mod-stream (1.18.0-6ubuntu14.6 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libnginx-mod-stream-geoip2 (1.18.0-6ubuntu14.6 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf nginx-core (1.18.0-6ubuntu14.6 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf nginx (1.18.0-6ubuntu14.6 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])

@@ -1,0 +1,12 @@
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+Hit:1 http://archive.ubuntu.com/ubuntu jammy InRelease
+Hit:2 http://security.ubuntu.com/ubuntu jammy-security InRelease
+Get:3 http://archive.ubuntu.com/ubuntu jammy-updates InRelease [128 kB]
+Get:4 http://archive.ubuntu.com/ubuntu jammy-backports InRelease [127 kB]
+Fetched 255 kB in 2s (116 kB/s)
+Reading package lists...
+Building dependency tree...
+Reading state information...
+18 packages can be upgraded. Run 'apt list --upgradable' to see them.

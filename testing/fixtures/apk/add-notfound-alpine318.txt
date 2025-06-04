@@ -1,0 +1,3 @@
+ERROR: unable to select packages:
+  nonexistentpackage (no such package):
+    required by: world[nonexistentpackage]

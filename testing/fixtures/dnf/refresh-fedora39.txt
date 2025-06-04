@@ -1,0 +1,4 @@
+Fedora 39 - x86_64                              9.4 kB/s | 8.5 kB     00:00    
+Fedora 39 openh264 (From Cisco) - x86_64        4.6 kB/s | 989  B     00:00    
+Fedora 39 - x86_64 - Updates                     19 kB/s | 8.1 kB     00:00    
+Metadata cache created.

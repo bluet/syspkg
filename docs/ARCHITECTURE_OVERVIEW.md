@@ -68,9 +68,11 @@ type PackageInfo struct {
 - Flexible manager selection by name or type
 
 ### ✅ **Testing**
-- **27 test cases** covering all functionality
+- **92+ test cases** covering all functionality
+- **Real fixture testing** with Docker-generated outputs
 - **Mock command runner** for reliable testing
 - **Security tests** for injection prevention
+- **Entrypoint-based fixture generation** for realistic test data
 
 ## File Structure
 
@@ -134,5 +136,5 @@ To extend syspkg:
 ---
 
 **Status**: Production Ready ✅
-**Version**: 2.0.0
-**Last Updated**: 2025-06-02
+**Version**: 2.0.0 (refactor-unified-interface branch)
+**Last Updated**: 2025-06-04

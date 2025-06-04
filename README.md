@@ -19,6 +19,7 @@ SysPkg is a unified CLI tool and Golang library for managing system packages acr
 - **Production Ready**: Comprehensive testing across multiple OS distributions
 - **Performance Optimized**: Efficient parsing with compiled regexes and robust error handling
 - **Cross-Platform**: Handles different line endings (CRLF/LF) and whitespace variations
+- **Hybrid Search**: Fast default search with optional `--status` flag for detailed package state information
 
 ## Features
 
@@ -27,9 +28,12 @@ SysPkg is a unified CLI tool and Golang library for managing system packages acr
 - Easy-to-use API for package installation, removal, search, listing, and system upgrades
 - Expandable architecture to support more package managers in the future
 
-## API Documentation
+## Documentation
 
-See the [Go Reference](https://pkg.go.dev/github.com/bluet/syspkg) for the full API documentation.
+- [API Documentation](https://pkg.go.dev/github.com/bluet/syspkg) - Full Go API reference
+- [Architecture Overview](docs/ARCHITECTURE_OVERVIEW.md) - Technical architecture and design patterns
+- [Contributing Guide](CONTRIBUTING.md) - Development workflow and testing strategy
+- [Test Fixtures](testing/fixtures/README.md) - Comprehensive fixture generation using Docker entrypoints
 
 ## Getting Started
 
@@ -71,20 +75,20 @@ syspkg --apt remove vim
 # Search for a package using Snap
 syspkg --snap search vim
 
-# Show all upgradable packages using Flatpak
-syspkg --flatpak show upgradable
+# List upgradable packages using Flatpak
+syspkg --flatpak list upgradable
 
 # Install a package using YUM (on RHEL/CentOS/Rocky/AlmaLinux)
 syspkg --yum install vim
 
 # Show package information
-syspkg --apt show package vim
+syspkg --apt info vim
 
 # List installed packages
-syspkg --snap show installed
+syspkg --snap list installed
 
 # List upgradable packages
-syspkg --flatpak show upgradable
+syspkg --flatpak list upgradable
 ```
 
 Or, you can do operations without knowing the package manager:
@@ -99,20 +103,23 @@ syspkg remove vim
 # Search for a package using all available package manager
 syspkg search vim
 
+# Search with installation status information (slightly slower)
+syspkg search vim --status
+
 # Upgrade all packages using all available package manager
 syspkg upgrade
 
-# Refresh package lists
-syspkg refresh
+# Update package lists
+syspkg update
 
 # Show package information
-syspkg show package vim
+syspkg info vim
 
 # List installed packages
-syspkg show installed
+syspkg list installed
 
 # List upgradable packages
-syspkg show upgradable
+syspkg list upgradable
 ```
 
 For more examples and real use cases, see the [cmd/syspkg/](cmd/syspkg/) directory.
@@ -192,8 +199,9 @@ Please open an issue (or PR ❤️) if you'd like to see support for any unliste
 
 ### For Developers 🛠️
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development workflow and testing guide
-- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Technical design and interfaces
+- **[docs/ARCHITECTURE_OVERVIEW.md](docs/ARCHITECTURE_OVERVIEW.md)** - Technical design and interfaces
 - **[docs/EXIT_CODES.md](docs/EXIT_CODES.md)** - Package manager exit code behaviors
+- **[testing/fixtures/README.md](testing/fixtures/README.md)** - Comprehensive fixture generation with Docker entrypoints
 - **[testing/docker/README.md](testing/docker/README.md)** - Multi-OS testing strategy
 
 ### For AI Assistants 🤖
@@ -203,14 +211,18 @@ Please open an issue (or PR ❤️) if you'd like to see support for any unliste
 
 **Current Version**: [Latest Release](https://github.com/bluet/syspkg/releases)
 
-**Stability**: Production ready with comprehensive testing across multiple OS distributions
+**Stability**: Production ready with unified interface architecture and comprehensive fixture-based testing across multiple OS distributions
+
+**Architecture**: V2.0 unified interface with plugin system - APT implementation complete, legacy managers in transition
 
 **Active Development**: See [Issues](https://github.com/bluet/syspkg/issues) for roadmap and current work
 
 ### Current Priorities
-- **Test Coverage**: Improving YUM, Snap, and Flatpak test coverage
-- **Architecture**: Complete CommandRunner migration for Snap and Flatpak
-- **Platform Support**: DNF and APK package manager implementations
+- **Branch Integration**: Merge refactor-unified-interface to main
+- **Legacy Cleanup**: Resolve backup directory compilation issues
+- **Security Enhancement**: Add Snyk security scanning to CI/CD
+- **Platform Expansion**: Snap and Flatpak plugin migration to unified interface
+- **New Package Managers**: DNF and APK implementations using unified architecture
 
 See [CHANGELOG.md](CHANGELOG.md) for recent achievements and [CLAUDE.md](CLAUDE.md) for detailed development roadmap.
 
@@ -224,7 +236,8 @@ We welcome contributions to SysPkg!
 
 ### For Developers
 - **Quick start**: See [CONTRIBUTING.md](CONTRIBUTING.md) for complete development workflow
-- **Architecture**: See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for technical design details
+- **Architecture**: See [docs/ARCHITECTURE_OVERVIEW.md](docs/ARCHITECTURE_OVERVIEW.md) for technical design details
+- **Fixture generation**: See [testing/fixtures/README.md](testing/fixtures/README.md) for comprehensive approach
 
 **Quick development setup:**
 ```bash
@@ -232,9 +245,17 @@ git clone https://github.com/bluet/syspkg.git
 cd syspkg
 make test          # Smart testing - detects your OS
 make check         # Code quality checks
+make help          # See all available targets
 ```
 
-For advanced testing across multiple OS, see [CONTRIBUTING.md](CONTRIBUTING.md).
+**Advanced fixture generation:**
+```bash
+make test-fixtures-apt    # Generate realistic APT fixtures using Docker entrypoints
+make test-fixtures        # Generate fixtures for all package managers
+make test-fixtures-validate  # Validate fixture quality
+```
+
+For complete development workflow and multi-OS testing, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

@@ -1,0 +1,20 @@
+Dependencies resolved.
+================================================================================
+ Package              Architecture Version                 Repository      Size
+================================================================================
+Removing:
+ vim-enhanced         x86_64       2:9.1.825-1.fc39        @updates       4.2 M
+Removing unused dependencies:
+ gpm-libs             x86_64       1.20.7-44.fc39          @fedora         28 k
+ libsodium            x86_64       1.0.18-15.fc39          @updates       355 k
+ vim-common           x86_64       2:9.1.825-1.fc39        @updates        37 M
+ vim-filesystem       noarch       2:9.1.825-1.fc39        @updates        40  
+ which                x86_64       2.21-40.fc39            @fedora         80 k
+ xxd                  x86_64       2:9.1.825-1.fc39        @updates        41 k
+
+Transaction Summary
+================================================================================
+Remove  7 Packages
+
+Freed space: 42 M
+Operation aborted.
