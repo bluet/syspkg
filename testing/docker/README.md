@@ -8,7 +8,7 @@ This directory contains Docker configurations for testing go-syspkg across multi
 
 - **[../../README.md](../../README.md)** - Project overview
 - **[../../CONTRIBUTING.md](../../CONTRIBUTING.md)** - Complete development workflow and testing guide
-- **[../../docs/ARCHITECTURE_OVERVIEW.md](../../docs/ARCHITECTURE_OVERVIEW.md)** - Technical design and interfaces
+- **[../../docs/ARCHITECTURE.md](../../docs/ARCHITECTURE.md)** - Technical design and interfaces
 - **[../../docs/EXIT_CODES.md](../../docs/EXIT_CODES.md)** - Package manager exit code behavior
 
 ## Test Categories
