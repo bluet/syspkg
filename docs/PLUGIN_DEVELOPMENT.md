@@ -16,6 +16,28 @@ The go-syspkg unified interface makes it incredibly easy to add support for any 
 
 The process is the same: implement the unified interface and register your plugin.
 
+## Testing Requirements (IMPORTANT)
+
+When developing plugins, follow these testing guidelines:
+
+### **Fixtures are Primary Test Data**
+- Use real fixture files from `testing/fixtures/` in unit tests
+- Fixtures contain full raw outputs from actual package managers
+- Inline mocks are for quick tests and edge cases only
+
+### **Docker for Safety**
+- ALWAYS use Docker for fixture generation
+- ALWAYS use Docker for integration testing
+- NEVER run package manager operations on the development system
+- Use `make test-docker-*` commands for safe testing
+
+### **Testing Hierarchy**
+- Unit tests: Use fixtures (safe, fast, realistic)
+- Integration tests: Run in Docker containers
+- System tests: Only in CI or dedicated environments
+
+This ensures your plugin works correctly with real-world command outputs and edge cases.
+
 ## Quick Start
 
 ### 1. Create Your Manager

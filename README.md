@@ -39,6 +39,7 @@ Need specific documentation? Find it quickly:
 - **⚙️ Technical details?** → [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - **🧪 Testing & fixtures?** → [docs/TESTING.md](docs/TESTING.md)
 - **🔌 Building plugins?** → [docs/PLUGIN_DEVELOPMENT.md](docs/PLUGIN_DEVELOPMENT.md)
+- **🏗️ Production integration?** → [docs/INTEGRATION_GUIDE.md](docs/INTEGRATION_GUIDE.md)
 
 ## Getting Started
 
@@ -127,8 +128,6 @@ syspkg list installed
 syspkg list upgradable
 ```
 
-For more examples and real use cases, see the [cmd/syspkg/](cmd/syspkg/) directory.
-
 ### Go Library
 
 Here's an example demonstrating how to use SysPkg as a Go library:
@@ -173,7 +172,10 @@ func main() {
 }
 ```
 
-For more examples and real use cases, see the [cmd/syspkg/](cmd/syspkg/) directory.
+**📚 Learning Resources:**
+- **New to the API?** → Start with [examples/](examples/) for clean integration patterns
+- **Building production services?** → See [docs/INTEGRATION_GUIDE.md](docs/INTEGRATION_GUIDE.md) for advanced patterns
+- **Need CLI reference?** → Check [cmd/syspkg/](cmd/syspkg/) for complete implementation
 
 ## Supported Package Managers
 
