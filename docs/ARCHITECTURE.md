@@ -233,8 +233,8 @@ make test-docker-all          # Cross-platform testing
 
 | Manager | Status | Test Coverage | Fixtures | Security |
 |---------|--------|---------------|----------|----------|
-| **APT** | ✅ Complete | 100% | 25+ authentic | ✅ Full |
-| **YUM** | ✅ Complete | 100% | 40+ authentic | ✅ Full |
+| **APT** | ✅ Complete | 100% | 44 authentic | ✅ Full |
+| **YUM** | ✅ Complete | 100% | 29 authentic | ✅ Full |
 
 ### 🚧 In Development
 

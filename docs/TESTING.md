@@ -201,8 +201,8 @@ func TestInputValidation(t *testing.T) {
 
 | Package Manager | Unit Tests | Integration Tests | Fixtures | Security Tests |
 |-----------------|------------|-------------------|----------|----------------|
-| **APT** | ✅ 37 tests | ✅ Docker | ✅ 25+ authentic | ✅ Comprehensive |
-| **YUM** | ✅ 39 tests | ✅ Docker | ✅ 40+ authentic | ✅ Comprehensive |
+| **APT** | ✅ 35 tests | ✅ Docker | ✅ 44 authentic | ✅ Comprehensive |
+| **YUM** | ✅ 53 tests | ✅ Docker | ✅ 29 authentic | ✅ Comprehensive |
 | **Snap** | 🚧 Partial | 🚧 Native only | 🚧 Limited | ✅ Complete |
 | **Flatpak** | 🚧 Partial | 🚧 Basic | 🚧 Limited | ✅ Complete |
 
