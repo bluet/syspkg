@@ -137,8 +137,11 @@ dnf search vim 2>/dev/null
    ```
 
 2. **Follow Naming Convention**
-   - `<operation>-<package>-<distro><version>.txt`
-   - Examples: `search-vim-ubuntu22.txt`, `info-nginx-rocky8.txt`
+   - `{operation}.{execution-mode}.{system-status}.{distro}-{version}.txt`
+   - Examples: 
+     - `install-vim.dry-run.clean-system.ubuntu-2204.txt`
+     - `dpkg-status-vim.vim-installed.ubuntu-2204.txt`
+     - `search-vim.clean-system.rocky-8.txt` (normal mode, execution-mode omitted)
 
 3. **Include Various Scenarios**
    - Successful operations
