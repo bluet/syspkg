@@ -89,23 +89,57 @@ func parseInstallOutput(output string) []manager.PackageInfo {
 }
 
 // parseRemoveOutput parses the output of `apt remove` command
+// Handles both actual removal output ("Removing package (version)") and
+// dry-run output ("The following packages will be REMOVED:")
 func parseRemoveOutput(output string) []manager.PackageInfo {
 	var packages []manager.PackageInfo
 	lines := strings.Split(output, "\n")
 
-	// Look for "Removing" lines which indicate successful removal
-	versionRegex := regexp.MustCompile(`Removing ([^\s]+) \(([^)]+)\)`)
+	// Look for "Removing package:arch (version) ..." lines (actual removal)
+	removingRegex := regexp.MustCompile(`Removing ([^:]+)(?::([^:]+))? \(([^)]+)\)`)
 
 	for _, line := range lines {
-		line = strings.TrimSpace(line)
+		if match := removingRegex.FindStringSubmatch(line); match != nil {
+			name := match[1]
+			arch := match[2]
+			version := match[3]
 
-		if matches := versionRegex.FindStringSubmatch(line); matches != nil {
-			packageName := matches[1]
-			version := matches[2]
+			pkg := manager.NewPackageInfo(name, version, manager.StatusAvailable, manager.TypeSystem)
 
-			pkg := manager.NewPackageInfo(packageName, version, manager.StatusAvailable, manager.TypeSystem)
-			pkg.Metadata = make(map[string]interface{})
+			if arch != "" {
+				pkg.Metadata["arch"] = arch
+			}
+
 			packages = append(packages, pkg)
+		}
+	}
+
+	// If no "Removing" lines found, try to parse from "The following packages will be REMOVED:" (dry-run)
+	if len(packages) == 0 {
+		inRemoveSection := false
+		for _, line := range lines {
+			if strings.Contains(line, "The following packages will be REMOVED:") {
+				inRemoveSection = true
+				continue
+			}
+
+			if inRemoveSection && strings.TrimSpace(line) != "" && !strings.Contains(line, "upgraded") {
+				// Parse package names from the removal list
+				packageNames := strings.Fields(line)
+				for _, name := range packageNames {
+					// Clean up package name (remove any special characters)
+					cleanName := strings.Trim(name, " \t")
+					if cleanName != "" && !strings.Contains(cleanName, "operation") && !strings.Contains(cleanName, "newly") {
+						pkg := manager.NewPackageInfo(cleanName, "", manager.StatusAvailable, manager.TypeSystem)
+						packages = append(packages, pkg)
+					}
+				}
+			}
+
+			// Stop at summary lines
+			if strings.Contains(line, "upgraded") || strings.Contains(line, "After this operation") {
+				break
+			}
 		}
 	}
 

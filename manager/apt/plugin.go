@@ -269,6 +269,10 @@ func (m *Manager) AutoRemove(ctx context.Context, opts *manager.Options) ([]mana
 		return nil, fmt.Errorf("apt autoremove failed: %w", err)
 	}
 
+	// Use appropriate parser based on operation mode
+	if opts != nil && opts.DryRun {
+		return m.parseAutoRemoveOutput(string(output)), nil
+	}
 	return parseRemoveOutput(string(output)), nil
 }
 
@@ -294,102 +298,6 @@ func (m *Manager) Verify(ctx context.Context, packages []string, opts *manager.O
 	}
 
 	return results, nil
-}
-
-// parseSearchOutput parses apt search output and extracts native status information
-func (m *Manager) parseSearchOutput(output string) []manager.PackageInfo {
-	var packages []manager.PackageInfo
-	lines := strings.Split(output, "\n")
-
-	for _, line := range lines {
-		if strings.Contains(line, "/") && !strings.HasPrefix(line, "Sorting") && !strings.HasPrefix(line, "Full Text") && !strings.HasPrefix(line, "WARNING") {
-			parts := strings.Fields(line)
-			if len(parts) >= 3 {
-				nameRepo := strings.Split(parts[0], "/")
-				if len(nameRepo) >= 2 {
-					// Default to available
-					status := manager.StatusAvailable
-
-					// Check if package is installed (indicated by "now" in repository list after "/")
-					repoList := nameRepo[1] // repository list after the "/"
-					if strings.Contains(repoList, "now") {
-						status = manager.StatusInstalled
-					}
-
-					// Check for additional status indicators in brackets
-					if len(parts) >= 4 && strings.Contains(line, "[") {
-						statusField := line[strings.Index(line, "["):]
-						if strings.Contains(statusField, "upgradable") {
-							status = manager.StatusUpgradable
-						}
-					}
-
-					pkg := manager.NewPackageInfo(nameRepo[0], parts[1], status, manager.TypeSystem)
-					pkg.NewVersion = parts[1]
-					pkg.Category = strings.Split(nameRepo[1], ",")[0] // Remove ",now" suffix
-					pkg.Metadata["arch"] = parts[2]
-					packages = append(packages, pkg)
-				}
-			}
-		}
-	}
-
-	return packages
-}
-
-func (m *Manager) parseRemoveOutput(output string) []manager.PackageInfo {
-	var packages []manager.PackageInfo
-	lines := strings.Split(output, "\n")
-
-	// Look for "Removing package:arch (version) ..." lines
-	removingRegex := regexp.MustCompile(`Removing ([^:]+)(?::([^:]+))? \(([^)]+)\)`)
-
-	for _, line := range lines {
-		if match := removingRegex.FindStringSubmatch(line); match != nil {
-			name := match[1]
-			arch := match[2]
-			version := match[3]
-
-			pkg := manager.NewPackageInfo(name, version, manager.StatusAvailable, manager.TypeSystem)
-
-			if arch != "" {
-				pkg.Metadata["arch"] = arch
-			}
-
-			packages = append(packages, pkg)
-		}
-	}
-
-	// If no "Removing" lines found, try to parse from "The following packages will be REMOVED:"
-	if len(packages) == 0 {
-		inRemoveSection := false
-		for _, line := range lines {
-			if strings.Contains(line, "The following packages will be REMOVED:") {
-				inRemoveSection = true
-				continue
-			}
-
-			if inRemoveSection && strings.TrimSpace(line) != "" && !strings.Contains(line, "upgraded") {
-				// Parse package names from the removal list
-				packageNames := strings.Fields(line)
-				for _, name := range packageNames {
-					// Clean up package name (remove any special characters)
-					cleanName := strings.Trim(name, " \t")
-					if cleanName != "" && !strings.Contains(cleanName, "operation") && !strings.Contains(cleanName, "newly") {
-						pkg := manager.NewPackageInfo(cleanName, "", manager.StatusAvailable, manager.TypeSystem)
-						packages = append(packages, pkg)
-					}
-				}
-			}
-
-			// Stop at summary lines
-			if strings.Contains(line, "upgraded") || strings.Contains(line, "After this operation") {
-				break
-			}
-		}
-	}
-
-	return packages
 }
 
 func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]manager.PackageInfo, error) {
@@ -527,11 +435,6 @@ func (m *Manager) parseUpgradeOutput(output string) []manager.PackageInfo {
 	}
 
 	return packages
-}
-
-func (m *Manager) parseListUpgradableOutput(output string) []manager.PackageInfo {
-	// This is the same as listUpgradable but exposed for testing
-	return parseListUpgradableOutput(output)
 }
 
 // Status returns overall status/health of the APT package manager

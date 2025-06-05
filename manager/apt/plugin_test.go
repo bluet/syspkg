@@ -52,7 +52,8 @@ func (m *MockCommandRunner) RunInteractive(ctx context.Context, command string, 
 
 func TestManagerBasicInfo(t *testing.T) {
 	runner := NewMockCommandRunner()
-	runner.SetOutput("apt --version", "apt 2.4.14 (amd64)")
+	versionFixture := testutil.LoadAPTFixture(t, "version.clean-system.ubuntu-2204.txt")
+	runner.SetOutput("apt --version", versionFixture)
 
 	mgr := NewManagerWithRunner(runner)
 
@@ -71,22 +72,15 @@ func TestManagerBasicInfo(t *testing.T) {
 		t.Fatalf("GetVersion failed: %v", err)
 	}
 
-	if !strings.Contains(version, "2.4.14") {
-		t.Errorf("Expected version to contain '2.4.14', got '%s'", version)
+	if !strings.Contains(version, "2.4.13") {
+		t.Errorf("Expected version to contain '2.4.13', got '%s'", version)
 	}
 }
 
 func TestSearch(t *testing.T) {
 	runner := NewMockCommandRunner()
-	searchOutput := `Sorting...
-Full Text Search...
-vim/jammy 2:8.2.3458-2ubuntu2.5 amd64
-  Vi IMproved - enhanced vi editor
-
-vim-common/jammy,jammy 2:8.2.3458-2ubuntu2.5 all
-  Vi IMproved - Common files`
-
-	runner.SetOutput("apt search vim", searchOutput)
+	searchFixture := testutil.LoadAPTFixture(t, "search-vim.clean-system.ubuntu-2204.txt")
+	runner.SetOutput("apt search vim", searchFixture)
 
 	mgr := NewManagerWithRunner(runner)
 	ctx := context.Background()
@@ -96,18 +90,18 @@ vim-common/jammy,jammy 2:8.2.3458-2ubuntu2.5 all
 		t.Fatalf("Search failed: %v", err)
 	}
 
-	if len(packages) != 2 {
-		t.Errorf("Expected 2 packages, got %d", len(packages))
+	if len(packages) == 0 {
+		t.Fatalf("Expected packages from search fixture, got none")
 	}
 
 	// Check first package
 	pkg := packages[0]
-	if pkg.Name != "vim" {
-		t.Errorf("Expected name 'vim', got '%s'", pkg.Name)
+	if pkg.Name != "apvlv" {
+		t.Errorf("Expected name 'apvlv', got '%s'", pkg.Name)
 	}
 
-	if pkg.NewVersion != "2:8.2.3458-2ubuntu2.5" {
-		t.Errorf("Expected version '2:8.2.3458-2ubuntu2.5', got '%s'", pkg.NewVersion)
+	if pkg.NewVersion != "0.4.0-2" {
+		t.Errorf("Expected version '0.4.0-2', got '%s'", pkg.NewVersion)
 	}
 
 	if pkg.Status != manager.StatusAvailable {
@@ -125,11 +119,8 @@ vim-common/jammy,jammy 2:8.2.3458-2ubuntu2.5 all
 
 func TestListInstalled(t *testing.T) {
 	runner := NewMockCommandRunner()
-	listOutput := `accountsservice 22.07.5-2ubuntu1.5 amd64
-adduser 3.118ubuntu5 all
-apt 2.4.14 amd64`
-
-	runner.SetOutput("dpkg-query -W -f ${binary:Package} ${Version} ${Architecture}\n", listOutput)
+	listFixture := testutil.LoadAPTFixture(t, "dpkg-query-packages.clean-system.ubuntu-2204.txt")
+	runner.SetOutput("dpkg-query -W -f ${binary:Package} ${Version} ${Architecture}\n", listFixture)
 
 	mgr := NewManagerWithRunner(runner)
 	ctx := context.Background()
@@ -139,26 +130,26 @@ apt 2.4.14 amd64`
 		t.Fatalf("List failed: %v", err)
 	}
 
-	if len(packages) != 3 {
-		t.Errorf("Expected 3 packages, got %d", len(packages))
+	if len(packages) == 0 {
+		t.Fatalf("Expected packages from fixture, got none")
 	}
 
 	// Check first package
 	pkg := packages[0]
-	if pkg.Name != "accountsservice" {
-		t.Errorf("Expected name 'accountsservice', got '%s'", pkg.Name)
+	if pkg.Name != "adduser" {
+		t.Errorf("Expected name 'adduser', got '%s'", pkg.Name)
 	}
 
-	if pkg.Version != "22.07.5-2ubuntu1.5" {
-		t.Errorf("Expected version '22.07.5-2ubuntu1.5', got '%s'", pkg.Version)
+	if pkg.Version != "3.118ubuntu5" {
+		t.Errorf("Expected version '3.118ubuntu5', got '%s'", pkg.Version)
 	}
 
 	if pkg.Status != manager.StatusInstalled {
 		t.Errorf("Expected status '%s', got '%s'", manager.StatusInstalled, pkg.Status)
 	}
 
-	if arch, ok := pkg.Metadata["arch"]; !ok || arch != "amd64" {
-		t.Errorf("Expected arch 'amd64', got '%v'", arch)
+	if arch, ok := pkg.Metadata["arch"]; !ok || arch != "all" {
+		t.Errorf("Expected arch 'all', got '%v'", arch)
 	}
 }
 
@@ -258,8 +249,7 @@ func TestSearchWithFixture(t *testing.T) {
 	// PURPOSE: Validates basic search parsing without status complexity
 	fixture := testutil.LoadAPTFixture(t, "search-vim-clean-ubuntu2204.txt")
 
-	mgr := NewManager()
-	packages := mgr.parseSearchOutput(fixture)
+	packages := parseSearchOutput(fixture)
 
 	if len(packages) == 0 {
 		t.Fatal("Expected packages from fixture, got none")
@@ -290,8 +280,7 @@ func TestSearchWithStatusFixture(t *testing.T) {
 	// PURPOSE: Validates status detection from native APT [installed] indicators
 	fixture := testutil.LoadAPTFixture(t, "search-vim-mixed-ubuntu2204.txt")
 
-	mgr := NewManager()
-	packages := mgr.parseSearchOutput(fixture)
+	packages := parseSearchOutput(fixture)
 
 	if len(packages) == 0 {
 		t.Fatal("Expected packages from fixture, got none")
@@ -512,8 +501,10 @@ func TestVerify(t *testing.T) {
 
 func TestStatus(t *testing.T) {
 	runner := NewMockCommandRunner()
-	runner.SetOutput("apt --version", "apt 2.4.14 (amd64)")
-	runner.SetOutput("apt list --installed", "Listing...\nvim/jammy 2:8.2.3458-2ubuntu2.5 amd64 [installed]")
+	versionFixture := testutil.LoadAPTFixture(t, "version.clean-system.ubuntu-2204.txt")
+	listFixture := testutil.LoadAPTFixture(t, "list-installed.vim-installed.ubuntu-2204.txt")
+	runner.SetOutput("apt --version", versionFixture)
+	runner.SetOutput("apt list --installed", listFixture)
 
 	mgr := NewManagerWithRunner(runner)
 	ctx := context.Background()
@@ -531,8 +522,8 @@ func TestStatus(t *testing.T) {
 		t.Error("Expected status.Healthy to be true")
 	}
 
-	if !strings.Contains(status.Version, "2.4.14") {
-		t.Errorf("Expected version to contain '2.4.14', got '%s'", status.Version)
+	if !strings.Contains(status.Version, "2.4.13") {
+		t.Errorf("Expected version to contain '2.4.13', got '%s'", status.Version)
 	}
 }
 
@@ -617,8 +608,7 @@ func TestInstallAlreadyInstalledFixture(t *testing.T) {
 func TestRemoveNotFoundFixture(t *testing.T) {
 	fixture := testutil.LoadAPTFixture(t, "remove-notfound-ubuntu2204.txt")
 
-	mgr := NewManager()
-	packages := mgr.parseRemoveOutput(fixture)
+	packages := parseRemoveOutput(fixture)
 
 	// Should return empty packages for not found
 	if len(packages) != 0 {
@@ -690,8 +680,7 @@ func TestUpgradeDryRunFixture(t *testing.T) {
 func TestSearchEmptyFixture(t *testing.T) {
 	fixture := testutil.LoadAPTFixture(t, "search-empty-ubuntu2204.txt")
 
-	mgr := NewManager()
-	packages := mgr.parseSearchOutput(fixture)
+	packages := parseSearchOutput(fixture)
 
 	// Should return empty packages for empty search
 	if len(packages) != 0 {
@@ -716,8 +705,7 @@ func TestInstallMultipleFixture(t *testing.T) {
 func TestRemoveWithDependenciesFixture(t *testing.T) {
 	fixture := testutil.LoadAPTFixture(t, "remove-with-dependencies-ubuntu2204.txt")
 
-	mgr := NewManager()
-	packages := mgr.parseRemoveOutput(fixture)
+	packages := parseRemoveOutput(fixture)
 
 	// Should detect vim from "The following packages will be REMOVED:" section
 	if len(packages) < 1 {
@@ -743,8 +731,7 @@ func TestRemoveWithDependenciesFixture(t *testing.T) {
 func TestListUpgradableFixture(t *testing.T) {
 	fixture := testutil.LoadAPTFixture(t, "list-upgradable-ubuntu2204.txt")
 
-	mgr := NewManager()
-	packages := mgr.parseListUpgradableOutput(fixture)
+	packages := parseListUpgradableOutput(fixture)
 
 	// Should detect multiple upgradable packages
 	if len(packages) == 0 {
@@ -847,8 +834,7 @@ func TestListInstalledFixture(t *testing.T) {
 
 	// APT doesn't have a specific parseListInstalledOutput, but we can validate the fixture format
 	// and use parseSearchOutput since list --installed uses similar format
-	mgr := NewManager()
-	packages := mgr.parseSearchOutput(fixture)
+	packages := parseSearchOutput(fixture)
 
 	if len(packages) == 0 {
 		t.Fatal("Expected installed packages from fixture, got none")
