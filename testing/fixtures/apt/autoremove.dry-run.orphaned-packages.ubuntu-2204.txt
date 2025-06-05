@@ -1,0 +1,127 @@
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following packages will be REMOVED:
+  binutils binutils-common binutils-x86-64-linux-gnu bzip2 cpp cpp-11 dirmngr
+  dpkg-dev fakeroot fontconfig-config fonts-dejavu-core g++ g++-11 gcc gcc-11
+  gcc-11-base gnupg gnupg-l10n gnupg-utils gpg gpg-agent gpg-wks-client
+  gpg-wks-server gpgconf gpgsm libalgorithm-diff-perl
+  libalgorithm-diff-xs-perl libalgorithm-merge-perl libasan6 libassuan0
+  libatomic1 libbinutils libbrotli1 libbsd0 libc-dev-bin libc-devtools
+  libc6-dev libcc1-0 libcrypt-dev libctf-nobfd0 libctf0 libdeflate0
+  libdpkg-perl libexpat1 libfakeroot libfile-fcntllock-perl libfontconfig1
+  libfreetype6 libgcc-11-dev libgd3 libgdbm-compat4 libgdbm6 libgomp1 libisl23
+  libitm1 libjbig0 libjpeg-turbo8 libjpeg8 libksba8 libldap-2.5-0
+  libldap-common liblocale-gettext-perl liblsan0 libmd0 libmpc3 libmpfr6
+  libnpth0 libnsl-dev libperl5.34 libpng16-16 libquadmath0 libreadline8
+  libsasl2-2 libsasl2-modules libsasl2-modules-db libsqlite3-0
+  libstdc++-11-dev libtiff5 libtirpc-dev libtsan0 libubsan1 libwebp7 libx11-6
+  libx11-data libxau6 libxcb1 libxdmcp6 libxpm4 linux-libc-dev
+  lto-disabled-list make manpages manpages-dev netbase patch perl
+  perl-modules-5.34 pinentry-curses readline-common rpcsvc-proto ucf xz-utils
+0 upgraded, 0 newly installed, 102 to remove and 18 not upgraded.
+Remv dpkg-dev [1.21.1ubuntu2.3]
+Remv g++ [4:11.2.0-1ubuntu1]
+Remv g++-11 [11.4.0-1ubuntu1~22.04]
+Remv gcc-11 [11.4.0-1ubuntu1~22.04] [gcc:amd64 ]
+Remv binutils [2.38-4ubuntu2.8] [gcc:amd64 ]
+Remv binutils-x86-64-linux-gnu [2.38-4ubuntu2.8] [gcc:amd64 ]
+Remv libctf0 [2.38-4ubuntu2.8] [gcc:amd64 ]
+Remv libbinutils [2.38-4ubuntu2.8] [gcc:amd64 ]
+Remv binutils-common [2.38-4ubuntu2.8] [gcc:amd64 ]
+Remv bzip2 [1.0.8-5build1] [gcc:amd64 ]
+Remv gcc [4:11.2.0-1ubuntu1]
+Remv cpp [4:11.2.0-1ubuntu1]
+Remv cpp-11 [11.4.0-1ubuntu1~22.04]
+Remv gnupg [2.2.27-3ubuntu2.3]
+Remv gpg-wks-client [2.2.27-3ubuntu2.3]
+Remv dirmngr [2.2.27-3ubuntu2.3]
+Remv fakeroot [1.28-1ubuntu1]
+Remv libc-devtools [2.35-0ubuntu3.10]
+Remv libgd3 [2.3.0-2ubuntu2.3]
+Remv libfontconfig1 [2.13.1-4.2ubuntu5]
+Remv fontconfig-config [2.13.1-4.2ubuntu5]
+Remv fonts-dejavu-core [2.37-2build1]
+Remv libstdc++-11-dev [11.4.0-1ubuntu1~22.04]
+Remv libgcc-11-dev [11.4.0-1ubuntu1~22.04]
+Remv libtsan0 [11.4.0-1ubuntu1~22.04]
+Remv libasan6 [11.4.0-1ubuntu1~22.04]
+Remv gcc-11-base [11.4.0-1ubuntu1~22.04]
+Remv gnupg-l10n [2.2.27-3ubuntu2.3]
+Remv gnupg-utils [2.2.27-3ubuntu2.3]
+Remv gpg-wks-server [2.2.27-3ubuntu2.3]
+Remv gpg [2.2.27-3ubuntu2.3]
+Remv gpg-agent [2.2.27-3ubuntu2.3]
+Remv gpgsm [2.2.27-3ubuntu2.3]
+Remv gpgconf [2.2.27-3ubuntu2.3]
+Remv libalgorithm-diff-xs-perl [0.04-6build3]
+Remv libalgorithm-merge-perl [0.08-3]
+Remv libalgorithm-diff-perl [1.201-1]
+Remv pinentry-curses [1.1.1-1build2]
+Remv libassuan0 [2.5.5-1build1]
+Remv libatomic1 [12.3.0-1ubuntu1~22.04]
+Remv libfreetype6 [2.11.1+dfsg-1ubuntu0.3]
+Remv libbrotli1 [1.0.9-2build6]
+Remv libxpm4 [1:3.5.12-1ubuntu0.22.04.2]
+Remv libx11-6 [2:1.7.5-1ubuntu0.3]
+Remv libxcb1 [1.14-3ubuntu3]
+Remv libxdmcp6 [1:1.1.3-0ubuntu5]
+Remv libbsd0 [0.11.5-1]
+Remv libc6-dev [2.35-0ubuntu3.10]
+Remv libc-dev-bin [2.35-0ubuntu3.10]
+Remv libcc1-0 [12.3.0-1ubuntu1~22.04]
+Remv libcrypt-dev [1:4.4.27-1]
+Remv libctf-nobfd0 [2.38-4ubuntu2.8]
+Remv libtiff5 [4.3.0-6ubuntu0.10]
+Remv libdeflate0 [1.10-2]
+Remv libdpkg-perl [1.21.1ubuntu2.3]
+Remv libexpat1 [2.4.7-1ubuntu0.6]
+Remv libfakeroot [1.28-1ubuntu1]
+Remv libfile-fcntllock-perl [0.22-3build7]
+Remv perl [5.34.0-3ubuntu1.4]
+Remv libperl5.34 [5.34.0-3ubuntu1.4]
+Remv libgdbm-compat4 [1.23-1]
+Remv libgdbm6 [1.23-1]
+Remv libgomp1 [12.3.0-1ubuntu1~22.04]
+Remv libisl23 [0.24-2build1]
+Remv libitm1 [12.3.0-1ubuntu1~22.04]
+Remv libjbig0 [2.1-3.1ubuntu0.22.04.1]
+Remv libjpeg8 [8c-2ubuntu10]
+Remv libjpeg-turbo8 [2.1.2-0ubuntu1]
+Remv libksba8 [1.6.0-2ubuntu0.2]
+Remv libldap-2.5-0 [2.5.19+dfsg-0ubuntu0.22.04.1]
+Remv libldap-common [2.5.19+dfsg-0ubuntu0.22.04.1]
+Remv liblocale-gettext-perl [1.07-4build3]
+Remv liblsan0 [12.3.0-1ubuntu1~22.04]
+Remv libmd0 [1.0.4-1build1]
+Remv libmpc3 [1.2.1-2build1]
+Remv libmpfr6 [4.1.0-3build3]
+Remv libnpth0 [1.6-3build2]
+Remv libnsl-dev [1.3.0-2build2]
+Remv libpng16-16 [1.6.37-3build5]
+Remv libquadmath0 [12.3.0-1ubuntu1~22.04]
+Remv libreadline8 [8.1.2-1]
+Remv libsasl2-2 [2.1.27+dfsg2-3ubuntu1.2]
+Remv libsasl2-modules [2.1.27+dfsg2-3ubuntu1.2]
+Remv libsasl2-modules-db [2.1.27+dfsg2-3ubuntu1.2]
+Remv libsqlite3-0 [3.37.2-2ubuntu0.4]
+Remv libtirpc-dev [1.3.2-2ubuntu0.1]
+Remv libubsan1 [12.3.0-1ubuntu1~22.04]
+Remv libwebp7 [1.2.2-2ubuntu0.22.04.2]
+Remv libx11-data [2:1.7.5-1ubuntu0.3]
+Remv libxau6 [1:1.0.9-1build5]
+Remv linux-libc-dev [5.15.0-141.151]
+Remv lto-disabled-list [24]
+Remv make [4.3-4.1build1]
+Remv manpages-dev [5.10-1ubuntu1]
+Remv manpages [5.10-1ubuntu1]
+Remv netbase [6.3]
+Remv patch [2.7.6-7build2]
+Remv perl-modules-5.34 [5.34.0-3ubuntu1.4]
+Remv readline-common [8.1.2-1]
+Remv rpcsvc-proto [1.4.2-0ubuntu6]
+Remv ucf [3.0043]
+Remv xz-utils [5.2.5-2ubuntu1]

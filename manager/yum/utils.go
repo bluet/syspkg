@@ -264,15 +264,56 @@ func parseInstallOutput(output string) []manager.PackageInfo {
 
 // parseRemoveOutput parses the output of `yum remove` command
 // and returns a list of packages that were removed.
+// Handles both table format and colon format output.
 func parseRemoveOutput(output string) []manager.PackageInfo {
 	var packages []manager.PackageInfo
 
 	lines := strings.Split(output, "\n")
+	inRemovingSection := false
 
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
 
-		// Look for "Removing" or "Erasing" lines during transaction
+		// Look for "Removing:" header (table format)
+		if line == "Removing:" {
+			inRemovingSection = true
+			continue
+		}
+
+		// Stop when we hit section boundaries or transaction summary
+		if strings.HasPrefix(line, "Transaction Summary") ||
+			strings.HasPrefix(line, "Complete!") ||
+			strings.HasPrefix(line, "=====") ||
+			(inRemovingSection && line == "") {
+			inRemovingSection = false
+			continue
+		}
+
+		// Parse table format lines in Removing section
+		if inRemovingSection && line != "" {
+			// Format: " vim-enhanced       x86_64     2:8.0.1763-19.el8_6.4       @appstream     2.9 M"
+			fields := strings.Fields(line)
+			if len(fields) >= 3 {
+				packageName := fields[0]
+				arch := fields[1]
+				version := fields[2]
+
+				// Clean up package name and version
+				name, cleanVersion := parsePackageNameVersion(packageName + "-" + version)
+				if name == "" {
+					name = packageName
+					cleanVersion = version
+				}
+
+				pkg := manager.NewPackageInfo(name, cleanVersion, manager.StatusAvailable, manager.TypeSystem)
+				pkg.Metadata = make(map[string]interface{})
+				pkg.Metadata["arch"] = arch
+				packages = append(packages, pkg)
+			}
+			continue
+		}
+
+		// Fallback: Look for "Removing" or "Erasing" lines with colon (legacy format)
 		if (strings.HasPrefix(line, "Removing") || strings.HasPrefix(line, "Erasing")) && strings.Contains(line, ":") {
 			// Format: "Removing       : package-version.arch"
 			colonIndex := strings.Index(line, ":")

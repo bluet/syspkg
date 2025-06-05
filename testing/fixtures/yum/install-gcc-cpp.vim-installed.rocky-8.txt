@@ -1,0 +1,164 @@
+Last metadata expiration check: 0:00:55 ago on Thu Jun  5 19:45:08 2025.
+Dependencies resolved.
+================================================================================
+ Package                  Arch     Version                    Repository   Size
+================================================================================
+Installing:
+ gcc-c++                  x86_64   8.5.0-26.el8_10            appstream    12 M
+Upgrading:
+ glibc                    x86_64   2.28-251.el8_10.16         baseos      2.2 M
+ glibc-common             x86_64   2.28-251.el8_10.16         baseos      1.0 M
+ glibc-minimal-langpack   x86_64   2.28-251.el8_10.16         baseos       70 k
+ libgcc                   x86_64   8.5.0-26.el8_10            baseos       81 k
+ libstdc++                x86_64   8.5.0-26.el8_10            baseos      472 k
+Installing dependencies:
+ cpp                      x86_64   8.5.0-26.el8_10            appstream    10 M
+ gcc                      x86_64   8.5.0-26.el8_10            appstream    23 M
+ glibc-devel              x86_64   2.28-251.el8_10.16         baseos       88 k
+ glibc-headers            x86_64   2.28-251.el8_10.16         baseos      493 k
+ isl                      x86_64   0.16.1-6.el8               appstream   834 k
+ kernel-headers           x86_64   4.18.0-553.54.1.el8_10     baseos       12 M
+ libgomp                  x86_64   8.5.0-26.el8_10            baseos      208 k
+ libmpc                   x86_64   1.1.0-9.1.el8              appstream    60 k
+ libpkgconf               x86_64   1.4.2-1.el8                baseos       34 k
+ libstdc++-devel          x86_64   8.5.0-26.el8_10            appstream   2.1 M
+ libxcrypt-devel          x86_64   4.1.1-6.el8                baseos       24 k
+ pkgconf                  x86_64   1.4.2-1.el8                baseos       37 k
+ pkgconf-m4               noarch   1.4.2-1.el8                baseos       16 k
+ pkgconf-pkg-config       x86_64   1.4.2-1.el8                baseos       14 k
+Installing weak dependencies:
+ glibc-gconv-extra        x86_64   2.28-251.el8_10.16         baseos      1.6 M
+ glibc-langpack-en        x86_64   2.28-251.el8_10.16         baseos      831 k
+
+Transaction Summary
+================================================================================
+Install  17 Packages
+Upgrade   5 Packages
+
+Total download size: 68 M
+Downloading Packages:
+(1/22): cpp-8.5.0-26.el8_10.x86_64.rpm          3.5 MB/s |  10 MB     00:02    
+(2/22): isl-0.16.1-6.el8.x86_64.rpm             2.5 MB/s | 834 kB     00:00    
+(3/22): libmpc-1.1.0-9.1.el8.x86_64.rpm         1.1 MB/s |  60 kB     00:00    
+(4/22): libstdc++-devel-8.5.0-26.el8_10.x86_64. 3.3 MB/s | 2.1 MB     00:00    
+(5/22): gcc-c++-8.5.0-26.el8_10.x86_64.rpm      2.9 MB/s |  12 MB     00:04    
+(6/22): gcc-8.5.0-26.el8_10.x86_64.rpm          4.3 MB/s |  23 MB     00:05    
+(7/22): glibc-devel-2.28-251.el8_10.16.x86_64.r  58 kB/s |  88 kB     00:01    
+(8/22): glibc-headers-2.28-251.el8_10.16.x86_64 145 kB/s | 493 kB     00:03    
+(9/22): glibc-langpack-en-2.28-251.el8_10.16.x8 128 kB/s | 831 kB     00:06    
+(10/22): libgomp-8.5.0-26.el8_10.x86_64.rpm     1.0 MB/s | 208 kB     00:00    
+(11/22): libpkgconf-1.4.2-1.el8.x86_64.rpm       25 kB/s |  34 kB     00:01    
+(12/22): libxcrypt-devel-4.1.1-6.el8.x86_64.rpm  15 kB/s |  24 kB     00:01    
+(13/22): glibc-gconv-extra-2.28-251.el8_10.16.x 128 kB/s | 1.6 MB     00:12    
+(14/22): pkgconf-m4-1.4.2-1.el8.noarch.rpm      261 kB/s |  16 kB     00:00    
+(15/22): pkgconf-1.4.2-1.el8.x86_64.rpm          22 kB/s |  37 kB     00:01    
+(16/22): pkgconf-pkg-config-1.4.2-1.el8.x86_64.  14 kB/s |  14 kB     00:01    
+(17/22): glibc-common-2.28-251.el8_10.16.x86_64 231 kB/s | 1.0 MB     00:04    
+(18/22): glibc-minimal-langpack-2.28-251.el8_10 349 kB/s |  70 kB     00:00    
+(19/22): libgcc-8.5.0-26.el8_10.x86_64.rpm       76 kB/s |  81 kB     00:01    
+(20/22): glibc-2.28-251.el8_10.16.x86_64.rpm    263 kB/s | 2.2 MB     00:08    
+(21/22): libstdc++-8.5.0-26.el8_10.x86_64.rpm   256 kB/s | 472 kB     00:01    
+(22/22): kernel-headers-4.18.0-553.54.1.el8_10. 155 kB/s |  12 MB     01:18    
+--------------------------------------------------------------------------------
+Total                                           789 kB/s |  68 MB     01:28     
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                        1/1 
+  Upgrading        : libgcc-8.5.0-26.el8_10.x86_64                         1/27 
+  Running scriptlet: libgcc-8.5.0-26.el8_10.x86_64                         1/27 
+  Installing       : glibc-langpack-en-2.28-251.el8_10.16.x86_64           2/27 
+  Upgrading        : glibc-common-2.28-251.el8_10.16.x86_64                3/27 
+  Running scriptlet: glibc-2.28-251.el8_10.16.x86_64                       4/27 
+  Upgrading        : glibc-2.28-251.el8_10.16.x86_64                       4/27 
+  Running scriptlet: glibc-2.28-251.el8_10.16.x86_64                       4/27 
+  Installing       : glibc-gconv-extra-2.28-251.el8_10.16.x86_64           5/27 
+  Running scriptlet: glibc-gconv-extra-2.28-251.el8_10.16.x86_64           5/27 
+  Installing       : libmpc-1.1.0-9.1.el8.x86_64                           6/27 
+  Upgrading        : libstdc++-8.5.0-26.el8_10.x86_64                      7/27 
+  Running scriptlet: libstdc++-8.5.0-26.el8_10.x86_64                      7/27 
+  Installing       : libstdc++-devel-8.5.0-26.el8_10.x86_64                8/27 
+  Installing       : cpp-8.5.0-26.el8_10.x86_64                            9/27 
+  Running scriptlet: cpp-8.5.0-26.el8_10.x86_64                            9/27 
+  Installing       : isl-0.16.1-6.el8.x86_64                              10/27 
+  Running scriptlet: isl-0.16.1-6.el8.x86_64                              10/27 
+  Installing       : libgomp-8.5.0-26.el8_10.x86_64                       11/27 
+  Running scriptlet: libgomp-8.5.0-26.el8_10.x86_64                       11/27 
+  Installing       : libpkgconf-1.4.2-1.el8.x86_64                        12/27 
+  Installing       : pkgconf-1.4.2-1.el8.x86_64                           13/27 
+  Installing       : pkgconf-m4-1.4.2-1.el8.noarch                        14/27 
+  Installing       : pkgconf-pkg-config-1.4.2-1.el8.x86_64                15/27 
+  Installing       : kernel-headers-4.18.0-553.54.1.el8_10.x86_64         16/27 
+  Running scriptlet: glibc-headers-2.28-251.el8_10.16.x86_64              17/27 
+  Installing       : glibc-headers-2.28-251.el8_10.16.x86_64              17/27 
+  Installing       : libxcrypt-devel-4.1.1-6.el8.x86_64                   18/27 
+  Installing       : glibc-devel-2.28-251.el8_10.16.x86_64                19/27 
+  Running scriptlet: glibc-devel-2.28-251.el8_10.16.x86_64                19/27 
+  Installing       : gcc-8.5.0-26.el8_10.x86_64                           20/27 
+  Running scriptlet: gcc-8.5.0-26.el8_10.x86_64                           20/27 
+  Installing       : gcc-c++-8.5.0-26.el8_10.x86_64                       21/27 
+  Upgrading        : glibc-minimal-langpack-2.28-251.el8_10.16.x86_64     22/27 
+  Cleanup          : libstdc++-8.5.0-20.el8.x86_64                        23/27 
+  Running scriptlet: libstdc++-8.5.0-20.el8.x86_64                        23/27 
+  Cleanup          : glibc-2.28-236.el8_9.7.x86_64                        24/27 
+  Cleanup          : glibc-minimal-langpack-2.28-236.el8_9.7.x86_64       25/27 
+  Cleanup          : glibc-common-2.28-236.el8_9.7.x86_64                 26/27 
+  Cleanup          : libgcc-8.5.0-20.el8.x86_64                           27/27 
+  Running scriptlet: libgcc-8.5.0-20.el8.x86_64                           27/27 
+  Running scriptlet: glibc-common-2.28-251.el8_10.16.x86_64               27/27 
+  Verifying        : cpp-8.5.0-26.el8_10.x86_64                            1/27 
+  Verifying        : gcc-8.5.0-26.el8_10.x86_64                            2/27 
+  Verifying        : gcc-c++-8.5.0-26.el8_10.x86_64                        3/27 
+  Verifying        : isl-0.16.1-6.el8.x86_64                               4/27 
+  Verifying        : libmpc-1.1.0-9.1.el8.x86_64                           5/27 
+  Verifying        : libstdc++-devel-8.5.0-26.el8_10.x86_64                6/27 
+  Verifying        : glibc-devel-2.28-251.el8_10.16.x86_64                 7/27 
+  Verifying        : glibc-gconv-extra-2.28-251.el8_10.16.x86_64           8/27 
+  Verifying        : glibc-headers-2.28-251.el8_10.16.x86_64               9/27 
+  Verifying        : glibc-langpack-en-2.28-251.el8_10.16.x86_64          10/27 
+  Verifying        : kernel-headers-4.18.0-553.54.1.el8_10.x86_64         11/27 
+  Verifying        : libgomp-8.5.0-26.el8_10.x86_64                       12/27 
+  Verifying        : libpkgconf-1.4.2-1.el8.x86_64                        13/27 
+  Verifying        : libxcrypt-devel-4.1.1-6.el8.x86_64                   14/27 
+  Verifying        : pkgconf-1.4.2-1.el8.x86_64                           15/27 
+  Verifying        : pkgconf-m4-1.4.2-1.el8.noarch                        16/27 
+  Verifying        : pkgconf-pkg-config-1.4.2-1.el8.x86_64                17/27 
+  Verifying        : glibc-2.28-251.el8_10.16.x86_64                      18/27 
+  Verifying        : glibc-2.28-236.el8_9.7.x86_64                        19/27 
+  Verifying        : glibc-common-2.28-251.el8_10.16.x86_64               20/27 
+  Verifying        : glibc-common-2.28-236.el8_9.7.x86_64                 21/27 
+  Verifying        : glibc-minimal-langpack-2.28-251.el8_10.16.x86_64     22/27 
+  Verifying        : glibc-minimal-langpack-2.28-236.el8_9.7.x86_64       23/27 
+  Verifying        : libgcc-8.5.0-26.el8_10.x86_64                        24/27 
+  Verifying        : libgcc-8.5.0-20.el8.x86_64                           25/27 
+  Verifying        : libstdc++-8.5.0-26.el8_10.x86_64                     26/27 
+  Verifying        : libstdc++-8.5.0-20.el8.x86_64                        27/27 
+
+Upgraded:
+  glibc-2.28-251.el8_10.16.x86_64                                               
+  glibc-common-2.28-251.el8_10.16.x86_64                                        
+  glibc-minimal-langpack-2.28-251.el8_10.16.x86_64                              
+  libgcc-8.5.0-26.el8_10.x86_64                                                 
+  libstdc++-8.5.0-26.el8_10.x86_64                                              
+Installed:
+  cpp-8.5.0-26.el8_10.x86_64                                                    
+  gcc-8.5.0-26.el8_10.x86_64                                                    
+  gcc-c++-8.5.0-26.el8_10.x86_64                                                
+  glibc-devel-2.28-251.el8_10.16.x86_64                                         
+  glibc-gconv-extra-2.28-251.el8_10.16.x86_64                                   
+  glibc-headers-2.28-251.el8_10.16.x86_64                                       
+  glibc-langpack-en-2.28-251.el8_10.16.x86_64                                   
+  isl-0.16.1-6.el8.x86_64                                                       
+  kernel-headers-4.18.0-553.54.1.el8_10.x86_64                                  
+  libgomp-8.5.0-26.el8_10.x86_64                                                
+  libmpc-1.1.0-9.1.el8.x86_64                                                   
+  libpkgconf-1.4.2-1.el8.x86_64                                                 
+  libstdc++-devel-8.5.0-26.el8_10.x86_64                                        
+  libxcrypt-devel-4.1.1-6.el8.x86_64                                            
+  pkgconf-1.4.2-1.el8.x86_64                                                    
+  pkgconf-m4-1.4.2-1.el8.noarch                                                 
+  pkgconf-pkg-config-1.4.2-1.el8.x86_64                                         
+
+Complete!

@@ -1,0 +1,25 @@
+Dependencies resolved.
+================================================================================
+ Package        Architecture  Version                   Repository         Size
+================================================================================
+Removing:
+ gcc-c++        x86_64        8.5.0-26.el8_10           @appstream         31 M
+
+Transaction Summary
+================================================================================
+Remove  1 Package
+
+Freed space: 31 M
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                        1/1 
+  Erasing          : gcc-c++-8.5.0-26.el8_10.x86_64                         1/1 
+  Verifying        : gcc-c++-8.5.0-26.el8_10.x86_64                         1/1 
+
+Removed:
+  gcc-c++-8.5.0-26.el8_10.x86_64                                                
+
+Complete!

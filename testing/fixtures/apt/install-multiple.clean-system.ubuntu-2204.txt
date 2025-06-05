@@ -1,0 +1,460 @@
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following additional packages will be installed:
+  adwaita-icon-theme alsa-topology-conf alsa-ucm-conf at-spi2-core
+  ca-certificates dbus dbus-user-session dconf-gsettings-backend dconf-service
+  dmsetup fontconfig fontconfig-config fonts-dejavu-core fonts-lato
+  gir1.2-glib-2.0 gsettings-desktop-schemas gtk-update-icon-cache
+  hicolor-icon-theme humanity-icon-theme javascript-common libapparmor1
+  libargon2-1 libasound2 libasound2-data libatk-bridge2.0-0 libatk1.0-0
+  libatk1.0-data libatspi2.0-0 libavahi-client3 libavahi-common-data
+  libavahi-common3 libbrotli1 libbsd0 libcairo-gobject2 libcairo2 libcanberra0
+  libcolord2 libcryptsetup12 libcups2 libcurl4 libdatrie1 libdbus-1-3
+  libdconf1 libdeflate0 libdevmapper1.02.1 libedit2 libepoxy0 libexpat1
+  libfontconfig1 libfreetype6 libfribidi0 libgdbm-compat4 libgdbm6
+  libgdk-pixbuf-2.0-0 libgdk-pixbuf2.0-bin libgdk-pixbuf2.0-common
+  libgirepository-1.0-1 libglib2.0-0 libglib2.0-data libgpm2 libgraphite2-3
+  libgtk-3-0 libgtk-3-bin libgtk-3-common libharfbuzz0b libice6 libicu70
+  libip4tc2 libjbig0 libjpeg-turbo8 libjpeg8 libjs-jquery libjson-c5 libkmod2
+  liblcms2-2 libldap-2.5-0 libldap-common libltdl7 liblua5.2-0 libmd0
+  libmpdec3 libnghttp2-14 libnss-systemd libogg0 libpam-systemd libpango-1.0-0
+  libpangocairo-1.0-0 libpangoft2-1.0-0 libperl5.34 libpixman-1-0 libpng16-16
+  libpsl5 libpython3-stdlib libpython3.10 libpython3.10-minimal
+  libpython3.10-stdlib libreadline8 librsvg2-2 librsvg2-common librtmp1
+  libruby3.0 libsasl2-2 libsasl2-modules libsasl2-modules-db libsm6
+  libsodium23 libsqlite3-0 libssh-4 libsystemd0 libtcl8.6 libtdb1 libthai-data
+  libthai0 libtiff5 libvorbis0a libvorbisfile3 libwayland-client0
+  libwayland-cursor0 libwayland-egl1 libwebp7 libx11-6 libx11-data libxau6
+  libxcb-render0 libxcb-shm0 libxcb1 libxcomposite1 libxcursor1 libxdamage1
+  libxdmcp6 libxext6 libxfixes3 libxi6 libxinerama1 libxkbcommon0 libxml2
+  libxrandr2 libxrender1 libxt6 libxtst6 libyaml-0-2 media-types netbase
+  networkd-dispatcher openssl perl perl-base perl-modules-5.34 publicsuffix
+  python3 python3-dbus python3-gi python3-minimal python3.10
+  python3.10-minimal rake readline-common ruby ruby-net-telnet ruby-rubygems
+  ruby-webrick ruby-xmlrpc ruby3.0 rubygems-integration session-migration
+  shared-mime-info sound-theme-freedesktop systemd systemd-sysv
+  systemd-timesyncd tzdata ubuntu-mono ucf unzip vim-common vim-gui-common
+  vim-runtime x11-common xdg-user-dirs xkb-data xxd zip
+Suggested packages:
+  apache2 | lighttpd | httpd libasound2-plugins alsa-utils libcanberra-gtk0
+  libcanberra-pulse colord cups-common gdbm-l10n gpm gvfs liblcms2-utils
+  librsvg2-bin libsasl2-modules-gssapi-mit | libsasl2-modules-gssapi-heimdal
+  libsasl2-modules-ldap libsasl2-modules-otp libsasl2-modules-sql tcl8.6 iw
+  | wireless-tools perl-doc libterm-readline-gnu-perl
+  | libterm-readline-perl-perl make libtap-harness-archive-perl python3-doc
+  python3-tk python3-venv python-dbus-doc python3.10-venv python3.10-doc
+  binutils binfmt-support readline-doc ri ruby-dev bundler systemd-container
+  libfido2-1 libtss2-esys-3.0.2-0 libtss2-mu0 libtss2-rc0 policykit-1 cscope
+  fonts-dejavu gnome-icon-theme
+The following NEW packages will be installed:
+  adwaita-icon-theme alsa-topology-conf alsa-ucm-conf at-spi2-core
+  ca-certificates curl dbus dbus-user-session dconf-gsettings-backend
+  dconf-service dmsetup fontconfig fontconfig-config fonts-dejavu-core
+  fonts-lato gir1.2-glib-2.0 gsettings-desktop-schemas gtk-update-icon-cache
+  hicolor-icon-theme humanity-icon-theme javascript-common libapparmor1
+  libargon2-1 libasound2 libasound2-data libatk-bridge2.0-0 libatk1.0-0
+  libatk1.0-data libatspi2.0-0 libavahi-client3 libavahi-common-data
+  libavahi-common3 libbrotli1 libbsd0 libcairo-gobject2 libcairo2 libcanberra0
+  libcolord2 libcryptsetup12 libcups2 libcurl4 libdatrie1 libdbus-1-3
+  libdconf1 libdeflate0 libdevmapper1.02.1 libedit2 libepoxy0 libexpat1
+  libfontconfig1 libfreetype6 libfribidi0 libgdbm-compat4 libgdbm6
+  libgdk-pixbuf-2.0-0 libgdk-pixbuf2.0-bin libgdk-pixbuf2.0-common
+  libgirepository-1.0-1 libglib2.0-0 libglib2.0-data libgpm2 libgraphite2-3
+  libgtk-3-0 libgtk-3-bin libgtk-3-common libharfbuzz0b libice6 libicu70
+  libip4tc2 libjbig0 libjpeg-turbo8 libjpeg8 libjs-jquery libjson-c5 libkmod2
+  liblcms2-2 libldap-2.5-0 libldap-common libltdl7 liblua5.2-0 libmd0
+  libmpdec3 libnghttp2-14 libnss-systemd libogg0 libpam-systemd libpango-1.0-0
+  libpangocairo-1.0-0 libpangoft2-1.0-0 libperl5.34 libpixman-1-0 libpng16-16
+  libpsl5 libpython3-stdlib libpython3.10 libpython3.10-minimal
+  libpython3.10-stdlib libreadline8 librsvg2-2 librsvg2-common librtmp1
+  libruby3.0 libsasl2-2 libsasl2-modules libsasl2-modules-db libsm6
+  libsodium23 libsqlite3-0 libssh-4 libtcl8.6 libtdb1 libthai-data libthai0
+  libtiff5 libvorbis0a libvorbisfile3 libwayland-client0 libwayland-cursor0
+  libwayland-egl1 libwebp7 libx11-6 libx11-data libxau6 libxcb-render0
+  libxcb-shm0 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxdmcp6
+  libxext6 libxfixes3 libxi6 libxinerama1 libxkbcommon0 libxml2 libxrandr2
+  libxrender1 libxt6 libxtst6 libyaml-0-2 media-types netbase
+  networkd-dispatcher openssl perl perl-modules-5.34 publicsuffix python3
+  python3-dbus python3-gi python3-minimal python3.10 python3.10-minimal rake
+  readline-common ruby ruby-net-telnet ruby-rubygems ruby-webrick ruby-xmlrpc
+  ruby3.0 rubygems-integration session-migration shared-mime-info
+  sound-theme-freedesktop systemd systemd-sysv systemd-timesyncd tzdata
+  ubuntu-mono ucf unzip vim-common vim-doc vim-gtk3 vim-gui-common vim-runtime
+  x11-common xdg-user-dirs xkb-data xxd zip
+The following packages will be upgraded:
+  libsystemd0 perl-base
+2 upgraded, 183 newly installed, 0 to remove and 19 not upgraded.
+Inst perl-base [5.34.0-3ubuntu1.3] (5.34.0-3ubuntu1.4 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf perl-base (5.34.0-3ubuntu1.4 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libsystemd0 [249.11-0ubuntu3.12] (249.11-0ubuntu3.15 Ubuntu:22.04/jammy-updates [amd64])
+Conf libsystemd0 (249.11-0ubuntu3.15 Ubuntu:22.04/jammy-updates [amd64])
+Inst libpython3.10-minimal (3.10.12-1~22.04.9 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libexpat1 (2.4.7-1ubuntu0.6 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst python3.10-minimal (3.10.12-1~22.04.9 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libpython3.10-minimal (3.10.12-1~22.04.9 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libexpat1 (2.4.7-1ubuntu0.6 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf python3.10-minimal (3.10.12-1~22.04.9 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst python3-minimal (3.10.6-1~22.04.1 Ubuntu:22.04/jammy-updates [amd64])
+Inst media-types (7.0.0 Ubuntu:22.04/jammy [all])
+Inst libmpdec3 (2.5.1-2build2 Ubuntu:22.04/jammy [amd64])
+Inst readline-common (8.1.2-1 Ubuntu:22.04/jammy [all])
+Inst libreadline8 (8.1.2-1 Ubuntu:22.04/jammy [amd64])
+Inst libsqlite3-0 (3.37.2-2ubuntu0.4 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libpython3.10-stdlib (3.10.12-1~22.04.9 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst python3.10 (3.10.12-1~22.04.9 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libpython3-stdlib (3.10.6-1~22.04.1 Ubuntu:22.04/jammy-updates [amd64])
+Conf python3-minimal (3.10.6-1~22.04.1 Ubuntu:22.04/jammy-updates [amd64])
+Inst python3 (3.10.6-1~22.04.1 Ubuntu:22.04/jammy-updates [amd64])
+Inst libapparmor1 (3.0.4-2ubuntu2.4 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libargon2-1 (0~20171227-0.3 Ubuntu:22.04/jammy [amd64])
+Inst libdevmapper1.02.1 (2:1.02.175-2.1ubuntu5 Ubuntu:22.04/jammy-updates [amd64])
+Inst libjson-c5 (0.15-3~ubuntu1.22.04.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libcryptsetup12 (2:2.4.3-1ubuntu1.3 Ubuntu:22.04/jammy-updates [amd64])
+Inst libip4tc2 (1.8.7-1ubuntu5.2 Ubuntu:22.04/jammy-updates [amd64])
+Inst libkmod2 (29-1ubuntu1 Ubuntu:22.04/jammy [amd64])
+Inst systemd (249.11-0ubuntu3.15 Ubuntu:22.04/jammy-updates [amd64])
+Conf libapparmor1 (3.0.4-2ubuntu2.4 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libargon2-1 (0~20171227-0.3 Ubuntu:22.04/jammy [amd64])
+Conf libdevmapper1.02.1 (2:1.02.175-2.1ubuntu5 Ubuntu:22.04/jammy-updates [amd64])
+Conf libjson-c5 (0.15-3~ubuntu1.22.04.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libcryptsetup12 (2:2.4.3-1ubuntu1.3 Ubuntu:22.04/jammy-updates [amd64])
+Conf libip4tc2 (1.8.7-1ubuntu5.2 Ubuntu:22.04/jammy-updates [amd64])
+Conf libkmod2 (29-1ubuntu1 Ubuntu:22.04/jammy [amd64])
+Conf systemd (249.11-0ubuntu3.15 Ubuntu:22.04/jammy-updates [amd64])
+Inst systemd-sysv (249.11-0ubuntu3.15 Ubuntu:22.04/jammy-updates [amd64])
+Inst fonts-lato (2.0-2.1 Ubuntu:22.04/jammy [all])
+Inst perl-modules-5.34 (5.34.0-3ubuntu1.4 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Inst libgdbm6 (1.23-1 Ubuntu:22.04/jammy [amd64])
+Inst libgdbm-compat4 (1.23-1 Ubuntu:22.04/jammy [amd64])
+Inst libperl5.34 (5.34.0-3ubuntu1.4 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst perl (5.34.0-3ubuntu1.4 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst openssl (3.0.2-0ubuntu1.19 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst ca-certificates (20240203~22.04.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Inst libdbus-1-3 (1.12.20-2ubuntu4.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst dbus (1.12.20-2ubuntu4.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst dmsetup (2:1.02.175-2.1ubuntu5 Ubuntu:22.04/jammy-updates [amd64])
+Inst libglib2.0-0 (2.72.4-0ubuntu2.5 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libgirepository-1.0-1 (1.72.0-1 Ubuntu:22.04/jammy [amd64])
+Inst gir1.2-glib-2.0 (1.72.0-1 Ubuntu:22.04/jammy [amd64])
+Inst libmd0 (1.0.4-1build1 Ubuntu:22.04/jammy [amd64])
+Inst libbsd0 (0.11.5-1 Ubuntu:22.04/jammy [amd64])
+Inst libfribidi0 (1.0.8-2ubuntu3.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libglib2.0-data (2.72.4-0ubuntu2.5 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Inst libicu70 (70.1-2 Ubuntu:22.04/jammy [amd64])
+Inst libnss-systemd (249.11-0ubuntu3.15 Ubuntu:22.04/jammy-updates [amd64])
+Inst libpam-systemd (249.11-0ubuntu3.15 Ubuntu:22.04/jammy-updates [amd64])
+Inst libxml2 (2.9.13+dfsg-1ubuntu0.7 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libyaml-0-2 (0.2.2-1build2 Ubuntu:22.04/jammy [amd64])
+Inst netbase (6.3 Ubuntu:22.04/jammy [all])
+Inst python3-dbus (1.2.18-3build1 Ubuntu:22.04/jammy [amd64])
+Inst python3-gi (3.42.1-0ubuntu1 Ubuntu:22.04/jammy-updates [amd64])
+Inst networkd-dispatcher (2.1-2ubuntu0.22.04.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Inst shared-mime-info (2.1-2 Ubuntu:22.04/jammy [amd64])
+Inst systemd-timesyncd (249.11-0ubuntu3.15 Ubuntu:22.04/jammy-updates [amd64])
+Inst tzdata (2025b-0ubuntu0.22.04.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Inst ucf (3.0043 Ubuntu:22.04/jammy [all])
+Inst xxd (2:8.2.3995-1ubuntu2.24 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst vim-common (2:8.2.3995-1ubuntu2.24 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Inst xdg-user-dirs (0.17-2ubuntu4 Ubuntu:22.04/jammy [amd64])
+Inst xkb-data (2.33-1 Ubuntu:22.04/jammy [all])
+Inst libedit2 (3.1-20210910-1build1 Ubuntu:22.04/jammy [amd64])
+Inst libnghttp2-14 (1.43.0-1ubuntu0.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libpng16-16 (1.6.37-3build5 Ubuntu:22.04/jammy [amd64])
+Inst libpsl5 (0.21.0-1.2build2 Ubuntu:22.04/jammy [amd64])
+Inst libxau6 (1:1.0.9-1build5 Ubuntu:22.04/jammy [amd64])
+Inst libxdmcp6 (1:1.1.3-0ubuntu5 Ubuntu:22.04/jammy [amd64])
+Inst libxcb1 (1.14-3ubuntu3 Ubuntu:22.04/jammy [amd64])
+Inst libx11-data (2:1.7.5-1ubuntu0.3 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Inst libx11-6 (2:1.7.5-1ubuntu0.3 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libxext6 (2:1.3.4-1build1 Ubuntu:22.04/jammy [amd64])
+Inst publicsuffix (20211207.1025-1 Ubuntu:22.04/jammy [all])
+Inst hicolor-icon-theme (0.17-2 Ubuntu:22.04/jammy [all])
+Inst libgdk-pixbuf2.0-common (2.42.8+dfsg-1ubuntu0.3 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Inst libjpeg-turbo8 (2.1.2-0ubuntu1 Ubuntu:22.04/jammy [amd64])
+Inst libjpeg8 (8c-2ubuntu10 Ubuntu:22.04/jammy [amd64])
+Inst libdeflate0 (1.10-2 Ubuntu:22.04/jammy [amd64])
+Inst libjbig0 (2.1-3.1ubuntu0.22.04.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libwebp7 (1.2.2-2ubuntu0.22.04.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libtiff5 (4.3.0-6ubuntu0.10 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libgdk-pixbuf-2.0-0 (2.42.8+dfsg-1ubuntu0.3 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst gtk-update-icon-cache (3.24.33-1ubuntu2.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst humanity-icon-theme (0.6.16 Ubuntu:22.04/jammy [all]) []
+Inst ubuntu-mono (20.10-0ubuntu2 Ubuntu:22.04/jammy [all]) []
+Inst adwaita-icon-theme (41.0-1ubuntu1 Ubuntu:22.04/jammy [all])
+Inst alsa-topology-conf (1.2.5.1-2 Ubuntu:22.04/jammy [all])
+Inst libasound2-data (1.2.6.1-1ubuntu1 Ubuntu:22.04/jammy [all])
+Inst libasound2 (1.2.6.1-1ubuntu1 Ubuntu:22.04/jammy [amd64])
+Inst alsa-ucm-conf (1.2.6.3-1ubuntu1.12 Ubuntu:22.04/jammy-updates [all])
+Inst libxi6 (2:1.8-1build1 Ubuntu:22.04/jammy [amd64])
+Inst libatspi2.0-0 (2.44.0-3 Ubuntu:22.04/jammy [amd64])
+Inst x11-common (1:7.7+23ubuntu2 Ubuntu:22.04/jammy [all])
+Inst libxtst6 (2:1.2.3-1build4 Ubuntu:22.04/jammy [amd64])
+Inst dbus-user-session (1.12.20-2ubuntu4.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libdconf1 (0.40.0-3 Ubuntu:22.04/jammy [amd64])
+Inst dconf-service (0.40.0-3 Ubuntu:22.04/jammy [amd64])
+Inst dconf-gsettings-backend (0.40.0-3 Ubuntu:22.04/jammy [amd64])
+Inst session-migration (0.3.6 Ubuntu:22.04/jammy [amd64])
+Inst gsettings-desktop-schemas (42.0-1ubuntu1 Ubuntu:22.04/jammy [all])
+Inst at-spi2-core (2.44.0-3 Ubuntu:22.04/jammy [amd64])
+Inst libbrotli1 (1.0.9-2build6 Ubuntu:22.04/jammy [amd64])
+Inst libsasl2-modules-db (2.1.27+dfsg2-3ubuntu1.2 Ubuntu:22.04/jammy-updates [amd64])
+Inst libsasl2-2 (2.1.27+dfsg2-3ubuntu1.2 Ubuntu:22.04/jammy-updates [amd64])
+Inst libldap-2.5-0 (2.5.19+dfsg-0ubuntu0.22.04.1 Ubuntu:22.04/jammy-updates [amd64])
+Inst librtmp1 (2.4+20151223.gitfa8646d.1-2build4 Ubuntu:22.04/jammy [amd64])
+Inst libssh-4 (0.9.6-2ubuntu0.22.04.3 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libcurl4 (7.81.0-1ubuntu1.20 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst curl (7.81.0-1ubuntu1.20 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libfreetype6 (2.11.1+dfsg-1ubuntu0.3 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst fonts-dejavu-core (2.37-2build1 Ubuntu:22.04/jammy [all])
+Inst fontconfig-config (2.13.1-4.2ubuntu5 Ubuntu:22.04/jammy [all])
+Inst libfontconfig1 (2.13.1-4.2ubuntu5 Ubuntu:22.04/jammy [amd64])
+Inst fontconfig (2.13.1-4.2ubuntu5 Ubuntu:22.04/jammy [amd64])
+Inst javascript-common (11+nmu1 Ubuntu:22.04/jammy [all])
+Inst libatk1.0-data (2.36.0-3build1 Ubuntu:22.04/jammy [all])
+Inst libatk1.0-0 (2.36.0-3build1 Ubuntu:22.04/jammy [amd64])
+Inst libatk-bridge2.0-0 (2.38.0-3 Ubuntu:22.04/jammy [amd64])
+Inst libavahi-common-data (0.8-5ubuntu5.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libavahi-common3 (0.8-5ubuntu5.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libavahi-client3 (0.8-5ubuntu5.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libpixman-1-0 (0.40.0-1ubuntu0.22.04.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libxcb-render0 (1.14-3ubuntu3 Ubuntu:22.04/jammy [amd64])
+Inst libxcb-shm0 (1.14-3ubuntu3 Ubuntu:22.04/jammy [amd64])
+Inst libxrender1 (1:0.9.10-1build4 Ubuntu:22.04/jammy [amd64])
+Inst libcairo2 (1.16.0-5ubuntu2 Ubuntu:22.04/jammy [amd64])
+Inst libcairo-gobject2 (1.16.0-5ubuntu2 Ubuntu:22.04/jammy [amd64])
+Inst libltdl7 (2.4.6-15build2 Ubuntu:22.04/jammy [amd64])
+Inst libtdb1 (1.4.5-2build1 Ubuntu:22.04/jammy [amd64])
+Inst libogg0 (1.3.5-0ubuntu3 Ubuntu:22.04/jammy [amd64])
+Inst libvorbis0a (1.3.7-1build2 Ubuntu:22.04/jammy [amd64])
+Inst libvorbisfile3 (1.3.7-1build2 Ubuntu:22.04/jammy [amd64])
+Inst sound-theme-freedesktop (0.8-2ubuntu1 Ubuntu:22.04/jammy [all])
+Inst libcanberra0 (0.30-10ubuntu1.22.04.1 Ubuntu:22.04/jammy-updates [amd64])
+Inst liblcms2-2 (2.12~rc1-2build2 Ubuntu:22.04/jammy [amd64])
+Inst libcolord2 (1.4.6-1 Ubuntu:22.04/jammy [amd64])
+Inst libcups2 (2.4.1op1-1ubuntu4.11 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libdatrie1 (0.2.13-2 Ubuntu:22.04/jammy [amd64])
+Inst libepoxy0 (1.5.10-1 Ubuntu:22.04/jammy [amd64])
+Inst libgdk-pixbuf2.0-bin (2.42.8+dfsg-1ubuntu0.3 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libgpm2 (1.20.7-10build1 Ubuntu:22.04/jammy [amd64])
+Inst libgraphite2-3 (1.3.14-1build2 Ubuntu:22.04/jammy [amd64])
+Inst libharfbuzz0b (2.7.4-1ubuntu3.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libthai-data (0.1.29-1build1 Ubuntu:22.04/jammy [all])
+Inst libthai0 (0.1.29-1build1 Ubuntu:22.04/jammy [amd64])
+Inst libpango-1.0-0 (1.50.6+ds-2ubuntu1 Ubuntu:22.04/jammy-updates [amd64])
+Inst libpangoft2-1.0-0 (1.50.6+ds-2ubuntu1 Ubuntu:22.04/jammy-updates [amd64])
+Inst libpangocairo-1.0-0 (1.50.6+ds-2ubuntu1 Ubuntu:22.04/jammy-updates [amd64])
+Inst libwayland-client0 (1.20.0-1ubuntu0.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libwayland-cursor0 (1.20.0-1ubuntu0.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libwayland-egl1 (1.20.0-1ubuntu0.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libxcomposite1 (1:0.4.5-1build2 Ubuntu:22.04/jammy [amd64])
+Inst libxfixes3 (1:6.0.0-1 Ubuntu:22.04/jammy [amd64])
+Inst libxcursor1 (1:1.2.0-2build4 Ubuntu:22.04/jammy [amd64])
+Inst libxdamage1 (1:1.1.5-2build2 Ubuntu:22.04/jammy [amd64])
+Inst libxinerama1 (2:1.1.4-3 Ubuntu:22.04/jammy [amd64])
+Inst libxkbcommon0 (1.4.0-1 Ubuntu:22.04/jammy [amd64])
+Inst libxrandr2 (2:1.5.2-1build1 Ubuntu:22.04/jammy [amd64])
+Inst libgtk-3-common (3.24.33-1ubuntu2.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Inst libgtk-3-0 (3.24.33-1ubuntu2.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libgtk-3-bin (3.24.33-1ubuntu2.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libice6 (2:1.0.10-1build2 Ubuntu:22.04/jammy [amd64])
+Inst libjs-jquery (3.6.0+dfsg+~3.5.13-1 Ubuntu:22.04/jammy [all])
+Inst libldap-common (2.5.19+dfsg-0ubuntu0.22.04.1 Ubuntu:22.04/jammy-updates [all])
+Inst liblua5.2-0 (5.2.4-2 Ubuntu:22.04/jammy [amd64])
+Inst libpython3.10 (3.10.12-1~22.04.9 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst librsvg2-2 (2.52.5+dfsg-3ubuntu0.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst librsvg2-common (2.52.5+dfsg-3ubuntu0.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst rubygems-integration (1.18 Ubuntu:22.04/jammy [all])
+Inst ruby3.0 (3.0.2-7ubuntu2.10 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64]) []
+Inst ruby-rubygems (3.3.5-2 Ubuntu:22.04/jammy [all]) []
+Inst ruby (1:3.0~exp1 Ubuntu:22.04/jammy [amd64]) []
+Inst rake (13.0.6-2 Ubuntu:22.04/jammy [all]) []
+Inst ruby-net-telnet (0.1.1-2 Ubuntu:22.04/jammy [all]) []
+Inst ruby-webrick (1.7.0-3ubuntu0.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all]) []
+Inst ruby-xmlrpc (0.3.2-1ubuntu0.1 Ubuntu:22.04/jammy-updates [all]) []
+Inst libruby3.0 (3.0.2-7ubuntu2.10 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libsasl2-modules (2.1.27+dfsg2-3ubuntu1.2 Ubuntu:22.04/jammy-updates [amd64])
+Inst libsm6 (2:1.2.3-1build2 Ubuntu:22.04/jammy [amd64])
+Inst libsodium23 (1.0.18-1build2 Ubuntu:22.04/jammy [amd64])
+Inst libtcl8.6 (8.6.12+dfsg-1build1 Ubuntu:22.04/jammy [amd64])
+Inst libxt6 (1:1.2.1-1 Ubuntu:22.04/jammy [amd64])
+Inst unzip (6.0-26ubuntu3.2 Ubuntu:22.04/jammy-updates [amd64])
+Inst vim-doc (2:8.2.3995-1ubuntu2.24 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Inst vim-gui-common (2:8.2.3995-1ubuntu2.24 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Inst vim-runtime (2:8.2.3995-1ubuntu2.24 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Inst zip (3.0-12build2 Ubuntu:22.04/jammy [amd64])
+Inst vim-gtk3 (2:8.2.3995-1ubuntu2.24 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf media-types (7.0.0 Ubuntu:22.04/jammy [all])
+Conf libmpdec3 (2.5.1-2build2 Ubuntu:22.04/jammy [amd64])
+Conf readline-common (8.1.2-1 Ubuntu:22.04/jammy [all])
+Conf libreadline8 (8.1.2-1 Ubuntu:22.04/jammy [amd64])
+Conf libsqlite3-0 (3.37.2-2ubuntu0.4 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libpython3.10-stdlib (3.10.12-1~22.04.9 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf python3.10 (3.10.12-1~22.04.9 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libpython3-stdlib (3.10.6-1~22.04.1 Ubuntu:22.04/jammy-updates [amd64])
+Conf python3 (3.10.6-1~22.04.1 Ubuntu:22.04/jammy-updates [amd64])
+Conf systemd-sysv (249.11-0ubuntu3.15 Ubuntu:22.04/jammy-updates [amd64])
+Conf fonts-lato (2.0-2.1 Ubuntu:22.04/jammy [all])
+Conf perl-modules-5.34 (5.34.0-3ubuntu1.4 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Conf libgdbm6 (1.23-1 Ubuntu:22.04/jammy [amd64])
+Conf libgdbm-compat4 (1.23-1 Ubuntu:22.04/jammy [amd64])
+Conf libperl5.34 (5.34.0-3ubuntu1.4 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf perl (5.34.0-3ubuntu1.4 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf openssl (3.0.2-0ubuntu1.19 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf ca-certificates (20240203~22.04.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Conf libdbus-1-3 (1.12.20-2ubuntu4.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf dbus (1.12.20-2ubuntu4.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf dmsetup (2:1.02.175-2.1ubuntu5 Ubuntu:22.04/jammy-updates [amd64])
+Conf libglib2.0-0 (2.72.4-0ubuntu2.5 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libgirepository-1.0-1 (1.72.0-1 Ubuntu:22.04/jammy [amd64])
+Conf gir1.2-glib-2.0 (1.72.0-1 Ubuntu:22.04/jammy [amd64])
+Conf libmd0 (1.0.4-1build1 Ubuntu:22.04/jammy [amd64])
+Conf libbsd0 (0.11.5-1 Ubuntu:22.04/jammy [amd64])
+Conf libfribidi0 (1.0.8-2ubuntu3.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libglib2.0-data (2.72.4-0ubuntu2.5 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Conf libicu70 (70.1-2 Ubuntu:22.04/jammy [amd64])
+Conf libnss-systemd (249.11-0ubuntu3.15 Ubuntu:22.04/jammy-updates [amd64])
+Conf libpam-systemd (249.11-0ubuntu3.15 Ubuntu:22.04/jammy-updates [amd64])
+Conf libxml2 (2.9.13+dfsg-1ubuntu0.7 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libyaml-0-2 (0.2.2-1build2 Ubuntu:22.04/jammy [amd64])
+Conf netbase (6.3 Ubuntu:22.04/jammy [all])
+Conf python3-dbus (1.2.18-3build1 Ubuntu:22.04/jammy [amd64])
+Conf python3-gi (3.42.1-0ubuntu1 Ubuntu:22.04/jammy-updates [amd64])
+Conf networkd-dispatcher (2.1-2ubuntu0.22.04.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Conf shared-mime-info (2.1-2 Ubuntu:22.04/jammy [amd64])
+Conf systemd-timesyncd (249.11-0ubuntu3.15 Ubuntu:22.04/jammy-updates [amd64])
+Conf tzdata (2025b-0ubuntu0.22.04.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Conf ucf (3.0043 Ubuntu:22.04/jammy [all])
+Conf xxd (2:8.2.3995-1ubuntu2.24 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf vim-common (2:8.2.3995-1ubuntu2.24 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Conf xdg-user-dirs (0.17-2ubuntu4 Ubuntu:22.04/jammy [amd64])
+Conf xkb-data (2.33-1 Ubuntu:22.04/jammy [all])
+Conf libedit2 (3.1-20210910-1build1 Ubuntu:22.04/jammy [amd64])
+Conf libnghttp2-14 (1.43.0-1ubuntu0.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libpng16-16 (1.6.37-3build5 Ubuntu:22.04/jammy [amd64])
+Conf libpsl5 (0.21.0-1.2build2 Ubuntu:22.04/jammy [amd64])
+Conf libxau6 (1:1.0.9-1build5 Ubuntu:22.04/jammy [amd64])
+Conf libxdmcp6 (1:1.1.3-0ubuntu5 Ubuntu:22.04/jammy [amd64])
+Conf libxcb1 (1.14-3ubuntu3 Ubuntu:22.04/jammy [amd64])
+Conf libx11-data (2:1.7.5-1ubuntu0.3 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Conf libx11-6 (2:1.7.5-1ubuntu0.3 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libxext6 (2:1.3.4-1build1 Ubuntu:22.04/jammy [amd64])
+Conf publicsuffix (20211207.1025-1 Ubuntu:22.04/jammy [all])
+Conf hicolor-icon-theme (0.17-2 Ubuntu:22.04/jammy [all])
+Conf libgdk-pixbuf2.0-common (2.42.8+dfsg-1ubuntu0.3 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Conf libjpeg-turbo8 (2.1.2-0ubuntu1 Ubuntu:22.04/jammy [amd64])
+Conf libjpeg8 (8c-2ubuntu10 Ubuntu:22.04/jammy [amd64])
+Conf libdeflate0 (1.10-2 Ubuntu:22.04/jammy [amd64])
+Conf libjbig0 (2.1-3.1ubuntu0.22.04.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libwebp7 (1.2.2-2ubuntu0.22.04.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libtiff5 (4.3.0-6ubuntu0.10 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libgdk-pixbuf-2.0-0 (2.42.8+dfsg-1ubuntu0.3 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf gtk-update-icon-cache (3.24.33-1ubuntu2.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf humanity-icon-theme (0.6.16 Ubuntu:22.04/jammy [all])
+Conf ubuntu-mono (20.10-0ubuntu2 Ubuntu:22.04/jammy [all])
+Conf adwaita-icon-theme (41.0-1ubuntu1 Ubuntu:22.04/jammy [all])
+Conf alsa-topology-conf (1.2.5.1-2 Ubuntu:22.04/jammy [all])
+Conf libasound2-data (1.2.6.1-1ubuntu1 Ubuntu:22.04/jammy [all])
+Conf libasound2 (1.2.6.1-1ubuntu1 Ubuntu:22.04/jammy [amd64])
+Conf alsa-ucm-conf (1.2.6.3-1ubuntu1.12 Ubuntu:22.04/jammy-updates [all])
+Conf libxi6 (2:1.8-1build1 Ubuntu:22.04/jammy [amd64])
+Conf libatspi2.0-0 (2.44.0-3 Ubuntu:22.04/jammy [amd64])
+Conf x11-common (1:7.7+23ubuntu2 Ubuntu:22.04/jammy [all])
+Conf libxtst6 (2:1.2.3-1build4 Ubuntu:22.04/jammy [amd64])
+Conf dbus-user-session (1.12.20-2ubuntu4.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libdconf1 (0.40.0-3 Ubuntu:22.04/jammy [amd64])
+Conf dconf-service (0.40.0-3 Ubuntu:22.04/jammy [amd64])
+Conf dconf-gsettings-backend (0.40.0-3 Ubuntu:22.04/jammy [amd64])
+Conf session-migration (0.3.6 Ubuntu:22.04/jammy [amd64])
+Conf gsettings-desktop-schemas (42.0-1ubuntu1 Ubuntu:22.04/jammy [all])
+Conf at-spi2-core (2.44.0-3 Ubuntu:22.04/jammy [amd64])
+Conf libbrotli1 (1.0.9-2build6 Ubuntu:22.04/jammy [amd64])
+Conf libsasl2-modules-db (2.1.27+dfsg2-3ubuntu1.2 Ubuntu:22.04/jammy-updates [amd64])
+Conf libsasl2-2 (2.1.27+dfsg2-3ubuntu1.2 Ubuntu:22.04/jammy-updates [amd64])
+Conf libldap-2.5-0 (2.5.19+dfsg-0ubuntu0.22.04.1 Ubuntu:22.04/jammy-updates [amd64])
+Conf librtmp1 (2.4+20151223.gitfa8646d.1-2build4 Ubuntu:22.04/jammy [amd64])
+Conf libssh-4 (0.9.6-2ubuntu0.22.04.3 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libcurl4 (7.81.0-1ubuntu1.20 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf curl (7.81.0-1ubuntu1.20 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libfreetype6 (2.11.1+dfsg-1ubuntu0.3 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf fonts-dejavu-core (2.37-2build1 Ubuntu:22.04/jammy [all])
+Conf fontconfig-config (2.13.1-4.2ubuntu5 Ubuntu:22.04/jammy [all])
+Conf libfontconfig1 (2.13.1-4.2ubuntu5 Ubuntu:22.04/jammy [amd64])
+Conf fontconfig (2.13.1-4.2ubuntu5 Ubuntu:22.04/jammy [amd64])
+Conf javascript-common (11+nmu1 Ubuntu:22.04/jammy [all])
+Conf libatk1.0-data (2.36.0-3build1 Ubuntu:22.04/jammy [all])
+Conf libatk1.0-0 (2.36.0-3build1 Ubuntu:22.04/jammy [amd64])
+Conf libatk-bridge2.0-0 (2.38.0-3 Ubuntu:22.04/jammy [amd64])
+Conf libavahi-common-data (0.8-5ubuntu5.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libavahi-common3 (0.8-5ubuntu5.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libavahi-client3 (0.8-5ubuntu5.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libpixman-1-0 (0.40.0-1ubuntu0.22.04.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libxcb-render0 (1.14-3ubuntu3 Ubuntu:22.04/jammy [amd64])
+Conf libxcb-shm0 (1.14-3ubuntu3 Ubuntu:22.04/jammy [amd64])
+Conf libxrender1 (1:0.9.10-1build4 Ubuntu:22.04/jammy [amd64])
+Conf libcairo2 (1.16.0-5ubuntu2 Ubuntu:22.04/jammy [amd64])
+Conf libcairo-gobject2 (1.16.0-5ubuntu2 Ubuntu:22.04/jammy [amd64])
+Conf libltdl7 (2.4.6-15build2 Ubuntu:22.04/jammy [amd64])
+Conf libtdb1 (1.4.5-2build1 Ubuntu:22.04/jammy [amd64])
+Conf libogg0 (1.3.5-0ubuntu3 Ubuntu:22.04/jammy [amd64])
+Conf libvorbis0a (1.3.7-1build2 Ubuntu:22.04/jammy [amd64])
+Conf libvorbisfile3 (1.3.7-1build2 Ubuntu:22.04/jammy [amd64])
+Conf sound-theme-freedesktop (0.8-2ubuntu1 Ubuntu:22.04/jammy [all])
+Conf libcanberra0 (0.30-10ubuntu1.22.04.1 Ubuntu:22.04/jammy-updates [amd64])
+Conf liblcms2-2 (2.12~rc1-2build2 Ubuntu:22.04/jammy [amd64])
+Conf libcolord2 (1.4.6-1 Ubuntu:22.04/jammy [amd64])
+Conf libcups2 (2.4.1op1-1ubuntu4.11 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libdatrie1 (0.2.13-2 Ubuntu:22.04/jammy [amd64])
+Conf libepoxy0 (1.5.10-1 Ubuntu:22.04/jammy [amd64])
+Conf libgdk-pixbuf2.0-bin (2.42.8+dfsg-1ubuntu0.3 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libgpm2 (1.20.7-10build1 Ubuntu:22.04/jammy [amd64])
+Conf libgraphite2-3 (1.3.14-1build2 Ubuntu:22.04/jammy [amd64])
+Conf libharfbuzz0b (2.7.4-1ubuntu3.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libthai-data (0.1.29-1build1 Ubuntu:22.04/jammy [all])
+Conf libthai0 (0.1.29-1build1 Ubuntu:22.04/jammy [amd64])
+Conf libpango-1.0-0 (1.50.6+ds-2ubuntu1 Ubuntu:22.04/jammy-updates [amd64])
+Conf libpangoft2-1.0-0 (1.50.6+ds-2ubuntu1 Ubuntu:22.04/jammy-updates [amd64])
+Conf libpangocairo-1.0-0 (1.50.6+ds-2ubuntu1 Ubuntu:22.04/jammy-updates [amd64])
+Conf libwayland-client0 (1.20.0-1ubuntu0.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libwayland-cursor0 (1.20.0-1ubuntu0.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libwayland-egl1 (1.20.0-1ubuntu0.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libxcomposite1 (1:0.4.5-1build2 Ubuntu:22.04/jammy [amd64])
+Conf libxfixes3 (1:6.0.0-1 Ubuntu:22.04/jammy [amd64])
+Conf libxcursor1 (1:1.2.0-2build4 Ubuntu:22.04/jammy [amd64])
+Conf libxdamage1 (1:1.1.5-2build2 Ubuntu:22.04/jammy [amd64])
+Conf libxinerama1 (2:1.1.4-3 Ubuntu:22.04/jammy [amd64])
+Conf libxkbcommon0 (1.4.0-1 Ubuntu:22.04/jammy [amd64])
+Conf libxrandr2 (2:1.5.2-1build1 Ubuntu:22.04/jammy [amd64])
+Conf libgtk-3-common (3.24.33-1ubuntu2.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Conf libgtk-3-0 (3.24.33-1ubuntu2.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libgtk-3-bin (3.24.33-1ubuntu2.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libice6 (2:1.0.10-1build2 Ubuntu:22.04/jammy [amd64])
+Conf libjs-jquery (3.6.0+dfsg+~3.5.13-1 Ubuntu:22.04/jammy [all])
+Conf libldap-common (2.5.19+dfsg-0ubuntu0.22.04.1 Ubuntu:22.04/jammy-updates [all])
+Conf liblua5.2-0 (5.2.4-2 Ubuntu:22.04/jammy [amd64])
+Conf libpython3.10 (3.10.12-1~22.04.9 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf librsvg2-2 (2.52.5+dfsg-3ubuntu0.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf librsvg2-common (2.52.5+dfsg-3ubuntu0.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf rubygems-integration (1.18 Ubuntu:22.04/jammy [all])
+Conf ruby3.0 (3.0.2-7ubuntu2.10 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf ruby-rubygems (3.3.5-2 Ubuntu:22.04/jammy [all])
+Conf ruby (1:3.0~exp1 Ubuntu:22.04/jammy [amd64])
+Conf rake (13.0.6-2 Ubuntu:22.04/jammy [all])
+Conf ruby-net-telnet (0.1.1-2 Ubuntu:22.04/jammy [all])
+Conf ruby-webrick (1.7.0-3ubuntu0.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Conf ruby-xmlrpc (0.3.2-1ubuntu0.1 Ubuntu:22.04/jammy-updates [all])
+Conf libruby3.0 (3.0.2-7ubuntu2.10 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libsasl2-modules (2.1.27+dfsg2-3ubuntu1.2 Ubuntu:22.04/jammy-updates [amd64])
+Conf libsm6 (2:1.2.3-1build2 Ubuntu:22.04/jammy [amd64])
+Conf libsodium23 (1.0.18-1build2 Ubuntu:22.04/jammy [amd64])
+Conf libtcl8.6 (8.6.12+dfsg-1build1 Ubuntu:22.04/jammy [amd64])
+Conf libxt6 (1:1.2.1-1 Ubuntu:22.04/jammy [amd64])
+Conf unzip (6.0-26ubuntu3.2 Ubuntu:22.04/jammy-updates [amd64])
+Conf vim-doc (2:8.2.3995-1ubuntu2.24 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Conf vim-gui-common (2:8.2.3995-1ubuntu2.24 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Conf vim-runtime (2:8.2.3995-1ubuntu2.24 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Conf zip (3.0-12build2 Ubuntu:22.04/jammy [amd64])
+Conf vim-gtk3 (2:8.2.3995-1ubuntu2.24 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])

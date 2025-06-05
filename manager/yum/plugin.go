@@ -36,7 +36,7 @@ func NewManagerWithRunner(runner manager.CommandRunner) *Manager {
 func (m *Manager) IsAvailable() bool {
 	// First try using the command runner (works for testing with mocks)
 	output, err := m.GetRunner().Run("yum", "--version")
-	if err == nil && (strings.Contains(string(output), "yum") || strings.Contains(string(output), "RPM")) {
+	if err == nil && (strings.Contains(strings.ToLower(string(output)), "yum") || strings.Contains(strings.ToLower(string(output)), "rpm")) {
 		return true
 	}
 
@@ -310,7 +310,13 @@ func (m *Manager) AutoRemove(ctx context.Context, opts *manager.Options) ([]mana
 	}
 
 	// Parse the output to extract removed packages
-	// YUM autoremove output format is similar to remove output
+	// Use context-aware parsing based on operation mode
+	if opts != nil && opts.DryRun {
+		// YUM autoremove dry-run may have different output format
+		// For now, use the enhanced parseRemoveOutput which handles both formats
+		// TODO: If dry-run format is significantly different, create parseAutoRemoveDryRunOutput
+		return parseRemoveOutput(string(output)), nil
+	}
 	return parseRemoveOutput(string(output)), nil
 }
 

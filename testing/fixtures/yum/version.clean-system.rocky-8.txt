@@ -1,0 +1,6 @@
+4.7.0
+  Installed: dnf-0:4.7.0-19.el8.noarch at Sun Nov 19 15:50:43 2023
+  Built    : infrastructure@rockylinux.org at Wed Jun 28 16:27:21 2023
+
+  Installed: rpm-0:4.14.3-26.el8.x86_64 at Sun Nov 19 15:50:42 2023
+  Built    : infrastructure@rockylinux.org at Wed Dec 21 17:29:15 2022

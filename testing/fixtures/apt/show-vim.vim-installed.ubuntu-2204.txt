@@ -1,0 +1,48 @@
+Package: vim
+Architecture: amd64
+Version: 2:8.2.3995-1ubuntu2.24
+Priority: optional
+Section: editors
+Origin: Ubuntu
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Original-Maintainer: Debian Vim Maintainers <team+vim@tracker.debian.org>
+Bugs: https://bugs.launchpad.net/ubuntu/+filebug
+Installed-Size: 3931
+Provides: editor
+Depends: vim-common (= 2:8.2.3995-1ubuntu2.24), vim-runtime (= 2:8.2.3995-1ubuntu2.24), libacl1 (>= 2.2.23), libc6 (>= 2.34), libgpm2 (>= 1.20.7), libpython3.10 (>= 3.10.0), libselinux1 (>= 3.1~), libsodium23 (>= 1.0.14), libtinfo6 (>= 6)
+Suggests: ctags, vim-doc, vim-scripts
+Filename: pool/main/v/vim/vim_8.2.3995-1ubuntu2.24_amd64.deb
+Size: 1728058
+MD5sum: ae2d044261d454c467132f9e95f9bebf
+SHA1: 088e8d0578a4bf646c61f8b8888458371c7771ca
+SHA256: d368290012d1c55566db665e71e6982473a2b2fc0368de55087bf0c999591695
+SHA512: 45df06f1b8efbe573781ace85e1d32caea5843bfe59808d23888b81858725c5ad5f85ead16cb5452add41f9b138eea3a3615da3e9dc3f3c7d84b4ed809c2d325
+Homepage: https://www.vim.org/
+Description: Vi IMproved - enhanced vi editor
+Description-md5: 59e8b8f7757db8b53566d5d119872de8
+Task: cloud-image, ubuntu-wsl, server, ubuntu-server-raspi, lubuntu-desktop
+
+Package: vim
+Architecture: amd64
+Version: 2:8.2.3995-1ubuntu2
+Priority: optional
+Section: editors
+Origin: Ubuntu
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Original-Maintainer: Debian Vim Maintainers <team+vim@tracker.debian.org>
+Bugs: https://bugs.launchpad.net/ubuntu/+filebug
+Installed-Size: 3916
+Provides: editor
+Depends: vim-common (= 2:8.2.3995-1ubuntu2), vim-runtime (= 2:8.2.3995-1ubuntu2), libacl1 (>= 2.2.23), libc6 (>= 2.34), libgpm2 (>= 1.20.7), libpython3.10 (>= 3.10.0), libselinux1 (>= 3.1~), libsodium23 (>= 1.0.14), libtinfo6 (>= 6)
+Suggests: ctags, vim-doc, vim-scripts
+Filename: pool/main/v/vim/vim_8.2.3995-1ubuntu2_amd64.deb
+Size: 1723566
+MD5sum: 3b0145d5f4ab60dde45b0b02259c6d5d
+SHA1: a5cb8feca431a2ce584bcd6f1ebf0f8e6b40c163
+SHA256: 13684fabc8fd8765cf55e03cbf2558392a3682be4d0929e71c3ad5adfc14643d
+SHA512: 1eccbe94bec70eab284fb35276fe61b2e13b43a23f9a80ab3caa945986e23c0d4776aef5b28bab177cfba1f6f493b73a0be4014a5255f388ee17b697bb73a48b
+Homepage: https://www.vim.org/
+Description: Vi IMproved - enhanced vi editor
+Description-md5: 59e8b8f7757db8b53566d5d119872de8
+Task: cloud-image, ubuntu-wsl, server, ubuntu-server-raspi, lubuntu-desktop
+

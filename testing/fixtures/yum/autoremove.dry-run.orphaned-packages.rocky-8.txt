@@ -1,0 +1,28 @@
+Last metadata expiration check: 0:02:37 ago on Thu Jun  5 19:45:08 2025.
+Dependencies resolved.
+================================================================================
+ Package               Arch      Version                    Repository     Size
+================================================================================
+Removing:
+ cpp                   x86_64    8.5.0-26.el8_10            @appstream     28 M
+ gcc                   x86_64    8.5.0-26.el8_10            @appstream     59 M
+ glibc-devel           x86_64    2.28-251.el8_10.16         @baseos       235 k
+ glibc-headers         x86_64    2.28-251.el8_10.16         @baseos       1.9 M
+ isl                   x86_64    0.16.1-6.el8               @appstream    3.1 M
+ kernel-headers        x86_64    4.18.0-553.54.1.el8_10     @baseos       5.4 M
+ libgomp               x86_64    8.5.0-26.el8_10            @baseos       324 k
+ libmpc                x86_64    1.1.0-9.1.el8              @appstream    124 k
+ libpkgconf            x86_64    1.4.2-1.el8                @baseos        66 k
+ libstdc++-devel       x86_64    8.5.0-26.el8_10            @appstream     11 M
+ libxcrypt-devel       x86_64    4.1.1-6.el8                @baseos        24 k
+ pkgconf               x86_64    1.4.2-1.el8                @baseos        64 k
+ pkgconf-m4            noarch    1.4.2-1.el8                @baseos        14 k
+ pkgconf-pkg-config    x86_64    1.4.2-1.el8                @baseos       3.0 k
+
+Transaction Summary
+================================================================================
+Remove  14 Packages
+
+Freed space: 110 M
+YUM will only download packages, install gpg keys, and check the transaction.
+Is this ok [y/N]: Operation aborted.

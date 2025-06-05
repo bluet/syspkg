@@ -1,0 +1,40 @@
+Last metadata expiration check: 0:02:34 ago on Thu Jun  5 19:45:08 2025.
+Package curl-7.61.1-33.el8.x86_64 is already installed.
+Dependencies resolved.
+================================================================================
+ Package               Architecture Version                  Repository    Size
+================================================================================
+Upgrading:
+ curl                  x86_64       7.61.1-34.el8_10.3       baseos       353 k
+ libcurl-minimal       x86_64       7.61.1-34.el8_10.3       baseos       289 k
+
+Transaction Summary
+================================================================================
+Upgrade  2 Packages
+
+Total download size: 642 k
+Downloading Packages:
+(1/2): libcurl-minimal-7.61.1-34.el8_10.3.x86_6 753 kB/s | 289 kB     00:00    
+(2/2): curl-7.61.1-34.el8_10.3.x86_64.rpm       902 kB/s | 353 kB     00:00    
+--------------------------------------------------------------------------------
+Total                                           649 kB/s | 642 kB     00:00     
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                        1/1 
+  Upgrading        : libcurl-minimal-7.61.1-34.el8_10.3.x86_64              1/4 
+  Upgrading        : curl-7.61.1-34.el8_10.3.x86_64                         2/4 
+  Cleanup          : curl-7.61.1-33.el8.x86_64                              3/4 
+  Cleanup          : libcurl-minimal-7.61.1-33.el8.x86_64                   4/4 
+  Running scriptlet: libcurl-minimal-7.61.1-33.el8.x86_64                   4/4 
+  Verifying        : curl-7.61.1-34.el8_10.3.x86_64                         1/4 
+  Verifying        : curl-7.61.1-33.el8.x86_64                              2/4 
+  Verifying        : libcurl-minimal-7.61.1-34.el8_10.3.x86_64              3/4 
+  Verifying        : libcurl-minimal-7.61.1-33.el8.x86_64                   4/4 
+
+Upgraded:
+  curl-7.61.1-34.el8_10.3.x86_64    libcurl-minimal-7.61.1-34.el8_10.3.x86_64   
+
+Complete!

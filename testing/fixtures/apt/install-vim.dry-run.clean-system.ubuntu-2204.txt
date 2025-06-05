@@ -1,0 +1,47 @@
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following additional packages will be installed:
+  libexpat1 libgpm2 libmpdec3 libpython3.10 libpython3.10-minimal
+  libpython3.10-stdlib libreadline8 libsodium23 libsqlite3-0 media-types
+  readline-common vim-common vim-runtime xxd
+Suggested packages:
+  gpm readline-doc ctags vim-doc vim-scripts
+The following NEW packages will be installed:
+  libexpat1 libgpm2 libmpdec3 libpython3.10 libpython3.10-minimal
+  libpython3.10-stdlib libreadline8 libsodium23 libsqlite3-0 media-types
+  readline-common vim vim-common vim-runtime xxd
+0 upgraded, 15 newly installed, 0 to remove and 21 not upgraded.
+Inst libexpat1 (2.4.7-1ubuntu0.6 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libmpdec3 (2.5.1-2build2 Ubuntu:22.04/jammy [amd64])
+Inst libpython3.10-minimal (3.10.12-1~22.04.9 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst media-types (7.0.0 Ubuntu:22.04/jammy [all])
+Inst readline-common (8.1.2-1 Ubuntu:22.04/jammy [all])
+Inst libreadline8 (8.1.2-1 Ubuntu:22.04/jammy [amd64])
+Inst libsqlite3-0 (3.37.2-2ubuntu0.4 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libpython3.10-stdlib (3.10.12-1~22.04.9 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst xxd (2:8.2.3995-1ubuntu2.24 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst vim-common (2:8.2.3995-1ubuntu2.24 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Inst libgpm2 (1.20.7-10build1 Ubuntu:22.04/jammy [amd64])
+Inst libpython3.10 (3.10.12-1~22.04.9 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libsodium23 (1.0.18-1build2 Ubuntu:22.04/jammy [amd64])
+Inst vim-runtime (2:8.2.3995-1ubuntu2.24 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Inst vim (2:8.2.3995-1ubuntu2.24 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libexpat1 (2.4.7-1ubuntu0.6 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libmpdec3 (2.5.1-2build2 Ubuntu:22.04/jammy [amd64])
+Conf libpython3.10-minimal (3.10.12-1~22.04.9 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf media-types (7.0.0 Ubuntu:22.04/jammy [all])
+Conf readline-common (8.1.2-1 Ubuntu:22.04/jammy [all])
+Conf libreadline8 (8.1.2-1 Ubuntu:22.04/jammy [amd64])
+Conf libsqlite3-0 (3.37.2-2ubuntu0.4 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libpython3.10-stdlib (3.10.12-1~22.04.9 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf xxd (2:8.2.3995-1ubuntu2.24 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf vim-common (2:8.2.3995-1ubuntu2.24 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Conf libgpm2 (1.20.7-10build1 Ubuntu:22.04/jammy [amd64])
+Conf libpython3.10 (3.10.12-1~22.04.9 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libsodium23 (1.0.18-1build2 Ubuntu:22.04/jammy [amd64])
+Conf vim-runtime (2:8.2.3995-1ubuntu2.24 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [all])
+Conf vim (2:8.2.3995-1ubuntu2.24 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])

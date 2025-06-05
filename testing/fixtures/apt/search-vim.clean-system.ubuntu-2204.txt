@@ -1,0 +1,275 @@
+Sorting...
+Full Text Search...
+apvlv/jammy 0.4.0-2 amd64
+  PDF viewer with Vim-like behaviour
+
+biosyntax-vim/jammy 1.0.0b-2 all
+  Syntax Highlighting for Computational Biology (vim)
+
+cpl-plugin-vimos/jammy 4.1.6+dfsg-2build1 amd64
+  ESO data reduction pipeline for the VIMOS instrument
+
+cpl-plugin-vimos-calib/jammy 4.1.6+dfsg-2build1 all
+  ESO data reduction pipeline calibration data downloader for VIMOS
+
+cpl-plugin-vimos-doc/jammy 4.1.6+dfsg-2build1 all
+  ESO data reduction pipeline documentation for VIMOS
+
+cream/jammy 0.43-3.1 all
+  VIM macros that make the VIM easier to use for beginners
+
+dh-vim-addon/jammy 0.4 all
+  debhelper addon to help package Vim/Neovim addons
+
+elpa-neotree/jammy 0.5.2-3 all
+  directory tree sidebar for Emacs that is like NERDTree for Vim
+
+elpa-powerline/jammy 2.4-4 all
+  Emacs version of the Vim powerline
+
+elpa-vimish-fold/jammy 0.2.3-5 all
+  fold text in GNU Emacs like in Vim
+
+geany-plugin-vimode/jammy 1.38+dfsg-1 amd64
+  Vim-mode plugin for Geany
+
+golang-github-reviewdog-errorformat-dev/jammy 0.0~git20210809.cda7203-2 all
+  Vim's quickfix errorformat implementation in Go (library)
+
+golang-github-vimeo-go-magic-dev/jammy 1.0.0-1.1 all
+  Go bindings for libmagic
+
+kakoune/jammy 2020.09.01-3 amd64
+  Vim-inspired, selection-oriented code editor
+
+libghc-yi-keymap-vim-dev/jammy 0.19.0-1 amd64
+  Vim keymap for Yi editor
+
+libghc-yi-keymap-vim-doc/jammy 0.19.0-1 all
+  Vim keymap for Yi editor; documentation
+
+libghc-yi-keymap-vim-prof/jammy 0.19.0-1 amd64
+  Vim keymap for Yi editor; profiling libraries
+
+libocp-indent-ocaml/jammy 1.8.2-1build4 amd64
+  OCaml indentation tool for emacs and vim - libraries
+
+libocp-indent-ocaml-dev/jammy 1.8.2-1build4 amd64
+  OCaml indentation tool for emacs and vim - development libraries
+
+libvi-quickfix-perl/jammy 1.135-1.1 all
+  Perl support for vim's QuickFix mode
+
+lua-nvim/jammy 0.2.2-1-1 amd64
+  Lua client for Neovim
+
+lua-nvim-dev/jammy 0.2.2-1-1 amd64
+  Lua client for Neovim
+
+neovim/jammy 0.6.1-3 amd64
+  heavily refactored vim fork
+
+neovim-qt/jammy 0.2.16-1 amd64
+  neovim client library and GUI
+
+neovim-runtime/jammy 0.6.1-3 all
+  heavily refactored vim fork (runtime files)
+
+notmuch-vim/jammy 0.35-2ubuntu1 all
+  thread-based email index, search and tagging (vim interface)
+
+ocp-indent/jammy 1.8.2-1build4 amd64
+  OCaml indentation tool for emacs and vim - runtime
+
+pacvim/jammy 1.1.1-1.1 amd64
+  pacman game concept with vim command
+
+python3-neovim/jammy 0.4.2-1 all
+  transitional dummy package
+
+python3-pynvim/jammy 0.4.2-1 all
+  Python3 library for scripting Neovim processes through its msgpack-rpc API
+
+qutebrowser/jammy 2.5.0-1 all
+  Keyboard-driven, vim-like browser based on PyQt5
+
+r-cran-vim/jammy 6.1.1+dfsg-1 amd64
+  GNU R visualization and imputation of missing values
+
+ruby-neovim/jammy 0.8.1-1 all
+  Ruby client for Neovim
+
+supercollider-vim/jammy 1:3.11.2+repack-1build1 all
+  SuperCollider mode for Vim
+
+svim/jammy 2.0.0-2 all
+  Structural variant caller for long sequencing reads
+
+vim/jammy-updates,jammy-security 2:8.2.3995-1ubuntu2.24 amd64
+  Vi IMproved - enhanced vi editor
+
+vim-addon-manager/jammy 0.5.10 all
+  manager of addons for the Vim editor
+
+vim-addon-mw-utils/jammy 0.2-4 all
+  Vim funcref library
+
+vim-airline/jammy 0.11-1 all
+  Lean & mean status/tabline for vim that's light as air
+
+vim-airline-themes/jammy 0+git.20180730-6e798f9-1.1 all
+  official theme collection for vim-airline
+
+vim-ale/jammy 3.1.0-1 all
+  Asynchronous Lint Engine for Vim 8 and NeoVim
+
+vim-athena/jammy-updates,jammy-security 2:8.2.3995-1ubuntu2.24 amd64
+  Vi IMproved - enhanced vi editor - with Athena GUI
+
+vim-autopep8/jammy 1.2.0-2 all
+  vim plugin to apply autopep8
+
+vim-bitbake/jammy 0~git20220408-1 all
+  Vim plugin to interact with Yocto bitbake-based recipes
+
+vim-command-t/jammy 5.0.2-5-g7147ba9-1build2 amd64
+  open files with a minimum number of keystrokes
+
+vim-common/jammy-updates,jammy-security 2:8.2.3995-1ubuntu2.24 all
+  Vi IMproved - Common files
+
+vim-ctrlp/jammy 1.81-1 all
+  fuzzy file, buffer, mru, tag, etc. finder for Vim
+
+vim-doc/jammy-updates,jammy-security 2:8.2.3995-1ubuntu2.24 all
+  Vi IMproved - HTML documentation
+
+vim-editorconfig/jammy 0.3.3+dfsg-2.1 all
+  EditorConfig Plugin for Vim
+
+vim-fugitive/jammy 3.4-1 all
+  Vim plugin to work with Git
+
+vim-git-hub/jammy 2.1.3-1 all
+  Vim runtime files for git-hub
+
+vim-gitgutter/jammy 0~20200414-2 all
+  Vim plugin which shows a git diff in the sign column
+
+vim-gtk/jammy-updates,jammy-security 2:8.2.3995-1ubuntu2.24 all
+  Vi IMproved - enhanced vi editor (dummy package)
+
+vim-gtk3/jammy-updates,jammy-security 2:8.2.3995-1ubuntu2.24 amd64
+  Vi IMproved - enhanced vi editor - with GTK3 GUI
+
+vim-gui-common/jammy-updates,jammy-security 2:8.2.3995-1ubuntu2.24 all
+  Vi IMproved - Common GUI files
+
+vim-haproxy/jammy-updates,jammy-security 2.4.24-0ubuntu0.22.04.2 all
+  syntax highlighting for HAProxy configuration files
+
+vim-icinga2/jammy 2.13.2-1build2 all
+  syntax highlighting for Icinga 2 config files in VIM
+
+vim-julia/jammy 0.0~git20211208.e497299-1 all
+  Vim support for Julia language
+
+vim-khuno/jammy 1.0.3-3 all
+  Python flakes Vim plugin
+
+vim-lastplace/jammy 3.1.1-2 all
+  Vim script to reopen files at your last edit position
+
+vim-latexsuite/jammy 1:1.10.0-1 all
+  view, edit and compile LaTeX documents from within Vim
+
+vim-ledger/jammy 1.2.0-2 all
+  Vim plugin for Ledger
+
+vim-migemo/jammy 1:1.2+gh0.20150404-7.1 all
+  VIM plugin for C/Migemo
+
+vim-nox/jammy-updates,jammy-security 2:8.2.3995-1ubuntu2.24 amd64
+  Vi IMproved - enhanced vi editor - with scripting languages support
+
+vim-pathogen/jammy 2.4-5 all
+  Manage your runtimepath with ease
+
+vim-poke/jammy 2.1+dfsg-2 all
+  Extensible editor for structured binary data (VIM addon)
+
+vim-puppet/jammy 4~20181115+git4793b074-2 all
+  syntax highlighting for puppet manifests in vim
+
+vim-python-jedi/jammy 0.18.0-1 all
+  autocompletion tool for Python - VIM addon files
+
+vim-rails/jammy 4.5~20110829-2 all
+  vim development tools for Rails development
+
+vim-redact-pass/jammy 1.7.4-5 all
+  stop pass(1) passwords ending up in Vim cache files
+
+vim-runtime/jammy-updates,jammy-security 2:8.2.3995-1ubuntu2.24 all
+  Vi IMproved - Runtime files
+
+vim-scripts/jammy 20210124.2 all
+  plugins for vim, adding bells and whistles
+
+vim-snipmate/jammy 0.87-6 all
+  Vim script that implements some of TextMate's snippets features.
+
+vim-snippets/jammy 1.0.0-7 all
+  Snippets files for various programming languages.
+
+vim-solarized/jammy 0~git110509-3 all
+  Solarized Colorscheme for Vim
+
+vim-subtitles/jammy 1.0-2 all
+  Syntax highlighting for subtitle files
+
+vim-syntastic/jammy 3.10.0-2 all
+  Syntax checking hacks for vim
+
+vim-syntax-docker/jammy-updates,jammy-security 20.10.21-0ubuntu1~22.04.7 all
+  Docker container engine - Vim highlighting syntax files
+
+vim-syntax-gtk/jammy 20110314-1.1 all
+  Syntax files to highlight GTK+ keywords in vim
+
+vim-tabular/jammy 1.0-6 all
+  Vim script for text filtering and alignment
+
+vim-textobj-user/jammy 0.7.6-2 all
+  Vim plugin for user-defined text objects
+
+vim-tiny/jammy-updates,jammy-security 2:8.2.3995-1ubuntu2.24 amd64
+  Vi IMproved - enhanced vi editor - compact version
+
+vim-tjp/jammy 3.7.1-1 all
+  vim addon for TaskJuggler .tjp files
+
+vim-tlib/jammy 1.27-5 all
+  Some vim utility functions
+
+vim-ultisnips/jammy 3.1-3.1 all
+  snippet solution for Vim
+
+vim-vader/jammy 0.3.0+git20200213.6fff477-2 all
+  simple vimscript test framework
+
+vim-vimerl/jammy 1.4.1+git20120509.89111c7-2.1 all
+  Erlang plugin for Vim
+
+vim-vimerl-syntax/jammy 1.4.1+git20120509.89111c7-2.1 all
+  Erlang syntax for Vim
+
+vim-voom/jammy 5.3-8 all
+  Vim two-pane outliner
+
+vim-youcompleteme/jammy 0+20200825+git2afee9d+ds-2 all
+  fast, as-you-type, fuzzy-search code completion engine for Vim
+
+vis/jammy 0.7-2 amd64
+  Modern, legacy free, simple yet efficient vim-like editor
+

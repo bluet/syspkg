@@ -1,0 +1,3 @@
+Last metadata expiration check: 0:02:41 ago on Thu Jun  5 19:45:08 2025.
+No match for argument: zzz9999nonexistent
+Error: Unable to find a match: zzz9999nonexistent

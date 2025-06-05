@@ -1,4 +1,0 @@
-Rocky Linux 8 - AppStream                       9.5 kB/s | 4.8 kB     00:00    
-Rocky Linux 8 - BaseOS                          8.4 kB/s | 4.3 kB     00:00    
-Rocky Linux 8 - Extras                          5.7 kB/s | 3.1 kB     00:00    
-Metadata cache created.

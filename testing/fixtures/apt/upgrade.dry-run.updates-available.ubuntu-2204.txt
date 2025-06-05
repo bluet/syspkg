@@ -1,0 +1,67 @@
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+Reading package lists...
+Building dependency tree...
+Reading state information...
+Calculating upgrade...
+The following packages were automatically installed and are no longer required:
+  binutils binutils-common binutils-x86-64-linux-gnu bzip2 cpp cpp-11 dirmngr
+  dpkg-dev fakeroot fontconfig-config fonts-dejavu-core g++ g++-11 gcc gcc-11
+  gcc-11-base gnupg gnupg-l10n gnupg-utils gpg gpg-agent gpg-wks-client
+  gpg-wks-server gpgconf gpgsm libalgorithm-diff-perl
+  libalgorithm-diff-xs-perl libalgorithm-merge-perl libasan6 libassuan0
+  libatomic1 libbinutils libbrotli1 libbsd0 libc-dev-bin libc-devtools
+  libc6-dev libcc1-0 libcrypt-dev libctf-nobfd0 libctf0 libdeflate0
+  libdpkg-perl libexpat1 libfakeroot libfile-fcntllock-perl libfontconfig1
+  libfreetype6 libgcc-11-dev libgd3 libgdbm-compat4 libgdbm6 libgomp1 libisl23
+  libitm1 libjbig0 libjpeg-turbo8 libjpeg8 libksba8 libldap-2.5-0
+  libldap-common liblocale-gettext-perl liblsan0 libmd0 libmpc3 libmpfr6
+  libnpth0 libnsl-dev libperl5.34 libpng16-16 libquadmath0 libreadline8
+  libsasl2-2 libsasl2-modules libsasl2-modules-db libsqlite3-0
+  libstdc++-11-dev libtiff5 libtirpc-dev libtsan0 libubsan1 libwebp7 libx11-6
+  libx11-data libxau6 libxcb1 libxdmcp6 libxpm4 linux-libc-dev
+  lto-disabled-list make manpages manpages-dev netbase patch perl
+  perl-modules-5.34 pinentry-curses readline-common rpcsvc-proto ucf xz-utils
+Use 'apt autoremove' to remove them.
+The following packages will be upgraded:
+  apt libapt-pkg6.0 libc-bin libcap2 libgnutls30 libgssapi-krb5-2 libk5crypto3
+  libkrb5-3 libkrb5support0 libpam-modules libpam-modules-bin libpam-runtime
+  libpam0g libseccomp2 libssl3 libsystemd0 libtasn1-6 libudev1
+18 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Inst libc-bin [2.35-0ubuntu3.8] (2.35-0ubuntu3.10 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libc-bin (2.35-0ubuntu3.10 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libsystemd0 [249.11-0ubuntu3.12] (249.11-0ubuntu3.15 Ubuntu:22.04/jammy-updates [amd64])
+Conf libsystemd0 (249.11-0ubuntu3.15 Ubuntu:22.04/jammy-updates [amd64])
+Inst libudev1 [249.11-0ubuntu3.12] (249.11-0ubuntu3.15 Ubuntu:22.04/jammy-updates [amd64])
+Conf libudev1 (249.11-0ubuntu3.15 Ubuntu:22.04/jammy-updates [amd64])
+Inst libapt-pkg6.0 [2.4.13] (2.4.14 Ubuntu:22.04/jammy-updates [amd64])
+Conf libapt-pkg6.0 (2.4.14 Ubuntu:22.04/jammy-updates [amd64])
+Inst libtasn1-6 [4.18.0-4build1] (4.18.0-4ubuntu0.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libtasn1-6 (4.18.0-4ubuntu0.1 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libgnutls30 [3.7.3-4ubuntu1.5] (3.7.3-4ubuntu1.6 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libgnutls30 (3.7.3-4ubuntu1.6 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libseccomp2 [2.5.3-2ubuntu2] (2.5.3-2ubuntu3~22.04.1 Ubuntu:22.04/jammy-updates [amd64])
+Conf libseccomp2 (2.5.3-2ubuntu3~22.04.1 Ubuntu:22.04/jammy-updates [amd64])
+Inst apt [2.4.13] (2.4.14 Ubuntu:22.04/jammy-updates [amd64])
+Conf apt (2.4.14 Ubuntu:22.04/jammy-updates [amd64])
+Inst libpam0g [1.4.0-11ubuntu2.4] (1.4.0-11ubuntu2.5 Ubuntu:22.04/jammy-updates [amd64])
+Conf libpam0g (1.4.0-11ubuntu2.5 Ubuntu:22.04/jammy-updates [amd64])
+Inst libpam-modules-bin [1.4.0-11ubuntu2.4] (1.4.0-11ubuntu2.5 Ubuntu:22.04/jammy-updates [amd64]) [libpam-modules:amd64 on libpam-modules-bin:amd64] [libpam-modules:amd64 ]
+Conf libpam-modules-bin (1.4.0-11ubuntu2.5 Ubuntu:22.04/jammy-updates [amd64]) [libpam-modules:amd64 ]
+Inst libpam-modules [1.4.0-11ubuntu2.4] (1.4.0-11ubuntu2.5 Ubuntu:22.04/jammy-updates [amd64])
+Conf libpam-modules (1.4.0-11ubuntu2.5 Ubuntu:22.04/jammy-updates [amd64])
+Inst libcap2 [1:2.44-1ubuntu0.22.04.1] (1:2.44-1ubuntu0.22.04.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libcap2 (1:2.44-1ubuntu0.22.04.2 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libk5crypto3 [1.19.2-2ubuntu0.4] (1.19.2-2ubuntu0.7 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libk5crypto3 (1.19.2-2ubuntu0.7 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libkrb5support0 [1.19.2-2ubuntu0.4] (1.19.2-2ubuntu0.7 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64]) [libkrb5-3:amd64 ]
+Conf libkrb5support0 (1.19.2-2ubuntu0.7 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64]) [libkrb5-3:amd64 ]
+Inst libkrb5-3 [1.19.2-2ubuntu0.4] (1.19.2-2ubuntu0.7 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64]) [libgssapi-krb5-2:amd64 ]
+Conf libkrb5-3 (1.19.2-2ubuntu0.7 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64]) [libgssapi-krb5-2:amd64 ]
+Inst libgssapi-krb5-2 [1.19.2-2ubuntu0.4] (1.19.2-2ubuntu0.7 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libgssapi-krb5-2 (1.19.2-2ubuntu0.7 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libssl3 [3.0.2-0ubuntu1.18] (3.0.2-0ubuntu1.19 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Conf libssl3 (3.0.2-0ubuntu1.19 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+Inst libpam-runtime [1.4.0-11ubuntu2.4] (1.4.0-11ubuntu2.5 Ubuntu:22.04/jammy-updates [all])
+Conf libpam-runtime (1.4.0-11ubuntu2.5 Ubuntu:22.04/jammy-updates [all])

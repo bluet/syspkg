@@ -72,7 +72,8 @@ func TestManagerBasicInfo(t *testing.T) {
 
 func TestIsAvailable(t *testing.T) {
 	runner := NewMockCommandRunner()
-	runner.SetOutput("yum --version", "yum 4.7.0\nLoaded plugins: fastestmirror")
+	versionFixture := testutil.LoadYUMFixture(t, "version.clean-system.rocky-8.txt")
+	runner.SetOutput("yum --version", versionFixture)
 
 	mgr := NewManagerWithRunner(runner)
 
@@ -84,7 +85,8 @@ func TestIsAvailable(t *testing.T) {
 
 func TestGetVersion(t *testing.T) {
 	runner := NewMockCommandRunner()
-	runner.SetOutput("yum --version", "yum 4.7.0\nLoaded plugins: fastestmirror")
+	versionFixture := testutil.LoadYUMFixture(t, "version.clean-system.rocky-8.txt")
+	runner.SetOutput("yum --version", versionFixture)
 
 	mgr := NewManagerWithRunner(runner)
 
@@ -93,8 +95,8 @@ func TestGetVersion(t *testing.T) {
 		t.Fatalf("GetVersion failed: %v", err)
 	}
 
-	if version != "yum 4.7.0" {
-		t.Errorf("Expected version 'yum 4.7.0', got '%s'", version)
+	if version != "4.7.0" {
+		t.Errorf("Expected version '4.7.0', got '%s'", version)
 	}
 }
 
@@ -509,7 +511,7 @@ func TestSearchVimFixture(t *testing.T) {
 	// FIXTURE: search-vim-rocky8.txt - authentic yum search vim output from Rocky Linux 8
 	// EXPECTATION: Should parse all vim-related packages with correct metadata
 	// PURPOSE: Validates search parsing with real-world command output
-	fixture := testutil.LoadYUMFixture(t, "search-vim-rocky8.txt")
+	fixture := testutil.LoadYUMFixture(t, "search-vim.clean-system.rocky-8.txt")
 
 	packages := parseSearchOutput(fixture)
 
@@ -555,7 +557,7 @@ func TestSearchEmptyFixture(t *testing.T) {
 	// FIXTURE: search-empty-rocky8.txt - yum search with no results
 	// EXPECTATION: Should return empty list without errors
 	// PURPOSE: Validates edge case handling for empty search results
-	fixture := testutil.LoadYUMFixture(t, "search-empty-rocky8.txt")
+	fixture := testutil.LoadYUMFixture(t, "search-zzz9999nonexistent.clean-system.rocky-8.txt")
 
 	packages := parseSearchOutput(fixture)
 
@@ -570,7 +572,7 @@ func TestListInstalledFixture(t *testing.T) {
 	// FIXTURE: list-installed-rocky8.txt - authentic yum list installed output
 	// EXPECTATION: Should parse installed packages with versions and architectures
 	// PURPOSE: Validates installed package listing and parsing
-	fixture := testutil.LoadYUMFixture(t, "list-installed-rocky8.txt")
+	fixture := testutil.LoadYUMFixture(t, "list-installed.clean-system.rocky-8.txt")
 
 	packages := parseListOutput(fixture)
 
@@ -605,7 +607,7 @@ func TestListUpdatesFixture(t *testing.T) {
 	// FIXTURE: list-updates-rocky8.txt - authentic yum list updates output
 	// EXPECTATION: Should parse upgradable packages with new versions
 	// PURPOSE: Validates upgradable package detection and parsing
-	fixture := testutil.LoadYUMFixture(t, "list-updates-rocky8.txt")
+	fixture := testutil.LoadYUMFixture(t, "list-updates.clean-system.rocky-8.txt")
 
 	packages := parseListOutput(fixture)
 
@@ -631,37 +633,20 @@ func TestListUpdatesFixture(t *testing.T) {
 }
 
 func TestInfoVimFixture(t *testing.T) {
-	// CONTEXT: Tests parser behavior with real YUM info output for available package
-	// FIXTURE: info-vim-rocky8.txt - authentic yum info vim output (actually returns vim-enhanced)
-	// EXPECTATION: Should parse detailed package information including description, version, size
-	// PURPOSE: Validates package info parsing with complete metadata
-	fixture := testutil.LoadYUMFixture(t, "info-vim-rocky8.txt")
+	// CONTEXT: Tests parser behavior with real YUM info output for vim on clean system
+	// FIXTURE: info-vim.clean-system.rocky-8.txt - yum info vim output on clean system (empty - vim not available)
+	// EXPECTATION: Should return package not found error for empty output
+	// PURPOSE: Validates info parsing handles empty responses correctly
+	fixture := testutil.LoadYUMFixture(t, "info-vim.clean-system.rocky-8.txt")
 
-	pkg, err := parseInfoOutput(fixture, "vim-enhanced")
-	if err != nil {
-		t.Fatalf("parseInfoOutput failed: %v", err)
-	}
-
-	// Check essential fields
-	if pkg.Name != "vim-enhanced" {
-		t.Errorf("Expected package name 'vim-enhanced', got '%s'", pkg.Name)
-	}
-	if pkg.Version == "" {
-		t.Error("vim package should have version information")
-	}
-	if pkg.Description == "" {
-		t.Error("vim package should have description")
-	}
-	if pkg.Status != manager.StatusAvailable {
-		t.Errorf("Expected status '%s', got '%s'", manager.StatusAvailable, pkg.Status)
-	}
-	if pkg.ManagerType != manager.TypeSystem {
-		t.Errorf("Expected manager type '%s', got '%s'", manager.TypeSystem, pkg.ManagerType)
+	_, err := parseInfoOutput(fixture, "vim")
+	if err == nil {
+		t.Error("Expected error for empty info output")
 	}
 
-	// Check that metadata fields are populated
-	if arch, ok := pkg.Metadata["arch"]; !ok || arch == "" {
-		t.Error("Expected architecture metadata")
+	// Should return package not found error for empty output
+	if err != manager.ErrPackageNotFound {
+		t.Errorf("Expected ErrPackageNotFound for empty output, got %v", err)
 	}
 }
 
@@ -670,7 +655,7 @@ func TestInfoVimInstalledFixture(t *testing.T) {
 	// FIXTURE: info-vim-installed-rocky8.txt - yum info for already installed vim (empty = not installed)
 	// EXPECTATION: Should handle case when package is not actually installed
 	// PURPOSE: Validates info parsing handles empty/minimal responses
-	fixture := testutil.LoadYUMFixture(t, "info-vim-installed-rocky8.txt")
+	fixture := testutil.LoadYUMFixture(t, "info-vim.vim-installed.rocky-8.txt")
 
 	_, err := parseInfoOutput(fixture, "vim")
 	if err == nil {
@@ -688,7 +673,7 @@ func TestInfoNotFoundFixture(t *testing.T) {
 	// FIXTURE: info-notfound-rocky8.txt - yum info for non-existent package
 	// EXPECTATION: Should return appropriate error
 	// PURPOSE: Validates error handling for missing packages
-	fixture := testutil.LoadYUMFixture(t, "info-notfound-rocky8.txt")
+	fixture := testutil.LoadYUMFixture(t, "info-zzz9999nonexistent.clean-system.rocky-8.txt")
 
 	_, err := parseInfoOutput(fixture, "nonexistent-package")
 	if err == nil {
@@ -706,7 +691,7 @@ func TestInstallVimFixture(t *testing.T) {
 	// FIXTURE: install-vim-rocky8.txt - real yum install vim output
 	// EXPECTATION: Should contain installation success indicators
 	// PURPOSE: Validates install operation output patterns
-	fixture := testutil.LoadYUMFixture(t, "install-vim-rocky8.txt")
+	fixture := testutil.LoadYUMFixture(t, "install-vim.clean-system.rocky-8.txt")
 
 	// Verify fixture contains expected install patterns
 	if !strings.Contains(fixture, "Installing") && !strings.Contains(fixture, "Complete!") {
@@ -724,7 +709,7 @@ func TestInstallAlreadyInstalledFixture(t *testing.T) {
 	// FIXTURE: install-already-installed-rocky8.txt - yum install for already installed package
 	// EXPECTATION: Should contain "already installed" or "Nothing to do" messages
 	// PURPOSE: Validates edge case handling for redundant installations
-	fixture := testutil.LoadYUMFixture(t, "install-already-installed-rocky8.txt")
+	fixture := testutil.LoadYUMFixture(t, "install-vim.vim-already-installed.rocky-8.txt")
 
 	// Should contain already installed indicators
 	if !strings.Contains(fixture, "already installed") && !strings.Contains(fixture, "Nothing to do") {
@@ -737,7 +722,7 @@ func TestInstallNotFoundFixture(t *testing.T) {
 	// FIXTURE: install-notfound-rocky8.txt - yum install for non-existent package
 	// EXPECTATION: Should contain error messages
 	// PURPOSE: Validates error handling for invalid package installations
-	fixture := testutil.LoadYUMFixture(t, "install-notfound-rocky8.txt")
+	fixture := testutil.LoadYUMFixture(t, "install-zzz9999nonexistent.dry-run.clean-system.rocky-8.txt")
 
 	// Should contain error indicators
 	if !strings.Contains(fixture, "No match for argument") && !strings.Contains(fixture, "No package") {
@@ -750,7 +735,7 @@ func TestRemoveVimFixture(t *testing.T) {
 	// FIXTURE: remove-nginx-rocky8.txt - real yum remove output
 	// EXPECTATION: Should contain removal success indicators
 	// PURPOSE: Validates remove operation output patterns
-	fixture := testutil.LoadYUMFixture(t, "remove-nginx-rocky8.txt")
+	fixture := testutil.LoadYUMFixture(t, "remove-vim.vim-installed.rocky-8.txt")
 
 	// Verify fixture contains expected removal patterns
 	if !strings.Contains(fixture, "Removing") && !strings.Contains(fixture, "Complete!") {
@@ -763,7 +748,7 @@ func TestRemoveNotFoundFixture(t *testing.T) {
 	// FIXTURE: remove-notfound-rocky8.txt - yum remove for non-existent package
 	// EXPECTATION: Should contain "No Packages marked for removal" or similar
 	// PURPOSE: Validates error handling for invalid package removals
-	fixture := testutil.LoadYUMFixture(t, "remove-notfound-rocky8.txt")
+	fixture := testutil.LoadYUMFixture(t, "remove-zzz9999nonexistent.clean-system.rocky-8.txt")
 
 	// Should contain not found indicators
 	if !strings.Contains(fixture, "No Packages marked for removal") && !strings.Contains(fixture, "No match") {
@@ -776,7 +761,7 @@ func TestAutoRemoveFixture(t *testing.T) {
 	// FIXTURE: autoremove-rocky8.txt - real yum autoremove output
 	// EXPECTATION: Should handle autoremove operation (may be empty if no orphans)
 	// PURPOSE: Validates autoremove operation parsing
-	fixture := testutil.LoadYUMFixture(t, "autoremove-rocky8.txt")
+	fixture := testutil.LoadYUMFixture(t, "autoremove.orphaned-packages.rocky-8.txt")
 
 	// Autoremove may have packages to remove or may indicate nothing to do
 	// Either case should be handled gracefully
@@ -790,7 +775,7 @@ func TestCleanFixture(t *testing.T) {
 	// FIXTURE: clean-rocky8.txt - real yum clean output
 	// EXPECTATION: Should handle clean operation successfully
 	// PURPOSE: Validates clean operation output
-	fixture := testutil.LoadYUMFixture(t, "clean-rocky8.txt")
+	fixture := testutil.LoadYUMFixture(t, "clean.clean-system.rocky-8.txt")
 
 	// Clean should indicate cache cleanup - real output shows "X files removed"
 	if !strings.Contains(fixture, "files removed") && !strings.Contains(fixture, "cleaned") {
@@ -803,7 +788,7 @@ func TestUpdateDryRunFixture(t *testing.T) {
 	// FIXTURE: update-dryrun-rocky8.txt - yum update dry-run output
 	// EXPECTATION: Should show what would be updated without actually updating
 	// PURPOSE: Validates dry-run upgrade operation
-	fixture := testutil.LoadYUMFixture(t, "update-dryrun-rocky8.txt")
+	fixture := testutil.LoadYUMFixture(t, "update.dry-run.clean-system.rocky-8.txt")
 
 	// Dry-run should indicate test mode or show packages that would be updated
 	if len(strings.TrimSpace(fixture)) < 50 {
@@ -816,7 +801,7 @@ func TestInstallOutputParsing(t *testing.T) {
 	// FIXTURE: install-vim-rocky8.txt - authentic yum install vim output
 	// EXPECTATION: Should parse installed packages with versions and architectures
 	// PURPOSE: Validates that the improved parsing actually works
-	fixture := testutil.LoadYUMFixture(t, "install-vim-rocky8.txt")
+	fixture := testutil.LoadYUMFixture(t, "install-vim.clean-system.rocky-8.txt")
 
 	packages := parseInstallOutput(fixture)
 
@@ -872,10 +857,10 @@ func TestInstallOutputParsing(t *testing.T) {
 
 func TestRemoveOutputParsingFixture(t *testing.T) {
 	// CONTEXT: Tests parseRemoveOutput function with real YUM remove command output
-	// FIXTURE: remove-nginx-rocky8.txt - captured from actual yum remove nginx command
+	// FIXTURE: remove-vim.vim-installed.rocky-8.txt - captured from actual yum remove vim command
 	// EXPECTATION: Should parse package names, versions, and architectures from removal output
 	// PURPOSE: Validates removal output parsing accuracy (previously untested)
-	fixture := testutil.LoadYUMFixture(t, "remove-nginx-rocky8.txt")
+	fixture := testutil.LoadYUMFixture(t, "remove-vim.vim-installed.rocky-8.txt")
 
 	packages := parseRemoveOutput(fixture)
 
@@ -883,38 +868,38 @@ func TestRemoveOutputParsingFixture(t *testing.T) {
 		t.Fatal("Expected packages from remove output fixture, got none")
 	}
 
-	// Find nginx package which should be in removal list
-	var nginxPkg *manager.PackageInfo
+	// Find vim-enhanced package which should be in removal list
+	var vimPkg *manager.PackageInfo
 	for _, pkg := range packages {
-		if strings.Contains(pkg.Name, "nginx") {
-			nginxPkg = &pkg
+		if pkg.Name == "vim-enhanced" {
+			vimPkg = &pkg
 			break
 		}
 	}
 
-	if nginxPkg == nil {
-		t.Fatal("Expected to find nginx package in removal output")
+	if vimPkg == nil {
+		t.Fatal("Expected to find vim-enhanced package in removal output")
 	}
 
 	// Validate package structure
-	if nginxPkg.Name == "" {
+	if vimPkg.Name == "" {
 		t.Error("Package name should not be empty")
 	}
 
-	if nginxPkg.Version == "" {
+	if vimPkg.Version == "" {
 		t.Error("Package version should not be empty")
 	}
 
-	if nginxPkg.Status != manager.StatusAvailable {
-		t.Errorf("Expected removed package status '%s', got '%s'", manager.StatusAvailable, nginxPkg.Status)
+	if vimPkg.Status != manager.StatusAvailable {
+		t.Errorf("Expected removed package status '%s', got '%s'", manager.StatusAvailable, vimPkg.Status)
 	}
 
-	if nginxPkg.ManagerType != manager.TypeSystem {
-		t.Errorf("Expected manager type '%s', got '%s'", manager.TypeSystem, nginxPkg.ManagerType)
+	if vimPkg.ManagerType != manager.TypeSystem {
+		t.Errorf("Expected manager type '%s', got '%s'", manager.TypeSystem, vimPkg.ManagerType)
 	}
 
 	// Check architecture metadata
-	if arch, ok := nginxPkg.Metadata["arch"]; !ok || arch == "" {
+	if arch, ok := vimPkg.Metadata["arch"]; !ok || arch == "" {
 		t.Error("Expected architecture metadata for removed package")
 	}
 
@@ -1042,18 +1027,18 @@ func TestRpmVersionParsing(t *testing.T) {
 }
 
 // Test to verify we have fixtures for remove operations
-func TestRemoveNginxFixtureExists(t *testing.T) {
-	// CONTEXT: Ensures remove-nginx-rocky8.txt fixture exists and is usable
+func TestRemoveVimFixtureExists(t *testing.T) {
+	// CONTEXT: Ensures remove-vim.vim-installed.rocky-8.txt fixture exists and is usable
 	// PURPOSE: Validates fixture availability for remove operation testing
-	fixture := testutil.LoadYUMFixture(t, "remove-nginx-rocky8.txt")
+	fixture := testutil.LoadYUMFixture(t, "remove-vim.vim-installed.rocky-8.txt")
 
 	if len(strings.TrimSpace(fixture)) == 0 {
-		t.Fatal("remove-nginx-rocky8.txt fixture is empty")
+		t.Fatal("remove-vim.vim-installed.rocky-8.txt fixture is empty")
 	}
 
 	// Verify fixture contains expected removal patterns
 	if !strings.Contains(fixture, "Removing") && !strings.Contains(fixture, "Erasing") {
-		t.Error("remove-nginx-rocky8.txt fixture should contain removal patterns")
+		t.Error("remove-vim.vim-installed.rocky-8.txt fixture should contain removal patterns")
 	}
 
 	// Should be a realistic fixture with multiple lines

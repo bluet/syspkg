@@ -1,0 +1,84 @@
+Last metadata expiration check: 0:02:38 ago on Thu Jun  5 19:45:08 2025.
+Dependencies resolved.
+================================================================================
+ Package               Arch      Version                    Repository     Size
+================================================================================
+Removing:
+ cpp                   x86_64    8.5.0-26.el8_10            @appstream     28 M
+ gcc                   x86_64    8.5.0-26.el8_10            @appstream     59 M
+ glibc-devel           x86_64    2.28-251.el8_10.16         @baseos       235 k
+ glibc-headers         x86_64    2.28-251.el8_10.16         @baseos       1.9 M
+ isl                   x86_64    0.16.1-6.el8               @appstream    3.1 M
+ kernel-headers        x86_64    4.18.0-553.54.1.el8_10     @baseos       5.4 M
+ libgomp               x86_64    8.5.0-26.el8_10            @baseos       324 k
+ libmpc                x86_64    1.1.0-9.1.el8              @appstream    124 k
+ libpkgconf            x86_64    1.4.2-1.el8                @baseos        66 k
+ libstdc++-devel       x86_64    8.5.0-26.el8_10            @appstream     11 M
+ libxcrypt-devel       x86_64    4.1.1-6.el8                @baseos        24 k
+ pkgconf               x86_64    1.4.2-1.el8                @baseos        64 k
+ pkgconf-m4            noarch    1.4.2-1.el8                @baseos        14 k
+ pkgconf-pkg-config    x86_64    1.4.2-1.el8                @baseos       3.0 k
+
+Transaction Summary
+================================================================================
+Remove  14 Packages
+
+Freed space: 110 M
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                        1/1 
+  Running scriptlet: gcc-8.5.0-26.el8_10.x86_64                            1/14 
+  Erasing          : gcc-8.5.0-26.el8_10.x86_64                            1/14 
+  Running scriptlet: glibc-devel-2.28-251.el8_10.16.x86_64                 2/14 
+  Erasing          : glibc-devel-2.28-251.el8_10.16.x86_64                 2/14 
+  Erasing          : libxcrypt-devel-4.1.1-6.el8.x86_64                    3/14 
+  Erasing          : pkgconf-pkg-config-1.4.2-1.el8.x86_64                 4/14 
+  Erasing          : glibc-headers-2.28-251.el8_10.16.x86_64               5/14 
+  Erasing          : kernel-headers-4.18.0-553.54.1.el8_10.x86_64          6/14 
+  Erasing          : pkgconf-m4-1.4.2-1.el8.noarch                         7/14 
+  Erasing          : libstdc++-devel-8.5.0-26.el8_10.x86_64                8/14 
+  Erasing          : pkgconf-1.4.2-1.el8.x86_64                            9/14 
+  Running scriptlet: cpp-8.5.0-26.el8_10.x86_64                           10/14 
+  Erasing          : cpp-8.5.0-26.el8_10.x86_64                           10/14 
+  Erasing          : libmpc-1.1.0-9.1.el8.x86_64                          11/14 
+  Erasing          : libpkgconf-1.4.2-1.el8.x86_64                        12/14 
+  Running scriptlet: libgomp-8.5.0-26.el8_10.x86_64                       13/14 
+  Erasing          : libgomp-8.5.0-26.el8_10.x86_64                       13/14 
+  Running scriptlet: libgomp-8.5.0-26.el8_10.x86_64                       13/14 
+  Erasing          : isl-0.16.1-6.el8.x86_64                              14/14 
+  Running scriptlet: isl-0.16.1-6.el8.x86_64                              14/14 
+  Verifying        : cpp-8.5.0-26.el8_10.x86_64                            1/14 
+  Verifying        : gcc-8.5.0-26.el8_10.x86_64                            2/14 
+  Verifying        : glibc-devel-2.28-251.el8_10.16.x86_64                 3/14 
+  Verifying        : glibc-headers-2.28-251.el8_10.16.x86_64               4/14 
+  Verifying        : isl-0.16.1-6.el8.x86_64                               5/14 
+  Verifying        : kernel-headers-4.18.0-553.54.1.el8_10.x86_64          6/14 
+  Verifying        : libgomp-8.5.0-26.el8_10.x86_64                        7/14 
+  Verifying        : libmpc-1.1.0-9.1.el8.x86_64                           8/14 
+  Verifying        : libpkgconf-1.4.2-1.el8.x86_64                         9/14 
+  Verifying        : libstdc++-devel-8.5.0-26.el8_10.x86_64               10/14 
+  Verifying        : libxcrypt-devel-4.1.1-6.el8.x86_64                   11/14 
+  Verifying        : pkgconf-1.4.2-1.el8.x86_64                           12/14 
+  Verifying        : pkgconf-m4-1.4.2-1.el8.noarch                        13/14 
+  Verifying        : pkgconf-pkg-config-1.4.2-1.el8.x86_64                14/14 
+
+Removed:
+  cpp-8.5.0-26.el8_10.x86_64                                                    
+  gcc-8.5.0-26.el8_10.x86_64                                                    
+  glibc-devel-2.28-251.el8_10.16.x86_64                                         
+  glibc-headers-2.28-251.el8_10.16.x86_64                                       
+  isl-0.16.1-6.el8.x86_64                                                       
+  kernel-headers-4.18.0-553.54.1.el8_10.x86_64                                  
+  libgomp-8.5.0-26.el8_10.x86_64                                                
+  libmpc-1.1.0-9.1.el8.x86_64                                                   
+  libpkgconf-1.4.2-1.el8.x86_64                                                 
+  libstdc++-devel-8.5.0-26.el8_10.x86_64                                        
+  libxcrypt-devel-4.1.1-6.el8.x86_64                                            
+  pkgconf-1.4.2-1.el8.x86_64                                                    
+  pkgconf-m4-1.4.2-1.el8.noarch                                                 
+  pkgconf-pkg-config-1.4.2-1.el8.x86_64                                         
+
+Complete!

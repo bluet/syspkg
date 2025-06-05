@@ -1,0 +1,44 @@
+Dependencies resolved.
+================================================================================
+ Package            Arch       Version                     Repository      Size
+================================================================================
+Removing:
+ vim-enhanced       x86_64     2:8.0.1763-19.el8_6.4       @appstream     2.9 M
+Removing unused dependencies:
+ gpm-libs           x86_64     1.20.7-17.el8               @appstream      28 k
+ vim-common         x86_64     2:8.0.1763-19.el8_6.4       @appstream      27 M
+ vim-filesystem     noarch     2:8.0.1763-19.el8_6.4       @appstream      40  
+ which              x86_64     2.21-20.el8                 @baseos         81 k
+
+Transaction Summary
+================================================================================
+Remove  5 Packages
+
+Freed space: 30 M
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                        1/1 
+  Erasing          : vim-enhanced-2:8.0.1763-19.el8_6.4.x86_64              1/5 
+  Erasing          : vim-common-2:8.0.1763-19.el8_6.4.x86_64                2/5 
+  Erasing          : vim-filesystem-2:8.0.1763-19.el8_6.4.noarch            3/5 
+  Erasing          : gpm-libs-1.20.7-17.el8.x86_64                          4/5 
+  Running scriptlet: gpm-libs-1.20.7-17.el8.x86_64                          4/5 
+  Erasing          : which-2.21-20.el8.x86_64                               5/5 
+  Running scriptlet: which-2.21-20.el8.x86_64                               5/5 
+  Verifying        : gpm-libs-1.20.7-17.el8.x86_64                          1/5 
+  Verifying        : vim-common-2:8.0.1763-19.el8_6.4.x86_64                2/5 
+  Verifying        : vim-enhanced-2:8.0.1763-19.el8_6.4.x86_64              3/5 
+  Verifying        : vim-filesystem-2:8.0.1763-19.el8_6.4.noarch            4/5 
+  Verifying        : which-2.21-20.el8.x86_64                               5/5 
+
+Removed:
+  gpm-libs-1.20.7-17.el8.x86_64                                                 
+  vim-common-2:8.0.1763-19.el8_6.4.x86_64                                       
+  vim-enhanced-2:8.0.1763-19.el8_6.4.x86_64                                     
+  vim-filesystem-2:8.0.1763-19.el8_6.4.noarch                                   
+  which-2.21-20.el8.x86_64                                                      
+
+Complete!

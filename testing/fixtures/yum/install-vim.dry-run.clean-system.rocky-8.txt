@@ -1,0 +1,21 @@
+Last metadata expiration check: 0:00:07 ago on Thu Jun  5 19:45:08 2025.
+Dependencies resolved.
+================================================================================
+ Package            Arch       Version                      Repository     Size
+================================================================================
+Installing:
+ vim-enhanced       x86_64     2:8.0.1763-19.el8_6.4        appstream     1.4 M
+Installing dependencies:
+ gpm-libs           x86_64     1.20.7-17.el8                appstream      38 k
+ vim-common         x86_64     2:8.0.1763-19.el8_6.4        appstream     6.3 M
+ vim-filesystem     noarch     2:8.0.1763-19.el8_6.4        appstream      49 k
+ which              x86_64     2.21-20.el8                  baseos         49 k
+
+Transaction Summary
+================================================================================
+Install  5 Packages
+
+Total download size: 7.8 M
+Installed size: 30 M
+YUM will only download packages, install gpg keys, and check the transaction.
+Is this ok [y/N]: Operation aborted.
