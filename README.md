@@ -2,38 +2,43 @@
 
 [![Test and Coverage](https://github.com/bluet/syspkg/actions/workflows/test-and-coverage.yml/badge.svg)](https://github.com/bluet/syspkg/actions/workflows/test-and-coverage.yml)
 [![Build](https://github.com/bluet/syspkg/actions/workflows/build.yml/badge.svg)](https://github.com/bluet/syspkg/actions/workflows/build.yml)
-[![Lint and Format](https://github.com/bluet/syspkg/actions/workflows/lint-and-format.yml/badge.svg)](https://github.com/bluet/syspkg/actions/workflows/lint-and-format.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/bluet/syspkg)](https://goreportcard.com/report/github.com/bluet/syspkg)
 [![Go Reference](https://pkg.go.dev/badge/github.com/bluet/syspkg.svg)](https://pkg.go.dev/github.com/bluet/syspkg)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/bluet/syspkg/blob/main/LICENSE)
-[![Go Version](https://img.shields.io/github/go-mod/go-version/bluet/syspkg)](https://github.com/bluet/syspkg)
-[![GitHub release](https://img.shields.io/github/v/release/bluet/syspkg)](https://github.com/bluet/syspkg/releases)
 
-SysPkg is a unified CLI tool and Golang library for managing system packages across different package managers. Currently, it supports APT, YUM, Snap, and Flatpak, with plans for more. It simplifies package management by providing a consistent interface and API through an abstraction layer that focuses on package manager tools rather than specific operating systems.
+**A unified package management tool for Linux systems** - One interface for APT, YUM, Snap, Flatpak, and more.
 
-## Key Features
+SysPkg provides a consistent CLI and Go library interface across different package managers, making it easy to manage packages regardless of your Linux distribution or containerized environment.
 
-- **Cross-Package Manager Compatibility**: Normalized status reporting (e.g., APT's config-files state maps to available)
-- **Consistent API**: Same interface across all supported package managers
-- **Tool-Focused**: Works wherever package manager tools work (containers, cross-platform, etc.)
-- **Production Ready**: Comprehensive testing across multiple OS distributions
-- **Performance Optimized**: Efficient parsing with compiled regexes and robust error handling
-- **Cross-Platform**: Handles different line endings (CRLF/LF) and whitespace variations
-- **Hybrid Search**: Fast default search with optional `--status` flag for detailed package state information
+## ✨ Features
 
-## Features
+- **🔧 Unified Interface**: Same commands work with APT, YUM, Snap, and Flatpak
+- **🛡️ Secure by Design**: Input validation and command injection prevention
+- **🐳 Container Ready**: Works in Docker, LXC, and other containerized environments
+- **📊 Rich Output**: JSON, table, and human-readable formats
+- **⚡ Fast & Reliable**: Production-tested with comprehensive error handling
+- **🔍 Smart Search**: Automatically searches across available package managers
 
-- A unified package management interface for various package managers
-- Supports popular package managers such as APT, YUM, Snap, Flatpak, and more
-- Easy-to-use API for package installation, removal, search, listing, and system upgrades
-- Expandable architecture to support more package managers in the future
+## 📦 Supported Package Managers
 
-## Documentation
+| Package Manager | Status | Distributions |
+|-----------------|--------|---------------|
+| **APT** | ✅ Production | Ubuntu, Debian, derivatives |
+| **YUM** | ✅ Production | RHEL, CentOS, Rocky Linux 8 |
+| **Snap** | 🚧 Beta | Universal Linux packages |
+| **Flatpak** | 🚧 Beta | Universal Linux applications |
 
-- [API Documentation](https://pkg.go.dev/github.com/bluet/syspkg) - Full Go API reference
-- [Architecture Overview](docs/ARCHITECTURE_OVERVIEW.md) - Technical architecture and design patterns
-- [Contributing Guide](CONTRIBUTING.md) - Development workflow and testing strategy
-- [Test Fixtures](testing/fixtures/README.md) - Comprehensive fixture generation using Docker entrypoints
+*More package managers coming soon: DNF, APK, Pacman, and more.*
+
+## 📋 Quick Reference
+
+Need specific documentation? Find it quickly:
+
+- **👥 New users?** → Continue reading this README
+- **🔧 Want to contribute?** → [CONTRIBUTING.md](CONTRIBUTING.md)
+- **⚙️ Technical details?** → [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- **🧪 Testing & fixtures?** → [docs/TESTING.md](docs/TESTING.md)
+- **🔌 Building plugins?** → [docs/PLUGIN_DEVELOPMENT.md](docs/PLUGIN_DEVELOPMENT.md)
 
 ## Getting Started
 

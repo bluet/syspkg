@@ -192,7 +192,7 @@ Located in `.github/workflows/`:
 
 ## Architecture Overview
 
-For detailed technical architecture, design patterns, and implementation guidelines, see **[docs/ARCHITECTURE_OVERVIEW.md](docs/ARCHITECTURE_OVERVIEW.md)**.
+For detailed technical architecture, design patterns, and implementation guidelines, see **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.
 
 **Quick Reference:**
 - **Core Interfaces**: `PackageManager` and `SysPkg` (interface.go)
@@ -233,7 +233,7 @@ For current development tasks, see [GitHub Issues](https://github.com/bluet/sysp
 5. **Cross-package manager status normalization** ✅ - APT config-files → available
 6. **GitHub workflow compatibility fixes** ✅ - Go 1.23.4, Docker multi-OS testing
 7. **Exit code bugs** ✅ - Fixed APT, Snap, Flatpak exit code handling (Issues #21, #22, #24)
-8. **CommandRunner interface migration** ✅ - APT complete, YUM pending (Issue #20)
+8. **CommandRunner interface migration** ✅ - APT and YUM complete (Issue #20)
 9. **Exit code documentation** ✅ - Created comprehensive exit code docs for all package managers
 10. **Add security scanning with Snyk** to CI/CD pipeline
 
@@ -242,10 +242,11 @@ For current development tasks, see [GitHub Issues](https://github.com/bluet/sysp
 - **Snap/Flatpak migration**: Convert to unified interface architecture
 - **Add security scanning with Snyk** to CI/CD pipeline
 
-### ✅ COMPLETED (2025-06-04)
+### ✅ COMPLETED (2025-06-06)
 - **Legacy code cleanup**: ✅ Resolved backup directory compilation issues
 - **YUM parser coverage gaps**: ✅ Fixed (57% → 100% coverage)
 - **YUM security validation**: ✅ Added comprehensive input validation testing
+- **YUM module refactoring**: ✅ Complete production-ready implementation with fixtures and tests
 - **APT category parsing**: ✅ Fixed GetInfo method and parser architecture
 - **Code quality**: ✅ Fixed all linting errors (errcheck, gofmt, unused functions)
 - **Testing strategy validation**: ✅ Confirmed excellent approach with proper implementation
@@ -253,7 +254,7 @@ For current development tasks, see [GitHub Issues](https://github.com/bluet/sysp
 ### 🟡 Medium Priority (Code Quality & Features)
 **Test Coverage & Architecture:**
 - **Test coverage improvements**: ✅ YUM gaps resolved (Issue #32), Snap & Flatpak suites pending
-- **CommandRunner migration completion**: YUM, Snap and Flatpak (Issues #20, #28, #29)
+- **CommandRunner migration completion**: Snap and Flatpak (Issues #28, #29)
 
 **CLI & User Experience:**
 - **CLI upgrade display**: Fix packages not shown in CLI output (Issue #3)
