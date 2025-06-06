@@ -28,7 +28,7 @@ When developing plugins, follow these testing guidelines:
 ### **Docker for Safety**
 - ALWAYS use Docker for fixture generation
 - ALWAYS use Docker for integration testing
-- NEVER run package manager operations on the development system
+- NEVER run package manager operations on the development system // WRONG: dev system operations
 - Use `make test-docker-*` commands for safe testing
 
 ### **Testing Hierarchy**
@@ -70,7 +70,7 @@ func NewMyManager() *MyManager {
 ```go
 // IsAvailable checks if your tool is installed
 func (m *MyManager) IsAvailable() bool {
-    _, err := m.GetRunner().Run("my-tool", "--version")
+    _, err := m.GetRunner().Run(context.Background(), "my-tool", []string{"--version"})
     return err == nil
 }
 
@@ -90,7 +90,8 @@ func (m *MyManager) Search(ctx context.Context, query []string, opts *manager.Op
     }
 
     // Your search logic here
-    output, err := m.GetRunner().RunContext(ctx, "my-tool", append([]string{"search"}, query...))
+    args := append([]string{"search"}, query...)
+    output, err := m.GetRunner().Run(ctx, "my-tool", args)
     if err != nil {
         return nil, err
     }
@@ -120,7 +121,7 @@ func (m *MyManager) Install(ctx context.Context, packages []string, opts *manage
 
     // Your installation logic here
     args := append([]string{"install"}, packages...)
-    output, err := m.GetRunner().RunContext(ctx, "my-tool", args)
+    output, err := m.GetRunner().Run(ctx, "my-tool", args)
     if err != nil {
         return nil, err
     }
@@ -205,7 +206,7 @@ The `BaseManager` provides sensible defaults for all methods:
 - **Input validation** via `ValidatePackageNames()`
 - **Logging helpers** via `LogVerbose()`, `LogDebug()`
 - **Dry run handling** via `HandleDryRun()`
-- **Timeout management** via `GetTimeoutContext()`
+- **Context-based timeout management** via standard Go patterns
 - **Basic status** via default `Status()` implementation
 
 ### Only Override What You Need
@@ -300,11 +301,8 @@ func (m *MyManager) SomeOperation(ctx context.Context, opts *manager.Options) er
         return nil
     }
 
-    // Use timeout
-    ctx, cancel := m.GetTimeoutContext(ctx, opts)
-    defer cancel()
-
-    // Your implementation
+    // Context passed through directly - caller controls timeout
+    // Your implementation using ctx
 }
 ```
 
@@ -320,7 +318,8 @@ func (m *MyManager) Install(ctx context.Context, packages []string, opts *manage
     }
 
     // Command execution errors
-    output, err := m.GetRunner().RunContext(ctx, "my-tool", []string{"install"}...)
+    args := append([]string{"install"}, packages...)
+    output, err := m.GetRunner().Run(ctx, "my-tool", args)
     if err != nil {
         return nil, fmt.Errorf("installation failed: %w", err)
     }
@@ -378,7 +377,7 @@ func (m *NVMManager) List(ctx context.Context, filter manager.ListFilter, opts *
 
 // Custom operation for version managers
 func (m *NVMManager) SetActiveVersion(version string, opts *manager.Options) error {
-    _, err := m.GetRunner().Run("nvm", "use", version)
+    _, err := m.GetRunner().Run(context.Background(), "nvm", []string{"use", version})
     return err
 }
 ```
@@ -393,7 +392,7 @@ type SteamManager struct {
 func (m *SteamManager) Install(ctx context.Context, packages []string, opts *manager.Options) ([]manager.PackageInfo, error) {
     // Steam uses app IDs instead of package names
     for _, appID := range packages {
-        _, err := m.GetRunner().RunContext(ctx, "steamcmd", "+app_update", appID, "+quit")
+        _, err := m.GetRunner().Run(ctx, "steamcmd", []string{"+app_update", appID, "+quit"})
         if err != nil {
             return nil, err
         }
@@ -413,7 +412,7 @@ func (m *SteamManager) Install(ctx context.Context, packages []string, opts *man
 
 // Custom Steam operations
 func (m *SteamManager) VerifyGameIntegrity(appID string) error {
-    _, err := m.GetRunner().Run("steamcmd", "+app_update", appID, "validate", "+quit")
+    _, err := m.GetRunner().Run(context.Background(), "steamcmd", []string{"+app_update", appID, "validate", "+quit"})
     return err
 }
 ```
@@ -426,6 +425,16 @@ func (m *SteamManager) VerifyGameIntegrity(appID string) error {
 - Use `BaseManager` for everything else
 - Don't try to fake unsupported operations
 
+```go
+// ❌ WRONG: Don't fake unsupported operations
+func (m *Manager) AutoRemove(ctx context.Context, opts *Options) ([]PackageInfo, error) {
+    return []PackageInfo{}, nil // WRONG: fake implementation
+}
+
+// ✅ CORRECT: Use BaseManager for unsupported operations
+// (BaseManager.AutoRemove will return ErrOperationNotSupported)
+```
+
 ### 2. Consistent Naming
 
 ```go
@@ -435,7 +444,7 @@ manager.NewBaseManager("steam", manager.TypeGame, runner)
 manager.NewBaseManager("apt", manager.TypeSystem, runner)
 
 // Bad
-manager.NewBaseManager("Node Package Manager", "nodejs", runner)
+manager.NewBaseManager("Node Package Manager", "nodejs", runner) // BAD: verbose name
 ```
 
 ### 3. Proper Error Messages
@@ -445,7 +454,7 @@ manager.NewBaseManager("Node Package Manager", "nodejs", runner)
 return nil, fmt.Errorf("failed to install %s: package not found in registry", pkg)
 
 // Bad
-return nil, errors.New("error")
+return nil, errors.New("error") // BAD: vague error
 ```
 
 ### 4. Use Metadata Wisely
@@ -458,7 +467,7 @@ pkg.Metadata["download_count"] = 1000000
 
 // Don't abuse it for core data
 pkg.Name = "package-name"        // Good
-pkg.Metadata["name"] = "package-name"  // Bad
+pkg.Metadata["name"] = "package-name"  // BAD: wrong field
 ```
 
 ### 5. Handle Edge Cases
@@ -471,7 +480,8 @@ func (m *MyManager) Search(ctx context.Context, query []string, opts *manager.Op
     }
 
     // Handle network issues
-    output, err := m.GetRunner().RunContext(ctx, "my-tool", "search", strings.Join(query, " "))
+    args := []string{"search", strings.Join(query, " ")}
+    output, err := m.GetRunner().Run(ctx, "my-tool", args)
     if err != nil {
         if strings.Contains(err.Error(), "network") {
             return nil, fmt.Errorf("network error: %w", err)
@@ -512,7 +522,7 @@ func NewPipManager() *PipManager {
 }
 
 func (m *PipManager) IsAvailable() bool {
-    _, err := m.GetRunner().Run("pip", "--version")
+    _, err := m.GetRunner().Run(context.Background(), "pip", []string{"--version"})
     return err == nil
 }
 
@@ -530,12 +540,11 @@ func (m *PipManager) Search(ctx context.Context, query []string, opts *manager.O
         return []manager.PackageInfo{}, nil
     }
 
-    ctx, cancel := m.GetTimeoutContext(ctx, opts)
-    defer cancel()
+    // Use context directly - caller controls timeouts
 
     // Use pip search (note: deprecated in newer pip versions)
     searchTerm := strings.Join(query, " ")
-    output, err := m.GetRunner().RunContext(ctx, "pip", []string{"search", searchTerm})
+    output, err := m.GetRunner().Run(ctx, "pip", []string{"search", searchTerm})
     if err != nil {
         return nil, fmt.Errorf("pip search failed: %w", err)
     }
@@ -561,8 +570,7 @@ func (m *PipManager) Install(ctx context.Context, packages []string, opts *manag
         return results, nil
     }
 
-    ctx, cancel := m.GetTimeoutContext(ctx, opts)
-    defer cancel()
+    // Use context directly - caller controls timeouts
 
     args := []string{"install"}
     if opts.GlobalScope {
@@ -570,7 +578,7 @@ func (m *PipManager) Install(ctx context.Context, packages []string, opts *manag
     }
     args = append(args, packages...)
 
-    output, err := m.GetRunner().RunContext(ctx, "pip", args)
+    output, err := m.GetRunner().Run(ctx, "pip", args)
     if err != nil {
         return nil, fmt.Errorf("pip install failed: %w", err)
     }
@@ -591,10 +599,9 @@ func (m *PipManager) List(ctx context.Context, filter manager.ListFilter, opts *
         return nil, fmt.Errorf("pip only supports listing installed packages")
     }
 
-    ctx, cancel := m.GetTimeoutContext(ctx, opts)
-    defer cancel()
+    // Use context directly - caller controls timeouts
 
-    output, err := m.GetRunner().RunContext(ctx, "pip", []string{"list", "--format=json"})
+    output, err := m.GetRunner().Run(ctx, "pip", []string{"list", "--format=json"})
     if err != nil {
         return nil, fmt.Errorf("pip list failed: %w", err)
     }

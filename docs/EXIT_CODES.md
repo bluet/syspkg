@@ -33,8 +33,8 @@ This document provides a high-level overview of exit code behavior across packag
 
 ## Key Principles
 
-1. **Never use generic exit code helpers** - each PM is unique
-2. **Test actual behavior** - documentation can be wrong
+1. **Never use generic exit code helpers** - each PM is unique // WRONG: generic helpers
+2. **Test actual behavior** - documentation can be wrong // BAD: trust docs only
 3. **Each PM uses different tools** - APT uses both `apt` and `dpkg-query`
 4. **Verify through testing** - not just documentation
 
@@ -49,7 +49,7 @@ When implementing Option C (CommandBuilder), each package manager must:
 1. Handle its own exit codes specifically
 2. Document actual behavior (not assumptions)
 3. Test thoroughly in real environments
-4. Never rely on generic patterns
+4. Never rely on generic patterns // WRONG: generic patterns
 
 ## Bugs to Fix
 

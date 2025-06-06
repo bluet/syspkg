@@ -25,7 +25,7 @@ Package managers produce complex, inconsistent output that requires sophisticate
 func (m *Manager) parseInstallOutput(output string) []PackageInfo {
     lines := strings.Split(output, "\n")
     for _, line := range lines {
-        if strings.Contains(line, "installed") {
+        if strings.Contains(line, "installed") { // WRONG: naive string matching
             // This is too simplistic and will match irrelevant lines
         }
     }
@@ -148,7 +148,7 @@ func (e *PackageManagerError) Unwrap() error {
 
 // Enhanced error handling with context
 func (m *Manager) executeWithErrorHandling(ctx context.Context, operation string, cmd string, args []string, packages []string) ([]byte, error) {
-    output, err := m.GetRunner().RunContext(ctx, cmd, args, m.getEnvironment()...)
+    output, err := m.GetRunner().Run(ctx, cmd, args, m.getEnvironment()...)
 
     if err != nil {
         // Extract exit code and classify error
@@ -202,34 +202,42 @@ func (m *Manager) executeWithErrorHandling(ctx context.Context, operation string
     return output, nil
 }
 
-// Context timeout handling
-func (m *Manager) executeWithTimeout(ctx context.Context, operation string, cmd string, args []string) ([]byte, error) {
-    // Set operation-specific timeouts
-    var timeout time.Duration
-    switch operation {
-    case "search", "list", "info":
-        timeout = 3 * time.Minute
-    case "install", "remove", "upgrade":
-        timeout = 15 * time.Minute
-    case "update", "refresh":
-        timeout = 10 * time.Minute
-    default:
-        timeout = 5 * time.Minute
+### Context and Timeout Best Practices
+
+**Plugin implementations should respect caller-provided context directly:**
+
+```go
+// ✅ CORRECT: Use context directly - let caller control timeouts
+func (m *Manager) Install(ctx context.Context, packages []string, opts *Options) ([]PackageInfo, error) {
+    // Validate inputs
+    if err := m.ValidatePackageNames(packages); err != nil {
+        return nil, err
     }
 
-    timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
+    // Use context directly - caller controls timeouts
+    args := append([]string{"install"}, packages...)
+    output, err := m.GetRunner().Run(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+    if err != nil {
+        return nil, fmt.Errorf("apt install failed: %w", err)
+    }
+
+    return parseInstallOutput(string(output)), nil
+}
+
+// ❌ WRONG: Don't add arbitrary timeout defaults
+func (m *Manager) installWithDefaults(ctx context.Context, packages []string) error {
+    // Don't do this - plugin authors can't know deployment environment
+    timeoutCtx, cancel := context.WithTimeout(ctx, 5*time.Minute) // WRONG: arbitrary timeout
     defer cancel()
-
-    output, err := m.GetRunner().RunContext(timeoutCtx, cmd, args, m.getEnvironment()...)
-
-    // Handle timeout specifically
-    if errors.Is(err, context.DeadlineExceeded) {
-        return nil, fmt.Errorf("%s operation timed out after %v", operation, timeout)
-    }
-
-    return output, err
+    // ...
 }
 ```
+
+**Why plugins shouldn't set timeout defaults:**
+- **Environment variability**: Bare metal vs VM performance differs dramatically
+- **Package managers handle timeouts**: APT, YUM already have configurable timeouts
+- **System administrators tune these**: Based on their specific environment
+- **Plugin authors can't know context**: Local mirrors vs slow external repos
 
 ## Testing Strategies
 
@@ -585,7 +593,7 @@ func (m *Manager) executeSecurely(ctx context.Context, command string, args []st
     // Sanitize environment
     safeEnv := m.sanitizeEnvironment(env)
 
-    return m.GetRunner().RunContext(ctx, command, args, safeEnv...)
+    return m.GetRunner().Run(ctx, command, args, safeEnv...)
 }
 ```
 
