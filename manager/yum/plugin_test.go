@@ -11,50 +11,33 @@ import (
 )
 
 // MockCommandRunner provides a test implementation of CommandRunner
+// MockCommandRunner wraps the manager package's MockCommandRunner
 type MockCommandRunner struct {
-	outputs map[string]string
-	errors  map[string]error
+	*manager.MockCommandRunner
 }
 
 func NewMockCommandRunner() *MockCommandRunner {
 	return &MockCommandRunner{
-		outputs: make(map[string]string),
-		errors:  make(map[string]error),
+		MockCommandRunner: manager.NewMockCommandRunner(),
 	}
-}
-
-func (m *MockCommandRunner) Run(name string, args ...string) ([]byte, error) {
-	command := name + " " + strings.Join(args, " ")
-	if err, exists := m.errors[command]; exists {
-		return nil, err
-	}
-	if output, exists := m.outputs[command]; exists {
-		return []byte(output), nil
-	}
-	return []byte(""), nil
-}
-
-func (m *MockCommandRunner) RunContext(ctx context.Context, name string, args []string, env ...string) ([]byte, error) {
-	command := name + " " + strings.Join(args, " ")
-	if err, exists := m.errors[command]; exists {
-		return nil, err
-	}
-	if output, exists := m.outputs[command]; exists {
-		return []byte(output), nil
-	}
-	return []byte(""), nil
-}
-
-func (m *MockCommandRunner) RunInteractive(ctx context.Context, name string, args []string, env ...string) error {
-	return nil
 }
 
 func (m *MockCommandRunner) SetOutput(command, output string) {
-	m.outputs[command] = output
+	args := strings.Fields(command)
+	if len(args) > 1 {
+		m.AddCommand(args[0], args[1:], []byte(output), nil)
+	} else {
+		m.AddCommand(args[0], []string{}, []byte(output), nil)
+	}
 }
 
 func (m *MockCommandRunner) SetError(command string, err error) {
-	m.errors[command] = err
+	args := strings.Fields(command)
+	if len(args) > 1 {
+		m.AddCommand(args[0], args[1:], nil, err)
+	} else {
+		m.AddCommand(args[0], []string{}, nil, err)
+	}
 }
 
 // Test YUM Manager Creation and Basic Info

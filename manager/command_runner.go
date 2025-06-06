@@ -6,24 +6,20 @@ import (
 	"errors"
 	"os"
 	"os/exec"
-	"time"
 )
 
 // CommandRunner provides an abstraction for executing system commands.
 // All non-interactive commands automatically get LC_ALL=C for consistent output.
+// All methods follow the Go context-first convention.
 type CommandRunner interface {
-	// Run executes a command with LC_ALL=C for consistent English output.
-	// This is the primary method for simple non-interactive commands.
-	Run(name string, args ...string) ([]byte, error)
-
-	// RunContext executes with context support and LC_ALL=C, plus optional extra env.
+	// Run executes a command with context support and LC_ALL=C, plus optional extra env.
 	// Extra env vars are appended after LC_ALL=C, allowing override if needed.
 	// Note: Later env values override earlier ones, so users can override LC_ALL=C
 	// by passing their own LC_ALL value (e.g., "LC_ALL=zh_TW.UTF-8").
 	// For commands with no args but extra env, pass nil or []string{} for args.
-	// Example: RunContext(ctx, "apt", []string{"update"}, "DEBIAN_FRONTEND=noninteractive")
-	// Example: RunContext(ctx, "yum", []string{"info", "vim"}, "LC_ALL=zh_TW.UTF-8") // Overrides default LC_ALL=C
-	RunContext(ctx context.Context, name string, args []string, env ...string) ([]byte, error)
+	// Example: Run(ctx, "apt", []string{"update"}, "DEBIAN_FRONTEND=noninteractive")
+	// Example: Run(ctx, "yum", []string{"info", "vim"}, "LC_ALL=zh_TW.UTF-8") // Overrides default LC_ALL=C
+	Run(ctx context.Context, name string, args []string, env ...string) ([]byte, error)
 
 	// RunInteractive executes in interactive mode with stdin/stdout/stderr passthrough.
 	// Does NOT prepend LC_ALL=C (preserves user's locale for interaction).
@@ -32,26 +28,15 @@ type CommandRunner interface {
 }
 
 // DefaultCommandRunner implements CommandRunner using real system commands
-type DefaultCommandRunner struct {
-	Timeout time.Duration // Default timeout for commands
-}
+type DefaultCommandRunner struct{}
 
-// NewDefaultCommandRunner creates a new DefaultCommandRunner with default timeout
+// NewDefaultCommandRunner creates a new DefaultCommandRunner
 func NewDefaultCommandRunner() *DefaultCommandRunner {
-	return &DefaultCommandRunner{
-		Timeout: 30 * time.Second, // Default 30 second timeout
-	}
+	return &DefaultCommandRunner{}
 }
 
-// Run executes a command with LC_ALL=C for consistent English output
-func (r *DefaultCommandRunner) Run(name string, args ...string) ([]byte, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), r.Timeout)
-	defer cancel()
-	return r.RunContext(ctx, name, args)
-}
-
-// RunContext executes with context support and LC_ALL=C, plus optional extra env
-func (r *DefaultCommandRunner) RunContext(ctx context.Context, name string, args []string, env ...string) ([]byte, error) {
+// Run executes with context support and LC_ALL=C, plus optional extra env
+func (r *DefaultCommandRunner) Run(ctx context.Context, name string, args []string, env ...string) ([]byte, error) {
 	cmd := exec.CommandContext(ctx, name, args...)
 
 	// Prepend LC_ALL=C, then append any additional env vars
@@ -87,7 +72,7 @@ type MockCommandRunner struct {
 	Errors map[string]error
 	// InteractiveCalls tracks interactive command calls for verification
 	InteractiveCalls []string
-	// EnvCalls tracks environment variables passed to RunContext/RunInteractive
+	// EnvCalls tracks environment variables passed to Run/RunInteractive
 	EnvCalls map[string][]string
 }
 
@@ -101,13 +86,8 @@ func NewMockCommandRunner() *MockCommandRunner {
 	}
 }
 
-// Run returns mocked output for the given command with LC_ALL=C
-func (m *MockCommandRunner) Run(name string, args ...string) ([]byte, error) {
-	return m.RunContext(context.Background(), name, args)
-}
-
-// RunContext returns mocked output for the given command
-func (m *MockCommandRunner) RunContext(ctx context.Context, name string, args []string, env ...string) ([]byte, error) {
+// Run returns mocked output for the given command
+func (m *MockCommandRunner) Run(ctx context.Context, name string, args []string, env ...string) ([]byte, error) {
 	// Build command key for lookup
 	cmdKey := m.buildKey(name, args)
 

@@ -88,10 +88,6 @@ func TestOptionsStructure(t *testing.T) {
 		t.Error("Expected GlobalScope to be true by default")
 	}
 
-	if opts.TimeoutSecs != 0 {
-		t.Errorf("Expected TimeoutSecs to be 0 by default, got %d", opts.TimeoutSecs)
-	}
-
 	if opts.Metadata == nil {
 		t.Error("Expected Metadata to be initialized")
 	}

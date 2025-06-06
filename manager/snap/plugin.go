@@ -37,13 +37,13 @@ func (m *Manager) IsAvailable() bool {
 		return false
 	}
 	// Verify snap is working
-	_, err = m.GetRunner().Run("snap", "version")
+	_, err = m.GetRunner().Run(context.Background(), "snap", []string{"version"})
 	return err == nil
 }
 
 // GetVersion returns Snap version
 func (m *Manager) GetVersion() (string, error) {
-	output, err := m.GetRunner().Run("snap", "version")
+	output, err := m.GetRunner().Run(context.Background(), "snap", []string{"version"})
 	if err != nil {
 		return "", err
 	}
@@ -73,7 +73,7 @@ func (m *Manager) Search(ctx context.Context, query []string, opts *manager.Opti
 	args := []string{"find", "--unicode=never", "--color=never"}
 	args = append(args, query...)
 
-	output, err := m.GetRunner().RunContext(ctx, "snap", args)
+	output, err := m.GetRunner().Run(ctx, "snap", args)
 	if err != nil {
 		return nil, fmt.Errorf("snap find failed: %w", err)
 	}
@@ -102,7 +102,7 @@ func (m *Manager) GetInfo(ctx context.Context, packageName string, opts *manager
 		return manager.PackageInfo{}, err
 	}
 
-	output, err := m.GetRunner().RunContext(ctx, "snap", []string{"info", packageName})
+	output, err := m.GetRunner().Run(ctx, "snap", []string{"info", packageName})
 	if err != nil {
 		return manager.PackageInfo{}, fmt.Errorf("snap info failed: %w", err)
 	}
@@ -148,7 +148,7 @@ func (m *Manager) Install(ctx context.Context, packages []string, opts *manager.
 		}
 
 		args = append(args, pkg)
-		_, err := m.GetRunner().RunContext(ctx, "snap", args)
+		_, err := m.GetRunner().Run(ctx, "snap", args)
 		if err != nil {
 			return nil, fmt.Errorf("snap install %s failed: %w", pkg, err)
 		}
@@ -179,7 +179,7 @@ func (m *Manager) Remove(ctx context.Context, packages []string, opts *manager.O
 		}
 
 		args = append(args, pkg)
-		_, err := m.GetRunner().RunContext(ctx, "snap", args)
+		_, err := m.GetRunner().Run(ctx, "snap", args)
 		if err != nil {
 			return nil, fmt.Errorf("snap remove %s failed: %w", pkg, err)
 		}
@@ -192,7 +192,7 @@ func (m *Manager) Remove(ctx context.Context, packages []string, opts *manager.O
 
 // Refresh refreshes package lists (equivalent to update)
 func (m *Manager) Refresh(ctx context.Context, opts *manager.Options) error {
-	_, err := m.GetRunner().RunContext(ctx, "snap", []string{"refresh", "--list"})
+	_, err := m.GetRunner().Run(ctx, "snap", []string{"refresh", "--list"})
 	if err != nil {
 		return fmt.Errorf("snap refresh --list failed: %w", err)
 	}
@@ -213,14 +213,14 @@ func (m *Manager) Upgrade(ctx context.Context, packages []string, opts *manager.
 	if opts != nil && opts.DryRun {
 		// Use --list to see what would be upgraded
 		listArgs := []string{"refresh", "--list"}
-		output, err := m.GetRunner().RunContext(ctx, "snap", listArgs)
+		output, err := m.GetRunner().Run(ctx, "snap", listArgs)
 		if err != nil {
 			return nil, fmt.Errorf("snap refresh --list failed: %w", err)
 		}
 		return m.parseUpgradeListOutput(string(output)), nil
 	}
 
-	output, err := m.GetRunner().RunContext(ctx, "snap", args)
+	output, err := m.GetRunner().Run(ctx, "snap", args)
 	if err != nil {
 		return nil, fmt.Errorf("snap refresh failed: %w", err)
 	}
@@ -253,7 +253,7 @@ func (m *Manager) Verify(ctx context.Context, packages []string, opts *manager.O
 	var results []manager.PackageInfo
 	for _, pkg := range packages {
 		// Check if package is installed and functioning
-		_, err := m.GetRunner().RunContext(ctx, "snap", []string{"list", pkg})
+		_, err := m.GetRunner().Run(ctx, "snap", []string{"list", pkg})
 		status := manager.StatusInstalled
 		if err != nil {
 			status = "not-installed"
@@ -335,7 +335,7 @@ func (m *Manager) parseInfoOutput(output, packageName string) manager.PackageInf
 
 // listInstalled lists installed snap packages
 func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]manager.PackageInfo, error) {
-	output, err := m.GetRunner().RunContext(ctx, "snap", []string{"list", "--unicode=never", "--color=never"})
+	output, err := m.GetRunner().Run(ctx, "snap", []string{"list", "--unicode=never", "--color=never"})
 	if err != nil {
 		return nil, fmt.Errorf("snap list failed: %w", err)
 	}
@@ -379,7 +379,7 @@ func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]mana
 
 // listUpgradable lists packages that can be upgraded
 func (m *Manager) listUpgradable(ctx context.Context, _ *manager.Options) ([]manager.PackageInfo, error) {
-	output, err := m.GetRunner().RunContext(ctx, "snap", []string{"refresh", "--list"})
+	output, err := m.GetRunner().Run(ctx, "snap", []string{"refresh", "--list"})
 	if err != nil {
 		return nil, fmt.Errorf("snap refresh --list failed: %w", err)
 	}

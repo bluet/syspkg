@@ -143,10 +143,6 @@ type Options struct {
 	// Manager-specific options
 	CustomArgs []string               `json:"custom_args"` // Additional command-line arguments
 	Metadata   map[string]interface{} `json:"metadata"`    // Manager-specific options
-
-	// Timeout and retries
-	TimeoutSecs int `json:"timeout_secs"` // Operation timeout (0 = use default)
-	Retries     int `json:"retries"`      // Number of retries on failure
 }
 
 // DefaultOptions returns a new Options struct with sensible defaults
@@ -162,8 +158,6 @@ func DefaultOptions() *Options {
 		GlobalScope: true,
 		SkipBroken:  false,
 		OnlyEnabled: true,
-		TimeoutSecs: 0, // Use manager's default
-		Retries:     0, // No retries by default
 		CustomArgs:  []string{},
 		Metadata:    make(map[string]interface{}),
 		Tags:        []string{},

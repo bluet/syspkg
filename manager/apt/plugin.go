@@ -38,13 +38,13 @@ func (m *Manager) IsAvailable() bool {
 		return false
 	}
 	// Verify it's Debian apt (not Java apt)
-	output, err := m.GetRunner().Run("apt", "--version")
+	output, err := m.GetRunner().Run(context.Background(), "apt", []string{"--version"})
 	return err == nil && strings.Contains(string(output), "apt") && !strings.Contains(string(output), "java")
 }
 
 // GetVersion returns APT version
 func (m *Manager) GetVersion() (string, error) {
-	output, err := m.GetRunner().Run("apt", "--version")
+	output, err := m.GetRunner().Run(context.Background(), "apt", []string{"--version"})
 	if err != nil {
 		return "", err
 	}
@@ -69,7 +69,7 @@ func (m *Manager) Search(ctx context.Context, query []string, opts *manager.Opti
 	}
 
 	args := append([]string{"search"}, query...)
-	output, err := m.GetRunner().RunContext(ctx, "apt", args)
+	output, err := m.GetRunner().Run(ctx, "apt", args)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +155,7 @@ func (m *Manager) Install(ctx context.Context, packages []string, opts *manager.
 		args = append(args, "--dry-run")
 	}
 
-	output, err := m.GetRunner().RunContext(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+	output, err := m.GetRunner().Run(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
 	if err != nil {
 		return nil, fmt.Errorf("apt install failed: %w", err)
 	}
@@ -182,7 +182,7 @@ func (m *Manager) Remove(ctx context.Context, packages []string, opts *manager.O
 		args = append(args, "--dry-run")
 	}
 
-	output, err := m.GetRunner().RunContext(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+	output, err := m.GetRunner().Run(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
 	if err != nil {
 		return nil, fmt.Errorf("apt remove failed: %w", err)
 	}
@@ -198,7 +198,7 @@ func (m *Manager) GetInfo(ctx context.Context, packageName string, opts *manager
 		return manager.PackageInfo{}, err
 	}
 
-	output, err := m.GetRunner().RunContext(ctx, "apt-cache", []string{"show", packageName}, "DEBIAN_FRONTEND=noninteractive")
+	output, err := m.GetRunner().Run(ctx, "apt-cache", []string{"show", packageName}, "DEBIAN_FRONTEND=noninteractive")
 	if err != nil {
 		return manager.PackageInfo{}, fmt.Errorf("apt-cache show failed: %w", err)
 	}
@@ -212,7 +212,7 @@ func (m *Manager) GetInfo(ctx context.Context, packageName string, opts *manager
 
 // Refresh updates package lists
 func (m *Manager) Refresh(ctx context.Context, opts *manager.Options) error {
-	_, err := m.GetRunner().RunContext(ctx, "apt", []string{"update"}, "DEBIAN_FRONTEND=noninteractive")
+	_, err := m.GetRunner().Run(ctx, "apt", []string{"update"}, "DEBIAN_FRONTEND=noninteractive")
 	if err != nil {
 		return fmt.Errorf("apt update failed: %w", err)
 	}
@@ -240,7 +240,7 @@ func (m *Manager) Upgrade(ctx context.Context, packages []string, opts *manager.
 		args = append(args, "--dry-run")
 	}
 
-	output, err := m.GetRunner().RunContext(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+	output, err := m.GetRunner().Run(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
 	if err != nil {
 		return nil, fmt.Errorf("apt upgrade failed: %w", err)
 	}
@@ -250,7 +250,7 @@ func (m *Manager) Upgrade(ctx context.Context, packages []string, opts *manager.
 
 // Clean removes cached packages
 func (m *Manager) Clean(ctx context.Context, opts *manager.Options) error {
-	_, err := m.GetRunner().RunContext(ctx, "apt", []string{"autoclean"}, "DEBIAN_FRONTEND=noninteractive")
+	_, err := m.GetRunner().Run(ctx, "apt", []string{"autoclean"}, "DEBIAN_FRONTEND=noninteractive")
 	if err != nil {
 		return fmt.Errorf("apt autoclean failed: %w", err)
 	}
@@ -264,7 +264,7 @@ func (m *Manager) AutoRemove(ctx context.Context, opts *manager.Options) ([]mana
 		args = append(args, "--dry-run")
 	}
 
-	output, err := m.GetRunner().RunContext(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+	output, err := m.GetRunner().Run(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
 	if err != nil {
 		return nil, fmt.Errorf("apt autoremove failed: %w", err)
 	}
@@ -288,7 +288,7 @@ func (m *Manager) Verify(ctx context.Context, packages []string, opts *manager.O
 
 	var results []manager.PackageInfo
 	for _, pkg := range packages {
-		_, err := m.GetRunner().RunContext(ctx, "dpkg", []string{"-s", pkg})
+		_, err := m.GetRunner().Run(ctx, "dpkg", []string{"-s", pkg})
 		status := manager.StatusInstalled
 		if err != nil {
 			status = "broken"
@@ -301,7 +301,7 @@ func (m *Manager) Verify(ctx context.Context, packages []string, opts *manager.O
 }
 
 func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]manager.PackageInfo, error) {
-	output, err := m.GetRunner().RunContext(ctx, "dpkg-query",
+	output, err := m.GetRunner().Run(ctx, "dpkg-query",
 		[]string{"-W", "-f", "${binary:Package} ${Version} ${Architecture}\n"})
 	if err != nil {
 		return nil, fmt.Errorf("dpkg-query failed: %w", err)
@@ -331,7 +331,7 @@ func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]mana
 }
 
 func (m *Manager) listUpgradable(ctx context.Context, _ *manager.Options) ([]manager.PackageInfo, error) {
-	output, err := m.GetRunner().RunContext(ctx, "apt", []string{"list", "--upgradable"})
+	output, err := m.GetRunner().Run(ctx, "apt", []string{"list", "--upgradable"})
 	if err != nil {
 		return nil, fmt.Errorf("apt list --upgradable failed: %w", err)
 	}
@@ -460,7 +460,7 @@ func (m *Manager) Status(ctx context.Context, opts *manager.Options) (manager.Ma
 	}
 
 	// Check if we can access APT
-	if _, err := m.GetRunner().RunContext(ctx, "apt", []string{"--version"}); err != nil {
+	if _, err := m.GetRunner().Run(ctx, "apt", []string{"--version"}); err != nil {
 		status.Healthy = false
 		status.Issues = append(status.Issues, "APT command not accessible")
 	}
@@ -471,7 +471,7 @@ func (m *Manager) Status(ctx context.Context, opts *manager.Options) (manager.Ma
 	}
 
 	// Try to get cache information
-	if _, err := m.GetRunner().RunContext(ctx, "apt-cache", []string{"stats"}); err == nil {
+	if _, err := m.GetRunner().Run(ctx, "apt-cache", []string{"stats"}); err == nil {
 		// APT cache is accessible - could parse more detailed info if needed
 		status.Metadata["cache_accessible"] = true
 	}

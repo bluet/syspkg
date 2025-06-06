@@ -35,7 +35,7 @@ func NewManagerWithRunner(runner manager.CommandRunner) *Manager {
 // IsAvailable checks if YUM is available
 func (m *Manager) IsAvailable() bool {
 	// First try using the command runner (works for testing with mocks)
-	output, err := m.GetRunner().Run("yum", "--version")
+	output, err := m.GetRunner().Run(context.Background(), "yum", []string{"--version"})
 	if err == nil && (strings.Contains(strings.ToLower(string(output)), "yum") || strings.Contains(strings.ToLower(string(output)), "rpm")) {
 		return true
 	}
@@ -52,7 +52,7 @@ func (m *Manager) IsAvailable() bool {
 
 // GetVersion returns YUM version
 func (m *Manager) GetVersion() (string, error) {
-	output, err := m.GetRunner().Run("yum", "--version")
+	output, err := m.GetRunner().Run(context.Background(), "yum", []string{"--version"})
 	if err != nil {
 		return "", err
 	}
@@ -75,7 +75,7 @@ func (m *Manager) Search(ctx context.Context, query []string, opts *manager.Opti
 	}
 
 	args := append([]string{"search"}, query...)
-	output, err := m.GetRunner().RunContext(ctx, "yum", args)
+	output, err := m.GetRunner().Run(ctx, "yum", args)
 	if err != nil {
 		// YUM returns exit code 1 when no packages found, but this is not an error for search
 		if strings.Contains(string(output), "No matches found") {
@@ -110,9 +110,7 @@ func (m *Manager) List(ctx context.Context, filter manager.ListFilter, opts *man
 
 // ListInstalled lists installed packages
 func (m *Manager) ListInstalled(ctx context.Context, opts *manager.Options) ([]manager.PackageInfo, error) {
-	// opts is not used in this function, so no need to handle nil case
-
-	output, err := m.GetRunner().RunContext(ctx, "yum", []string{"list", "installed"})
+	output, err := m.GetRunner().Run(ctx, "yum", []string{"list", "installed"})
 	if err != nil {
 		return nil, fmt.Errorf("yum list installed failed: %w", err)
 	}
@@ -122,9 +120,7 @@ func (m *Manager) ListInstalled(ctx context.Context, opts *manager.Options) ([]m
 
 // ListUpgradable lists packages that can be upgraded
 func (m *Manager) ListUpgradable(ctx context.Context, opts *manager.Options) ([]manager.PackageInfo, error) {
-	// opts is not used in this function, so no need to handle nil case
-
-	output, err := m.GetRunner().RunContext(ctx, "yum", []string{"list", "updates"})
+	output, err := m.GetRunner().Run(ctx, "yum", []string{"list", "updates"})
 	if err != nil {
 		// YUM returns exit code 1 when no updates available, this is not an error
 		if strings.Contains(string(output), "No packages marked for update") {
@@ -138,13 +134,11 @@ func (m *Manager) ListUpgradable(ctx context.Context, opts *manager.Options) ([]
 
 // GetInfo gets detailed package information
 func (m *Manager) GetInfo(ctx context.Context, packageName string, opts *manager.Options) (manager.PackageInfo, error) {
-	// opts is not used in this function, so no need to handle nil case
-
 	if err := m.ValidatePackageNames([]string{packageName}); err != nil {
 		return manager.PackageInfo{}, err
 	}
 
-	output, err := m.GetRunner().RunContext(ctx, "yum", []string{"info", packageName})
+	output, err := m.GetRunner().Run(ctx, "yum", []string{"info", packageName})
 	if err != nil {
 		if strings.Contains(string(output), "No matching Packages") ||
 			strings.Contains(string(output), "Error: No matching Packages") {
@@ -180,7 +174,7 @@ func (m *Manager) Install(ctx context.Context, packageNames []string, opts *mana
 	}
 	args = append(args, packageNames...)
 
-	output, err := m.GetRunner().RunContext(ctx, "yum", args)
+	output, err := m.GetRunner().Run(ctx, "yum", args)
 	if err != nil {
 		if strings.Contains(err.Error(), "Nothing to do") ||
 			strings.Contains(err.Error(), "already installed") {
@@ -212,7 +206,7 @@ func (m *Manager) Remove(ctx context.Context, packageNames []string, opts *manag
 	}
 	args = append(args, packageNames...)
 
-	output, err := m.GetRunner().RunContext(ctx, "yum", args)
+	output, err := m.GetRunner().Run(ctx, "yum", args)
 	if err != nil {
 		if strings.Contains(err.Error(), "No Packages marked for removal") {
 			return nil, manager.ErrPackageNotFound
@@ -231,9 +225,7 @@ func (m *Manager) Refresh(ctx context.Context, opts *manager.Options) error {
 
 // Update updates package lists (refresh metadata)
 func (m *Manager) Update(ctx context.Context, opts *manager.Options) error {
-	// opts is not used in this function, so no need to handle nil case
-
-	_, err := m.GetRunner().RunContext(ctx, "yum", []string{"makecache", "fast"})
+	_, err := m.GetRunner().Run(ctx, "yum", []string{"makecache", "fast"})
 	if err != nil {
 		return fmt.Errorf("yum makecache failed: %w", err)
 	}
@@ -262,7 +254,7 @@ func (m *Manager) Upgrade(ctx context.Context, packageNames []string, opts *mana
 	}
 	args = append(args, packageNames...)
 
-	output, err := m.GetRunner().RunContext(ctx, "yum", args)
+	output, err := m.GetRunner().Run(ctx, "yum", args)
 	if err != nil {
 		if strings.Contains(err.Error(), "Nothing to do") {
 			return []manager.PackageInfo{}, nil // Not an error if nothing to update
@@ -277,9 +269,7 @@ func (m *Manager) Upgrade(ctx context.Context, packageNames []string, opts *mana
 
 // Clean cleans package cache
 func (m *Manager) Clean(ctx context.Context, opts *manager.Options) error {
-	// opts is not used in this function, so no need to handle nil case
-
-	_, err := m.GetRunner().RunContext(ctx, "yum", []string{"clean", "all"})
+	_, err := m.GetRunner().Run(ctx, "yum", []string{"clean", "all"})
 	if err != nil {
 		return fmt.Errorf("yum clean failed: %w", err)
 	}
@@ -301,7 +291,7 @@ func (m *Manager) AutoRemove(ctx context.Context, opts *manager.Options) ([]mana
 		args = append(args, "-y")
 	}
 
-	output, err := m.GetRunner().RunContext(ctx, "yum", args)
+	output, err := m.GetRunner().Run(ctx, "yum", args)
 	if err != nil {
 		if strings.Contains(err.Error(), "Nothing to do") {
 			return []manager.PackageInfo{}, nil // Not an error if nothing to remove
@@ -322,8 +312,6 @@ func (m *Manager) AutoRemove(ctx context.Context, opts *manager.Options) ([]mana
 
 // Verify verifies package integrity
 func (m *Manager) Verify(ctx context.Context, packageNames []string, opts *manager.Options) ([]manager.PackageInfo, error) {
-	// opts is not used in this function, so no need to handle nil case
-
 	if len(packageNames) > 0 {
 		if err := m.ValidatePackageNames(packageNames); err != nil {
 			return nil, err
@@ -336,7 +324,7 @@ func (m *Manager) Verify(ctx context.Context, packageNames []string, opts *manag
 		args = append(args, packageNames...)
 	}
 
-	output, err := m.GetRunner().RunContext(ctx, "yum", args)
+	output, err := m.GetRunner().Run(ctx, "yum", args)
 	if err != nil {
 		return nil, fmt.Errorf("yum check failed: %w", err)
 	}
@@ -376,7 +364,8 @@ func (m *Manager) Status(ctx context.Context, opts *manager.Options) (manager.Ma
 	}
 
 	// Check if we can access YUM
-	if _, err := m.GetRunner().RunContext(ctx, "yum", []string{"--version"}); err != nil {
+
+	if _, err := m.GetRunner().Run(ctx, "yum", []string{"--version"}); err != nil {
 		status.Healthy = false
 		status.Issues = append(status.Issues, "YUM command not accessible")
 	}

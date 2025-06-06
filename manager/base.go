@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"time"
 )
 
 // BaseManager provides default implementations for PackageManager interface.
@@ -48,16 +47,16 @@ func (b *BaseManager) GetRunner() CommandRunner {
 func (b *BaseManager) IsAvailable() bool {
 	// Default: try to run the command with --version or --help
 	// Subclasses should override this with specific logic
-	_, err := b.runner.Run(b.name, "--version")
+	_, err := b.runner.Run(context.Background(), b.name, []string{"--version"})
 	if err != nil {
-		_, err = b.runner.Run(b.name, "--help")
+		_, err = b.runner.Run(context.Background(), b.name, []string{"--help"})
 	}
 	return err == nil
 }
 
 func (b *BaseManager) GetVersion() (string, error) {
 	// Default: try to get version output
-	output, err := b.runner.Run(b.name, "--version")
+	output, err := b.runner.Run(context.Background(), b.name, []string{"--version"})
 	if err != nil {
 		return "", fmt.Errorf("unable to get version for %s: %w", b.name, err)
 	}
@@ -158,17 +157,6 @@ func (b *BaseManager) LogDebugf(opts *Options, format string, args ...interface{
 	if opts != nil && opts.Debug {
 		log.Printf("[%s DEBUG] "+format, append([]interface{}{b.name}, args...)...)
 	}
-}
-
-// GetTimeoutContext creates a context with timeout from options
-func (b *BaseManager) GetTimeoutContext(ctx context.Context, opts *Options) (context.Context, context.CancelFunc) {
-	timeout := 30 * time.Second // Default timeout
-
-	if opts != nil && opts.TimeoutSecs > 0 {
-		timeout = time.Duration(opts.TimeoutSecs) * time.Second
-	}
-
-	return context.WithTimeout(ctx, timeout)
 }
 
 // ValidatePackageNames validates package names for security

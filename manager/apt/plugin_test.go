@@ -9,45 +9,33 @@ import (
 	"github.com/bluet/syspkg/testing/testutil"
 )
 
-// MockCommandRunner for testing
+// MockCommandRunner wraps the manager package's MockCommandRunner
 type MockCommandRunner struct {
-	commands map[string]string // command -> output
-	errors   map[string]error  // command -> error
+	*manager.MockCommandRunner
 }
 
 func NewMockCommandRunner() *MockCommandRunner {
 	return &MockCommandRunner{
-		commands: make(map[string]string),
-		errors:   make(map[string]error),
+		MockCommandRunner: manager.NewMockCommandRunner(),
 	}
 }
 
 func (m *MockCommandRunner) SetOutput(command, output string) {
-	m.commands[command] = output
+	args := strings.Fields(command)
+	if len(args) > 1 {
+		m.AddCommand(args[0], args[1:], []byte(output), nil)
+	} else {
+		m.AddCommand(args[0], []string{}, []byte(output), nil)
+	}
 }
 
 func (m *MockCommandRunner) SetError(command string, err error) {
-	m.errors[command] = err
-}
-
-func (m *MockCommandRunner) Run(command string, args ...string) ([]byte, error) {
-	fullCmd := command + " " + strings.Join(args, " ")
-	if err, exists := m.errors[fullCmd]; exists {
-		return nil, err
+	args := strings.Fields(command)
+	if len(args) > 1 {
+		m.AddCommand(args[0], args[1:], nil, err)
+	} else {
+		m.AddCommand(args[0], []string{}, nil, err)
 	}
-	if output, exists := m.commands[fullCmd]; exists {
-		return []byte(output), nil
-	}
-	return []byte(""), nil
-}
-
-func (m *MockCommandRunner) RunContext(ctx context.Context, command string, args []string, env ...string) ([]byte, error) {
-	return m.Run(command, args...)
-}
-
-func (m *MockCommandRunner) RunInteractive(ctx context.Context, command string, args []string, env ...string) error {
-	_, err := m.RunContext(ctx, command, args, env...)
-	return err
 }
 
 func TestManagerBasicInfo(t *testing.T) {
@@ -120,7 +108,7 @@ func TestSearch(t *testing.T) {
 func TestListInstalled(t *testing.T) {
 	runner := NewMockCommandRunner()
 	listFixture := testutil.LoadAPTFixture(t, "dpkg-query-packages.clean-system.ubuntu-2204.txt")
-	runner.SetOutput("dpkg-query -W -f ${binary:Package} ${Version} ${Architecture}\n", listFixture)
+	runner.AddCommand("dpkg-query", []string{"-W", "-f", "${binary:Package} ${Version} ${Architecture}\n"}, []byte(listFixture), nil)
 
 	mgr := NewManagerWithRunner(runner)
 	ctx := context.Background()
@@ -529,7 +517,7 @@ func TestStatus(t *testing.T) {
 
 func TestDryRun(t *testing.T) {
 	runner := NewMockCommandRunner()
-	runner.SetOutput("apt install -y --dry-run vim", "NOTE: This is only a simulation!")
+	runner.AddCommand("apt", []string{"install", "-y", "vim", "--dry-run"}, []byte("NOTE: This is only a simulation!"), nil)
 
 	mgr := NewManagerWithRunner(runner)
 	ctx := context.Background()

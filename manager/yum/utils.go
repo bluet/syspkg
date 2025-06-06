@@ -2,6 +2,7 @@
 package yum
 
 import (
+	"context"
 	"regexp"
 	"strings"
 
@@ -428,7 +429,7 @@ func (m *Manager) enhanceWithDetailedStatus(packages []manager.PackageInfo) []ma
 		enhanced[i] = pkg
 
 		// Check if package is installed using rpm -q
-		output, err := m.GetRunner().Run("rpm", "-q", pkg.Name)
+		output, err := m.GetRunner().Run(context.Background(), "rpm", []string{"-q", pkg.Name})
 		if err == nil {
 			// Package is installed
 			version := parseRpmVersion(string(output))
@@ -436,7 +437,7 @@ func (m *Manager) enhanceWithDetailedStatus(packages []manager.PackageInfo) []ma
 			enhanced[i].Version = version
 
 			// Check if there's an available update
-			updateOutput, updateErr := m.GetRunner().Run("yum", "list", "updates", pkg.Name)
+			updateOutput, updateErr := m.GetRunner().Run(context.Background(), "yum", []string{"list", "updates", pkg.Name})
 			if updateErr == nil && strings.Contains(string(updateOutput), pkg.Name) {
 				enhanced[i].Status = manager.StatusUpgradable
 				// Parse available version would require more complex parsing

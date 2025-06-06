@@ -5,7 +5,6 @@ import (
 	"errors"
 	"strings"
 	"testing"
-	"time"
 )
 
 func TestMockCommandRunner(t *testing.T) {
@@ -77,7 +76,7 @@ func TestMockCommandRunner(t *testing.T) {
 			}
 
 			// Test the command execution
-			output, err := runner.Run(tt.testCommand, tt.testArgs...)
+			output, err := runner.Run(context.Background(), tt.testCommand, tt.testArgs)
 
 			// Verify results
 			if string(output) != string(tt.expectedOutput) {
@@ -100,7 +99,7 @@ func TestMockCommandRunnerAddMethods(t *testing.T) {
 
 	// Test AddCommand
 	runner.AddCommand("rpm", []string{"-q", "vim"}, []byte("vim-8.0.1763\n"), nil)
-	output, err := runner.Run("rpm", "-q", "vim")
+	output, err := runner.Run(context.Background(), "rpm", []string{"-q", "vim"})
 
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
@@ -112,7 +111,7 @@ func TestMockCommandRunnerAddMethods(t *testing.T) {
 	// Test AddError
 	testErr := errors.New("test error")
 	runner.AddError("rpm", []string{"-q", "missing"}, testErr)
-	_, err = runner.Run("rpm", "-q", "missing")
+	_, err = runner.Run(context.Background(), "rpm", []string{"-q", "missing"})
 
 	if err == nil {
 		t.Error("Expected error, got nil")
@@ -125,13 +124,8 @@ func TestMockCommandRunnerAddMethods(t *testing.T) {
 func TestDefaultCommandRunner(t *testing.T) {
 	runner := NewDefaultCommandRunner()
 
-	// Test that timeout is set
-	if runner.Timeout != 30*time.Second {
-		t.Errorf("Expected timeout 30s, got %v", runner.Timeout)
-	}
-
 	// Test a simple command that should exist on most systems
-	output, err := runner.Run("echo", "test")
+	output, err := runner.Run(context.Background(), "echo", []string{"test"})
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
@@ -146,7 +140,7 @@ func TestDefaultCommandRunnerWithContext(t *testing.T) {
 
 	// Test with a normal context
 	ctx := context.Background()
-	output, err := runner.RunContext(ctx, "echo", []string{"test"})
+	output, err := runner.Run(ctx, "echo", []string{"test"})
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
@@ -158,7 +152,7 @@ func TestDefaultCommandRunnerWithContext(t *testing.T) {
 	cancelledCtx, cancel := context.WithCancel(context.Background())
 	cancel() // Cancel immediately
 
-	_, err = runner.RunContext(cancelledCtx, "sleep", []string{"10"})
+	_, err = runner.Run(cancelledCtx, "sleep", []string{"10"})
 	if err == nil {
 		t.Error("Expected error due to cancelled context")
 	}

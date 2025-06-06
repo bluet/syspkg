@@ -12,7 +12,7 @@ func TestCommandRunnerEnvironmentHandling(t *testing.T) {
 
 		// Test that LC_ALL=C is prepended automatically using 'env' command
 		// This is more reliable than echo "$LC_ALL" across different systems
-		output, err := runner.Run("env")
+		output, err := runner.Run(context.Background(), "env", []string{})
 		if err != nil {
 			t.Fatalf("Failed to run 'env' command: %v", err)
 		}
@@ -32,9 +32,9 @@ func TestCommandRunnerEnvironmentHandling(t *testing.T) {
 		// Add a mocked command
 		mock.AddCommand("apt", []string{"update"}, []byte("success"), nil)
 
-		// Test RunContext with environment variables
+		// Test Run with environment variables
 		ctx := context.Background()
-		_, err := mock.RunContext(ctx, "apt", []string{"update"}, "DEBIAN_FRONTEND=noninteractive")
+		_, err := mock.Run(ctx, "apt", []string{"update"}, "DEBIAN_FRONTEND=noninteractive")
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
 		}
@@ -74,7 +74,7 @@ func TestCommandRunnerEnvironmentHandling(t *testing.T) {
 
 		// Call without environment variables
 		ctx := context.Background()
-		_, err := mock.RunContext(ctx, "ls", []string{})
+		_, err := mock.Run(ctx, "ls", []string{})
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
 		}
