@@ -266,10 +266,13 @@ For current development tasks, see [GitHub Issues](https://github.com/bluet/sysp
 - **Extract common parsing logic** (DRY principle)
 - **Replace magic strings/numbers** with constants
 
+### ✅ COMPLETED (2025-06-08)
+**New Package Managers:**
+- **APK package manager** support (Alpine Linux) - ✅ Registered and imported
+
 ### 🟢 Low Priority (Platform Support)
 **New Package Managers:**
 - **DNF package manager** support (Red Hat/Fedora) - uses yum backend
-- **APK package manager** support (Alpine Linux)
 - **Homebrew support** for macOS
 - **Windows package managers** (chocolatey/scoop/winget)
 
@@ -419,3 +422,7 @@ Fixtures are automatically generated from real package manager outputs across di
 This ensures parsers work correctly with real-world output variations across distributions.
 
 See `testing/docker/`, `testing/os-matrix.yaml`, and [CONTRIBUTING.md](CONTRIBUTING.md) for complete details.
+
+## Memories
+
+- Think clearly about what responsibility should belong to the module, and what's on the user/integrator side.

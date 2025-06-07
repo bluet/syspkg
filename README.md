@@ -25,10 +25,11 @@ SysPkg provides a consistent CLI and Go library interface across different packa
 |-----------------|--------|---------------|
 | **APT** | ✅ Production | Ubuntu, Debian, derivatives |
 | **YUM** | ✅ Production | RHEL, CentOS, Rocky Linux 8 |
+| **APK** | ✅ Registered | Alpine Linux |
 | **Snap** | 🚧 Beta | Universal Linux packages |
 | **Flatpak** | 🚧 Beta | Universal Linux applications |
 
-*More package managers coming soon: DNF, APK, Pacman, and more.*
+*More package managers coming soon: DNF, Pacman, and more.*
 
 ## 📋 Quick Reference
 
@@ -40,6 +41,7 @@ Need specific documentation? Find it quickly:
 - **🧪 Testing & fixtures?** → [docs/TESTING.md](docs/TESTING.md)
 - **🔌 Building plugins?** → [docs/PLUGIN_DEVELOPMENT.md](docs/PLUGIN_DEVELOPMENT.md)
 - **🏗️ Production integration?** → [docs/INTEGRATION_GUIDE.md](docs/INTEGRATION_GUIDE.md)
+- **🔢 Exit codes & automation?** → [docs/EXIT_CODES.md](docs/EXIT_CODES.md)
 
 ## Getting Started
 
@@ -72,60 +74,93 @@ SysPkg provides a unified CLI tool for managing system packages across different
 Here's an example demonstrating how to use SysPkg as a CLI tool:
 
 ```bash
-# Install a package using APT
+# Use specific package managers
+syspkg -m apt install vim       # Install using APT
+syspkg -m snap search vim       # Search using Snap  
+syspkg -m flatpak list upgradable  # List using Flatpak
+syspkg -m yum install vim       # Install using YUM
+
+# Use by manager category
+syspkg -c system install vim    # Use system package manager (apt/yum/apk)
+syspkg -c app search vim        # Use app managers (snap/flatpak)
+
+# Legacy manager-specific flags (still supported)
 syspkg --apt install vim
-
-# Remove a package using APT
-syspkg --apt remove vim
-
-# Search for a package using Snap
 syspkg --snap search vim
-
-# List upgradable packages using Flatpak
-syspkg --flatpak list upgradable
-
-# Install a package using YUM (on RHEL/CentOS/Rocky/AlmaLinux)
-syspkg --yum install vim
-
-# Show package information
-syspkg --apt info vim
-
-# List installed packages
-syspkg --snap list installed
-
-# List upgradable packages
 syspkg --flatpak list upgradable
 ```
 
-Or, you can do operations without knowing the package manager:
+### Multi-Manager Operations (--all flag)
+
+Use `--all` to perform operations across **all available package managers**:
 
 ```bash
-# Install a package using all available package managers
-syspkg install vim
+# Read-only operations (safe)
+syspkg search vim --all             # Search across all managers
+syspkg list installed --all         # List from all managers  
+syspkg info vim --all               # Get info from all managers
+syspkg status --all                 # Show status of all managers
 
-# Remove a package using all available package manager
-syspkg remove vim
+# Write operations (with safety prompts)
+syspkg update --all                 # Update package lists (all managers)
+syspkg upgrade --all                # Upgrade packages (all managers) 
+syspkg clean --all                  # Clean caches (all managers)
+syspkg autoremove --all             # Remove orphaned packages (all managers)
 
-# Search for a package using all available package manager
-syspkg search vim
+# Bypass safety prompts with --yes
+syspkg upgrade --all --yes          # Skip confirmation prompt
+syspkg clean --all --dry-run        # See what would be done
+```
 
-# Search with installation status information (slightly slower)
-syspkg search vim --status
+### Single Manager Operations (auto-selection)
 
-# Upgrade all packages using all available package manager
-syspkg upgrade
+Without `--all` or `-m`, syspkg automatically selects the best available system package manager:
 
-# Update package lists
-syspkg update
+```bash
+syspkg install vim                  # Uses best system manager (apt/yum/apk)
+syspkg search vim                   # Searches all managers (default behavior)
+syspkg list installed               # Uses best system manager  
+syspkg upgrade                      # Uses best system manager
+```
 
-# Show package information
-syspkg info vim
+### Pipeline Support
 
-# List installed packages
+Use `-` to read package names from stdin:
+
+```bash
+# Install packages from a file
+cat packages.txt | syspkg install -
+
+# Install multiple packages from command output
+echo "vim curl git" | syspkg install -
+
+# Verify all installed packages (with new tab-separated format)
+syspkg list installed -q | cut -f1 | syspkg verify -
+
+# Advanced pipeline with manager information
+syspkg list installed --all -q | awk '$2=="apt"' | cut -f1 | syspkg verify -
+```
+
+### Output Formats
+
+SysPkg supports multiple output formats optimized for different use cases:
+
+```bash
+# Human-readable format (default)
 syspkg list installed
+# Output: packagename [manager] [version] status - description
 
-# List upgradable packages
-syspkg list upgradable
+# Quiet mode - tab-separated for parsing
+syspkg list installed -q
+# Output: packagename<TAB>manager<TAB>version<TAB>status
+
+# JSON output for programmatic use  
+syspkg list installed -j
+# Output: [{"name":"vim","manager":"apt","version":"8.2","status":"installed"}]
+
+# With status information (slower but accurate)
+syspkg search vim --status
+# Shows real installation status across managers
 ```
 
 ### Go Library
@@ -136,30 +171,32 @@ Here's an example demonstrating how to use SysPkg as a Go library:
 package main
 
 import (
+ "context"
  "fmt"
- "github.com/bluet/syspkg"
+ "github.com/bluet/syspkg/manager"
+
+ // Import package managers you want to use
+ _ "github.com/bluet/syspkg/manager/apt"
+ _ "github.com/bluet/syspkg/manager/yum"
 )
 
 func main() {
- // Initialize SysPkg with all available package managers on current system
- includeOptions := syspkg.IncludeOptions{
-  AllAvailable: true,
- }
- syspkgManager, err := syspkg.New(includeOptions)
- if err != nil {
-  fmt.Printf("Error initializing SysPkg: %v\n", err)
-  return
- }
+ // Get the global registry of package managers
+ registry := manager.GetGlobalRegistry()
+
+ // Get all available package managers on current system
+ managers := registry.GetAvailable()
 
  // Get APT package manager (if available)
- aptManager, err := syspkgManager.GetPackageManager("apt")
- if err != nil {
-  fmt.Printf("APT package manager not available: %v\n", err)
+ aptManager, exists := managers["apt"]
+ if !exists {
+  fmt.Printf("APT package manager not available\n")
   return
  }
 
  // List installed packages using APT
- installedPackages, err := aptManager.ListInstalled(nil)
+ ctx := context.Background()
+ installedPackages, err := aptManager.List(ctx, manager.FilterInstalled, nil)
  if err != nil {
   fmt.Printf("Error listing installed packages: %v\n", err)
   return
