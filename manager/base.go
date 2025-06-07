@@ -5,6 +5,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os/exec"
+	"strings"
 )
 
 // BaseManager provides default implementations for PackageManager interface.
@@ -12,20 +14,20 @@ import (
 // This follows the "Less is more" principle by providing sensible defaults while allowing
 // full customization when needed.
 type BaseManager struct {
-	name        string
-	managerType string
-	runner      CommandRunner
+	name            string
+	managerCategory string
+	runner          CommandRunner
 }
 
-// NewBaseManager creates a new base manager with the given name and type
-func NewBaseManager(name, managerType string, runner CommandRunner) *BaseManager {
+// NewBaseManager creates a new base manager with the given name and category
+func NewBaseManager(name, managerCategory string, runner CommandRunner) *BaseManager {
 	if runner == nil {
 		runner = NewDefaultCommandRunner()
 	}
 	return &BaseManager{
-		name:        name,
-		managerType: managerType,
-		runner:      runner,
+		name:            name,
+		managerCategory: managerCategory,
+		runner:          runner,
 	}
 }
 
@@ -35,8 +37,8 @@ func (b *BaseManager) GetName() string {
 	return b.name
 }
 
-func (b *BaseManager) GetType() string {
-	return b.managerType
+func (b *BaseManager) GetCategory() string {
+	return b.managerCategory
 }
 
 // GetRunner returns the command runner for subclasses
@@ -56,11 +58,11 @@ func (b *BaseManager) IsAvailable() bool {
 
 func (b *BaseManager) GetVersion() (string, error) {
 	// Default: try to get version output
-	output, err := b.runner.Run(context.Background(), b.name, []string{"--version"})
+	result, err := b.runner.Run(context.Background(), b.name, []string{"--version"})
 	if err != nil {
 		return "", fmt.Errorf("unable to get version for %s: %w", b.name, err)
 	}
-	return string(output), nil
+	return string(result.Output), nil
 }
 
 // === CORE PACKAGE OPERATIONS (Default: not supported) ===
@@ -230,12 +232,48 @@ func indexString(s, substr string) int {
 }
 
 // NewPackageInfo creates a PackageInfo with common fields set
-func NewPackageInfo(name, version, status, managerType string) PackageInfo {
+func NewPackageInfo(name, version, status, managerName string) PackageInfo {
 	return PackageInfo{
 		Name:        name,
 		Version:     version,
 		Status:      status,
-		ManagerType: managerType,
+		ManagerName: managerName,
 		Metadata:    make(map[string]interface{}),
+	}
+}
+
+// WrapCommandError extracts meaningful error messages from command execution failures.
+// If the error is an ExitError with stderr output, it returns a more descriptive error.
+// This helps with proper exit code classification in the CLI.
+func WrapCommandError(operation string, err error) error {
+	if err == nil {
+		return nil
+	}
+
+	// Try to extract stderr from ExitError
+	if exitErr, ok := err.(*exec.ExitError); ok && len(exitErr.Stderr) > 0 {
+		// Clean up the stderr output
+		stderr := strings.TrimSpace(string(exitErr.Stderr))
+		// Remove common prefixes that don't add value
+		stderr = strings.TrimPrefix(stderr, "E: ")
+		stderr = strings.TrimPrefix(stderr, "Error: ")
+		stderr = strings.TrimPrefix(stderr, "error: ")
+
+		// Return a clean error message that includes the actual problem
+		return fmt.Errorf("%s: %s", operation, stderr)
+	}
+
+	// Fallback to wrapping the original error
+	return fmt.Errorf("%s: %w", operation, err)
+}
+
+// === STANDARDIZED RETURN STATUS HELPERS ===
+
+// WrapReturn creates a status result with explicit status code - plugin developers know what happened
+func WrapReturn(status ReturnStatus, message string, err error) error {
+	return &StandardStatus{
+		Status:  status,
+		Message: message,
+		Wrapped: err,
 	}
 }

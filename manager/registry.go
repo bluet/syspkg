@@ -104,7 +104,7 @@ func (r *Registry) GetByType(managerType string) map[string]PackageManager {
 	result := make(map[string]PackageManager)
 
 	for name, manager := range available {
-		if manager.GetType() == managerType {
+		if manager.GetCategory() == managerType {
 			result[name] = manager
 		}
 	}
@@ -122,7 +122,7 @@ func (r *Registry) GetBestMatch(managerType string) PackageManager {
 
 	for _, plugin := range r.plugins {
 		manager := plugin.CreateManager()
-		if manager.IsAvailable() && manager.GetType() == managerType {
+		if manager.IsAvailable() && manager.GetCategory() == managerType {
 			priority := plugin.GetPriority()
 			if priority > bestPriority {
 				bestPriority = priority

@@ -8,18 +8,27 @@ import (
 	"os/exec"
 )
 
+// CommandResult holds the complete result of command execution
+type CommandResult struct {
+	Output   []byte // stdout
+	Stderr   []byte // stderr
+	ExitCode int    // exit code (0 = success)
+}
+
 // CommandRunner provides an abstraction for executing system commands.
 // All non-interactive commands automatically get LC_ALL=C for consistent output.
 // All methods follow the Go context-first convention.
 type CommandRunner interface {
 	// Run executes a command with context support and LC_ALL=C, plus optional extra env.
+	// Returns CommandResult with stdout, stderr, and exit code so plugin developers
+	// can know exactly what happened and choose the appropriate ReturnStatus.
 	// Extra env vars are appended after LC_ALL=C, allowing override if needed.
 	// Note: Later env values override earlier ones, so users can override LC_ALL=C
 	// by passing their own LC_ALL value (e.g., "LC_ALL=zh_TW.UTF-8").
 	// For commands with no args but extra env, pass nil or []string{} for args.
 	// Example: Run(ctx, "apt", []string{"update"}, "DEBIAN_FRONTEND=noninteractive")
 	// Example: Run(ctx, "yum", []string{"info", "vim"}, "LC_ALL=zh_TW.UTF-8") // Overrides default LC_ALL=C
-	Run(ctx context.Context, name string, args []string, env ...string) ([]byte, error)
+	Run(ctx context.Context, name string, args []string, env ...string) (*CommandResult, error)
 
 	// RunInteractive executes in interactive mode with stdin/stdout/stderr passthrough.
 	// Does NOT prepend LC_ALL=C (preserves user's locale for interaction).
@@ -36,7 +45,7 @@ func NewDefaultCommandRunner() *DefaultCommandRunner {
 }
 
 // Run executes with context support and LC_ALL=C, plus optional extra env
-func (r *DefaultCommandRunner) Run(ctx context.Context, name string, args []string, env ...string) ([]byte, error) {
+func (r *DefaultCommandRunner) Run(ctx context.Context, name string, args []string, env ...string) (*CommandResult, error) {
 	cmd := exec.CommandContext(ctx, name, args...)
 
 	// Prepend LC_ALL=C, then append any additional env vars
@@ -44,7 +53,26 @@ func (r *DefaultCommandRunner) Run(ctx context.Context, name string, args []stri
 	allEnv := append([]string{"LC_ALL=C"}, env...)
 	cmd.Env = append(os.Environ(), allEnv...)
 
-	return cmd.Output()
+	// Capture both stdout and stderr
+	output, err := cmd.Output()
+
+	result := &CommandResult{
+		Output:   output,
+		ExitCode: 0, // Default to success
+	}
+
+	// Extract exit code and stderr from error
+	if err != nil {
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			result.ExitCode = exitErr.ExitCode()
+			result.Stderr = exitErr.Stderr
+		} else {
+			// Non-exit error (e.g., command not found) - return the error
+			return result, err
+		}
+	}
+
+	return result, nil
 }
 
 // RunInteractive executes in interactive mode with stdin/stdout/stderr passthrough
@@ -87,7 +115,7 @@ func NewMockCommandRunner() *MockCommandRunner {
 }
 
 // Run returns mocked output for the given command
-func (m *MockCommandRunner) Run(ctx context.Context, name string, args []string, env ...string) ([]byte, error) {
+func (m *MockCommandRunner) Run(ctx context.Context, name string, args []string, env ...string) (*CommandResult, error) {
 	// Build command key for lookup
 	cmdKey := m.buildKey(name, args)
 
@@ -101,7 +129,11 @@ func (m *MockCommandRunner) Run(ctx context.Context, name string, args []string,
 
 	// Return mocked output if available
 	if output, exists := m.Commands[cmdKey]; exists {
-		return output, nil
+		return &CommandResult{
+			Output:   output,
+			Stderr:   []byte{},
+			ExitCode: 0,
+		}, nil
 	}
 
 	// Default: return error when no mock is found (catches missing mocks in tests)

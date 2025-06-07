@@ -6,12 +6,41 @@ import (
 	"errors"
 )
 
-// Standard error for unsupported operations
+// Standard errors for unsupported operations
 var (
 	ErrOperationNotSupported = errors.New("operation not supported by this package manager")
 	ErrPackageNotFound       = errors.New("package not found")
 	ErrInvalidPackageName    = errors.New("invalid package name")
 )
+
+// ReturnStatus represents different categories of operation results that map to specific exit codes
+type ReturnStatus int
+
+const (
+	StatusSuccess          ReturnStatus = iota // Operation succeeded (exit code 0)
+	StatusGeneralError                         // General errors (exit code 1)
+	StatusUsageError                           // Usage/validation errors (exit code 2)
+	StatusPermissionError                      // Permission denied (exit code 77)
+	StatusUnavailableError                     // Service unavailable (exit code 69)
+)
+
+// StandardStatus wraps a result with a specific status for consistent exit code handling
+type StandardStatus struct {
+	Status  ReturnStatus
+	Message string
+	Wrapped error
+}
+
+func (s *StandardStatus) Error() string {
+	if s.Wrapped != nil {
+		return s.Message + ": " + s.Wrapped.Error()
+	}
+	return s.Message
+}
+
+func (s *StandardStatus) Unwrap() error {
+	return s.Wrapped
+}
 
 // PackageManager defines the unified interface that ALL package managers must implement.
 // If a manager doesn't support an operation, it should return ErrOperationNotSupported
@@ -25,8 +54,8 @@ type PackageManager interface {
 	// GetName returns the human-readable name of the package manager (e.g., "APT", "npm", "Steam")
 	GetName() string
 
-	// GetType returns the category type (e.g., "system", "language", "game", "version")
-	GetType() string
+	// GetCategory returns the manager category (e.g., "system", "language", "game", "version")
+	GetCategory() string
 
 	// IsAvailable checks if this package manager is available on the current system
 	IsAvailable() bool
@@ -102,8 +131,8 @@ type PackageInfo struct {
 	Category    string `json:"category"` // Package category/section
 
 	// Manager-specific data
-	ManagerType string                 `json:"manager_type"` // Which manager this came from
-	Metadata    map[string]interface{} `json:"metadata"`     // Flexible manager-specific data
+	ManagerName string                 `json:"manager"`  // Which manager this came from (apt, yum, snap, etc.)
+	Metadata    map[string]interface{} `json:"metadata"` // Flexible manager-specific data
 }
 
 // ManagerStatus represents the overall health/status of a package manager
@@ -172,14 +201,14 @@ const (
 	StatusUnknown    = "unknown"
 )
 
-// Standard manager types
+// Standard manager categories
 const (
-	TypeSystem     = "system"     // APT, YUM, DNF, Pacman, etc.
-	TypeLanguage   = "language"   // npm, pip, cargo, gem, etc.
-	TypeVersion    = "version"    // nvm, asdf, pyenv, rbenv, etc.
-	TypeContainer  = "container"  // docker, podman, helm, etc.
-	TypeGame       = "game"       // steam, lutris, gog, etc.
-	TypeScientific = "scientific" // conda, mamba, bioconda, etc.
-	TypeBuild      = "build"      // vcpkg, conan, cmake, etc.
-	TypeApp        = "app"        // flatpak, snap, appimage, etc.
+	CategorySystem     = "system"     // APT, YUM, DNF, Pacman, etc.
+	CategoryLanguage   = "language"   // npm, pip, cargo, gem, etc.
+	CategoryVersion    = "version"    // nvm, asdf, pyenv, rbenv, etc.
+	CategoryContainer  = "container"  // docker, podman, helm, etc.
+	CategoryGame       = "game"       // steam, lutris, gog, etc.
+	CategoryScientific = "scientific" // conda, mamba, bioconda, etc.
+	CategoryBuild      = "build"      // vcpkg, conan, cmake, etc.
+	CategoryApp        = "app"        // flatpak, snap, appimage, etc.
 )
