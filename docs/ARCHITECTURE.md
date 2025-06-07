@@ -80,7 +80,7 @@ type PackageInfo struct {
     Status      string                 `json:"status"`
     Description string                 `json:"description"`
     Category    string                 `json:"category"`
-    ManagerType string                 `json:"manager_type"`
+    Manager     string                 `json:"manager"`
     Metadata    map[string]interface{} `json:"metadata"`     // Flexible!
 }
 

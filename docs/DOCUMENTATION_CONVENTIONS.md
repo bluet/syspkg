@@ -22,7 +22,7 @@ func badExample() {
     mgr.Install(packages)       // WRONG: missing context
 }
 
-// ✅ CORRECT: Recommended pattern  
+// ✅ CORRECT: Recommended pattern
 func goodExample(ctx context.Context) {
     mgr.Install(ctx, packages, opts)
 }
@@ -33,7 +33,7 @@ func goodExample(ctx context.Context) {
 Use these consistent keywords for different types of issues:
 
 - `// WRONG:` - Incorrect implementation patterns
-- `// BAD:` - Poor practices or design decisions  
+- `// BAD:` - Poor practices or design decisions
 - `// DANGEROUS:` - Security or safety issues
 - `// SLOW:` - Performance anti-patterns
 - `// BROKEN:` - Code that doesn't work
@@ -53,7 +53,7 @@ Find anti-patterns quickly:
 # Find all wrong patterns
 rg "WRONG:" docs/
 
-# Find all bad practices  
+# Find all bad practices
 rg "BAD:" docs/
 
 # Find security issues
@@ -86,7 +86,7 @@ When adding new documentation:
 
 1. **Include anti-patterns**: Show what NOT to do
 2. **Add searchable markers**: Use consistent `WRONG:`, `BAD:` etc.
-3. **Provide context**: Explain why patterns are problematic  
+3. **Provide context**: Explain why patterns are problematic
 4. **Link examples**: Point to real code that demonstrates patterns
 5. **Update this guide**: Add new conventions as they emerge
 

@@ -6,6 +6,7 @@ This guide covers advanced patterns for integrating go-syspkg into production se
 
 While the [examples/](../examples/) directory shows basic integration patterns, this guide focuses on production concerns like monitoring, logging, performance, and reliability for services that depend on go-syspkg.
 
+
 ## 🔧 Long-Running Service Patterns
 
 ### Service Initialization

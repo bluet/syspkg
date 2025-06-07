@@ -308,30 +308,203 @@ func (m *MyManager) SomeOperation(ctx context.Context, opts *manager.Options) er
 
 ## Error Handling
 
-Return appropriate errors:
+### Standardized Return Status (Recommended)
+
+The **best practice** is to use explicit status codes - plugin developers know exactly what happened:
 
 ```go
 func (m *MyManager) Install(ctx context.Context, packages []string, opts *manager.Options) ([]manager.PackageInfo, error) {
-    // Validation errors
+    // Validation errors - you know this is a usage error
+    if len(packages) == 0 {
+        return nil, manager.WrapReturn(manager.StatusUsageError, "install requires package names", nil)
+    }
+    
     if err := m.ValidatePackageNames(packages); err != nil {
-        return nil, err
+        return nil, manager.WrapReturn(manager.StatusUsageError, "invalid package names", err)
     }
 
-    // Command execution errors
+    // Run the command
     args := append([]string{"install"}, packages...)
-    output, err := m.GetRunner().Run(ctx, "my-tool", args)
+    result, err := m.GetRunner().Run(ctx, "my-tool", args)
     if err != nil {
-        return nil, fmt.Errorf("installation failed: %w", err)
+        // Command execution failed (e.g., tool not found)
+        return nil, manager.WrapReturn(manager.StatusUnavailableError, "my-tool command failed", err)
     }
-
-    // Package not found
-    if strings.Contains(string(output), "not found") {
-        return nil, manager.ErrPackageNotFound
+    
+    // Handle error cases first (return-early pattern)
+    if result.ExitCode != 0 {
+        switch result.ExitCode {
+        case 1:
+            // Check stderr for specific errors
+            stderrStr := string(result.Stderr)
+            if strings.Contains(stderrStr, "not found") {
+                return nil, manager.WrapReturn(manager.StatusUnavailableError, "package not found", nil)
+            }
+            return nil, manager.WrapReturn(manager.StatusGeneralError, "installation failed", nil)
+        case 2:
+            // Invalid usage
+            return nil, manager.WrapReturn(manager.StatusUsageError, "invalid arguments", nil)
+        case 77:
+            // Permission denied (if your tool uses this exit code)
+            return nil, manager.WrapReturn(manager.StatusPermissionError, "requires root access", nil)
+        default:
+            return nil, manager.WrapReturn(manager.StatusGeneralError, "unknown error", nil)
+        }
     }
-
-    return results, nil
+    
+    // result.ExitCode == 0: Success - parse and return results
+    return m.parseInstallOutput(string(result.Output)), nil
 }
 ```
+
+### Available Return Status Codes
+
+| Status Code | Exit Code | Usage |
+|-------------|-----------|-------|
+| `manager.StatusSuccess` | 0 | Operation succeeded |
+| `manager.StatusUsageError` | 2 | Invalid arguments, malformed input |
+| `manager.StatusPermissionError` | 77 | Permission denied, needs sudo |
+| `manager.StatusUnavailableError` | 69 | Service/package not found |
+| `manager.StatusGeneralError` | 1 | General failures |
+
+### CommandResult Structure
+
+The `CommandRunner.Run()` method returns a `*CommandResult` with complete command execution details:
+
+```go
+type CommandResult struct {
+    Output   []byte // stdout
+    Stderr   []byte // stderr  
+    ExitCode int    // exit code (0 = success)
+}
+```
+
+### The One Function You Need
+
+```go
+manager.WrapReturn(status, message, wrappedError)
+```
+
+### Complete Example with CommandResult
+
+```go
+func (m *MyManager) Install(ctx context.Context, packages []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+    // Validation - plugin developer knows this is usage error
+    if len(packages) == 0 {
+        return nil, manager.WrapReturn(manager.StatusUsageError, "install requires package names", nil)
+    }
+    
+    // Execute command
+    result, err := m.GetRunner().Run(ctx, "my-tool", []string{"install"}, packages...)
+    if err != nil {
+        // Command execution failed (tool not found)
+        return nil, manager.WrapReturn(manager.StatusUnavailableError, "my-tool command failed", err)
+    }
+    
+    // Handle error cases first (return-early pattern)
+    if result.ExitCode != 0 {
+        switch result.ExitCode {
+        case 1:
+            // Generic error - check stderr for specifics
+            if strings.Contains(string(result.Stderr), "not found") {
+                return nil, manager.WrapReturn(manager.StatusUnavailableError, "package not found", nil)
+            }
+            return nil, manager.WrapReturn(manager.StatusGeneralError, "installation failed", nil)
+        case 2:
+            // Invalid usage
+            return nil, manager.WrapReturn(manager.StatusUsageError, "invalid arguments", nil)
+        case 77:
+            // Permission denied (if your tool uses this exit code)
+            return nil, manager.WrapReturn(manager.StatusPermissionError, "requires root access", nil)
+        default:
+            return nil, manager.WrapReturn(manager.StatusGeneralError, "unknown error", nil)
+        }
+    }
+    
+    // Success - parse results and return
+    return m.parseInstallOutput(string(result.Output)), nil
+}
+```
+
+### Why This Design is Better
+
+**Plugin developers know exactly what happened:**
+```go
+// You KNOW this is a usage error  
+if len(packages) == 0 {
+    return nil, manager.WrapReturn(manager.StatusUsageError, "install requires packages", nil)
+}
+
+// You KNOW what your tool's exit codes mean
+result, err := m.GetRunner().Run(ctx, "my-tool", args)
+if err != nil {
+    return nil, manager.WrapReturn(manager.StatusUnavailableError, "my-tool not found", err)
+}
+
+// Handle error cases first (return-early pattern)
+if result.ExitCode != 0 {
+    switch result.ExitCode {
+    case 100:
+        // APT uses exit code 100 for "package not found"
+        return nil, manager.WrapReturn(manager.StatusUnavailableError, "package not found", nil)
+    case 77:
+        // Your tool uses exit code 77 for permission denied
+        return nil, manager.WrapReturn(manager.StatusPermissionError, "requires root", nil)
+    default:
+        // Check stderr for more context
+        if strings.Contains(string(result.Stderr), "invalid") {
+            return nil, manager.WrapReturn(manager.StatusUsageError, "invalid input", nil)
+        }
+        return nil, manager.WrapReturn(manager.StatusGeneralError, "command failed", nil)
+    }
+}
+
+// Success case - do the main work
+return processResults(result.Output), nil
+```
+
+**No guessing, no pattern matching, just explicit control.**
+
+### Error Message Best Practices
+
+Create clear, actionable error messages:
+
+```go
+// ✅ Good: Clear and actionable  
+return nil, manager.WrapReturn(manager.StatusPermissionError, "installation requires root access - try with sudo", err)
+return nil, manager.WrapReturn(manager.StatusUnavailableError, "package 'vim' not found in enabled repositories", nil)
+return nil, manager.WrapReturn(manager.StatusUsageError, "package name cannot contain spaces or special characters", nil)
+
+// ❌ Bad: Vague and unhelpful
+return nil, manager.WrapReturn(manager.StatusGeneralError, "error", err)
+return nil, manager.WrapReturn(manager.StatusUsageError, "bad input", nil)
+```
+
+### Migration Guide
+
+**Update existing error handling:**
+
+```go
+// OLD: Generic error handling
+if err != nil {
+    return nil, fmt.Errorf("install failed: %w", err)
+}
+
+// NEW: Explicit status-based handling
+if err != nil {
+    return nil, manager.WrapReturn(manager.StatusGeneralError, "install failed", err)
+}
+
+// BETTER: Specific status based on what you know happened
+if err != nil {
+    if strings.Contains(err.Error(), "permission denied") {
+        return nil, manager.WrapReturn(manager.StatusPermissionError, "installation requires root access", err)
+    }
+    return nil, manager.WrapReturn(manager.StatusGeneralError, "install failed", err)
+}
+```
+
+This ensures consistent exit codes across all package managers and provides better user experience.
 
 ## Testing Your Plugin
 

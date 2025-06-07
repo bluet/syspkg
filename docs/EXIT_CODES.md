@@ -56,3 +56,49 @@ When implementing Option C (CommandBuilder), each package manager must:
 1. **APT**: Remove incorrect handling of exit code 100 as "no packages found"
 2. **Snap**: Remove incorrect handling of exit code 64 as "no packages found"
 3. **All PMs**: Verify and document actual exit code behavior
+
+## SysPkg CLI Exit Codes
+
+The syspkg CLI tool uses standardized exit codes following POSIX and sysexits.h conventions:
+
+### Exit Code Reference
+
+| Code | Constant | Meaning | Example |
+|------|----------|---------|---------|
+| **0** | `ExitSuccess` | Success | `syspkg search vim` (found packages) |
+| **1** | `ExitGeneralError` | General errors | Network issues, unknown failures |
+| **2** | `ExitUsageError` | Invalid arguments (POSIX) | `syspkg` (no command), `syspkg invalid-cmd` |
+| **77** | `ExitNoPermission` | Permission denied (sysexits.h) | `syspkg install vim` (needs sudo) |
+| **69** | `ExitUnavailable` | Service unavailable (sysexits.h) | `syspkg --yum install` (on Ubuntu) |
+| **130** | `ExitSignalInt` | SIGINT (Ctrl+C) | User interrupted operation |
+
+### Usage Examples
+
+```bash
+# Script can handle specific error cases
+syspkg install vim
+case $? in
+    0)   echo "Success" ;;
+    1)   echo "General error - check logs" ;;
+    2)   echo "Usage error - check command syntax" ;;
+    77)  echo "Permission denied - try with sudo" ;;
+    69)  echo "Package manager not available" ;;
+    130) echo "Interrupted by user" ;;
+esac
+```
+
+### Error Output
+
+- **Usage errors** → stderr (with exit code 2)
+- **Help output** → stdout (with exit code 0)
+- **General errors** → stderr (with appropriate exit code)
+
+### For Plugin Developers
+
+When developing package manager plugins, ensure your error messages contain recognizable patterns for proper exit code classification:
+
+- **Permission errors**: Include "permission denied", "are you root", "try with sudo", "access denied"
+- **Unavailable errors**: Include "not found", "not available", "unavailable"
+- **Usage errors**: Include "requires", "invalid", "usage"
+
+See [PLUGIN_DEVELOPMENT.md](PLUGIN_DEVELOPMENT.md#error-handling) for detailed error handling guidelines.

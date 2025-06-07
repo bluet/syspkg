@@ -340,7 +340,7 @@ go tool cover -html=apt.out
 - **Don't use hardcoded test data** when fixtures are available // BAD: hardcoded test data
 - **Don't skip security validation** tests // WRONG: skip security tests
 - **Don't test third-party libraries** (focus on our code) // WRONG: test external libs
-- **Don't make tests depend on external services** // BAD: external dependencies  
+- **Don't make tests depend on external services** // BAD: external dependencies
 - **Don't use magic numbers** in test assertions // WRONG: magic numbers
 
 ## Related Documentation
