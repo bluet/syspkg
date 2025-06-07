@@ -13,7 +13,7 @@ func TestPackageInfoStructure(t *testing.T) {
 		Status:      StatusInstalled,
 		Description: "Test package",
 		Category:    "test",
-		ManagerType: TypeSystem,
+		ManagerName:     "test-manager",
 		Metadata: map[string]interface{}{
 			"arch":   "amd64",
 			"source": "test",
@@ -28,8 +28,8 @@ func TestPackageInfoStructure(t *testing.T) {
 		t.Errorf("Expected status '%s', got '%s'", StatusInstalled, pkg.Status)
 	}
 
-	if pkg.ManagerType != TypeSystem {
-		t.Errorf("Expected manager type '%s', got '%s'", TypeSystem, pkg.ManagerType)
+	if pkg.ManagerName != "test-manager" {
+		t.Errorf("Expected manager '%s', got '%s'", "test-manager", pkg.ManagerName)
 	}
 
 	if arch, ok := pkg.Metadata["arch"]; !ok || arch != "amd64" {
@@ -118,14 +118,14 @@ func TestConstants(t *testing.T) {
 
 	// Test manager type constants
 	expectedTypes := []string{
-		TypeSystem,
-		TypeLanguage,
-		TypeVersion,
-		TypeContainer,
-		TypeGame,
-		TypeScientific,
-		TypeBuild,
-		TypeApp,
+		CategorySystem,
+		CategoryLanguage,
+		CategoryVersion,
+		CategoryContainer,
+		CategoryGame,
+		CategoryScientific,
+		CategoryBuild,
+		CategoryApp,
 	}
 
 	for _, managerType := range expectedTypes {
@@ -166,7 +166,7 @@ func TestPackageManagerInterface(t *testing.T) {
 		t.Error("GetName should return non-empty string")
 	}
 
-	managerType := pm.GetType()
+	managerType := pm.GetCategory()
 	if managerType == "" {
 		t.Error("GetType should return non-empty string")
 	}
@@ -191,7 +191,7 @@ func TestPackageManagerInterface(t *testing.T) {
 type MockPackageManager struct{}
 
 func (m *MockPackageManager) GetName() string             { return "mock" }
-func (m *MockPackageManager) GetType() string             { return TypeSystem }
+func (m *MockPackageManager) GetCategory() string         { return CategorySystem }
 func (m *MockPackageManager) IsAvailable() bool           { return true }
 func (m *MockPackageManager) GetVersion() (string, error) { return "1.0.0", nil }
 func (m *MockPackageManager) Search(ctx context.Context, query []string, opts *Options) ([]PackageInfo, error) {

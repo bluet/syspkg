@@ -76,15 +76,21 @@ func TestMockCommandRunner(t *testing.T) {
 			}
 
 			// Test the command execution
-			output, err := runner.Run(context.Background(), tt.testCommand, tt.testArgs)
+			result, err := runner.Run(context.Background(), tt.testCommand, tt.testArgs)
 
 			// Verify results
-			if string(output) != string(tt.expectedOutput) {
-				t.Errorf("Expected output %q, got %q", string(tt.expectedOutput), string(output))
-			}
-
 			if (err == nil) != (tt.expectedError == nil) {
 				t.Errorf("Expected error %v, got %v", tt.expectedError, err)
+			}
+
+			if err == nil {
+				// Success case: result must not be nil
+				if result == nil {
+					t.Fatal("Expected result, got nil")
+				}
+				if string(result.Output) != string(tt.expectedOutput) {
+					t.Errorf("Expected output %q, got %q", string(tt.expectedOutput), string(result.Output))
+				}
 			}
 
 			if err != nil && tt.expectedError != nil && err.Error() != tt.expectedError.Error() {
@@ -99,13 +105,16 @@ func TestMockCommandRunnerAddMethods(t *testing.T) {
 
 	// Test AddCommand
 	runner.AddCommand("rpm", []string{"-q", "vim"}, []byte("vim-8.0.1763\n"), nil)
-	output, err := runner.Run(context.Background(), "rpm", []string{"-q", "vim"})
+	result, err := runner.Run(context.Background(), "rpm", []string{"-q", "vim"})
 
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
-	if string(output) != "vim-8.0.1763\n" {
-		t.Errorf("Expected 'vim-8.0.1763\\n', got %q", string(output))
+	if result == nil {
+		t.Fatal("Expected result, got nil")
+	}
+	if string(result.Output) != "vim-8.0.1763\n" {
+		t.Errorf("Expected 'vim-8.0.1763\\n', got %q", string(result.Output))
 	}
 
 	// Test AddError
@@ -125,13 +134,16 @@ func TestDefaultCommandRunner(t *testing.T) {
 	runner := NewDefaultCommandRunner()
 
 	// Test a simple command that should exist on most systems
-	output, err := runner.Run(context.Background(), "echo", []string{"test"})
+	result, err := runner.Run(context.Background(), "echo", []string{"test"})
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
+	if result == nil {
+		t.Fatal("Expected result, got nil")
+	}
 	// Note: With LC_ALL=C prepended, output should still be "test\n"
-	if string(output) != "test\n" {
-		t.Errorf("Expected 'test\\n', got %q", string(output))
+	if string(result.Output) != "test\n" {
+		t.Errorf("Expected 'test\\n', got %q", string(result.Output))
 	}
 }
 
@@ -140,12 +152,15 @@ func TestDefaultCommandRunnerWithContext(t *testing.T) {
 
 	// Test with a normal context
 	ctx := context.Background()
-	output, err := runner.Run(ctx, "echo", []string{"test"})
+	result, err := runner.Run(ctx, "echo", []string{"test"})
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
-	if string(output) != "test\n" {
-		t.Errorf("Expected 'test\\n', got %q", string(output))
+	if result == nil {
+		t.Fatal("Expected result, got nil")
+	}
+	if string(result.Output) != "test\n" {
+		t.Errorf("Expected 'test\\n', got %q", string(result.Output))
 	}
 
 	// Test with a cancelled context

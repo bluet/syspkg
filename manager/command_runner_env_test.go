@@ -12,13 +12,13 @@ func TestCommandRunnerEnvironmentHandling(t *testing.T) {
 
 		// Test that LC_ALL=C is prepended automatically using 'env' command
 		// This is more reliable than echo "$LC_ALL" across different systems
-		output, err := runner.Run(context.Background(), "env", []string{})
+		result, err := runner.Run(context.Background(), "env", []string{})
 		if err != nil {
 			t.Fatalf("Failed to run 'env' command: %v", err)
 		}
 
 		// Verify that LC_ALL=C appears in the environment
-		envOutput := string(output)
+		envOutput := string(result.Output)
 		if !strings.Contains(envOutput, "LC_ALL=C") {
 			t.Errorf("Expected LC_ALL=C in environment output, but not found. Output: %s", envOutput)
 		}
