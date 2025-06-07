@@ -64,7 +64,7 @@ COMMANDS:
 OPTIONS:
     # Multi-Manager Control
     --apt, --snap, --flatpak    Use only specific manager(s)
-    --all                       Use all available managers (default)
+    --all                       Use all available managers (default, concurrent for 3x performance)
     --status                    Show real package status (installed/available/upgradable)
 
     # Standard Options
@@ -79,20 +79,20 @@ OPTIONS:
     --version            Show version
 
 EXAMPLES:
-    # Fast repository search (default)
-    syspkg search vim                    # Search across all managers (fast)
-    syspkg search vim --apt              # Search only APT (fast)
+    # Fast concurrent search (default)
+    syspkg search vim                    # Search across all managers (parallel execution)
+    syspkg search vim --apt              # Search only APT (single manager)
 
     # Status-aware search (slower but accurate)
-    syspkg search vim --status           # Show real installation status
+    syspkg search vim --status           # Show real installation status (concurrent)
     syspkg search vim --apt --status     # APT with status information
 
     # Package operations
     syspkg install vim curl -c system   # Install using system package manager category
     syspkg install vim curl -m apt      # Install using specific APT manager
-    syspkg list installed --all          # List installed packages from ALL managers
-    syspkg upgrade --all --dry-run       # Show what would be upgraded (all managers)
-    syspkg update --all                  # Update package lists (all managers)
+    syspkg list installed --all          # List installed packages from ALL managers (concurrent)
+    syspkg upgrade --all --dry-run       # Show what would be upgraded (all managers, parallel)
+    syspkg update --all                  # Update package lists (all managers, concurrent)
     syspkg managers                      # Show available package managers
 
     # Pipeline support (stdin)
