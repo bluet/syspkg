@@ -63,7 +63,7 @@ func (m *Manager) parseInstallOutput(output string) []PackageInfo {
                 continue
             }
 
-            pkg := manager.NewPackageInfo(name, version, manager.StatusInstalled, manager.TypeSystem)
+            pkg := manager.NewPackageInfo(name, version, manager.StatusInstalled, manager.CategorySystem)
 
             if arch != "" {
                 pkg.Metadata["arch"] = arch
@@ -460,8 +460,8 @@ func TestAPTManager_Integration(t *testing.T) {
             if pkg.Name == "" {
                 t.Error("package name should not be empty")
             }
-            if pkg.ManagerType != TypeSystem {
-                t.Errorf("expected manager type '%s', got '%s'", TypeSystem, pkg.ManagerType)
+            if pkg.ManagerType != CategorySystem {
+                t.Errorf("expected manager type '%s', got '%s'", CategorySystem, pkg.ManagerType)
             }
         }
     })

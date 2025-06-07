@@ -126,12 +126,12 @@ func GetAvailableManagers() map[string]PackageManager
 
 ```go
 const (
-    TypeSystem    = "system"    // APT, YUM, DNF, APK, Pacman
-    TypeLanguage  = "language"  // npm, pip, cargo, gem, composer
-    TypeContainer = "container" // Docker, Podman, Helm
-    TypeApp       = "app"       // Snap, Flatpak, AppImage
-    TypeGame      = "game"      // Steam, Lutris, GOG
-    TypeVersion   = "version"   // nvm, rbenv, pyenv, asdf
+    CategorySystem    = "system"    // APT, YUM, DNF, APK, Pacman
+    CategoryLanguage  = "language"  // npm, pip, cargo, gem, composer
+    CategoryContainer = "container" // Docker, Podman, Helm
+    CategoryApp       = "app"       // Snap, Flatpak, AppImage
+    CategoryGame      = "game"      // Steam, Lutris, GOG
+    CategoryVersion   = "version"   // nvm, rbenv, pyenv, asdf
 )
 ```
 
@@ -181,11 +181,11 @@ for name, pm := range managers {
 
 ```go
 // Get best system package manager (APT on Ubuntu, YUM on RHEL)
-systemPM := manager.GetBestManager(manager.TypeSystem)
+systemPM := manager.GetBestManager(manager.CategorySystem)
 systemPM.Install(ctx, []string{"vim"}, opts)
 
 // Get application manager
-appPM := manager.GetBestManager(manager.TypeApp)
+appPM := manager.GetBestManager(manager.CategoryApp)
 appPM.Install(ctx, []string{"discord"}, opts)
 ```
 

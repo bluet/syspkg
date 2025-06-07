@@ -27,7 +27,7 @@ import _ "github.com/bluet/syspkg/manager/apt"  // Auto-registers plugin
 
 // Registry discovery
 registry := manager.GetGlobalRegistry()
-systemPM := registry.GetBestMatch(manager.TypeSystem)
+systemPM := registry.GetBestMatch(manager.CategorySystem)
 
 // Basic operation
 packages, err := systemPM.Search(ctx, []string{"vim"}, opts)
@@ -77,7 +77,7 @@ registry := manager.GetGlobalRegistry()
 managers := registry.GetAvailable()
 
 // Get best system manager
-systemPM := registry.GetBestMatch(manager.TypeSystem)
+systemPM := registry.GetBestMatch(manager.CategorySystem)
 ```
 
 ### **Context & Options**

@@ -58,7 +58,7 @@ type MyManager struct {
 // NewMyManager creates a new instance
 func NewMyManager() *MyManager {
     // BaseManager handles common operations, logging, validation, etc.
-    base := manager.NewBaseManager("my-tool", manager.TypeLanguage, manager.NewDefaultCommandRunner())
+    base := manager.NewBaseManager("my-tool", manager.CategoryLanguage, manager.NewDefaultCommandRunner())
     return &MyManager{
         BaseManager: base,
     }
@@ -234,14 +234,14 @@ Use these predefined types for consistency:
 
 ```go
 const (
-    TypeSystem     = "system"     // OS package managers (apt, yum)
-    TypeLanguage   = "language"   // Language-specific (npm, pip, cargo)
-    TypeVersion    = "version"    // Version managers (nvm, asdf, pyenv)
-    TypeContainer  = "container"  // Container management (docker, podman)
-    TypeGame       = "game"       // Game managers (steam, lutris)
-    TypeScientific = "scientific" // Scientific computing (conda, mamba)
-    TypeBuild      = "build"      // Build tools (vcpkg, conan)
-    TypeApp        = "app"        // Application stores (flatpak, snap)
+    CategorySystem     = "system"     // OS package managers (apt, yum)
+    CategoryLanguage   = "language"   // Language-specific (npm, pip, cargo)
+    CategoryVersion    = "version"    // Version managers (nvm, asdf, pyenv)
+    CategoryContainer  = "container"  // Container management (docker, podman)
+    CategoryGame       = "game"       // Game managers (steam, lutris)
+    CategoryScientific = "scientific" // Scientific computing (conda, mamba)
+    CategoryBuild      = "build"      // Build tools (vcpkg, conan)
+    CategoryApp        = "app"        // Application stores (flatpak, snap)
 )
 ```
 
@@ -612,9 +612,9 @@ func (m *Manager) AutoRemove(ctx context.Context, opts *Options) ([]PackageInfo,
 
 ```go
 // Good
-manager.NewBaseManager("npm", manager.TypeLanguage, runner)
-manager.NewBaseManager("steam", manager.TypeGame, runner)
-manager.NewBaseManager("apt", manager.TypeSystem, runner)
+manager.NewBaseManager("npm", manager.CategoryLanguage, runner)
+manager.NewBaseManager("steam", manager.CategoryGame, runner)
+manager.NewBaseManager("apt", manager.CategorySystem, runner)
 
 // Bad
 manager.NewBaseManager("Node Package Manager", "nodejs", runner) // BAD: verbose name
@@ -690,7 +690,7 @@ type PipManager struct {
 }
 
 func NewPipManager() *PipManager {
-    base := manager.NewBaseManager("pip", manager.TypeLanguage, manager.NewDefaultCommandRunner())
+    base := manager.NewBaseManager("pip", manager.CategoryLanguage, manager.NewDefaultCommandRunner())
     return &PipManager{BaseManager: base}
 }
 
