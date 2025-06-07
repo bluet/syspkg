@@ -21,11 +21,11 @@ func main() {
 
 	fmt.Printf("📦 Available: %d managers\n", len(managers))
 	for name, mgr := range managers {
-		fmt.Printf("   • %s (%s)\n", name, mgr.GetType())
+		fmt.Printf("   • %s (%s)\n", name, mgr.GetCategory())
 	}
 
 	// Get system package manager
-	systemPM := registry.GetBestMatch(manager.TypeSystem)
+	systemPM := registry.GetBestMatch(manager.CategorySystem)
 	if systemPM == nil {
 		fmt.Println("❌ No system package manager available")
 		return

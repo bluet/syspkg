@@ -27,11 +27,11 @@ func main() {
 		if pm.IsAvailable() {
 			status = "✅"
 		}
-		fmt.Printf("   %s %-10s (%s)\n", status, name, pm.GetType())
+		fmt.Printf("   %s %-10s (%s)\n", status, name, pm.GetCategory())
 	}
 
 	// 2. Get the best system package manager
-	systemPM := registry.GetBestMatch(manager.TypeSystem)
+	systemPM := registry.GetBestMatch(manager.CategorySystem)
 	if systemPM == nil {
 		log.Fatal("No system package manager available")
 	}
@@ -152,7 +152,7 @@ func main() {
 	if len(packages) > 0 {
 		pkg := packages[0]
 		fmt.Printf("  Package: %s\n", pkg.Name)
-		fmt.Printf("  Manager Type: %s\n", pkg.ManagerType)
+		fmt.Printf("  Manager Name: %s\n", pkg.ManagerName)
 		for key, value := range pkg.Metadata {
 			fmt.Printf("  %s: %v\n", key, value)
 		}
