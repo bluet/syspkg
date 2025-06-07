@@ -48,8 +48,8 @@ func TestManagerBasicInfo(t *testing.T) {
 		t.Errorf("Expected name 'yum', got '%s'", mgr.GetName())
 	}
 
-	if mgr.GetType() != "system" {
-		t.Errorf("Expected type 'system', got '%s'", mgr.GetType())
+	if mgr.GetCategory() != "system" {
+		t.Errorf("Expected type 'system', got '%s'", mgr.GetCategory())
 	}
 }
 
@@ -510,8 +510,8 @@ func TestSearchVimFixture(t *testing.T) {
 		if pkg.Status == "" {
 			t.Error("Package status should not be empty")
 		}
-		if pkg.ManagerType != manager.TypeSystem {
-			t.Errorf("Expected manager type '%s', got '%s'", manager.TypeSystem, pkg.ManagerType)
+		if pkg.ManagerName != "yum" {
+			t.Errorf("Expected manager type '%s', got '%s'", "yum", pkg.ManagerName)
 		}
 		// YUM search output shows available packages
 		if pkg.Status != manager.StatusAvailable {
@@ -579,8 +579,8 @@ func TestListInstalledFixture(t *testing.T) {
 		if pkg.Status != manager.StatusInstalled {
 			t.Errorf("Expected status '%s' for package '%s', got '%s'", manager.StatusInstalled, pkg.Name, pkg.Status)
 		}
-		if pkg.ManagerType != manager.TypeSystem {
-			t.Errorf("Expected manager type '%s', got '%s'", manager.TypeSystem, pkg.ManagerType)
+		if pkg.ManagerName != "yum" {
+			t.Errorf("Expected manager type '%s', got '%s'", "yum", pkg.ManagerName)
 		}
 	}
 }
@@ -609,8 +609,8 @@ func TestListUpdatesFixture(t *testing.T) {
 		if pkg.Status != manager.StatusUpgradable {
 			t.Errorf("Expected status '%s' for package '%s', got '%s'", manager.StatusUpgradable, pkg.Name, pkg.Status)
 		}
-		if pkg.ManagerType != manager.TypeSystem {
-			t.Errorf("Expected manager type '%s', got '%s'", manager.TypeSystem, pkg.ManagerType)
+		if pkg.ManagerName != "yum" {
+			t.Errorf("Expected manager type '%s', got '%s'", "yum", pkg.ManagerName)
 		}
 	}
 }
@@ -877,8 +877,8 @@ func TestRemoveOutputParsingFixture(t *testing.T) {
 		t.Errorf("Expected removed package status '%s', got '%s'", manager.StatusAvailable, vimPkg.Status)
 	}
 
-	if vimPkg.ManagerType != manager.TypeSystem {
-		t.Errorf("Expected manager type '%s', got '%s'", manager.TypeSystem, vimPkg.ManagerType)
+	if vimPkg.ManagerName != "yum" {
+		t.Errorf("Expected manager type '%s', got '%s'", "yum", vimPkg.ManagerName)
 	}
 
 	// Check architecture metadata

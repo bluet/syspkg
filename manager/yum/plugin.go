@@ -21,43 +21,42 @@ type Manager struct {
 func NewManager() *Manager {
 	runner := manager.NewDefaultCommandRunner()
 	return &Manager{
-		BaseManager: manager.NewBaseManager("yum", manager.TypeSystem, runner),
+		BaseManager: manager.NewBaseManager("yum", manager.CategorySystem, runner),
 	}
 }
 
 // NewManagerWithRunner creates YUM manager with custom runner (for testing)
 func NewManagerWithRunner(runner manager.CommandRunner) *Manager {
 	return &Manager{
-		BaseManager: manager.NewBaseManager("yum", manager.TypeSystem, runner),
+		BaseManager: manager.NewBaseManager("yum", manager.CategorySystem, runner),
 	}
 }
 
 // IsAvailable checks if YUM is available
 func (m *Manager) IsAvailable() bool {
 	// First try using the command runner (works for testing with mocks)
-	output, err := m.GetRunner().Run(context.Background(), "yum", []string{"--version"})
-	if err == nil && (strings.Contains(strings.ToLower(string(output)), "yum") || strings.Contains(strings.ToLower(string(output)), "rpm")) {
+	result, err := m.GetRunner().Run(context.Background(), "yum", []string{"--version"})
+	if err == nil && result.ExitCode == 0 && (strings.Contains(strings.ToLower(string(result.Output)), "yum") || strings.Contains(strings.ToLower(string(result.Output)), "rpm")) {
 		return true
 	}
 
 	// Fallback to checking if yum binary exists in PATH (for real systems)
 	_, pathErr := exec.LookPath("yum")
-	if pathErr != nil {
-		return false
-	}
-
-	// Try again with exec (in case runner failed but binary exists)
-	return err == nil
+	return pathErr == nil
 }
 
 // GetVersion returns YUM version
 func (m *Manager) GetVersion() (string, error) {
-	output, err := m.GetRunner().Run(context.Background(), "yum", []string{"--version"})
+	result, err := m.GetRunner().Run(context.Background(), "yum", []string{"--version"})
 	if err != nil {
 		return "", err
 	}
 
-	lines := strings.Split(string(output), "\n")
+	if result.ExitCode != 0 {
+		return "", fmt.Errorf("yum --version failed with exit code %d", result.ExitCode)
+	}
+
+	lines := strings.Split(string(result.Output), "\n")
 	if len(lines) > 0 {
 		return strings.TrimSpace(lines[0]), nil
 	}
@@ -75,16 +74,27 @@ func (m *Manager) Search(ctx context.Context, query []string, opts *manager.Opti
 	}
 
 	args := append([]string{"search"}, query...)
-	output, err := m.GetRunner().Run(ctx, "yum", args)
+	result, err := m.GetRunner().Run(ctx, "yum", args)
 	if err != nil {
-		// YUM returns exit code 1 when no packages found, but this is not an error for search
-		if strings.Contains(string(output), "No matches found") {
-			return []manager.PackageInfo{}, nil
-		}
-		return nil, fmt.Errorf("yum search failed: %w", err)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "yum command failed", err)
 	}
 
-	packages := parseSearchOutput(string(output))
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 1:
+			// YUM returns exit code 1 when no packages found, but this is not an error for search
+			if strings.Contains(string(result.Output), "No matches found") || strings.Contains(string(result.Stderr), "No matches found") {
+				return []manager.PackageInfo{}, nil
+			}
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "yum search failed", nil)
+		default:
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "yum search failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
+	packages := parseSearchOutput(string(result.Output))
 
 	// If status enhancement is requested, get detailed status
 	if opts.ShowStatus {
@@ -110,26 +120,43 @@ func (m *Manager) List(ctx context.Context, filter manager.ListFilter, opts *man
 
 // ListInstalled lists installed packages
 func (m *Manager) ListInstalled(ctx context.Context, opts *manager.Options) ([]manager.PackageInfo, error) {
-	output, err := m.GetRunner().Run(ctx, "yum", []string{"list", "installed"})
+	result, err := m.GetRunner().Run(ctx, "yum", []string{"list", "installed"})
 	if err != nil {
-		return nil, fmt.Errorf("yum list installed failed: %w", err)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "yum command failed", err)
 	}
 
-	return parseListOutput(string(output)), nil
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		return nil, manager.WrapReturn(manager.StatusGeneralError, "yum list installed failed", nil)
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
+	return parseListOutput(string(result.Output)), nil
 }
 
 // ListUpgradable lists packages that can be upgraded
 func (m *Manager) ListUpgradable(ctx context.Context, opts *manager.Options) ([]manager.PackageInfo, error) {
-	output, err := m.GetRunner().Run(ctx, "yum", []string{"list", "updates"})
+	result, err := m.GetRunner().Run(ctx, "yum", []string{"list", "updates"})
 	if err != nil {
-		// YUM returns exit code 1 when no updates available, this is not an error
-		if strings.Contains(string(output), "No packages marked for update") {
-			return []manager.PackageInfo{}, nil
-		}
-		return nil, fmt.Errorf("yum list updates failed: %w", err)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "yum command failed", err)
 	}
 
-	return parseListOutput(string(output)), nil
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 1:
+			// YUM returns exit code 1 when no updates available, this is not an error
+			if strings.Contains(string(result.Output), "No packages marked for update") || strings.Contains(string(result.Stderr), "No packages marked for update") {
+				return []manager.PackageInfo{}, nil
+			}
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "yum list updates failed", nil)
+		default:
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "yum list updates failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
+	return parseListOutput(string(result.Output)), nil
 }
 
 // GetInfo gets detailed package information
@@ -138,16 +165,29 @@ func (m *Manager) GetInfo(ctx context.Context, packageName string, opts *manager
 		return manager.PackageInfo{}, err
 	}
 
-	output, err := m.GetRunner().Run(ctx, "yum", []string{"info", packageName})
+	result, err := m.GetRunner().Run(ctx, "yum", []string{"info", packageName})
 	if err != nil {
-		if strings.Contains(string(output), "No matching Packages") ||
-			strings.Contains(string(output), "Error: No matching Packages") {
-			return manager.PackageInfo{}, manager.ErrPackageNotFound
-		}
-		return manager.PackageInfo{}, fmt.Errorf("yum info failed: %w", err)
+		return manager.PackageInfo{}, manager.WrapReturn(manager.StatusUnavailableError, "yum command failed", err)
 	}
 
-	info, err := parseInfoOutput(string(output), packageName)
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 1:
+			// Check for package not found
+			if strings.Contains(string(result.Output), "No matching Packages") ||
+				strings.Contains(string(result.Output), "Error: No matching Packages") ||
+				strings.Contains(string(result.Stderr), "No matching Packages") {
+				return manager.PackageInfo{}, manager.ErrPackageNotFound
+			}
+			return manager.PackageInfo{}, manager.WrapReturn(manager.StatusGeneralError, "yum info failed", nil)
+		default:
+			return manager.PackageInfo{}, manager.WrapReturn(manager.StatusGeneralError, "yum info failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
+	info, err := parseInfoOutput(string(result.Output), packageName)
 	if err != nil {
 		return manager.PackageInfo{}, err
 	}
@@ -174,17 +214,32 @@ func (m *Manager) Install(ctx context.Context, packageNames []string, opts *mana
 	}
 	args = append(args, packageNames...)
 
-	output, err := m.GetRunner().Run(ctx, "yum", args)
+	result, err := m.GetRunner().Run(ctx, "yum", args)
 	if err != nil {
-		if strings.Contains(err.Error(), "Nothing to do") ||
-			strings.Contains(err.Error(), "already installed") {
-			return []manager.PackageInfo{}, nil // Not an error if already installed
-		}
-		return nil, fmt.Errorf("yum install failed: %w", err)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "yum command failed", err)
 	}
 
-	// Parse the output to extract installed packages
-	return parseInstallOutput(string(output)), nil
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 1:
+			// Check stderr/output for specific error messages
+			combinedOutput := string(result.Output) + string(result.Stderr)
+			if strings.Contains(combinedOutput, "Nothing to do") ||
+				strings.Contains(combinedOutput, "already installed") {
+				return []manager.PackageInfo{}, nil // Not an error if already installed
+			}
+			if strings.Contains(combinedOutput, "No package") {
+				return nil, manager.WrapReturn(manager.StatusUnavailableError, "package not found", nil)
+			}
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "installation failed", nil)
+		default:
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "yum install failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
+	return parseInstallOutput(string(result.Output)), nil
 }
 
 // Remove removes packages
@@ -206,16 +261,27 @@ func (m *Manager) Remove(ctx context.Context, packageNames []string, opts *manag
 	}
 	args = append(args, packageNames...)
 
-	output, err := m.GetRunner().Run(ctx, "yum", args)
+	result, err := m.GetRunner().Run(ctx, "yum", args)
 	if err != nil {
-		if strings.Contains(err.Error(), "No Packages marked for removal") {
-			return nil, manager.ErrPackageNotFound
-		}
-		return nil, fmt.Errorf("yum remove failed: %w", err)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "yum command failed", err)
 	}
 
-	// Parse the output to extract removed packages
-	return parseRemoveOutput(string(output)), nil
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 1:
+			combinedOutput := string(result.Output) + string(result.Stderr)
+			if strings.Contains(combinedOutput, "No Packages marked for removal") {
+				return nil, manager.ErrPackageNotFound
+			}
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "removal failed", nil)
+		default:
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "yum remove failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
+	return parseRemoveOutput(string(result.Output)), nil
 }
 
 // Refresh updates package lists (refresh metadata)
@@ -225,11 +291,17 @@ func (m *Manager) Refresh(ctx context.Context, opts *manager.Options) error {
 
 // Update updates package lists (refresh metadata)
 func (m *Manager) Update(ctx context.Context, opts *manager.Options) error {
-	_, err := m.GetRunner().Run(ctx, "yum", []string{"makecache", "fast"})
+	result, err := m.GetRunner().Run(ctx, "yum", []string{"makecache", "fast"})
 	if err != nil {
-		return fmt.Errorf("yum makecache failed: %w", err)
+		return manager.WrapReturn(manager.StatusUnavailableError, "yum command failed", err)
 	}
 
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		return manager.WrapReturn(manager.StatusGeneralError, "yum makecache failed", nil)
+	}
+
+	// result.ExitCode == 0: Success
 	return nil
 }
 
@@ -254,26 +326,43 @@ func (m *Manager) Upgrade(ctx context.Context, packageNames []string, opts *mana
 	}
 	args = append(args, packageNames...)
 
-	output, err := m.GetRunner().Run(ctx, "yum", args)
+	result, err := m.GetRunner().Run(ctx, "yum", args)
 	if err != nil {
-		if strings.Contains(err.Error(), "Nothing to do") {
-			return []manager.PackageInfo{}, nil // Not an error if nothing to update
-		}
-		return nil, fmt.Errorf("yum update failed: %w", err)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "yum command failed", err)
 	}
 
-	// Parse the output to extract upgraded packages
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 1:
+			combinedOutput := string(result.Output) + string(result.Stderr)
+			if strings.Contains(combinedOutput, "Nothing to do") {
+				return []manager.PackageInfo{}, nil // Not an error if nothing to update
+			}
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "upgrade failed", nil)
+		default:
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "yum update failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
 	// YUM update output format is similar to install output
-	return parseInstallOutput(string(output)), nil
+	return parseInstallOutput(string(result.Output)), nil
 }
 
 // Clean cleans package cache
 func (m *Manager) Clean(ctx context.Context, opts *manager.Options) error {
-	_, err := m.GetRunner().Run(ctx, "yum", []string{"clean", "all"})
+	result, err := m.GetRunner().Run(ctx, "yum", []string{"clean", "all"})
 	if err != nil {
-		return fmt.Errorf("yum clean failed: %w", err)
+		return manager.WrapReturn(manager.StatusUnavailableError, "yum command failed", err)
 	}
 
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		return manager.WrapReturn(manager.StatusGeneralError, "yum clean failed", nil)
+	}
+
+	// result.ExitCode == 0: Success
 	return nil
 }
 
@@ -291,23 +380,34 @@ func (m *Manager) AutoRemove(ctx context.Context, opts *manager.Options) ([]mana
 		args = append(args, "-y")
 	}
 
-	output, err := m.GetRunner().Run(ctx, "yum", args)
+	result, err := m.GetRunner().Run(ctx, "yum", args)
 	if err != nil {
-		if strings.Contains(err.Error(), "Nothing to do") {
-			return []manager.PackageInfo{}, nil // Not an error if nothing to remove
-		}
-		return nil, fmt.Errorf("yum autoremove failed: %w", err)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "yum command failed", err)
 	}
 
-	// Parse the output to extract removed packages
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 1:
+			combinedOutput := string(result.Output) + string(result.Stderr)
+			if strings.Contains(combinedOutput, "Nothing to do") {
+				return []manager.PackageInfo{}, nil // Not an error if nothing to remove
+			}
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "autoremove failed", nil)
+		default:
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "yum autoremove failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
 	// Use context-aware parsing based on operation mode
 	if opts != nil && opts.DryRun {
 		// YUM autoremove dry-run may have different output format
 		// For now, use the enhanced parseRemoveOutput which handles both formats
 		// TODO: If dry-run format is significantly different, create parseAutoRemoveDryRunOutput
-		return parseRemoveOutput(string(output)), nil
+		return parseRemoveOutput(string(result.Output)), nil
 	}
-	return parseRemoveOutput(string(output)), nil
+	return parseRemoveOutput(string(result.Output)), nil
 }
 
 // Verify verifies package integrity
@@ -334,7 +434,7 @@ func (m *Manager) Verify(ctx context.Context, packageNames []string, opts *manag
 	if len(packageNames) > 0 {
 		for _, pkg := range packageNames {
 			// For simplicity, if yum check succeeds, mark packages as verified
-			result := manager.NewPackageInfo(pkg, "", manager.StatusInstalled, manager.TypeSystem)
+			result := manager.NewPackageInfo(pkg, "", manager.StatusInstalled, "yum")
 			result.Metadata = make(map[string]interface{})
 			result.Metadata["verified"] = true
 			results = append(results, result)
