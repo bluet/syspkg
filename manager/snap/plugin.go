@@ -19,14 +19,14 @@ type Manager struct {
 func NewManager() *Manager {
 	runner := manager.NewDefaultCommandRunner()
 	return &Manager{
-		BaseManager: manager.NewBaseManager("snap", manager.TypeSystem, runner),
+		BaseManager: manager.NewBaseManager("snap", manager.CategorySystem, runner),
 	}
 }
 
 // NewManagerWithRunner creates Snap manager with custom runner (for testing)
 func NewManagerWithRunner(runner manager.CommandRunner) *Manager {
 	return &Manager{
-		BaseManager: manager.NewBaseManager("snap", manager.TypeSystem, runner),
+		BaseManager: manager.NewBaseManager("snap", manager.CategorySystem, runner),
 	}
 }
 
@@ -37,18 +37,22 @@ func (m *Manager) IsAvailable() bool {
 		return false
 	}
 	// Verify snap is working
-	_, err = m.GetRunner().Run(context.Background(), "snap", []string{"version"})
-	return err == nil
+	result, err := m.GetRunner().Run(context.Background(), "snap", []string{"version"})
+	return err == nil && result.ExitCode == 0
 }
 
 // GetVersion returns Snap version
 func (m *Manager) GetVersion() (string, error) {
-	output, err := m.GetRunner().Run(context.Background(), "snap", []string{"version"})
+	result, err := m.GetRunner().Run(context.Background(), "snap", []string{"version"})
 	if err != nil {
 		return "", err
 	}
 
-	lines := strings.Split(string(output), "\n")
+	if result.ExitCode != 0 {
+		return "", fmt.Errorf("snap version failed with exit code %d", result.ExitCode)
+	}
+
+	lines := strings.Split(string(result.Output), "\n")
 	for _, line := range lines {
 		if strings.HasPrefix(line, "snap ") {
 			parts := strings.Fields(line)
@@ -73,12 +77,24 @@ func (m *Manager) Search(ctx context.Context, query []string, opts *manager.Opti
 	args := []string{"find", "--unicode=never", "--color=never"}
 	args = append(args, query...)
 
-	output, err := m.GetRunner().Run(ctx, "snap", args)
+	result, err := m.GetRunner().Run(ctx, "snap", args)
 	if err != nil {
-		return nil, fmt.Errorf("snap find failed: %w", err)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "snap command failed", err)
 	}
 
-	return m.parseSearchOutput(string(output)), nil
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 1:
+			// Snap: no packages found - that's okay for search
+			return []manager.PackageInfo{}, nil
+		default:
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "snap find failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
+	return m.parseSearchOutput(string(result.Output)), nil
 }
 
 // List lists packages based on filter
@@ -102,12 +118,24 @@ func (m *Manager) GetInfo(ctx context.Context, packageName string, opts *manager
 		return manager.PackageInfo{}, err
 	}
 
-	output, err := m.GetRunner().Run(ctx, "snap", []string{"info", packageName})
+	result, err := m.GetRunner().Run(ctx, "snap", []string{"info", packageName})
 	if err != nil {
-		return manager.PackageInfo{}, fmt.Errorf("snap info failed: %w", err)
+		return manager.PackageInfo{}, manager.WrapReturn(manager.StatusUnavailableError, "snap command failed", err)
 	}
 
-	return m.parseInfoOutput(string(output), packageName), nil
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 1:
+			// Package not found
+			return manager.PackageInfo{}, manager.WrapReturn(manager.StatusUnavailableError, "package not found", nil)
+		default:
+			return manager.PackageInfo{}, manager.WrapReturn(manager.StatusGeneralError, "snap info failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
+	return m.parseInfoOutput(string(result.Output), packageName), nil
 }
 
 // Status returns package manager status
@@ -150,10 +178,10 @@ func (m *Manager) Install(ctx context.Context, packages []string, opts *manager.
 		args = append(args, pkg)
 		_, err := m.GetRunner().Run(ctx, "snap", args)
 		if err != nil {
-			return nil, fmt.Errorf("snap install %s failed: %w", pkg, err)
+			return nil, manager.WrapCommandError(fmt.Sprintf("snap install %s failed", pkg), err)
 		}
 
-		results = append(results, manager.NewPackageInfo(pkg, "", manager.StatusInstalled, manager.TypeSystem))
+		results = append(results, manager.NewPackageInfo(pkg, "", manager.StatusInstalled, "snap"))
 	}
 
 	return results, nil
@@ -174,17 +202,17 @@ func (m *Manager) Remove(ctx context.Context, packages []string, opts *manager.O
 		args := []string{"remove"}
 		if opts != nil && opts.DryRun {
 			// Snap doesn't have a --dry-run, so we'll just return what would be removed
-			results = append(results, manager.NewPackageInfo(pkg, "", "would-remove", manager.TypeSystem))
+			results = append(results, manager.NewPackageInfo(pkg, "", "would-remove", "snap"))
 			continue
 		}
 
 		args = append(args, pkg)
 		_, err := m.GetRunner().Run(ctx, "snap", args)
 		if err != nil {
-			return nil, fmt.Errorf("snap remove %s failed: %w", pkg, err)
+			return nil, manager.WrapCommandError(fmt.Sprintf("snap remove %s failed", pkg), err)
 		}
 
-		results = append(results, manager.NewPackageInfo(pkg, "", "removed", manager.TypeSystem))
+		results = append(results, manager.NewPackageInfo(pkg, "", "removed", "snap"))
 	}
 
 	return results, nil
@@ -194,7 +222,7 @@ func (m *Manager) Remove(ctx context.Context, packages []string, opts *manager.O
 func (m *Manager) Refresh(ctx context.Context, opts *manager.Options) error {
 	_, err := m.GetRunner().Run(ctx, "snap", []string{"refresh", "--list"})
 	if err != nil {
-		return fmt.Errorf("snap refresh --list failed: %w", err)
+		return manager.WrapCommandError("snap refresh --list failed", err)
 	}
 	return nil
 }
@@ -213,19 +241,38 @@ func (m *Manager) Upgrade(ctx context.Context, packages []string, opts *manager.
 	if opts != nil && opts.DryRun {
 		// Use --list to see what would be upgraded
 		listArgs := []string{"refresh", "--list"}
-		output, err := m.GetRunner().Run(ctx, "snap", listArgs)
+		result, err := m.GetRunner().Run(ctx, "snap", listArgs)
 		if err != nil {
-			return nil, fmt.Errorf("snap refresh --list failed: %w", err)
+			return nil, manager.WrapReturn(manager.StatusUnavailableError, "snap command failed", err)
 		}
-		return m.parseUpgradeListOutput(string(output)), nil
+
+		// Handle error cases first (return-early pattern)
+		if result.ExitCode != 0 {
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "snap refresh --list failed", nil)
+		}
+
+		// result.ExitCode == 0: Success - parse results and return
+		return m.parseUpgradeListOutput(string(result.Output)), nil
 	}
 
-	output, err := m.GetRunner().Run(ctx, "snap", args)
+	result, err := m.GetRunner().Run(ctx, "snap", args)
 	if err != nil {
-		return nil, fmt.Errorf("snap refresh failed: %w", err)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "snap command failed", err)
 	}
 
-	return m.parseUpgradeOutput(string(output)), nil
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 1:
+			// No updates available - not an error
+			return []manager.PackageInfo{}, nil
+		default:
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "snap refresh failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
+	return m.parseUpgradeOutput(string(result.Output)), nil
 }
 
 // Clean is not applicable for Snap (packages are self-contained)
@@ -259,7 +306,7 @@ func (m *Manager) Verify(ctx context.Context, packages []string, opts *manager.O
 			status = "not-installed"
 		}
 
-		results = append(results, manager.NewPackageInfo(pkg, "", status, manager.TypeSystem))
+		results = append(results, manager.NewPackageInfo(pkg, "", status, "snap"))
 	}
 
 	return results, nil
@@ -283,7 +330,7 @@ func (m *Manager) parseSearchOutput(output string) []manager.PackageInfo {
 			version := parts[1]
 			publisher := parts[2]
 
-			pkg := manager.NewPackageInfo(name, version, manager.StatusAvailable, manager.TypeSystem)
+			pkg := manager.NewPackageInfo(name, version, manager.StatusAvailable, "snap")
 			pkg.Metadata["publisher"] = publisher
 
 			// Notes (if present)
@@ -306,7 +353,7 @@ func (m *Manager) parseSearchOutput(output string) []manager.PackageInfo {
 
 // parseInfoOutput parses snap info output
 func (m *Manager) parseInfoOutput(output, packageName string) manager.PackageInfo {
-	pkg := manager.NewPackageInfo(packageName, "", manager.StatusAvailable, manager.TypeSystem)
+	pkg := manager.NewPackageInfo(packageName, "", manager.StatusAvailable, "snap")
 
 	lines := strings.Split(output, "\n")
 	for _, line := range lines {
@@ -335,13 +382,19 @@ func (m *Manager) parseInfoOutput(output, packageName string) manager.PackageInf
 
 // listInstalled lists installed snap packages
 func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]manager.PackageInfo, error) {
-	output, err := m.GetRunner().Run(ctx, "snap", []string{"list", "--unicode=never", "--color=never"})
+	result, err := m.GetRunner().Run(ctx, "snap", []string{"list", "--unicode=never", "--color=never"})
 	if err != nil {
-		return nil, fmt.Errorf("snap list failed: %w", err)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "snap command failed", err)
 	}
 
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		return nil, manager.WrapReturn(manager.StatusGeneralError, "snap list failed", nil)
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
 	var packages []manager.PackageInfo
-	lines := strings.Split(string(output), "\n")
+	lines := strings.Split(string(result.Output), "\n")
 
 	// Skip header line
 	for i, line := range lines {
@@ -355,7 +408,7 @@ func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]mana
 			name := parts[0]
 			version := parts[1]
 
-			pkg := manager.NewPackageInfo(name, version, manager.StatusInstalled, manager.TypeSystem)
+			pkg := manager.NewPackageInfo(name, version, manager.StatusInstalled, "snap")
 
 			if len(parts) >= 3 {
 				pkg.Metadata["rev"] = parts[2]
@@ -379,12 +432,24 @@ func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]mana
 
 // listUpgradable lists packages that can be upgraded
 func (m *Manager) listUpgradable(ctx context.Context, _ *manager.Options) ([]manager.PackageInfo, error) {
-	output, err := m.GetRunner().Run(ctx, "snap", []string{"refresh", "--list"})
+	result, err := m.GetRunner().Run(ctx, "snap", []string{"refresh", "--list"})
 	if err != nil {
-		return nil, fmt.Errorf("snap refresh --list failed: %w", err)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "snap command failed", err)
 	}
 
-	return m.parseUpgradeListOutput(string(output)), nil
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 1:
+			// No updates available - not an error
+			return []manager.PackageInfo{}, nil
+		default:
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "snap refresh --list failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
+	return m.parseUpgradeListOutput(string(result.Output)), nil
 }
 
 // parseUpgradeListOutput parses the output of snap refresh --list
@@ -402,7 +467,7 @@ func (m *Manager) parseUpgradeListOutput(output string) []manager.PackageInfo {
 			name := parts[0]
 			newVersion := parts[1]
 
-			pkg := manager.NewPackageInfo(name, "", manager.StatusUpgradable, manager.TypeSystem)
+			pkg := manager.NewPackageInfo(name, "", manager.StatusUpgradable, "snap")
 			pkg.NewVersion = newVersion
 
 			packages = append(packages, pkg)
@@ -423,7 +488,7 @@ func (m *Manager) parseUpgradeOutput(output string) []manager.PackageInfo {
 			parts := strings.Fields(line)
 			if len(parts) >= 2 && parts[1] == "refreshed" {
 				name := parts[0]
-				pkg := manager.NewPackageInfo(name, "", "upgraded", manager.TypeSystem)
+				pkg := manager.NewPackageInfo(name, "", "upgraded", "snap")
 				packages = append(packages, pkg)
 			}
 		}

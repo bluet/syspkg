@@ -19,14 +19,14 @@ type Manager struct {
 func NewManager() *Manager {
 	runner := manager.NewDefaultCommandRunner()
 	return &Manager{
-		BaseManager: manager.NewBaseManager("flatpak", manager.TypeSystem, runner),
+		BaseManager: manager.NewBaseManager("flatpak", manager.CategorySystem, runner),
 	}
 }
 
 // NewManagerWithRunner creates Flatpak manager with custom runner (for testing)
 func NewManagerWithRunner(runner manager.CommandRunner) *Manager {
 	return &Manager{
-		BaseManager: manager.NewBaseManager("flatpak", manager.TypeSystem, runner),
+		BaseManager: manager.NewBaseManager("flatpak", manager.CategorySystem, runner),
 	}
 }
 
@@ -37,18 +37,22 @@ func (m *Manager) IsAvailable() bool {
 		return false
 	}
 	// Verify flatpak is working
-	_, err = m.GetRunner().Run(context.Background(), "flatpak", []string{"--version"})
-	return err == nil
+	result, err := m.GetRunner().Run(context.Background(), "flatpak", []string{"--version"})
+	return err == nil && result.ExitCode == 0
 }
 
 // GetVersion returns Flatpak version
 func (m *Manager) GetVersion() (string, error) {
-	output, err := m.GetRunner().Run(context.Background(), "flatpak", []string{"--version"}, "LANG=C")
+	result, err := m.GetRunner().Run(context.Background(), "flatpak", []string{"--version"}, "LANG=C")
 	if err != nil {
 		return "", err
 	}
 
-	lines := strings.Split(string(output), "\n")
+	if result.ExitCode != 0 {
+		return "", fmt.Errorf("flatpak --version failed with exit code %d", result.ExitCode)
+	}
+
+	lines := strings.Split(string(result.Output), "\n")
 	for _, line := range lines {
 		if strings.HasPrefix(line, "Flatpak ") {
 			parts := strings.Fields(line)
@@ -73,12 +77,24 @@ func (m *Manager) Search(ctx context.Context, query []string, opts *manager.Opti
 	args := []string{"search"}
 	args = append(args, query...)
 
-	output, err := m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
+	result, err := m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
 	if err != nil {
-		return nil, fmt.Errorf("flatpak search failed: %w", err)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "flatpak command failed", err)
 	}
 
-	return m.parseSearchOutput(string(output)), nil
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 1:
+			// Flatpak: no packages found - that's okay for search
+			return []manager.PackageInfo{}, nil
+		default:
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "flatpak search failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
+	return m.parseSearchOutput(string(result.Output)), nil
 }
 
 // List lists packages based on filter
@@ -102,12 +118,24 @@ func (m *Manager) GetInfo(ctx context.Context, packageName string, opts *manager
 		return manager.PackageInfo{}, err
 	}
 
-	output, err := m.GetRunner().Run(ctx, "flatpak", []string{"info", packageName}, "LANG=C")
+	result, err := m.GetRunner().Run(ctx, "flatpak", []string{"info", packageName}, "LANG=C")
 	if err != nil {
-		return manager.PackageInfo{}, fmt.Errorf("flatpak info failed: %w", err)
+		return manager.PackageInfo{}, manager.WrapReturn(manager.StatusUnavailableError, "flatpak command failed", err)
 	}
 
-	return m.parseInfoOutput(string(output), packageName), nil
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 1:
+			// Package not found
+			return manager.PackageInfo{}, manager.WrapReturn(manager.StatusUnavailableError, "package not found", nil)
+		default:
+			return manager.PackageInfo{}, manager.WrapReturn(manager.StatusGeneralError, "flatpak info failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
+	return m.parseInfoOutput(string(result.Output), packageName), nil
 }
 
 // Status returns package manager status
@@ -148,12 +176,28 @@ func (m *Manager) Install(ctx context.Context, packages []string, opts *manager.
 		}
 
 		args = append(args, pkg)
-		_, err := m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
+		result, err := m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
 		if err != nil {
-			return nil, fmt.Errorf("flatpak install %s failed: %w", pkg, err)
+			return nil, manager.WrapReturn(manager.StatusUnavailableError, "flatpak command failed", err)
 		}
 
-		results = append(results, manager.NewPackageInfo(pkg, "", manager.StatusInstalled, manager.TypeSystem))
+		// Handle error cases first (return-early pattern)
+		if result.ExitCode != 0 {
+			switch result.ExitCode {
+			case 1:
+				// Package not found or already installed
+				combinedOutput := string(result.Output) + string(result.Stderr)
+				if strings.Contains(combinedOutput, "not found") {
+					return nil, manager.WrapReturn(manager.StatusUnavailableError, fmt.Sprintf("package %s not found", pkg), nil)
+				}
+				return nil, manager.WrapReturn(manager.StatusGeneralError, fmt.Sprintf("installation of %s failed", pkg), nil)
+			default:
+				return nil, manager.WrapReturn(manager.StatusGeneralError, fmt.Sprintf("flatpak install %s failed", pkg), nil)
+			}
+		}
+
+		// result.ExitCode == 0: Success
+		results = append(results, manager.NewPackageInfo(pkg, "", manager.StatusInstalled, "flatpak"))
 	}
 
 	return results, nil
@@ -174,17 +218,17 @@ func (m *Manager) Remove(ctx context.Context, packages []string, opts *manager.O
 		args := []string{"uninstall", "-y"}
 		if opts != nil && opts.DryRun {
 			// Flatpak doesn't have a --dry-run, so we'll just return what would be removed
-			results = append(results, manager.NewPackageInfo(pkg, "", "would-remove", manager.TypeSystem))
+			results = append(results, manager.NewPackageInfo(pkg, "", "would-remove", "flatpak"))
 			continue
 		}
 
 		args = append(args, pkg)
 		_, err := m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
 		if err != nil {
-			return nil, fmt.Errorf("flatpak uninstall %s failed: %w", pkg, err)
+			return nil, manager.WrapCommandError(fmt.Sprintf("flatpak uninstall %s failed", pkg), err)
 		}
 
-		results = append(results, manager.NewPackageInfo(pkg, "", "removed", manager.TypeSystem))
+		results = append(results, manager.NewPackageInfo(pkg, "", "removed", "flatpak"))
 	}
 
 	return results, nil
@@ -194,7 +238,7 @@ func (m *Manager) Remove(ctx context.Context, packages []string, opts *manager.O
 func (m *Manager) Refresh(ctx context.Context, opts *manager.Options) error {
 	_, err := m.GetRunner().Run(ctx, "flatpak", []string{"update", "--appstream"}, "LANG=C")
 	if err != nil {
-		return fmt.Errorf("flatpak update --appstream failed: %w", err)
+		return manager.WrapCommandError("flatpak update --appstream failed", err)
 	}
 	return nil
 }
@@ -226,12 +270,24 @@ func (m *Manager) Upgrade(ctx context.Context, packages []string, opts *manager.
 		return results, nil
 	}
 
-	output, err := m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
+	result, err := m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
 	if err != nil {
-		return nil, fmt.Errorf("flatpak update failed: %w", err)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "flatpak command failed", err)
 	}
 
-	return m.parseUpdateOutput(string(output)), nil
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 1:
+			// No updates available - not an error
+			return []manager.PackageInfo{}, nil
+		default:
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "flatpak update failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
+	return m.parseUpdateOutput(string(result.Output)), nil
 }
 
 // Clean is not applicable for Flatpak (automatic cleanup)
@@ -239,7 +295,7 @@ func (m *Manager) Clean(ctx context.Context, opts *manager.Options) error {
 	// Clean unused runtimes
 	_, err := m.GetRunner().Run(ctx, "flatpak", []string{"uninstall", "--unused", "-y"}, "LANG=C")
 	if err != nil {
-		return fmt.Errorf("flatpak uninstall --unused failed: %w", err)
+		return manager.WrapCommandError("flatpak uninstall --unused failed", err)
 	}
 	return nil
 }
@@ -251,12 +307,24 @@ func (m *Manager) AutoRemove(ctx context.Context, opts *manager.Options) ([]mana
 		args = append(args, "-y")
 	}
 
-	output, err := m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
+	result, err := m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
 	if err != nil {
-		return nil, fmt.Errorf("flatpak uninstall --unused failed: %w", err)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "flatpak command failed", err)
 	}
 
-	return m.parseUninstallOutput(string(output)), nil
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 1:
+			// No unused packages - not an error
+			return []manager.PackageInfo{}, nil
+		default:
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "flatpak uninstall --unused failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
+	return m.parseUninstallOutput(string(result.Output)), nil
 }
 
 // Verify checks package integrity
@@ -278,7 +346,7 @@ func (m *Manager) Verify(ctx context.Context, packages []string, opts *manager.O
 			status = "not-installed"
 		}
 
-		results = append(results, manager.NewPackageInfo(pkg, "", status, manager.TypeSystem))
+		results = append(results, manager.NewPackageInfo(pkg, "", status, "flatpak"))
 	}
 
 	return results, nil
@@ -302,7 +370,7 @@ func (m *Manager) parseSearchOutput(output string) []manager.PackageInfo {
 			appId := strings.TrimSpace(parts[2])
 			version := strings.TrimSpace(parts[3])
 
-			pkg := manager.NewPackageInfo(name, version, manager.StatusAvailable, manager.TypeSystem)
+			pkg := manager.NewPackageInfo(name, version, manager.StatusAvailable, "flatpak")
 			pkg.Description = description
 			pkg.Metadata["app_id"] = appId
 
@@ -322,7 +390,7 @@ func (m *Manager) parseSearchOutput(output string) []manager.PackageInfo {
 
 // parseInfoOutput parses flatpak info output
 func (m *Manager) parseInfoOutput(output, packageName string) manager.PackageInfo {
-	pkg := manager.NewPackageInfo(packageName, "", manager.StatusAvailable, manager.TypeSystem)
+	pkg := manager.NewPackageInfo(packageName, "", manager.StatusAvailable, "flatpak")
 
 	lines := strings.Split(output, "\n")
 	for _, line := range lines {
@@ -353,13 +421,19 @@ func (m *Manager) parseInfoOutput(output, packageName string) manager.PackageInf
 
 // listInstalled lists installed flatpak packages
 func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]manager.PackageInfo, error) {
-	output, err := m.GetRunner().Run(ctx, "flatpak", []string{"list", "--app"}, "LANG=C")
+	result, err := m.GetRunner().Run(ctx, "flatpak", []string{"list", "--app"}, "LANG=C")
 	if err != nil {
-		return nil, fmt.Errorf("flatpak list failed: %w", err)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "flatpak command failed", err)
 	}
 
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		return nil, manager.WrapReturn(manager.StatusGeneralError, "flatpak list failed", nil)
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
 	var packages []manager.PackageInfo
-	lines := strings.Split(string(output), "\n")
+	lines := strings.Split(string(result.Output), "\n")
 
 	for _, line := range lines {
 		if strings.TrimSpace(line) == "" {
@@ -373,7 +447,7 @@ func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]mana
 			appId := strings.TrimSpace(parts[1])
 			version := strings.TrimSpace(parts[2])
 
-			pkg := manager.NewPackageInfo(name, version, manager.StatusInstalled, manager.TypeSystem)
+			pkg := manager.NewPackageInfo(name, version, manager.StatusInstalled, "flatpak")
 			pkg.Metadata["app_id"] = appId
 
 			if len(parts) >= 4 {
@@ -393,12 +467,24 @@ func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]mana
 // listUpgradable lists packages that can be upgraded
 func (m *Manager) listUpgradable(ctx context.Context, _ *manager.Options) ([]manager.PackageInfo, error) {
 	// Check for updates without applying them
-	output, err := m.GetRunner().Run(ctx, "flatpak", []string{"remote-ls", "--updates"}, "LANG=C")
+	result, err := m.GetRunner().Run(ctx, "flatpak", []string{"remote-ls", "--updates"}, "LANG=C")
 	if err != nil {
-		return nil, fmt.Errorf("flatpak remote-ls --updates failed: %w", err)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "flatpak command failed", err)
 	}
 
-	return m.parseUpdatesOutput(string(output)), nil
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 1:
+			// No updates available - not an error
+			return []manager.PackageInfo{}, nil
+		default:
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "flatpak remote-ls --updates failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
+	return m.parseUpdatesOutput(string(result.Output)), nil
 }
 
 // parseUpdatesOutput parses the output of flatpak remote-ls --updates
@@ -417,7 +503,7 @@ func (m *Manager) parseUpdatesOutput(output string) []manager.PackageInfo {
 			appId := strings.TrimSpace(parts[0])
 			version := strings.TrimSpace(parts[1])
 
-			pkg := manager.NewPackageInfo(appId, "", manager.StatusUpgradable, manager.TypeSystem)
+			pkg := manager.NewPackageInfo(appId, "", manager.StatusUpgradable, "flatpak")
 			pkg.NewVersion = version
 			pkg.Metadata["app_id"] = appId
 
@@ -446,7 +532,7 @@ func (m *Manager) parseUpdateOutput(output string) []manager.PackageInfo {
 			parts := strings.Fields(line)
 			if len(parts) >= 2 {
 				name := parts[1] // Usually the second field is the app name
-				pkg := manager.NewPackageInfo(name, "", "upgraded", manager.TypeSystem)
+				pkg := manager.NewPackageInfo(name, "", "upgraded", "flatpak")
 				packages = append(packages, pkg)
 			}
 		}
@@ -466,7 +552,7 @@ func (m *Manager) parseUninstallOutput(output string) []manager.PackageInfo {
 			parts := strings.Fields(line)
 			if len(parts) >= 2 {
 				name := parts[1]
-				pkg := manager.NewPackageInfo(name, "", "removed", manager.TypeSystem)
+				pkg := manager.NewPackageInfo(name, "", "removed", "flatpak")
 				packages = append(packages, pkg)
 			}
 		}

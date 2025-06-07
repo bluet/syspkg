@@ -20,14 +20,14 @@ type Manager struct {
 func NewManager() *Manager {
 	runner := manager.NewDefaultCommandRunner()
 	return &Manager{
-		BaseManager: manager.NewBaseManager("apk", manager.TypeSystem, runner),
+		BaseManager: manager.NewBaseManager("apk", manager.CategorySystem, runner),
 	}
 }
 
 // NewManagerWithRunner creates APK manager with custom runner (for testing)
 func NewManagerWithRunner(runner manager.CommandRunner) *Manager {
 	return &Manager{
-		BaseManager: manager.NewBaseManager("apk", manager.TypeSystem, runner),
+		BaseManager: manager.NewBaseManager("apk", manager.CategorySystem, runner),
 	}
 }
 
@@ -44,12 +44,12 @@ func (m *Manager) IsAvailable() bool {
 
 // GetVersion returns APK version
 func (m *Manager) GetVersion() (string, error) {
-	output, err := m.GetRunner().Run(context.Background(), "apk", []string{"--version"})
+	result, err := m.GetRunner().Run(context.Background(), "apk", []string{"--version"})
 	if err != nil {
 		return "", err
 	}
 
-	lines := strings.Split(string(output), "\n")
+	lines := strings.Split(string(result.Output), "\n")
 	for _, line := range lines {
 		if strings.HasPrefix(line, "apk-tools ") {
 			parts := strings.Fields(line)
@@ -58,7 +58,7 @@ func (m *Manager) GetVersion() (string, error) {
 			}
 		}
 	}
-	return strings.TrimSpace(string(output)), nil
+	return strings.TrimSpace(string(result.Output)), nil
 }
 
 // Search searches for packages
@@ -74,12 +74,29 @@ func (m *Manager) Search(ctx context.Context, query []string, opts *manager.Opti
 	args := []string{"search"}
 	args = append(args, query...)
 
-	output, err := m.GetRunner().Run(ctx, "apk", args)
+	result, err := m.GetRunner().Run(ctx, "apk", args)
 	if err != nil {
-		return nil, fmt.Errorf("apk search failed: %w", err)
+		// Command execution failed (e.g., apk not found)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "apk command failed", err)
 	}
 
-	return m.parseSearchOutput(string(output)), nil
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 1:
+			// No packages found - that's okay for search
+			return []manager.PackageInfo{}, nil
+		case 2:
+			// Invalid usage
+			return nil, manager.WrapReturn(manager.StatusUsageError, "invalid search query", nil)
+		default:
+			// Unknown exit code
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "apk search failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
+	return m.parseSearchOutput(string(result.Output)), nil
 }
 
 // List lists packages based on filter
@@ -104,10 +121,10 @@ func (m *Manager) GetInfo(ctx context.Context, packageName string, opts *manager
 
 	output, err := m.GetRunner().Run(ctx, "apk", []string{"info", packageName})
 	if err != nil {
-		return manager.PackageInfo{}, fmt.Errorf("apk info failed: %w", err)
+		return manager.PackageInfo{}, manager.WrapCommandError("apk info failed", err)
 	}
 
-	return m.parseInfoOutput(string(output), packageName), nil
+	return m.parseInfoOutput(string(output.Output), packageName), nil
 }
 
 // Status returns package manager status
@@ -154,12 +171,13 @@ func (m *Manager) Status(ctx context.Context, opts *manager.Options) (manager.Ma
 
 // Install installs packages
 func (m *Manager) Install(ctx context.Context, packages []string, opts *manager.Options) ([]manager.PackageInfo, error) {
+	// Plugin developer knows this is a usage error
 	if len(packages) == 0 {
-		return nil, fmt.Errorf("install requires package names")
+		return nil, manager.WrapReturn(manager.StatusUsageError, "install requires package names", nil)
 	}
 
 	if err := m.ValidatePackageNames(packages); err != nil {
-		return nil, err
+		return nil, manager.WrapReturn(manager.StatusUsageError, "invalid package names", err)
 	}
 
 	args := []string{"add"}
@@ -168,12 +186,33 @@ func (m *Manager) Install(ctx context.Context, packages []string, opts *manager.
 	}
 	args = append(args, packages...)
 
-	output, err := m.GetRunner().Run(ctx, "apk", args)
+	result, err := m.GetRunner().Run(ctx, "apk", args)
 	if err != nil {
-		return nil, fmt.Errorf("apk add failed: %w", err)
+		// Command execution failed (e.g., apk not found)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "apk command failed", err)
 	}
 
-	return m.parseInstallOutput(string(output)), nil
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 1:
+			// Check stderr to determine specific error
+			stderrStr := string(result.Stderr)
+			if strings.Contains(stderrStr, "not found") || strings.Contains(stderrStr, "No such package") {
+				return nil, manager.WrapReturn(manager.StatusUnavailableError, "package not found in repository", nil)
+			}
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "installation failed", nil)
+		case 77:
+			// Permission denied (APK uses this exit code)
+			return nil, manager.WrapReturn(manager.StatusPermissionError, "installation requires root access", nil)
+		default:
+			// Unknown exit code
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "apk install failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
+	return m.parseInstallOutput(string(result.Output)), nil
 }
 
 // Remove removes packages
@@ -194,10 +233,10 @@ func (m *Manager) Remove(ctx context.Context, packages []string, opts *manager.O
 
 	output, err := m.GetRunner().Run(ctx, "apk", args)
 	if err != nil {
-		return nil, fmt.Errorf("apk del failed: %w", err)
+		return nil, manager.WrapCommandError("apk del failed", err)
 	}
 
-	return m.parseRemoveOutput(string(output)), nil
+	return m.parseRemoveOutput(string(output.Output)), nil
 }
 
 // Refresh refreshes package lists (equivalent to update)
@@ -209,7 +248,7 @@ func (m *Manager) Refresh(ctx context.Context, opts *manager.Options) error {
 func (m *Manager) Update(ctx context.Context, opts *manager.Options) error {
 	_, err := m.GetRunner().Run(ctx, "apk", []string{"update"})
 	if err != nil {
-		return fmt.Errorf("apk update failed: %w", err)
+		return manager.WrapCommandError("apk update failed", err)
 	}
 	return nil
 }
@@ -231,17 +270,17 @@ func (m *Manager) Upgrade(ctx context.Context, packages []string, opts *manager.
 
 	output, err := m.GetRunner().Run(ctx, "apk", args)
 	if err != nil {
-		return nil, fmt.Errorf("apk upgrade failed: %w", err)
+		return nil, manager.WrapCommandError("apk upgrade failed", err)
 	}
 
-	return m.parseUpgradeOutput(string(output)), nil
+	return m.parseUpgradeOutput(string(output.Output)), nil
 }
 
 // Clean cleans package cache
 func (m *Manager) Clean(ctx context.Context, opts *manager.Options) error {
 	_, err := m.GetRunner().Run(ctx, "apk", []string{"cache", "clean"})
 	if err != nil {
-		return fmt.Errorf("apk cache clean failed: %w", err)
+		return manager.WrapCommandError("apk cache clean failed", err)
 	}
 	return nil
 }
@@ -271,7 +310,7 @@ func (m *Manager) Verify(ctx context.Context, packages []string, opts *manager.O
 			status = "not-installed"
 		}
 
-		results = append(results, manager.NewPackageInfo(pkg, "", status, manager.TypeSystem))
+		results = append(results, manager.NewPackageInfo(pkg, "", status, "apk"))
 	}
 
 	return results, nil
@@ -288,7 +327,7 @@ func (m *Manager) parseSearchOutput(output string) []manager.PackageInfo {
 		}
 
 		// Format: package-name-version
-		pkg := manager.NewPackageInfo(line, "", manager.StatusAvailable, manager.TypeSystem)
+		pkg := manager.NewPackageInfo(line, "", manager.StatusAvailable, "apk")
 		packages = append(packages, pkg)
 	}
 
@@ -297,7 +336,7 @@ func (m *Manager) parseSearchOutput(output string) []manager.PackageInfo {
 
 // parseInfoOutput parses apk info output
 func (m *Manager) parseInfoOutput(output, packageName string) manager.PackageInfo {
-	pkg := manager.NewPackageInfo(packageName, "", manager.StatusAvailable, manager.TypeSystem)
+	pkg := manager.NewPackageInfo(packageName, "", manager.StatusAvailable, "apk")
 
 	lines := strings.Split(output, "\n")
 	for i, line := range lines {
@@ -338,11 +377,11 @@ func (m *Manager) parseInfoOutput(output, packageName string) manager.PackageInf
 func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]manager.PackageInfo, error) {
 	output, err := m.GetRunner().Run(ctx, "apk", []string{"info", "-v"})
 	if err != nil {
-		return nil, fmt.Errorf("apk info -v failed: %w", err)
+		return nil, manager.WrapCommandError("apk info -v failed", err)
 	}
 
 	var packages []manager.PackageInfo
-	lines := strings.Split(string(output), "\n")
+	lines := strings.Split(string(output.Output), "\n")
 
 	// Regex to parse: package-version arch {origin} (license) [installed]
 	installedRegex := regexp.MustCompile(`^([^\s]+) ([^\s]+) \{([^}]+)\} \(([^)]+)\) \[installed\]`)
@@ -370,7 +409,7 @@ func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]mana
 				name = nameVersion
 			}
 
-			pkg := manager.NewPackageInfo(name, version, manager.StatusInstalled, manager.TypeSystem)
+			pkg := manager.NewPackageInfo(name, version, manager.StatusInstalled, "apk")
 			pkg.Metadata["arch"] = arch
 			pkg.Metadata["origin"] = origin
 			pkg.Metadata["license"] = license
@@ -388,10 +427,10 @@ func (m *Manager) listUpgradable(ctx context.Context, _ *manager.Options) ([]man
 	// We would need to simulate upgrade to see what would be upgraded
 	output, err := m.GetRunner().Run(ctx, "apk", []string{"upgrade", "--simulate"})
 	if err != nil {
-		return nil, fmt.Errorf("apk upgrade --simulate failed: %w", err)
+		return nil, manager.WrapCommandError("apk upgrade --simulate failed", err)
 	}
 
-	return m.parseUpgradeOutput(string(output)), nil
+	return m.parseUpgradeOutput(string(output.Output)), nil
 }
 
 // parseInstallOutput parses the output of apk add
@@ -406,7 +445,7 @@ func (m *Manager) parseInstallOutput(output string) []manager.PackageInfo {
 			for _, part := range parts {
 				if strings.Contains(part, "-") && !strings.HasPrefix(part, "-") {
 					// Looks like a package name
-					pkg := manager.NewPackageInfo(part, "", manager.StatusInstalled, manager.TypeSystem)
+					pkg := manager.NewPackageInfo(part, "", manager.StatusInstalled, "apk")
 					packages = append(packages, pkg)
 				}
 			}
@@ -428,7 +467,7 @@ func (m *Manager) parseRemoveOutput(output string) []manager.PackageInfo {
 			for _, part := range parts {
 				if strings.Contains(part, "-") && !strings.HasPrefix(part, "-") {
 					// Looks like a package name
-					pkg := manager.NewPackageInfo(part, "", "removed", manager.TypeSystem)
+					pkg := manager.NewPackageInfo(part, "", "removed", "apk")
 					packages = append(packages, pkg)
 				}
 			}
@@ -450,7 +489,7 @@ func (m *Manager) parseUpgradeOutput(output string) []manager.PackageInfo {
 			for _, part := range parts {
 				if strings.Contains(part, "-") && !strings.HasPrefix(part, "-") {
 					// Looks like a package name
-					pkg := manager.NewPackageInfo(part, "", "upgraded", manager.TypeSystem)
+					pkg := manager.NewPackageInfo(part, "", "upgraded", "apk")
 					packages = append(packages, pkg)
 				}
 			}
