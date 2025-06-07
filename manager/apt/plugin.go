@@ -20,14 +20,14 @@ type Manager struct {
 func NewManager() *Manager {
 	runner := manager.NewDefaultCommandRunner()
 	return &Manager{
-		BaseManager: manager.NewBaseManager("apt", manager.TypeSystem, runner),
+		BaseManager: manager.NewBaseManager("apt", manager.CategorySystem, runner),
 	}
 }
 
 // NewManagerWithRunner creates APT manager with custom runner (for testing)
 func NewManagerWithRunner(runner manager.CommandRunner) *Manager {
 	return &Manager{
-		BaseManager: manager.NewBaseManager("apt", manager.TypeSystem, runner),
+		BaseManager: manager.NewBaseManager("apt", manager.CategorySystem, runner),
 	}
 }
 
@@ -38,24 +38,24 @@ func (m *Manager) IsAvailable() bool {
 		return false
 	}
 	// Verify it's Debian apt (not Java apt)
-	output, err := m.GetRunner().Run(context.Background(), "apt", []string{"--version"})
-	return err == nil && strings.Contains(string(output), "apt") && !strings.Contains(string(output), "java")
+	result, err := m.GetRunner().Run(context.Background(), "apt", []string{"--version"})
+	return err == nil && strings.Contains(string(result.Output), "apt") && !strings.Contains(string(result.Output), "java")
 }
 
 // GetVersion returns APT version
 func (m *Manager) GetVersion() (string, error) {
-	output, err := m.GetRunner().Run(context.Background(), "apt", []string{"--version"})
+	result, err := m.GetRunner().Run(context.Background(), "apt", []string{"--version"})
 	if err != nil {
 		return "", err
 	}
-	lines := strings.Split(string(output), "\n")
+	lines := strings.Split(string(result.Output), "\n")
 	if len(lines) > 0 {
 		parts := strings.Fields(lines[0])
 		if len(parts) >= 2 {
 			return parts[1], nil
 		}
 	}
-	return strings.TrimSpace(string(output)), nil
+	return strings.TrimSpace(string(result.Output)), nil
 }
 
 // Search finds packages
@@ -69,16 +69,38 @@ func (m *Manager) Search(ctx context.Context, query []string, opts *manager.Opti
 	}
 
 	args := append([]string{"search"}, query...)
-	output, err := m.GetRunner().Run(ctx, "apt", args)
+	result, err := m.GetRunner().Run(ctx, "apt", args)
 	if err != nil {
-		return nil, err
+		// Command execution failed (e.g., apt not found)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "apt command failed", err)
 	}
 
-	// apt search already provides basic status information
-	packages := parseSearchOutput(string(output))
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 1:
+			// APT: no packages found or general error
+			stderrStr := string(result.Stderr)
+			if strings.Contains(stderrStr, "not found") || strings.Contains(stderrStr, "No packages found") {
+				return []manager.PackageInfo{}, nil // Empty results for search is okay
+			}
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "apt search failed", nil)
+		case 2:
+			// APT: invalid usage/arguments
+			return nil, manager.WrapReturn(manager.StatusUsageError, "invalid search arguments", nil)
+		case 100:
+			// APT: package cache needs update
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "package cache needs update - run 'apt update'", nil)
+		default:
+			// Unknown exit code
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "apt search failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse and process results
+	packages := parseSearchOutput(string(result.Output))
 
 	// If ShowStatus is requested, enhance with more detailed status info
-	// This is useful for getting exact version details and upgradability
 	if opts.ShowStatus {
 		return m.addStatusInfo(ctx, packages, opts)
 	}
@@ -155,12 +177,31 @@ func (m *Manager) Install(ctx context.Context, packages []string, opts *manager.
 		args = append(args, "--dry-run")
 	}
 
-	output, err := m.GetRunner().Run(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+	result, err := m.GetRunner().Run(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
 	if err != nil {
-		return nil, fmt.Errorf("apt install failed: %w", err)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "apt command failed", err)
 	}
 
-	return parseInstallOutput(string(output)), nil
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 1:
+			// APT: general error, check stderr for specifics
+			stderrStr := string(result.Stderr)
+			if strings.Contains(stderrStr, "not found") || strings.Contains(stderrStr, "No such package") {
+				return nil, manager.WrapReturn(manager.StatusUnavailableError, "package not found in repository", nil)
+			}
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "installation failed", nil)
+		case 100:
+			// APT: permission or lock error
+			return nil, manager.WrapReturn(manager.StatusPermissionError, "installation requires root access or system is locked", nil)
+		default:
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "apt install failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
+	return parseInstallOutput(string(result.Output)), nil
 }
 
 // Remove packages
@@ -182,12 +223,31 @@ func (m *Manager) Remove(ctx context.Context, packages []string, opts *manager.O
 		args = append(args, "--dry-run")
 	}
 
-	output, err := m.GetRunner().Run(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+	result, err := m.GetRunner().Run(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
 	if err != nil {
-		return nil, fmt.Errorf("apt remove failed: %w", err)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "apt command failed", err)
 	}
 
-	return parseRemoveOutput(string(output)), nil
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 1:
+			// APT: general error, check stderr for specifics
+			stderrStr := string(result.Stderr)
+			if strings.Contains(stderrStr, "not installed") {
+				return nil, manager.WrapReturn(manager.StatusUnavailableError, "package not installed", nil)
+			}
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "removal failed", nil)
+		case 100:
+			// APT: permission or lock error
+			return nil, manager.WrapReturn(manager.StatusPermissionError, "removal requires root access or system is locked", nil)
+		default:
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "apt remove failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
+	return parseRemoveOutput(string(result.Output)), nil
 }
 
 // GetInfo returns detailed package information
@@ -198,12 +258,24 @@ func (m *Manager) GetInfo(ctx context.Context, packageName string, opts *manager
 		return manager.PackageInfo{}, err
 	}
 
-	output, err := m.GetRunner().Run(ctx, "apt-cache", []string{"show", packageName}, "DEBIAN_FRONTEND=noninteractive")
+	result, err := m.GetRunner().Run(ctx, "apt-cache", []string{"show", packageName}, "DEBIAN_FRONTEND=noninteractive")
 	if err != nil {
-		return manager.PackageInfo{}, fmt.Errorf("apt-cache show failed: %w", err)
+		return manager.PackageInfo{}, manager.WrapReturn(manager.StatusUnavailableError, "apt-cache command failed", err)
 	}
 
-	pkg := ParsePackageInfo(string(output))
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 1:
+			// Package not found
+			return manager.PackageInfo{}, manager.WrapReturn(manager.StatusUnavailableError, "package not found", nil)
+		default:
+			return manager.PackageInfo{}, manager.WrapReturn(manager.StatusGeneralError, "apt-cache show failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
+	pkg := ParsePackageInfo(string(result.Output))
 	if pkg.Name == "" {
 		return manager.PackageInfo{}, manager.ErrPackageNotFound
 	}
@@ -212,10 +284,23 @@ func (m *Manager) GetInfo(ctx context.Context, packageName string, opts *manager
 
 // Refresh updates package lists
 func (m *Manager) Refresh(ctx context.Context, opts *manager.Options) error {
-	_, err := m.GetRunner().Run(ctx, "apt", []string{"update"}, "DEBIAN_FRONTEND=noninteractive")
+	result, err := m.GetRunner().Run(ctx, "apt", []string{"update"}, "DEBIAN_FRONTEND=noninteractive")
 	if err != nil {
-		return fmt.Errorf("apt update failed: %w", err)
+		return manager.WrapReturn(manager.StatusUnavailableError, "apt command failed", err)
 	}
+
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 100:
+			// APT: permission or lock error
+			return manager.WrapReturn(manager.StatusPermissionError, "update requires root access or system is locked", nil)
+		default:
+			return manager.WrapReturn(manager.StatusGeneralError, "apt update failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success
 	return nil
 }
 
@@ -240,20 +325,48 @@ func (m *Manager) Upgrade(ctx context.Context, packages []string, opts *manager.
 		args = append(args, "--dry-run")
 	}
 
-	output, err := m.GetRunner().Run(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+	result, err := m.GetRunner().Run(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
 	if err != nil {
-		return nil, fmt.Errorf("apt upgrade failed: %w", err)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "apt command failed", err)
 	}
 
-	return parseInstallOutput(string(output)), nil
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 1:
+			// APT: general error
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "upgrade failed", nil)
+		case 100:
+			// APT: permission or lock error
+			return nil, manager.WrapReturn(manager.StatusPermissionError, "upgrade requires root access or system is locked", nil)
+		default:
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "apt upgrade failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
+	return parseInstallOutput(string(result.Output)), nil
 }
 
 // Clean removes cached packages
 func (m *Manager) Clean(ctx context.Context, opts *manager.Options) error {
-	_, err := m.GetRunner().Run(ctx, "apt", []string{"autoclean"}, "DEBIAN_FRONTEND=noninteractive")
+	result, err := m.GetRunner().Run(ctx, "apt", []string{"autoclean"}, "DEBIAN_FRONTEND=noninteractive")
 	if err != nil {
-		return fmt.Errorf("apt autoclean failed: %w", err)
+		return manager.WrapReturn(manager.StatusUnavailableError, "apt command failed", err)
 	}
+
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 100:
+			// APT: permission or lock error
+			return manager.WrapReturn(manager.StatusPermissionError, "clean requires root access or system is locked", nil)
+		default:
+			return manager.WrapReturn(manager.StatusGeneralError, "apt autoclean failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success
 	return nil
 }
 
@@ -264,16 +377,28 @@ func (m *Manager) AutoRemove(ctx context.Context, opts *manager.Options) ([]mana
 		args = append(args, "--dry-run")
 	}
 
-	output, err := m.GetRunner().Run(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+	result, err := m.GetRunner().Run(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
 	if err != nil {
-		return nil, fmt.Errorf("apt autoremove failed: %w", err)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "apt command failed", err)
 	}
 
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 100:
+			// APT: permission or lock error
+			return nil, manager.WrapReturn(manager.StatusPermissionError, "autoremove requires root access or system is locked", nil)
+		default:
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "apt autoremove failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
 	// Use appropriate parser based on operation mode
 	if opts != nil && opts.DryRun {
-		return m.parseAutoRemoveOutput(string(output)), nil
+		return m.parseAutoRemoveOutput(string(result.Output)), nil
 	}
-	return parseRemoveOutput(string(output)), nil
+	return parseRemoveOutput(string(result.Output)), nil
 }
 
 // Verify checks package integrity (delegated to dpkg)
@@ -294,21 +419,27 @@ func (m *Manager) Verify(ctx context.Context, packages []string, opts *manager.O
 			status = "broken"
 		}
 
-		results = append(results, manager.NewPackageInfo(pkg, "", status, manager.TypeSystem))
+		results = append(results, manager.NewPackageInfo(pkg, "", status, "apt"))
 	}
 
 	return results, nil
 }
 
 func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]manager.PackageInfo, error) {
-	output, err := m.GetRunner().Run(ctx, "dpkg-query",
+	result, err := m.GetRunner().Run(ctx, "dpkg-query",
 		[]string{"-W", "-f", "${binary:Package} ${Version} ${Architecture}\n"})
 	if err != nil {
-		return nil, fmt.Errorf("dpkg-query failed: %w", err)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "dpkg-query command failed", err)
 	}
 
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		return nil, manager.WrapReturn(manager.StatusGeneralError, "dpkg-query failed", nil)
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
 	var packages []manager.PackageInfo
-	lines := strings.Split(string(output), "\n")
+	lines := strings.Split(string(result.Output), "\n")
 
 	for _, line := range lines {
 		if strings.TrimSpace(line) == "" {
@@ -317,7 +448,7 @@ func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]mana
 
 		parts := strings.Fields(line)
 		if len(parts) >= 2 {
-			pkg := manager.NewPackageInfo(parts[0], parts[1], manager.StatusInstalled, manager.TypeSystem)
+			pkg := manager.NewPackageInfo(parts[0], parts[1], manager.StatusInstalled, "apt")
 
 			if len(parts) >= 3 {
 				pkg.Metadata["arch"] = parts[2]
@@ -331,13 +462,25 @@ func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]mana
 }
 
 func (m *Manager) listUpgradable(ctx context.Context, _ *manager.Options) ([]manager.PackageInfo, error) {
-	output, err := m.GetRunner().Run(ctx, "apt", []string{"list", "--upgradable"})
+	result, err := m.GetRunner().Run(ctx, "apt", []string{"list", "--upgradable"})
 	if err != nil {
-		return nil, fmt.Errorf("apt list --upgradable failed: %w", err)
+		return nil, manager.WrapReturn(manager.StatusUnavailableError, "apt command failed", err)
 	}
 
+	// Handle error cases first (return-early pattern)
+	if result.ExitCode != 0 {
+		switch result.ExitCode {
+		case 100:
+			// APT: permission or cache issue
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "apt cache needs update - run 'apt update'", nil)
+		default:
+			return nil, manager.WrapReturn(manager.StatusGeneralError, "apt list --upgradable failed", nil)
+		}
+	}
+
+	// result.ExitCode == 0: Success - parse results and return
 	var packages []manager.PackageInfo
-	lines := strings.Split(string(output), "\n")
+	lines := strings.Split(string(result.Output), "\n")
 
 	for _, line := range lines {
 		if strings.HasPrefix(line, "Listing") || strings.TrimSpace(line) == "" {
@@ -355,7 +498,7 @@ func (m *Manager) listUpgradable(ctx context.Context, _ *manager.Options) ([]man
 					oldVersion = strings.TrimSuffix(parts[5], "]")
 				}
 
-				pkg := manager.NewPackageInfo(nameRepo[0], oldVersion, manager.StatusUpgradable, manager.TypeSystem)
+				pkg := manager.NewPackageInfo(nameRepo[0], oldVersion, manager.StatusUpgradable, "apt")
 				pkg.NewVersion = parts[1]
 				pkg.Category = nameRepo[1]
 				pkg.Metadata["arch"] = parts[2]
@@ -389,7 +532,7 @@ func (m *Manager) parseAutoRemoveOutput(output string) []manager.PackageInfo {
 				// Clean up package name (remove any special characters)
 				cleanName := strings.Trim(name, " \t")
 				if cleanName != "" && !strings.Contains(cleanName, "operation") {
-					pkg := manager.NewPackageInfo(cleanName, "", manager.StatusAvailable, manager.TypeSystem)
+					pkg := manager.NewPackageInfo(cleanName, "", manager.StatusAvailable, "apt")
 					packages = append(packages, pkg)
 				}
 			}
@@ -427,7 +570,7 @@ func (m *Manager) parseUpgradeOutput(output string) []manager.PackageInfo {
 			currentVersion := match[2]
 			newVersion := match[3]
 
-			pkg := manager.NewPackageInfo(name, currentVersion, manager.StatusUpgradable, manager.TypeSystem)
+			pkg := manager.NewPackageInfo(name, currentVersion, manager.StatusUpgradable, "apt")
 			pkg.NewVersion = newVersion
 
 			packages = append(packages, pkg)

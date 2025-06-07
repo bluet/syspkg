@@ -50,8 +50,8 @@ func TestManagerBasicInfo(t *testing.T) {
 		t.Errorf("Expected name 'apt', got '%s'", mgr.GetName())
 	}
 
-	if mgr.GetType() != manager.TypeSystem {
-		t.Errorf("Expected type '%s', got '%s'", manager.TypeSystem, mgr.GetType())
+	if mgr.GetCategory() != manager.CategorySystem {
+		t.Errorf("Expected type '%s', got '%s'", manager.CategorySystem, mgr.GetCategory())
 	}
 
 	// Test version
@@ -100,8 +100,8 @@ func TestSearch(t *testing.T) {
 		t.Errorf("Expected category 'jammy', got '%s'", pkg.Category)
 	}
 
-	if pkg.ManagerType != manager.TypeSystem {
-		t.Errorf("Expected manager type '%s', got '%s'", manager.TypeSystem, pkg.ManagerType)
+	if pkg.ManagerName != "apt" {
+		t.Errorf("Expected manager type '%s', got '%s'", "apt", pkg.ManagerName)
 	}
 }
 
@@ -251,8 +251,8 @@ func TestSearchWithFixture(t *testing.T) {
 		if pkg.Status == "" {
 			t.Error("Package status should not be empty")
 		}
-		if pkg.ManagerType != manager.TypeSystem {
-			t.Errorf("Expected manager type '%s', got '%s'", manager.TypeSystem, pkg.ManagerType)
+		if pkg.ManagerName != "apt" {
+			t.Errorf("Expected manager type '%s', got '%s'", "apt", pkg.ManagerName)
 		}
 		// CRITICAL ASSUMPTION: Clean system fixture = all packages available (no installs)
 		if pkg.Status != manager.StatusAvailable {
@@ -549,8 +549,8 @@ func TestPluginRegistration(t *testing.T) {
 		t.Errorf("Expected name 'apt', got '%s'", aptMgr.GetName())
 	}
 
-	if aptMgr.GetType() != manager.TypeSystem {
-		t.Errorf("Expected type '%s', got '%s'", manager.TypeSystem, aptMgr.GetType())
+	if aptMgr.GetCategory() != manager.CategorySystem {
+		t.Errorf("Expected type '%s', got '%s'", manager.CategorySystem, aptMgr.GetCategory())
 	}
 
 	// Test plugin priority
@@ -842,8 +842,8 @@ func TestListInstalledFixture(t *testing.T) {
 		if pkg.Status != manager.StatusInstalled && pkg.Status != manager.StatusUpgradable {
 			t.Errorf("Expected status 'installed' or 'upgradable' for package '%s', got '%s'", pkg.Name, pkg.Status)
 		}
-		if pkg.ManagerType != manager.TypeSystem {
-			t.Errorf("Expected manager type '%s', got '%s'", manager.TypeSystem, pkg.ManagerType)
+		if pkg.ManagerName != "apt" {
+			t.Errorf("Expected manager type '%s', got '%s'", "apt", pkg.ManagerName)
 		}
 	}
 }
@@ -874,8 +874,8 @@ func TestShowVimFixture(t *testing.T) {
 			if pkg.Description == "" {
 				t.Error("vim package should have description")
 			}
-			if pkg.ManagerType != manager.TypeSystem {
-				t.Errorf("Expected manager type '%s', got '%s'", manager.TypeSystem, pkg.ManagerType)
+			if pkg.ManagerName != "apt" {
+				t.Errorf("Expected manager type '%s', got '%s'", "apt", pkg.ManagerName)
 			}
 			break
 		}

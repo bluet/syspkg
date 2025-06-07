@@ -36,7 +36,7 @@ func parseSearchOutput(output string) []manager.PackageInfo {
 						}
 					}
 
-					pkg := manager.NewPackageInfo(nameRepo[0], parts[1], status, manager.TypeSystem)
+					pkg := manager.NewPackageInfo(nameRepo[0], parts[1], status, "apt")
 					pkg.NewVersion = parts[1]
 					pkg.Category = strings.Split(nameRepo[1], ",")[0] // Remove ",now" suffix
 					pkg.Metadata["arch"] = parts[2]
@@ -79,7 +79,7 @@ func parseInstallOutput(output string) []manager.PackageInfo {
 			packageName := matches[1]
 			version := matches[2]
 
-			pkg := manager.NewPackageInfo(packageName, version, manager.StatusInstalled, manager.TypeSystem)
+			pkg := manager.NewPackageInfo(packageName, version, manager.StatusInstalled, "apt")
 			pkg.Metadata = make(map[string]interface{})
 			packages = append(packages, pkg)
 		}
@@ -104,7 +104,7 @@ func parseRemoveOutput(output string) []manager.PackageInfo {
 			arch := match[2]
 			version := match[3]
 
-			pkg := manager.NewPackageInfo(name, version, manager.StatusAvailable, manager.TypeSystem)
+			pkg := manager.NewPackageInfo(name, version, manager.StatusAvailable, "apt")
 
 			if arch != "" {
 				pkg.Metadata["arch"] = arch
@@ -130,7 +130,7 @@ func parseRemoveOutput(output string) []manager.PackageInfo {
 					// Clean up package name (remove any special characters)
 					cleanName := strings.Trim(name, " \t")
 					if cleanName != "" && !strings.Contains(cleanName, "operation") && !strings.Contains(cleanName, "newly") {
-						pkg := manager.NewPackageInfo(cleanName, "", manager.StatusAvailable, manager.TypeSystem)
+						pkg := manager.NewPackageInfo(cleanName, "", manager.StatusAvailable, "apt")
 						packages = append(packages, pkg)
 					}
 				}
@@ -183,7 +183,7 @@ func parseListUpgradableOutput(output string) []manager.PackageInfo {
 			oldVersion = upgradeMatch[1]
 		}
 
-		pkg := manager.NewPackageInfo(packageName, oldVersion, manager.StatusUpgradable, manager.TypeSystem)
+		pkg := manager.NewPackageInfo(packageName, oldVersion, manager.StatusUpgradable, "apt")
 		pkg.NewVersion = newVersion
 		pkg.Metadata = make(map[string]interface{})
 		pkg.Metadata["arch"] = arch
@@ -196,7 +196,7 @@ func parseListUpgradableOutput(output string) []manager.PackageInfo {
 
 // ParsePackageInfo parses the output of `apt show` or `apt-cache show` command
 func ParsePackageInfo(output string) manager.PackageInfo {
-	pkg := manager.NewPackageInfo("", "", manager.StatusUnknown, manager.TypeSystem)
+	pkg := manager.NewPackageInfo("", "", manager.StatusUnknown, "apt")
 
 	lines := strings.Split(output, "\n")
 	for _, line := range lines {
