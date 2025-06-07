@@ -52,6 +52,11 @@ bin/
 tmp/
 **/*.log.dccache
 
+# Built binaries (should use bin/ directory instead)
+syspkg
+syspkg-*
+manager/syspkg
+
 # Vim swap files
 *.swp
 *.swo

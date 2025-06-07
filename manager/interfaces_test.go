@@ -13,7 +13,7 @@ func TestPackageInfoStructure(t *testing.T) {
 		Status:      StatusInstalled,
 		Description: "Test package",
 		Category:    "test",
-		ManagerName:     "test-manager",
+		ManagerName: "test-manager",
 		Metadata: map[string]interface{}{
 			"arch":   "amd64",
 			"source": "test",

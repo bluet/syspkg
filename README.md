@@ -76,7 +76,7 @@ Here's an example demonstrating how to use SysPkg as a CLI tool:
 ```bash
 # Use specific package managers
 syspkg -m apt install vim       # Install using APT
-syspkg -m snap search vim       # Search using Snap  
+syspkg -m snap search vim       # Search using Snap
 syspkg -m flatpak list upgradable  # List using Flatpak
 syspkg -m yum install vim       # Install using YUM
 
@@ -97,13 +97,13 @@ Use `--all` to perform operations across **all available package managers**:
 ```bash
 # Read-only operations (safe)
 syspkg search vim --all             # Search across all managers
-syspkg list installed --all         # List from all managers  
+syspkg list installed --all         # List from all managers
 syspkg info vim --all               # Get info from all managers
 syspkg status --all                 # Show status of all managers
 
 # Write operations (with safety prompts)
 syspkg update --all                 # Update package lists (all managers)
-syspkg upgrade --all                # Upgrade packages (all managers) 
+syspkg upgrade --all                # Upgrade packages (all managers)
 syspkg clean --all                  # Clean caches (all managers)
 syspkg autoremove --all             # Remove orphaned packages (all managers)
 
@@ -119,7 +119,7 @@ Without `--all` or `-m`, syspkg automatically selects the best available system 
 ```bash
 syspkg install vim                  # Uses best system manager (apt/yum/apk)
 syspkg search vim                   # Searches all managers (default behavior)
-syspkg list installed               # Uses best system manager  
+syspkg list installed               # Uses best system manager
 syspkg upgrade                      # Uses best system manager
 ```
 
@@ -154,7 +154,7 @@ syspkg list installed
 syspkg list installed -q
 # Output: packagename<TAB>manager<TAB>version<TAB>status
 
-# JSON output for programmatic use  
+# JSON output for programmatic use
 syspkg list installed -j
 # Output: [{"name":"vim","manager":"apt","version":"8.2","status":"installed"}]
 

@@ -318,7 +318,7 @@ func (m *MyManager) Install(ctx context.Context, packages []string, opts *manage
     if len(packages) == 0 {
         return nil, manager.WrapReturn(manager.StatusUsageError, "install requires package names", nil)
     }
-    
+
     if err := m.ValidatePackageNames(packages); err != nil {
         return nil, manager.WrapReturn(manager.StatusUsageError, "invalid package names", err)
     }
@@ -330,7 +330,7 @@ func (m *MyManager) Install(ctx context.Context, packages []string, opts *manage
         // Command execution failed (e.g., tool not found)
         return nil, manager.WrapReturn(manager.StatusUnavailableError, "my-tool command failed", err)
     }
-    
+
     // Handle error cases first (return-early pattern)
     if result.ExitCode != 0 {
         switch result.ExitCode {
@@ -351,7 +351,7 @@ func (m *MyManager) Install(ctx context.Context, packages []string, opts *manage
             return nil, manager.WrapReturn(manager.StatusGeneralError, "unknown error", nil)
         }
     }
-    
+
     // result.ExitCode == 0: Success - parse and return results
     return m.parseInstallOutput(string(result.Output)), nil
 }
@@ -374,7 +374,7 @@ The `CommandRunner.Run()` method returns a `*CommandResult` with complete comman
 ```go
 type CommandResult struct {
     Output   []byte // stdout
-    Stderr   []byte // stderr  
+    Stderr   []byte // stderr
     ExitCode int    // exit code (0 = success)
 }
 ```
@@ -393,14 +393,14 @@ func (m *MyManager) Install(ctx context.Context, packages []string, opts *manage
     if len(packages) == 0 {
         return nil, manager.WrapReturn(manager.StatusUsageError, "install requires package names", nil)
     }
-    
+
     // Execute command
     result, err := m.GetRunner().Run(ctx, "my-tool", []string{"install"}, packages...)
     if err != nil {
         // Command execution failed (tool not found)
         return nil, manager.WrapReturn(manager.StatusUnavailableError, "my-tool command failed", err)
     }
-    
+
     // Handle error cases first (return-early pattern)
     if result.ExitCode != 0 {
         switch result.ExitCode {
@@ -420,7 +420,7 @@ func (m *MyManager) Install(ctx context.Context, packages []string, opts *manage
             return nil, manager.WrapReturn(manager.StatusGeneralError, "unknown error", nil)
         }
     }
-    
+
     // Success - parse results and return
     return m.parseInstallOutput(string(result.Output)), nil
 }
@@ -430,7 +430,7 @@ func (m *MyManager) Install(ctx context.Context, packages []string, opts *manage
 
 **Plugin developers know exactly what happened:**
 ```go
-// You KNOW this is a usage error  
+// You KNOW this is a usage error
 if len(packages) == 0 {
     return nil, manager.WrapReturn(manager.StatusUsageError, "install requires packages", nil)
 }
@@ -470,7 +470,7 @@ return processResults(result.Output), nil
 Create clear, actionable error messages:
 
 ```go
-// ✅ Good: Clear and actionable  
+// ✅ Good: Clear and actionable
 return nil, manager.WrapReturn(manager.StatusPermissionError, "installation requires root access - try with sudo", err)
 return nil, manager.WrapReturn(manager.StatusUnavailableError, "package 'vim' not found in enabled repositories", nil)
 return nil, manager.WrapReturn(manager.StatusUsageError, "package name cannot contain spaces or special characters", nil)
