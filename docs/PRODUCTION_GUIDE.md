@@ -63,7 +63,7 @@ func (m *Manager) parseInstallOutput(output string) []PackageInfo {
                 continue
             }
 
-            pkg := manager.NewPackageInfo(name, version, manager.StatusInstalled, manager.CategorySystem)
+            pkg := manager.NewPackageInfo(name, version, manager.StatusInstalled, "apt")
 
             if arch != "" {
                 pkg.Metadata["arch"] = arch
@@ -460,8 +460,8 @@ func TestAPTManager_Integration(t *testing.T) {
             if pkg.Name == "" {
                 t.Error("package name should not be empty")
             }
-            if pkg.ManagerType != CategorySystem {
-                t.Errorf("expected manager type '%s', got '%s'", CategorySystem, pkg.ManagerType)
+            if pkg.Manager != "apt" {
+                t.Errorf("expected manager '%s', got '%s'", "apt", pkg.Manager)
             }
         }
     })
@@ -1045,9 +1045,9 @@ func TestManagerCompliance(t *testing.T, createManager func() PackageManager) {
             t.Error("GetName() should return non-empty string")
         }
 
-        managerType := manager.GetType()
-        if managerType == "" {
-            t.Error("GetType() should return non-empty string")
+        managerCategory := manager.GetCategory()
+        if managerCategory == "" {
+            t.Error("GetCategory() should return non-empty string")
         }
 
         available := manager.IsAvailable()

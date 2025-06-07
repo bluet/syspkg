@@ -330,7 +330,7 @@ func (m *MockPackageManager) GetName() string {
     return "mock"
 }
 
-func (m *MockPackageManager) GetType() string {
+func (m *MockPackageManager) GetCategory() string {
     return "mock"
 }
 

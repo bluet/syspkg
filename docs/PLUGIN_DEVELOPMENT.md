@@ -114,7 +114,7 @@ func (m *MyManager) Install(ctx context.Context, packages []string, opts *manage
         // Create dry-run results manually
         results := make([]manager.PackageInfo, len(packages))
         for i, pkg := range packages {
-            results[i] = manager.NewPackageInfo(pkg, "unknown", "would-install", m.GetType())
+            results[i] = manager.NewPackageInfo(pkg, "unknown", "would-install", m.GetName())
         }
         return results, nil
     }
@@ -173,7 +173,7 @@ All package managers must implement these methods from the `PackageManager` inte
 type PackageManager interface {
     // Basic info
     GetName() string
-    GetType() string
+    GetCategory() string
     IsAvailable() bool
     GetVersion() (string, error)
 
@@ -265,7 +265,7 @@ type PackageInfo struct {
 ### Using Metadata for Tool-Specific Data
 
 ```go
-pkg := manager.NewPackageInfo("my-package", "1.0.0", "installed", m.GetType())
+pkg := manager.NewPackageInfo("my-package", "1.0.0", "installed", m.GetName())
 
 // Add tool-specific metadata
 pkg.Metadata["repository"] = "my-repo"
@@ -574,7 +574,7 @@ func (m *SteamManager) Install(ctx context.Context, packages []string, opts *man
     // Return results with Steam-specific metadata
     var results []manager.PackageInfo
     for _, appID := range packages {
-        pkg := manager.NewPackageInfo(appID, "unknown", "installed", m.GetType())
+        pkg := manager.NewPackageInfo(appID, "unknown", "installed", m.GetName())
         pkg.Metadata["appid"] = appID
         pkg.Metadata["platform"] = "steam"
         results = append(results, pkg)
@@ -738,7 +738,7 @@ func (m *PipManager) Install(ctx context.Context, packages []string, opts *manag
     if opts.DryRun {
         results := make([]manager.PackageInfo, len(packages))
         for i, pkg := range packages {
-            results[i] = manager.NewPackageInfo(pkg, "unknown", "would-install", m.GetType())
+            results[i] = manager.NewPackageInfo(pkg, "unknown", "would-install", m.GetName())
         }
         return results, nil
     }
@@ -761,7 +761,7 @@ func (m *PipManager) Install(ctx context.Context, packages []string, opts *manag
     // Assume successful installation
     results := make([]manager.PackageInfo, len(packages))
     for i, pkg := range packages {
-        results[i] = manager.NewPackageInfo(pkg, "unknown", "installed", m.GetType())
+        results[i] = manager.NewPackageInfo(pkg, "unknown", "installed", m.GetName())
     }
 
     return results, nil
@@ -795,7 +795,7 @@ func (m *PipManager) parseSearchOutput(output string) ([]manager.PackageInfo, er
         // Simple parsing - real implementation would be more robust
         parts := strings.Fields(line)
         if len(parts) >= 2 {
-            pkg := manager.NewPackageInfo(parts[0], parts[1], "available", m.GetType())
+            pkg := manager.NewPackageInfo(parts[0], parts[1], "available", m.GetName())
             if len(parts) > 2 {
                 pkg.Description = strings.Join(parts[2:], " ")
             }
@@ -817,7 +817,7 @@ func (m *PipManager) parseListOutput(output string) ([]manager.PackageInfo, erro
 
     for _, pipPkg := range pipPackages {
         if name, ok := pipPkg["name"]; ok {
-            pkg := manager.NewPackageInfo(name, pipPkg["version"], "installed", m.GetType())
+            pkg := manager.NewPackageInfo(name, pipPkg["version"], "installed", m.GetName())
             packages = append(packages, pkg)
         }
     }

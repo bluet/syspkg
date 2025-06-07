@@ -44,7 +44,7 @@ go test ./manager/ -v              # Test unified interface
 type PackageManager interface {
     // Basic information
     GetName() string
-    GetType() string
+    GetCategory() string
     IsAvailable() bool
     GetVersion() (string, error)
 
@@ -57,7 +57,6 @@ type PackageManager interface {
 
     // Update operations
     Refresh(ctx context.Context, opts *Options) error
-    Update(ctx context.Context, opts *Options) error
     Upgrade(ctx context.Context, packages []string, opts *Options) ([]PackageInfo, error)
 
     // Cleanup operations

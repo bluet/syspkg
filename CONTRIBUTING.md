@@ -769,18 +769,30 @@ graph TD
 ### Package Manager Interface
 ```go
 type PackageManager interface {
+    // Basic information
+    GetName() string
+    GetCategory() string
     IsAvailable() bool
-    Install(pkgs []string, opts *Options) ([]PackageInfo, error)
-    Delete(pkgs []string, opts *Options) ([]PackageInfo, error)
-    Find(keywords []string, opts *Options) ([]PackageInfo, error)
-    ListInstalled(opts *Options) ([]PackageInfo, error)
-    ListUpgradable(opts *Options) ([]PackageInfo, error)
-    Upgrade(pkgs []string, opts *Options) ([]PackageInfo, error)
-    UpgradeAll(opts *Options) ([]PackageInfo, error)
-    Refresh(opts *Options) error
-    Clean(opts *Options) error
-    GetPackageInfo(pkg string, opts *Options) (PackageInfo, error)
-    AutoRemove(opts *Options) ([]PackageInfo, error)
+    GetVersion() (string, error)
+
+    // Core operations
+    Search(ctx context.Context, query []string, opts *Options) ([]PackageInfo, error)
+    List(ctx context.Context, filter ListFilter, opts *Options) ([]PackageInfo, error)
+    Install(ctx context.Context, packages []string, opts *Options) ([]PackageInfo, error)
+    Remove(ctx context.Context, packages []string, opts *Options) ([]PackageInfo, error)
+    GetInfo(ctx context.Context, packageName string, opts *Options) (PackageInfo, error)
+
+    // Update operations
+    Refresh(ctx context.Context, opts *Options) error
+    Upgrade(ctx context.Context, packages []string, opts *Options) ([]PackageInfo, error)
+
+    // Cleanup operations
+    Clean(ctx context.Context, opts *Options) error
+    AutoRemove(ctx context.Context, opts *Options) ([]PackageInfo, error)
+
+    // Health operations
+    Verify(ctx context.Context, packages []string, opts *Options) ([]PackageInfo, error)
+    Status(ctx context.Context, opts *Options) (ManagerStatus, error)
 }
 ```
 
