@@ -10,6 +10,9 @@ import (
 	"github.com/bluet/syspkg/manager"
 )
 
+// ManagerName is the identifier for the Flatpak package manager
+const ManagerName = "flatpak"
+
 // Manager implements the unified PackageManager interface for Flatpak
 type Manager struct {
 	*manager.BaseManager
@@ -19,14 +22,14 @@ type Manager struct {
 func NewManager() *Manager {
 	runner := manager.NewDefaultCommandRunner()
 	return &Manager{
-		BaseManager: manager.NewBaseManager("flatpak", manager.CategorySystem, runner),
+		BaseManager: manager.NewBaseManager(ManagerName, manager.CategorySystem, runner),
 	}
 }
 
 // NewManagerWithRunner creates Flatpak manager with custom runner (for testing)
 func NewManagerWithRunner(runner manager.CommandRunner) *Manager {
 	return &Manager{
-		BaseManager: manager.NewBaseManager("flatpak", manager.CategorySystem, runner),
+		BaseManager: manager.NewBaseManager(ManagerName, manager.CategorySystem, runner),
 	}
 }
 
@@ -197,7 +200,7 @@ func (m *Manager) Install(ctx context.Context, packages []string, opts *manager.
 		}
 
 		// result.ExitCode == 0: Success
-		results = append(results, manager.NewPackageInfo(pkg, "", manager.StatusInstalled, "flatpak"))
+		results = append(results, manager.NewPackageInfo(pkg, "", manager.StatusInstalled, ManagerName))
 	}
 
 	return results, nil
@@ -218,7 +221,7 @@ func (m *Manager) Remove(ctx context.Context, packages []string, opts *manager.O
 		args := []string{"uninstall", "-y"}
 		if opts != nil && opts.DryRun {
 			// Flatpak doesn't have a --dry-run, so we'll just return what would be removed
-			results = append(results, manager.NewPackageInfo(pkg, "", "would-remove", "flatpak"))
+			results = append(results, manager.NewPackageInfo(pkg, "", "would-remove", ManagerName))
 			continue
 		}
 
@@ -228,7 +231,7 @@ func (m *Manager) Remove(ctx context.Context, packages []string, opts *manager.O
 			return nil, manager.WrapCommandError(fmt.Sprintf("flatpak uninstall %s failed", pkg), err)
 		}
 
-		results = append(results, manager.NewPackageInfo(pkg, "", "removed", "flatpak"))
+		results = append(results, manager.NewPackageInfo(pkg, "", "removed", ManagerName))
 	}
 
 	return results, nil
@@ -351,7 +354,7 @@ func (m *Manager) Verify(ctx context.Context, packages []string, opts *manager.O
 			status = "not-installed"
 		}
 
-		results = append(results, manager.NewPackageInfo(pkg, "", status, "flatpak"))
+		results = append(results, manager.NewPackageInfo(pkg, "", status, ManagerName))
 	}
 
 	return results, nil
@@ -375,7 +378,7 @@ func (m *Manager) parseSearchOutput(output string) []manager.PackageInfo {
 			appId := strings.TrimSpace(parts[2])
 			version := strings.TrimSpace(parts[3])
 
-			pkg := manager.NewPackageInfo(name, version, manager.StatusAvailable, "flatpak")
+			pkg := manager.NewPackageInfo(name, version, manager.StatusAvailable, ManagerName)
 			pkg.Description = description
 			pkg.Metadata["app_id"] = appId
 
@@ -395,7 +398,7 @@ func (m *Manager) parseSearchOutput(output string) []manager.PackageInfo {
 
 // parseInfoOutput parses flatpak info output
 func (m *Manager) parseInfoOutput(output, packageName string) manager.PackageInfo {
-	pkg := manager.NewPackageInfo(packageName, "", manager.StatusAvailable, "flatpak")
+	pkg := manager.NewPackageInfo(packageName, "", manager.StatusAvailable, ManagerName)
 
 	lines := strings.Split(output, "\n")
 	for _, line := range lines {
@@ -452,7 +455,7 @@ func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]mana
 			version := strings.TrimSpace(parts[1])
 			origin := strings.TrimSpace(parts[2])
 
-			pkg := manager.NewPackageInfo(name, version, manager.StatusInstalled, "flatpak")
+			pkg := manager.NewPackageInfo(name, version, manager.StatusInstalled, ManagerName)
 			pkg.Metadata["origin"] = origin
 
 			packages = append(packages, pkg)
@@ -502,7 +505,7 @@ func (m *Manager) parseUpdatesOutput(output string) []manager.PackageInfo {
 			version := strings.TrimSpace(parts[1])
 			origin := strings.TrimSpace(parts[2])
 
-			pkg := manager.NewPackageInfo(name, version, manager.StatusUpgradable, "flatpak")
+			pkg := manager.NewPackageInfo(name, version, manager.StatusUpgradable, ManagerName)
 			pkg.Metadata["origin"] = origin
 
 			packages = append(packages, pkg)
@@ -523,7 +526,7 @@ func (m *Manager) parseUpdateOutput(output string) []manager.PackageInfo {
 			parts := strings.Fields(line)
 			if len(parts) >= 2 {
 				name := parts[1] // Usually the second field is the app name
-				pkg := manager.NewPackageInfo(name, "", "upgraded", "flatpak")
+				pkg := manager.NewPackageInfo(name, "", "upgraded", ManagerName)
 				packages = append(packages, pkg)
 			}
 		}
@@ -543,7 +546,7 @@ func (m *Manager) parseUninstallOutput(output string) []manager.PackageInfo {
 			parts := strings.Fields(line)
 			if len(parts) >= 2 {
 				name := parts[1]
-				pkg := manager.NewPackageInfo(name, "", "removed", "flatpak")
+				pkg := manager.NewPackageInfo(name, "", "removed", ManagerName)
 				packages = append(packages, pkg)
 			}
 		}

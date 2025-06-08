@@ -11,6 +11,9 @@ import (
 	"github.com/bluet/syspkg/manager"
 )
 
+// ManagerName is the identifier for the APT package manager
+const ManagerName = "apt"
+
 // Manager implements the unified PackageManager interface for APT
 type Manager struct {
 	*manager.BaseManager
@@ -20,14 +23,14 @@ type Manager struct {
 func NewManager() *Manager {
 	runner := manager.NewDefaultCommandRunner()
 	return &Manager{
-		BaseManager: manager.NewBaseManager("apt", manager.CategorySystem, runner),
+		BaseManager: manager.NewBaseManager(ManagerName, manager.CategorySystem, runner),
 	}
 }
 
 // NewManagerWithRunner creates APT manager with custom runner (for testing)
 func NewManagerWithRunner(runner manager.CommandRunner) *Manager {
 	return &Manager{
-		BaseManager: manager.NewBaseManager("apt", manager.CategorySystem, runner),
+		BaseManager: manager.NewBaseManager(ManagerName, manager.CategorySystem, runner),
 	}
 }
 
@@ -419,7 +422,7 @@ func (m *Manager) Verify(ctx context.Context, packages []string, opts *manager.O
 			status = "broken"
 		}
 
-		results = append(results, manager.NewPackageInfo(pkg, "", status, "apt"))
+		results = append(results, manager.NewPackageInfo(pkg, "", status, ManagerName))
 	}
 
 	return results, nil
@@ -448,7 +451,7 @@ func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]mana
 
 		parts := strings.Fields(line)
 		if len(parts) >= 2 {
-			pkg := manager.NewPackageInfo(parts[0], parts[1], manager.StatusInstalled, "apt")
+			pkg := manager.NewPackageInfo(parts[0], parts[1], manager.StatusInstalled, ManagerName)
 
 			if len(parts) >= 3 {
 				pkg.Metadata["arch"] = parts[2]
@@ -498,7 +501,7 @@ func (m *Manager) listUpgradable(ctx context.Context, _ *manager.Options) ([]man
 					oldVersion = strings.TrimSuffix(parts[5], "]")
 				}
 
-				pkg := manager.NewPackageInfo(nameRepo[0], oldVersion, manager.StatusUpgradable, "apt")
+				pkg := manager.NewPackageInfo(nameRepo[0], oldVersion, manager.StatusUpgradable, ManagerName)
 				pkg.NewVersion = parts[1]
 				pkg.Category = nameRepo[1]
 				pkg.Metadata["arch"] = parts[2]
@@ -532,7 +535,7 @@ func (m *Manager) parseAutoRemoveOutput(output string) []manager.PackageInfo {
 				// Clean up package name (remove any special characters)
 				cleanName := strings.Trim(name, " \t")
 				if cleanName != "" && !strings.Contains(cleanName, "operation") {
-					pkg := manager.NewPackageInfo(cleanName, "", manager.StatusAvailable, "apt")
+					pkg := manager.NewPackageInfo(cleanName, "", manager.StatusAvailable, ManagerName)
 					packages = append(packages, pkg)
 				}
 			}
@@ -570,7 +573,7 @@ func (m *Manager) parseUpgradeOutput(output string) []manager.PackageInfo {
 			currentVersion := match[2]
 			newVersion := match[3]
 
-			pkg := manager.NewPackageInfo(name, currentVersion, manager.StatusUpgradable, "apt")
+			pkg := manager.NewPackageInfo(name, currentVersion, manager.StatusUpgradable, ManagerName)
 			pkg.NewVersion = newVersion
 
 			packages = append(packages, pkg)

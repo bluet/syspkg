@@ -201,7 +201,7 @@ func parseInfoOutput(output string, packageName string) (manager.PackageInfo, er
 		status = manager.StatusInstalled
 	}
 
-	pkg := manager.NewPackageInfo(name, version, status, "yum")
+	pkg := manager.NewPackageInfo(name, version, status, ManagerName)
 	pkg.Description = description
 	pkg.Metadata = make(map[string]interface{})
 	pkg.Metadata["arch"] = arch
@@ -251,7 +251,7 @@ func parseInstallOutput(output string) []manager.PackageInfo {
 				name, version := parsePackageNameVersion(packageWithVersion)
 
 				if name != "" {
-					pkg := manager.NewPackageInfo(name, version, manager.StatusInstalled, "yum")
+					pkg := manager.NewPackageInfo(name, version, manager.StatusInstalled, ManagerName)
 					pkg.Metadata = make(map[string]interface{})
 					pkg.Metadata["arch"] = arch
 					packages = append(packages, pkg)
@@ -306,7 +306,7 @@ func parseRemoveOutput(output string) []manager.PackageInfo {
 					cleanVersion = version
 				}
 
-				pkg := manager.NewPackageInfo(name, cleanVersion, manager.StatusAvailable, "yum")
+				pkg := manager.NewPackageInfo(name, cleanVersion, manager.StatusAvailable, ManagerName)
 				pkg.Metadata = make(map[string]interface{})
 				pkg.Metadata["arch"] = arch
 				packages = append(packages, pkg)
@@ -333,7 +333,7 @@ func parseRemoveOutput(output string) []manager.PackageInfo {
 				name, version := parsePackageNameVersion(packageWithVersion)
 
 				if name != "" {
-					pkg := manager.NewPackageInfo(name, version, manager.StatusAvailable, "yum")
+					pkg := manager.NewPackageInfo(name, version, manager.StatusAvailable, ManagerName)
 					pkg.Metadata = make(map[string]interface{})
 					pkg.Metadata["arch"] = arch
 					packages = append(packages, pkg)

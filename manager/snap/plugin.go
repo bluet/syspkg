@@ -10,6 +10,9 @@ import (
 	"github.com/bluet/syspkg/manager"
 )
 
+// ManagerName is the identifier for the Snap package manager
+const ManagerName = "snap"
+
 // Manager implements the unified PackageManager interface for Snap
 type Manager struct {
 	*manager.BaseManager
@@ -19,14 +22,14 @@ type Manager struct {
 func NewManager() *Manager {
 	runner := manager.NewDefaultCommandRunner()
 	return &Manager{
-		BaseManager: manager.NewBaseManager("snap", manager.CategorySystem, runner),
+		BaseManager: manager.NewBaseManager(ManagerName, manager.CategorySystem, runner),
 	}
 }
 
 // NewManagerWithRunner creates Snap manager with custom runner (for testing)
 func NewManagerWithRunner(runner manager.CommandRunner) *Manager {
 	return &Manager{
-		BaseManager: manager.NewBaseManager("snap", manager.CategorySystem, runner),
+		BaseManager: manager.NewBaseManager(ManagerName, manager.CategorySystem, runner),
 	}
 }
 

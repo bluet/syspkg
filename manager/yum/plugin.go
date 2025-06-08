@@ -10,6 +10,9 @@ import (
 	"github.com/bluet/syspkg/manager"
 )
 
+// ManagerName is the identifier for the YUM package manager
+const ManagerName = "yum"
+
 // Timeouts for different YUM operations are handled by BaseManager
 
 // Manager implements the unified PackageManager interface for YUM
@@ -21,14 +24,14 @@ type Manager struct {
 func NewManager() *Manager {
 	runner := manager.NewDefaultCommandRunner()
 	return &Manager{
-		BaseManager: manager.NewBaseManager("yum", manager.CategorySystem, runner),
+		BaseManager: manager.NewBaseManager(ManagerName, manager.CategorySystem, runner),
 	}
 }
 
 // NewManagerWithRunner creates YUM manager with custom runner (for testing)
 func NewManagerWithRunner(runner manager.CommandRunner) *Manager {
 	return &Manager{
-		BaseManager: manager.NewBaseManager("yum", manager.CategorySystem, runner),
+		BaseManager: manager.NewBaseManager(ManagerName, manager.CategorySystem, runner),
 	}
 }
 
@@ -439,7 +442,7 @@ func (m *Manager) Verify(ctx context.Context, packageNames []string, opts *manag
 	if len(packageNames) > 0 {
 		for _, pkg := range packageNames {
 			// For simplicity, if yum check succeeds, mark packages as verified
-			result := manager.NewPackageInfo(pkg, "", manager.StatusInstalled, "yum")
+			result := manager.NewPackageInfo(pkg, "", manager.StatusInstalled, ManagerName)
 			result.Metadata = make(map[string]interface{})
 			result.Metadata["verified"] = true
 			results = append(results, result)
