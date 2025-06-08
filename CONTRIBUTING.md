@@ -6,7 +6,7 @@ Thank you for your interest in contributing to SysPkg! This guide will help you 
 
 - **[README.md](README.md)** - Project overview and user guide
 - **[CHANGELOG.md](CHANGELOG.md)** - Recent achievements and version history
-- **[docs/ARCHITECTURE_OVERVIEW.md](docs/ARCHITECTURE_OVERVIEW.md)** - Technical design and interfaces
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Technical design and interfaces
 - **[testing/fixtures/README.md](testing/fixtures/README.md)** - Comprehensive fixture generation with Docker entrypoints
 - **[testing/docker/README.md](testing/docker/README.md)** - Multi-OS testing infrastructure
 - **[docs/EXIT_CODES.md](docs/EXIT_CODES.md)** - Package manager exit code behavior

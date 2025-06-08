@@ -252,7 +252,7 @@ Please open an issue (or PR ❤️) if you'd like to see support for any unliste
 
 ### For Developers 🛠️
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development workflow and testing guide
-- **[docs/ARCHITECTURE_OVERVIEW.md](docs/ARCHITECTURE_OVERVIEW.md)** - Technical design and interfaces
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Technical design and interfaces
 - **[docs/EXIT_CODES.md](docs/EXIT_CODES.md)** - Package manager exit code behaviors
 - **[testing/fixtures/README.md](testing/fixtures/README.md)** - Comprehensive fixture generation with Docker entrypoints
 - **[testing/docker/README.md](testing/docker/README.md)** - Multi-OS testing strategy
@@ -289,7 +289,7 @@ We welcome contributions to SysPkg!
 
 ### For Developers
 - **Quick start**: See [CONTRIBUTING.md](CONTRIBUTING.md) for complete development workflow
-- **Architecture**: See [docs/ARCHITECTURE_OVERVIEW.md](docs/ARCHITECTURE_OVERVIEW.md) for technical design details
+- **Architecture**: See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for technical design details
 - **Fixture generation**: See [testing/fixtures/README.md](testing/fixtures/README.md) for comprehensive approach
 
 **Quick development setup:**

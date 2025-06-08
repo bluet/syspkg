@@ -257,7 +257,7 @@ type PackageInfo struct {
     Status      string                 `json:"status"`      // installed, available, upgradable
     Description string                 `json:"description"`
     Category    string                 `json:"category"`
-    ManagerType string                 `json:"manager_type"`
+    ManagerName string                 `json:"manager"`
     Metadata    map[string]interface{} `json:"metadata"`    // Tool-specific data
 }
 ```
