@@ -11,7 +11,6 @@ import (
 	"os/signal"
 	"sort"
 	"strings"
-	"sync"
 	"syscall"
 	"time"
 
@@ -141,8 +140,10 @@ func main() {
 		ShowStatus: config.ShowStatus,
 	}
 
-	// Execute command with multi-manager support
-	err = executeMultiCommand(ctx, managers, config, opts)
+	// Execute command using new dispatcher pattern
+	validator := NewCommandValidator()
+	dispatcher := NewCommandDispatcher(validator)
+	err = dispatcher.Dispatch(ctx, managers, config, opts)
 	if err != nil {
 		if !config.Quiet {
 			printErrorAndExit(err, classifyError(err))
@@ -306,85 +307,30 @@ func getManagerEmoji(managerName string) string {
 
 // handleSearchUnified implements unified search display for both single and multi-manager scenarios
 func handleSearchUnified(ctx context.Context, managers map[string]manager.PackageManager, query []string, config *Config, opts *manager.Options) error {
-	if len(managers) == 0 {
-		return fmt.Errorf("no package managers available")
+	validator := NewCommandValidator()
+	if err := validator.ValidateManagersAvailable(managers); err != nil {
+		return err
 	}
 
+	formatter := NewOutputFormatter(config)
+	processor := NewPackageListProcessor(formatter, config)
+
 	// Print initial search message
-	if !config.Quiet && !config.JSON {
-		if len(managers) == 1 {
-			// Single manager
-			for name, pm := range managers {
-				emoji := getManagerEmoji(name)
-				statusInfo := ""
-				if config.ShowStatus {
-					statusInfo = " (with status)"
-				}
-				fmt.Printf("🔍 Searching for '%s' using %s %s%s...\n\n", strings.Join(query, " "), emoji, strings.ToUpper(pm.GetName()), statusInfo)
-			}
-		} else {
-			// Multi-manager
-			managerNames := make([]string, 0, len(managers))
-			for name := range managers {
-				managerNames = append(managerNames, name)
-			}
-			fmt.Printf("🔍 Searching for '%s' across %d package managers (%s)...\n\n",
-				strings.Join(query, " "), len(managers), strings.Join(managerNames, ", "))
-		}
-	}
+	formatter.FormatSearchHeader(query, managers, config.ShowStatus)
 
 	totalPackages := 0
 
 	// Use concurrent search for multiple managers for performance
 	if len(managers) > 1 {
-		// Get registry for concurrent operations
 		registry := manager.GetGlobalRegistry()
 		searchResults := registry.SearchAllConcurrent(ctx, query, opts)
-
-		// Process results in a consistent order (sorted by manager name)
-		managerNames := make([]string, 0, len(managers))
-		for name := range managers {
-			managerNames = append(managerNames, name)
-		}
-		sort.Strings(managerNames)
-
-		for _, name := range managerNames {
-			packages, exists := searchResults[name]
-			if !exists {
-				continue
-			}
-
-			if len(packages) == 0 {
-				if !config.Quiet && !config.JSON {
-					fmt.Printf("📦 %s: No results found\n", strings.ToUpper(name))
-				}
-				continue
-			}
-
-			// Display header with emoji and count
-			if !config.Quiet && !config.JSON {
-				emoji := getManagerEmoji(name)
-				fmt.Printf("%s %s (%d packages):\n", emoji, strings.ToUpper(name), len(packages))
-			}
-
-			// Display packages using unified logic
-			for _, pkg := range packages {
-				formatPackageInfo(pkg, config, name)
-			}
-
-			if !config.Quiet && !config.JSON && len(packages) > 0 {
-				fmt.Println()
-			}
-			totalPackages += len(packages)
-		}
+		totalPackages = processor.ProcessSearchResults(searchResults, managers)
 	} else {
 		// Single manager - use direct call (no performance benefit from concurrency)
 		for name, pm := range managers {
 			packages, err := pm.Search(ctx, query, opts)
 			if err != nil {
-				if !config.Quiet && !config.JSON {
-					fmt.Printf("❌ Error searching %s: %v\n", name, err)
-				}
+				formatter.FormatErrorMessage(name, err)
 				continue
 			}
 
@@ -396,14 +342,12 @@ func handleSearchUnified(ctx context.Context, managers map[string]manager.Packag
 			}
 
 			// Display header with emoji and count
-			if !config.Quiet && !config.JSON {
-				emoji := getManagerEmoji(name)
-				fmt.Printf("%s %s (%d packages):\n", emoji, strings.ToUpper(name), len(packages))
-			}
+			emoji := getManagerEmoji(name)
+			formatter.FormatManagerHeader(name, emoji, len(packages), "packages")
 
 			// Display packages using unified logic
 			for _, pkg := range packages {
-				formatPackageInfo(pkg, config, name)
+				formatter.FormatPackageInfo(pkg, name)
 			}
 
 			if !config.Quiet && !config.JSON && len(packages) > 0 {
@@ -423,8 +367,9 @@ func handleSearchUnified(ctx context.Context, managers map[string]manager.Packag
 
 // handleListUnified implements unified list display for multi-manager scenarios
 func handleListUnified(ctx context.Context, managers map[string]manager.PackageManager, args []string, config *Config, opts *manager.Options) error {
-	if len(managers) == 0 {
-		return fmt.Errorf("no package managers available")
+	validator := NewCommandValidator()
+	if err := validator.ValidateManagersAvailable(managers); err != nil {
+		return err
 	}
 
 	// Parse filter from args
@@ -442,94 +387,31 @@ func handleListUnified(ctx context.Context, managers map[string]manager.PackageM
 		}
 	}
 
+	formatter := NewOutputFormatter(config)
+	processor := NewPackageListProcessor(formatter, config)
+
 	// Print initial message
-	if !config.Quiet && !config.JSON {
-		managerNames := make([]string, 0, len(managers))
-		for name := range managers {
-			managerNames = append(managerNames, name)
-		}
-		fmt.Printf("📋 Listing %s packages across %d package managers (%s)...\n\n",
-			filter, len(managers), strings.Join(managerNames, ", "))
-	}
+	formatter.FormatListHeader(filter, managers)
 
 	totalPackages := 0
 
 	// Use concurrent operations for installed packages when multiple managers are available
 	if len(managers) > 1 && filter == manager.FilterInstalled {
-		// Get registry for concurrent operations
 		registry := manager.GetGlobalRegistry()
 		listResults := registry.ListInstalledAllConcurrent(ctx, opts)
-
-		// Process results in a consistent order (sorted by manager name)
-		managerNames := make([]string, 0, len(managers))
-		for name := range managers {
-			managerNames = append(managerNames, name)
-		}
-		sort.Strings(managerNames)
-
-		for _, name := range managerNames {
-			packages, exists := listResults[name]
-			if !exists {
-				continue
-			}
-
-			if len(packages) == 0 {
-				if !config.Quiet && !config.JSON {
-					fmt.Printf("📦 %s: No %s packages found\n", strings.ToUpper(name), filter)
-				}
-				continue
-			}
-
-			// Display header with emoji and count
-			if !config.Quiet && !config.JSON {
-				emoji := getManagerEmoji(name)
-				fmt.Printf("%s %s (%d %s packages):\n", emoji, strings.ToUpper(name), len(packages), filter)
-			}
-
-			// Display packages using unified logic
-			for _, pkg := range packages {
-				formatPackageInfo(pkg, config, name)
-			}
-
-			if !config.Quiet && !config.JSON && len(packages) > 0 {
-				fmt.Println()
-			}
-			totalPackages += len(packages)
-		}
+		totalPackages = processor.ProcessListResults(listResults, managers, filter)
 	} else {
 		// Sequential processing for single manager or non-installed filters
+		listResults := make(map[string][]manager.PackageInfo)
 		for name, pm := range managers {
 			packages, err := pm.List(ctx, filter, opts)
 			if err != nil {
-				if !config.Quiet && !config.JSON {
-					fmt.Printf("❌ Error listing %s packages: %v\n", name, err)
-				}
+				formatter.FormatErrorMessage(name, err)
 				continue
 			}
-
-			if len(packages) == 0 {
-				if !config.Quiet && !config.JSON {
-					fmt.Printf("📦 %s: No %s packages found\n", strings.ToUpper(name), filter)
-				}
-				continue
-			}
-
-			// Display header with emoji and count
-			if !config.Quiet && !config.JSON {
-				emoji := getManagerEmoji(name)
-				fmt.Printf("%s %s (%d %s packages):\n", emoji, strings.ToUpper(name), len(packages), filter)
-			}
-
-			// Display packages using unified logic
-			for _, pkg := range packages {
-				formatPackageInfo(pkg, config, name)
-			}
-
-			if !config.Quiet && !config.JSON && len(packages) > 0 {
-				fmt.Println()
-			}
-			totalPackages += len(packages)
+			listResults[name] = packages
 		}
+		totalPackages = processor.ProcessListResults(listResults, managers, filter)
 	}
 
 	// Summary for multi-manager listing
@@ -542,17 +424,20 @@ func handleListUnified(ctx context.Context, managers map[string]manager.PackageM
 
 // handleInfoUnified implements unified package info display for multi-manager scenarios
 func handleInfoUnified(ctx context.Context, managers map[string]manager.PackageManager, args []string, config *Config, opts *manager.Options) error {
-	if len(args) < 2 {
-		return fmt.Errorf("info requires a package name")
+	validator := NewCommandValidator()
+	if err := validator.ValidateInfoCommand(args); err != nil {
+		return err
 	}
-	if len(managers) == 0 {
-		return fmt.Errorf("no package managers available")
+	if err := validator.ValidateManagersAvailable(managers); err != nil {
+		return err
 	}
 
 	packageName := args[1]
-	printInfoHeader(packageName, managers, config)
+	formatter := NewOutputFormatter(config)
+	formatter.FormatInfoHeader(packageName, managers)
 
-	return processConcurrentInfoResults(ctx, managers, packageName, config, opts)
+	handler := NewInfoResultHandler(formatter, config)
+	return handler.ProcessConcurrentInfoResults(ctx, managers, packageName, opts)
 }
 
 // handleStatusUnified implements unified status display for multi-manager scenarios
@@ -711,28 +596,15 @@ func handleUpdateUnified(ctx context.Context, managers map[string]manager.Packag
 
 // handleUpgradeUnified implements unified upgrade for multi-manager scenarios
 func handleUpgradeUnified(ctx context.Context, managers map[string]manager.PackageManager, args []string, config *Config, opts *manager.Options) error {
-	if len(managers) == 0 {
-		return fmt.Errorf("no package managers available")
+	validator := NewCommandValidator()
+	if err := validator.ValidateManagersAvailable(managers); err != nil {
+		return err
 	}
 
-	// Parse packages from args (same logic as single-manager)
-	packages := []string{}
-	stdinFound := false
-	if len(args) > 1 {
-		for _, arg := range args[1:] {
-			if arg == "-" {
-				stdinFound = true
-				stdinPackages, err := readPackagesFromStdin()
-				if err != nil {
-					return fmt.Errorf("failed to read packages from stdin: %w", err)
-				}
-				packages = stdinPackages
-				break
-			}
-		}
-		if !stdinFound {
-			packages = args[1:]
-		}
+	// Parse packages from args
+	packages, err := parsePackagesFromArgs(args)
+	if err != nil {
+		return err
 	}
 
 	target := "all packages"
@@ -741,129 +613,40 @@ func handleUpgradeUnified(ctx context.Context, managers map[string]manager.Packa
 	}
 
 	// Safety prompt for destructive operation
-	if !opts.AssumeYes && !config.DryRun && !config.Quiet && !config.JSON {
-		managerNames := make([]string, 0, len(managers))
-		for name := range managers {
-			managerNames = append(managerNames, name)
-		}
-		fmt.Printf("⚠️  This will upgrade %s across %d managers (%s)\n", target, len(managers), strings.Join(managerNames, ", "))
-		fmt.Print("Do you want to continue? [y/N]: ")
-
-		var response string
-		_, _ = fmt.Scanln(&response)
-		if strings.ToLower(response) != "y" && strings.ToLower(response) != "yes" {
-			fmt.Println("Upgrade cancelled.")
-			return nil
-		}
+	confirmHandler := NewConfirmationHandler(config, opts)
+	if err := confirmHandler.ConfirmDestructiveOperation("upgrade", target, managers); err != nil {
+		return err
 	}
 
 	// Print initial message
-	if !config.Quiet && !config.JSON {
-		verb := "Upgrading"
-		if config.DryRun {
-			verb = "Would upgrade"
-		}
-		fmt.Printf("🚀 %s %s across %d package managers...\n\n", verb, target, len(managers))
-	}
+	formatter := NewOutputFormatter(config)
+	formatter.FormatOperationHeader("upgrade", target, managers, config.DryRun)
 
 	// Use Registry concurrent operations for performance
 	registry := manager.GetGlobalRegistry()
 	upgradeResults := registry.UpgradeAllConcurrent(ctx, packages, opts)
 
-	// Process results in a consistent order (sorted by manager name)
-	managerNames := make([]string, 0, len(managers))
-	for name := range managers {
-		managerNames = append(managerNames, name)
-	}
-	sort.Strings(managerNames)
-
-	successCount := 0
-	totalPackages := 0
-	for _, name := range managerNames {
-		upgradePackages, exists := upgradeResults[name]
-		if !exists {
-			continue
-		}
-
-		if !config.Quiet && !config.JSON {
-			emoji := getManagerEmoji(name)
-			verb := "Upgrading"
-			if config.DryRun {
-				verb = "Would upgrade"
-			}
-			fmt.Printf("%s %s %s using %s...\n", emoji, verb, target, strings.ToUpper(name))
-		}
-
-		if len(upgradePackages) >= 0 { // Success (even if 0 packages)
-			successCount++
-			totalPackages += len(upgradePackages)
-			if !config.Quiet && !config.JSON {
-				fmt.Printf("✅ %s: Successfully processed %d packages\n", strings.ToUpper(name), len(upgradePackages))
-			}
-
-			// Display results for each manager
-			if config.JSON {
-				outputResult(upgradePackages, config, name)
-			} else if config.Quiet {
-				for _, pkg := range upgradePackages {
-					formatPackageInfo(pkg, config, name)
-				}
-			} else {
-				// Normal verbose mode - show package details
-				for _, pkg := range upgradePackages {
-					formatPackageInfo(pkg, config, name)
-				}
-			}
-		}
-	}
-
-	if !config.Quiet && !config.JSON {
-		fmt.Printf("\n📊 Summary: %d packages upgraded across %d/%d managers\n", totalPackages, successCount, len(managers))
-	}
-
-	if successCount == 0 {
-		return fmt.Errorf("failed to upgrade packages for any manager")
-	}
-
-	return nil
+	// Process results using new result processor
+	processor := NewResultProcessor(formatter, config)
+	return processor.ProcessPackageOperationResults(upgradeResults, managers, "upgrade", "upgraded")
 }
 
 // handleCleanUnified implements unified clean for multi-manager scenarios
 func handleCleanUnified(ctx context.Context, managers map[string]manager.PackageManager, config *Config, opts *manager.Options) error {
-	if len(managers) == 0 {
-		return fmt.Errorf("no package managers available")
+	validator := NewCommandValidator()
+	if err := validator.ValidateManagersAvailable(managers); err != nil {
+		return err
 	}
 
 	// Safety prompt for destructive operation
-	if !opts.AssumeYes && !config.DryRun && !config.Quiet && !config.JSON {
-		managerNames := make([]string, 0, len(managers))
-		for name := range managers {
-			managerNames = append(managerNames, name)
-		}
-		fmt.Printf("⚠️  This will clean package caches across %d managers (%s)\n", len(managers), strings.Join(managerNames, ", "))
-		fmt.Print("Do you want to continue? [y/N]: ")
-
-		var response string
-		_, _ = fmt.Scanln(&response)
-		if strings.ToLower(response) != "y" && strings.ToLower(response) != "yes" {
-			fmt.Println("Clean cancelled.")
-			return nil
-		}
+	confirmHandler := NewConfirmationHandler(config, opts)
+	if err := confirmHandler.ConfirmDestructiveOperation("clean package caches", "", managers); err != nil {
+		return err
 	}
 
 	// Print initial message
-	if !config.Quiet && !config.JSON {
-		managerNames := make([]string, 0, len(managers))
-		for name := range managers {
-			managerNames = append(managerNames, name)
-		}
-		verb := "Cleaning"
-		if config.DryRun {
-			verb = "Would clean"
-		}
-		fmt.Printf("🧹 %s package caches across %d package managers (%s)...\n\n",
-			verb, len(managers), strings.Join(managerNames, ", "))
-	}
+	formatter := NewOutputFormatter(config)
+	formatter.FormatOperationHeader("clean", "package caches", managers, config.DryRun)
 
 	// Use Registry concurrent operations for performance
 	registry := manager.GetGlobalRegistry()
@@ -917,96 +700,28 @@ func handleCleanUnified(ctx context.Context, managers map[string]manager.Package
 
 // handleAutoRemoveUnified implements unified autoremove for multi-manager scenarios
 func handleAutoRemoveUnified(ctx context.Context, managers map[string]manager.PackageManager, config *Config, opts *manager.Options) error {
-	if len(managers) == 0 {
-		return fmt.Errorf("no package managers available")
+	validator := NewCommandValidator()
+	if err := validator.ValidateManagersAvailable(managers); err != nil {
+		return err
 	}
 
 	// Safety prompt for destructive operation
-	if !opts.AssumeYes && !config.DryRun && !config.Quiet && !config.JSON {
-		managerNames := make([]string, 0, len(managers))
-		for name := range managers {
-			managerNames = append(managerNames, name)
-		}
-		fmt.Printf("⚠️  This will remove orphaned packages across %d managers (%s)\n", len(managers), strings.Join(managerNames, ", "))
-		fmt.Print("Do you want to continue? [y/N]: ")
-
-		var response string
-		_, _ = fmt.Scanln(&response)
-		if strings.ToLower(response) != "y" && strings.ToLower(response) != "yes" {
-			fmt.Println("AutoRemove cancelled.")
-			return nil
-		}
+	confirmHandler := NewConfirmationHandler(config, opts)
+	if err := confirmHandler.ConfirmDestructiveOperation("remove orphaned packages", "", managers); err != nil {
+		return err
 	}
 
 	// Print initial message
-	if !config.Quiet && !config.JSON {
-		managerNames := make([]string, 0, len(managers))
-		for name := range managers {
-			managerNames = append(managerNames, name)
-		}
-		verb := "Removing"
-		if config.DryRun {
-			verb = "Would remove"
-		}
-		fmt.Printf("🗑️  %s orphaned packages across %d package managers (%s)...\n\n",
-			verb, len(managers), strings.Join(managerNames, ", "))
-	}
+	formatter := NewOutputFormatter(config)
+	formatter.FormatOperationHeader("autoremove", "orphaned packages", managers, config.DryRun)
 
 	// Use Registry concurrent operations for performance
 	registry := manager.GetGlobalRegistry()
 	autoRemoveResults := registry.AutoRemoveAllConcurrent(ctx, opts)
 
-	// Process results in a consistent order (sorted by manager name)
-	managerNames := make([]string, 0, len(managers))
-	for name := range managers {
-		managerNames = append(managerNames, name)
-	}
-	sort.Strings(managerNames)
-
-	successCount := 0
-	totalPackages := 0
-	for _, name := range managerNames {
-		packages, exists := autoRemoveResults[name]
-		if !exists {
-			continue
-		}
-
-		if !config.Quiet && !config.JSON {
-			emoji := getManagerEmoji(name)
-			verb := "Removing"
-			if config.DryRun {
-				verb = "Would remove"
-			}
-			fmt.Printf("%s %s orphaned packages using %s...\n", emoji, verb, strings.ToUpper(name))
-		}
-
-		if len(packages) >= 0 { // Success (even if 0 packages)
-			successCount++
-			totalPackages += len(packages)
-			if !config.Quiet && !config.JSON {
-				fmt.Printf("✅ %s: Successfully processed %d packages\n", strings.ToUpper(name), len(packages))
-			}
-
-			// Display results for each manager
-			if config.JSON {
-				outputResult(packages, config, name)
-			} else if config.Quiet {
-				for _, pkg := range packages {
-					formatPackageInfo(pkg, config, name)
-				}
-			}
-		}
-	}
-
-	if !config.Quiet && !config.JSON {
-		fmt.Printf("\n📊 Summary: %d orphaned packages removed across %d/%d managers\n", totalPackages, successCount, len(managers))
-	}
-
-	if successCount == 0 {
-		return fmt.Errorf("failed to remove orphaned packages for any manager")
-	}
-
-	return nil
+	// Process results using new result processor
+	processor := NewResultProcessor(formatter, config)
+	return processor.ProcessPackageOperationResults(autoRemoveResults, managers, "autoremove", "removed")
 }
 
 // handleInstallUnified implements unified install for multi-manager scenarios
@@ -1067,172 +782,6 @@ func handleVerifyUnified(ctx context.Context, managers map[string]manager.Packag
 	results := registry.VerifyAllConcurrent(ctx, packages, opts)
 
 	return processPackageOperationResults(results, managers, config, "verify", "verified")
-}
-
-func executeMultiCommand(ctx context.Context, managers map[string]manager.PackageManager, config *Config, opts *manager.Options) error {
-	args := getCommandArgs()
-	if len(args) == 0 {
-		return fmt.Errorf("no command specified")
-	}
-
-	command := args[0]
-
-	// For multi-manager operations (search is always multi, others when --all is specified)
-	switch command {
-	case "search":
-		if len(args) < 2 {
-			return fmt.Errorf("search requires a query")
-		}
-		return handleSearchUnified(ctx, managers, args[1:], config, opts)
-
-	case "list":
-		if config.UseAllManagers {
-			return handleListUnified(ctx, managers, args, config, opts)
-		}
-		// Fall through to single-manager handling
-
-	case "info":
-		if config.UseAllManagers {
-			return handleInfoUnified(ctx, managers, args, config, opts)
-		}
-		// Fall through to single-manager handling
-
-	case "status":
-		if config.UseAllManagers {
-			return handleStatusUnified(ctx, managers, config, opts)
-		}
-		// Fall through to single-manager handling
-
-	case "update":
-		if config.UseAllManagers {
-			return handleUpdateUnified(ctx, managers, config, opts)
-		}
-		// Fall through to single-manager handling
-
-	case "upgrade":
-		if config.UseAllManagers {
-			return handleUpgradeUnified(ctx, managers, args, config, opts)
-		}
-		// Fall through to single-manager handling
-
-	case "clean":
-		if config.UseAllManagers {
-			return handleCleanUnified(ctx, managers, config, opts)
-		}
-		// Fall through to single-manager handling
-
-	case "autoremove":
-		if config.UseAllManagers {
-			return handleAutoRemoveUnified(ctx, managers, config, opts)
-		}
-		// Fall through to single-manager handling
-
-	case "install":
-		if config.UseAllManagers {
-			return handleInstallUnified(ctx, managers, args, config, opts)
-		}
-		// Fall through to single-manager handling
-
-	case "remove":
-		if config.UseAllManagers {
-			return handleRemoveUnified(ctx, managers, args, config, opts)
-		}
-		// Fall through to single-manager handling
-
-	case "verify":
-		if config.UseAllManagers {
-			return handleVerifyUnified(ctx, managers, args, config, opts)
-		}
-		// Fall through to single-manager handling
-
-	case "managers":
-		return handleManagers(config)
-	}
-
-	// Single-manager operations (including list, info, status without --all)
-	{
-		// For single-manager operations, select the appropriate manager
-		var pm manager.PackageManager
-
-		if len(managers) == 1 {
-			// Only one manager available, use it
-			for _, mgr := range managers {
-				pm = mgr
-				break
-			}
-		} else {
-			// Multiple managers available
-			if config.Manager != "" {
-				// User specified a manager
-				var exists bool
-				pm, exists = managers[config.Manager]
-				if !exists {
-					return fmt.Errorf("specified manager '%s' not available", config.Manager)
-				}
-			} else {
-				// No manager specified - use the best system package manager
-				registry := manager.GetGlobalRegistry()
-				pm = registry.GetBestMatch(manager.CategorySystem)
-				if pm == nil {
-					return fmt.Errorf("no system package manager available")
-				}
-				if !config.Quiet && !config.JSON {
-					fmt.Printf("Using %s package manager\n", pm.GetName())
-				}
-			}
-		}
-		return executeSingleCommand(ctx, pm, config, opts)
-	}
-}
-
-func executeSingleCommand(ctx context.Context, pm manager.PackageManager, config *Config, opts *manager.Options) error {
-	args := getCommandArgs()
-	if len(args) == 0 {
-		return fmt.Errorf("no command specified")
-	}
-
-	command := args[0]
-	return executeCommand(ctx, pm, command, args, config, opts)
-}
-
-func executeCommand(ctx context.Context, pm manager.PackageManager, command string, args []string, config *Config, opts *manager.Options) error {
-	switch command {
-	case "search":
-		return executeSearchCommand(ctx, pm, args, config, opts)
-	case "list":
-		return executeListCommand(ctx, pm, args, config, opts)
-	case "install":
-		return executeInstallCommand(ctx, pm, args, config, opts)
-	case "remove":
-		return executeRemoveCommand(ctx, pm, args, config, opts)
-	case "info":
-		return executeInfoCommand(ctx, pm, args, config, opts)
-	case "update":
-		return handleUpdate(ctx, pm, config, opts)
-	case "upgrade":
-		return executeUpgradeCommand(ctx, pm, args, config, opts)
-	case "clean":
-		return handleClean(ctx, pm, config, opts)
-	case "autoremove":
-		return handleAutoRemove(ctx, pm, config, opts)
-	case "verify":
-		return executeVerifyCommand(ctx, pm, args, config, opts)
-	case "status":
-		return handleStatus(ctx, pm, config, opts)
-	case "managers":
-		return handleManagers(config)
-	default:
-		return fmt.Errorf("unknown command: %s", command)
-	}
-}
-
-func executeSearchCommand(ctx context.Context, pm manager.PackageManager, args []string, config *Config, opts *manager.Options) error {
-	if len(args) < 2 {
-		return fmt.Errorf("search requires a query")
-	}
-	// Convert single manager to map for unified handling
-	managers := map[string]manager.PackageManager{pm.GetName(): pm}
-	return handleSearchUnified(ctx, managers, args[1:], config, opts)
 }
 
 func executeListCommand(ctx context.Context, pm manager.PackageManager, args []string, config *Config, opts *manager.Options) error {
@@ -1377,32 +926,6 @@ func executeVerifyCommand(ctx context.Context, pm manager.PackageManager, args [
 	}
 
 	return handleVerify(ctx, pm, packages, config, opts)
-}
-
-func getCommandArgs() []string {
-	args := os.Args[1:]
-	var result []string
-
-	// Skip flags and extract command + args
-	for i := 0; i < len(args); i++ {
-		arg := args[i]
-
-		// Skip flags that take values
-		if (arg == "-c" || arg == "--category" || arg == "-m" || arg == "--manager") && i+1 < len(args) {
-			i++ // Skip the value too
-			continue
-		}
-
-		// Skip single flags, but allow "-" (stdin indicator)
-		if strings.HasPrefix(arg, "-") && arg != "-" {
-			continue
-		}
-
-		// This is a command or argument
-		result = append(result, arg)
-	}
-
-	return result
 }
 
 func outputResult(data interface{}, config *Config, managerName string) {
@@ -1962,117 +1485,4 @@ func getOperationVerb(operation string, dryRun bool) string {
 		verb = "Would " + strings.ToLower(verb)
 	}
 	return verb
-}
-
-// printInfoHeader prints the initial message for info command
-func printInfoHeader(packageName string, managers map[string]manager.PackageManager, config *Config) {
-	if !config.Quiet && !config.JSON {
-		managerNames := make([]string, 0, len(managers))
-		for name := range managers {
-			managerNames = append(managerNames, name)
-		}
-		fmt.Printf("ℹ️  Getting info for '%s' across %d package managers (%s)...\n\n",
-			packageName, len(managers), strings.Join(managerNames, ", "))
-	}
-}
-
-// infoResult represents the result of an info operation from a single manager
-type infoResult struct {
-	managerName string
-	success     bool
-	pkg         manager.PackageInfo
-	err         error
-}
-
-// processConcurrentInfoResults handles concurrent info operations and result display
-func processConcurrentInfoResults(ctx context.Context, managers map[string]manager.PackageManager, packageName string, config *Config, opts *manager.Options) error {
-
-	results := make(chan infoResult, len(managers))
-	var wg sync.WaitGroup
-
-	// Start concurrent info operations
-	for name, pm := range managers {
-		wg.Add(1)
-		go func(name string, pm manager.PackageManager) {
-			defer wg.Done()
-			pkg, err := pm.GetInfo(ctx, packageName, opts)
-			results <- infoResult{name, err == nil, pkg, err}
-		}(name, pm)
-	}
-
-	// Wait for all operations to complete
-	go func() {
-		wg.Wait()
-		close(results)
-	}()
-
-	return displayInfoResults(results, managers, packageName, config)
-}
-
-// displayInfoResults processes and displays info results from all managers
-func displayInfoResults(results chan infoResult, managers map[string]manager.PackageManager, packageName string, config *Config) error {
-	// Process results in a consistent order (sorted by manager name)
-	managerNames := make([]string, 0, len(managers))
-	for name := range managers {
-		managerNames = append(managerNames, name)
-	}
-	sort.Strings(managerNames)
-
-	// Collect results by manager name
-	resultMap := make(map[string]infoResult)
-	for result := range results {
-		resultMap[result.managerName] = result
-	}
-
-	foundCount := 0
-	for _, name := range managerNames {
-		result, exists := resultMap[name]
-		if !exists {
-			continue
-		}
-
-		if !result.success {
-			if !config.Quiet && !config.JSON {
-				fmt.Printf("❌ %s: %v\n", strings.ToUpper(result.managerName), result.err)
-			}
-			continue
-		}
-
-		foundCount++
-		displaySingleInfoResult(result, config)
-	}
-
-	if foundCount == 0 && !config.Quiet && !config.JSON {
-		fmt.Printf("Package '%s' not found in any package manager\n", packageName)
-	}
-
-	return nil
-}
-
-// displaySingleInfoResult displays the result from a single manager
-func displaySingleInfoResult(result infoResult, config *Config) {
-	// Display header for each manager
-	if !config.Quiet && !config.JSON {
-		emoji := getManagerEmoji(result.managerName)
-		fmt.Printf("%s %s:\n", emoji, strings.ToUpper(result.managerName))
-	}
-
-	if config.JSON {
-		outputResult(result.pkg, config, result.managerName)
-	} else {
-		if config.Quiet {
-			formatPackageInfo(result.pkg, config, result.managerName)
-		} else {
-			fmt.Printf("  Name: %s\n", result.pkg.Name)
-			fmt.Printf("  Version: %s\n", result.pkg.Version)
-			fmt.Printf("  Status: %s\n", result.pkg.Status)
-			if result.pkg.Description != "" {
-				fmt.Printf("  Description: %s\n", result.pkg.Description)
-			}
-			if result.pkg.Category != "" {
-				fmt.Printf("  Category: %s\n", result.pkg.Category)
-			}
-			fmt.Println()
-		}
-	}
 }
