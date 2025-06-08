@@ -63,7 +63,6 @@ COMMANDS:
 
 OPTIONS:
     # Multi-Manager Control
-    --apt, --snap, --flatpak    Use only specific manager(s)
     --all                       Use all available managers (default, concurrent for 3x performance)
     --status                    Show real package status (installed/available/upgradable)
 
@@ -81,11 +80,11 @@ OPTIONS:
 EXAMPLES:
     # Fast concurrent search (default)
     syspkg search vim                    # Search across all managers (parallel execution)
-    syspkg search vim --apt              # Search only APT (single manager)
+    syspkg search vim -m apt             # Search only APT (single manager)
 
     # Status-aware search (slower but accurate)
     syspkg search vim --status           # Show real installation status (concurrent)
-    syspkg search vim --apt --status     # APT with status information
+    syspkg search vim -m apt --status    # APT with status information
 
     # Package operations
     syspkg install vim curl -c system   # Install using system package manager category
@@ -105,9 +104,8 @@ EXAMPLES:
 type Config struct {
 	Manager         string
 	ManagerCategory string
-	ManagerFilters  map[string]bool // apt, snap, flatpak specific filters
-	UseAllManagers  bool            // Default: true (user's original superior approach)
-	ShowStatus      bool            // --status flag for status-aware search
+	UseAllManagers  bool // Default: true (user's original superior approach)
+	ShowStatus      bool // --status flag for status-aware search
 	DryRun          bool
 	Verbose         bool
 	Quiet           bool
@@ -156,7 +154,6 @@ func main() {
 
 func parseArgs() *Config {
 	config := &Config{
-		ManagerFilters: make(map[string]bool),
 		UseAllManagers: true, // User's original superior default
 	}
 	args := os.Args[1:]
@@ -167,18 +164,8 @@ func parseArgs() *Config {
 
 		switch arg {
 		// Multi-manager selection (user's original superior approach)
-		case "--apt":
-			config.ManagerFilters["apt"] = true
-			config.UseAllManagers = false
-		case "--snap":
-			config.ManagerFilters["snap"] = true
-			config.UseAllManagers = false
-		case "--flatpak":
-			config.ManagerFilters["flatpak"] = true
-			config.UseAllManagers = false
 		case "--all":
 			config.UseAllManagers = true
-			config.ManagerFilters = make(map[string]bool) // Clear filters
 		case "--status":
 			config.ShowStatus = true
 		case "-c", "--category":
@@ -291,21 +278,12 @@ func selectPackageManagers(registry *manager.Registry, config *Config) (map[stri
 		return available, nil
 	}
 
-	// Filtered managers (user's original superior user control)
-	result := make(map[string]manager.PackageManager)
-	for name, enabled := range config.ManagerFilters {
-		if enabled {
-			if pm, exists := available[name]; exists {
-				result[name] = pm
-			}
-		}
+	// Default behavior: use best system manager
+	pm := registry.GetBestMatch(manager.CategorySystem)
+	if pm == nil {
+		return nil, fmt.Errorf("no system package manager available")
 	}
-
-	if len(result) == 0 {
-		return nil, fmt.Errorf("no package managers available")
-	}
-
-	return result, nil
+	return map[string]manager.PackageManager{pm.GetName(): pm}, nil
 }
 
 // getManagerEmoji returns appropriate emoji for each package manager

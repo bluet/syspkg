@@ -4,7 +4,6 @@ package manager
 import (
 	"context"
 	"fmt"
-	"log"
 	"os/exec"
 	"strings"
 )
@@ -17,6 +16,7 @@ type BaseManager struct {
 	name            string
 	managerCategory string
 	runner          CommandRunner
+	logger          Logger
 }
 
 // NewBaseManager creates a new base manager with the given name and category
@@ -28,6 +28,14 @@ func NewBaseManager(name, managerCategory string, runner CommandRunner) *BaseMan
 		name:            name,
 		managerCategory: managerCategory,
 		runner:          runner,
+		logger:          DefaultLogger{}, // Default to standard logging
+	}
+}
+
+// SetLogger allows integrators to set a custom logger
+func (b *BaseManager) SetLogger(logger Logger) {
+	if logger != nil {
+		b.logger = logger
 	}
 }
 
@@ -150,14 +158,14 @@ func (b *BaseManager) Status(ctx context.Context, opts *Options) (ManagerStatus,
 // LogVerbosef logs a message only if verbose mode is enabled
 func (b *BaseManager) LogVerbosef(opts *Options, format string, args ...interface{}) {
 	if opts != nil && opts.Verbose {
-		log.Printf("[%s] "+format, append([]interface{}{b.name}, args...)...)
+		b.logger.Printf("[%s] "+format, append([]interface{}{b.name}, args...)...)
 	}
 }
 
 // LogDebugf logs a message only if debug mode is enabled
 func (b *BaseManager) LogDebugf(opts *Options, format string, args ...interface{}) {
 	if opts != nil && opts.Debug {
-		log.Printf("[%s DEBUG] "+format, append([]interface{}{b.name}, args...)...)
+		b.logger.Printf("[%s DEBUG] "+format, append([]interface{}{b.name}, args...)...)
 	}
 }
 
@@ -175,9 +183,9 @@ func (b *BaseManager) ValidatePackageNames(packages []string) error {
 func (b *BaseManager) HandleDryRun(opts *Options, operation string, packages []string) {
 	if opts != nil && opts.DryRun {
 		if len(packages) > 0 {
-			log.Printf("[%s DRY-RUN] Would %s packages: %v", b.name, operation, packages)
+			b.logger.Printf("[%s DRY-RUN] Would %s packages: %v", b.name, operation, packages)
 		} else {
-			log.Printf("[%s DRY-RUN] Would %s", b.name, operation)
+			b.logger.Printf("[%s DRY-RUN] Would %s", b.name, operation)
 		}
 	}
 }

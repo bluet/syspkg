@@ -352,6 +352,11 @@ func (m *Manager) Upgrade(ctx context.Context, packageNames []string, opts *mana
 
 // Clean cleans package cache
 func (m *Manager) Clean(ctx context.Context, opts *manager.Options) error {
+	// Check for dry-run mode - should not perform actual operations
+	if opts != nil && opts.DryRun {
+		return nil
+	}
+
 	result, err := m.GetRunner().Run(ctx, "yum", []string{"clean", "all"})
 	if err != nil {
 		return manager.WrapReturn(manager.StatusUnavailableError, "yum command failed", err)

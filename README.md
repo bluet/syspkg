@@ -85,10 +85,10 @@ syspkg -m yum install vim       # Install using YUM
 syspkg -c system install vim    # Use system package manager (apt/yum/apk)
 syspkg -c app search vim        # Use app managers (snap/flatpak)
 
-# Legacy manager-specific flags (still supported)
-syspkg --apt install vim
-syspkg --snap search vim
-syspkg --flatpak list upgradable
+# Specific manager operations
+syspkg -m apt install vim
+syspkg -m snap search vim
+syspkg -m flatpak list upgradable
 ```
 
 ### Multi-Manager Operations (--all flag)
@@ -125,6 +125,39 @@ syspkg search vim                   # Searches all managers (default behavior)
 syspkg list installed               # Uses best system manager
 syspkg upgrade                      # Uses best system manager
 ```
+
+### Manager Selection Logic
+
+SysPkg automatically selects the best available package manager using a priority-based system:
+
+**Priority Rankings:**
+- **APT**: 90 (highest priority - Ubuntu/Debian systems)
+- **YUM**: 80 (high priority - RHEL/CentOS systems)
+- **Snap**: 80 (high priority - universal packages)
+- **Flatpak**: 70 (medium priority - universal applications)
+- **APK**: 60 (lower priority - Alpine Linux only)
+
+**Selection Examples:**
+```bash
+# Automatic selection (no flags)
+syspkg install vim                  # Uses APT on Ubuntu, YUM on RHEL, etc.
+syspkg search vim                   # Searches ALL managers (multi-manager default)
+
+# Category-based selection
+syspkg install vim -c system        # Uses highest priority system manager
+syspkg install discord -c app       # Uses highest priority app manager (Snap > Flatpak)
+
+# Explicit manager selection
+syspkg install vim -m yum           # Force specific manager regardless of priority
+```
+
+**How It Works:**
+1. When no manager is specified, SysPkg uses `GetBestMatch()` for the operation type
+2. System operations default to the highest-priority system manager available
+3. Multi-manager operations (`--all`) run across all available managers concurrently
+4. Priority ensures consistent behavior across different Linux distributions
+
+For implementation details, see [`manager.GetBestMatch()`](manager/registry.go).
 
 ### Pipeline Support
 
@@ -232,7 +265,7 @@ func main() {
 | SNAP            | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               | ✅         | ✅    | ✅      |
 | Flatpak         | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               | ✅         | ✅    | ✅      |
 | DNF             | 🚧      | 🚧    | 🚧     | 🚧     | 🚧             | 🚧             | 🚧               | 🚧         | 🚧    | 🚧      |
-| APK (Alpine)    | 🚧      | 🚧    | 🚧     | 🚧     | 🚧             | 🚧             | 🚧               | 🚧         | 🚧    | 🚧      |
+| APK (Alpine)    | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               | ✅         | ✅    | ✅      |
 | Zypper (openSUSE) | 🚧   | 🚧    | 🚧     | 🚧     | 🚧             | 🚧             | 🚧               | 🚧         | 🚧    | 🚧      |
 
 **Legend:** ✅ Implemented, 🚧 Planned, ❌ Not supported

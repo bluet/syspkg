@@ -292,6 +292,11 @@ func (m *Manager) Upgrade(ctx context.Context, packages []string, opts *manager.
 
 // Clean is not applicable for Flatpak (automatic cleanup)
 func (m *Manager) Clean(ctx context.Context, opts *manager.Options) error {
+	// Check for dry-run mode - should not perform actual operations
+	if opts != nil && opts.DryRun {
+		return nil
+	}
+
 	// Clean unused runtimes
 	_, err := m.GetRunner().Run(ctx, "flatpak", []string{"uninstall", "--unused", "-y"}, "LANG=C")
 	if err != nil {

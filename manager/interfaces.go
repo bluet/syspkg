@@ -4,6 +4,7 @@ package manager
 import (
 	"context"
 	"errors"
+	"log"
 )
 
 // Standard errors for unsupported operations
@@ -212,3 +213,17 @@ const (
 	CategoryBuild      = "build"      // vcpkg, conan, cmake, etc.
 	CategoryApp        = "app"        // flatpak, snap, appimage, etc.
 )
+
+// Logger interface allows integrators to control logging output
+type Logger interface {
+	// Printf logs a formatted message
+	Printf(format string, args ...interface{})
+}
+
+// DefaultLogger implements Logger using the standard log package
+type DefaultLogger struct{}
+
+// Printf implements Logger interface using standard log.Printf
+func (d DefaultLogger) Printf(format string, args ...interface{}) {
+	log.Printf(format, args...)
+}
