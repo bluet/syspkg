@@ -830,6 +830,11 @@ func handleUpgradeUnified(ctx context.Context, managers map[string]manager.Packa
 				for _, pkg := range upgradePackages {
 					formatPackageInfo(pkg, config, name)
 				}
+			} else {
+				// Normal verbose mode - show package details
+				for _, pkg := range upgradePackages {
+					formatPackageInfo(pkg, config, name)
+				}
 			}
 		}
 	}
