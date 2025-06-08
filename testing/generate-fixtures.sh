@@ -100,6 +100,23 @@ generate_apk_fixtures() {
     echo ""
 }
 
+# Function to generate Flatpak fixtures
+generate_flatpak_fixtures() {
+    echo "🔧 Generating Flatpak fixtures (Ubuntu 22.04 with Flatpak)..."
+    echo "  Using entrypoint: $ENTRYPOINTS_DIR/entrypoint-flatpak.sh"
+
+    mkdir -p "${FIXTURES_DIR}/flatpak"
+
+    docker run --rm \
+        -v "${FIXTURES_DIR}/flatpak:/fixtures" \
+        -v "${ENTRYPOINTS_DIR}/entrypoint-flatpak.sh:/entrypoint.sh:ro" \
+        ubuntu:22.04 \
+        /entrypoint.sh
+
+    echo "  ✅ Flatpak fixtures generated"
+    echo ""
+}
+
 # Main execution
 main() {
     check_docker
@@ -118,12 +135,16 @@ main() {
         "apk")
             generate_apk_fixtures
             ;;
+        "flatpak")
+            generate_flatpak_fixtures
+            ;;
         *)
             # Generate fixtures for all package managers
             generate_apt_fixtures
             generate_yum_fixtures
             generate_dnf_fixtures
             generate_apk_fixtures
+            generate_flatpak_fixtures
             ;;
     esac
 
@@ -131,7 +152,7 @@ main() {
     echo ""
     echo "📋 Summary by package manager:"
 
-    for pm in apt yum dnf apk; do
+    for pm in apt yum dnf apk flatpak; do
         if [ -d "${FIXTURES_DIR}/$pm" ]; then
             count=$(find "${FIXTURES_DIR}/$pm" -name "*.txt" -type f 2>/dev/null | wc -l)
             echo "  $pm: $count fixtures"

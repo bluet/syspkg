@@ -1,0 +1,312 @@
+Crossword Editor	Create crossword puzzles	org.gnome.Crosswords.Editor	0.3.15	stable	flathub
+UYAP Editor	Edit and view UDF documents	tr.gov.uyap.Editor	5.4.12	stable	flathub
+Wonderland Editor	Fast, lightweight 3D engine for the web	com.wonderlandengine.editor	1.4.3	stable	flathub
+Howl	Lightweight editor with keyboard-centric minimalistic interface	io.howl.Editor	0.6	stable	flathub
+Rocket	Rocket Editor	io.github.rocket.editor	0.11.0	stable	flathub
+Micro Text Editor	A modern and intuitive terminal-based text editor	io.github.zyedidia.micro	2.0.14	stable	flathub
+Translation Editor	Translate and localize applications and libraries	org.gnome.Gtranslator	48.0	stable	flathub
+Titania X3D Editor	Edit, view, and navigate in X3D and VRML worlds	de.create3000.titania	4.6.12	stable	flathub
+Varnam Editor	Easily type Indic languages	com.varnamproject.Varnam	0.1	stable	flathub
+Vim	The ubiquitous text editor	org.vim.Vim	v9.1.1420-1-g086b3b5b7	stable	flathub
+Tiled	General purpose map editor	org.mapeditor.Tiled	1.11.1	stable	flathub
+KWrite	Text Editor	org.kde.kwrite	25.04.1	stable	flathub
+KBibTeX	BibTeX editor by KDE to edit bibliographies used with LaTeX	org.kde.kbibtex	0.10.0	stable	flathub
+Kate	Advanced text editor	org.kde.kate	25.04.2	stable	flathub
+ghostwriter	Distraction-free text editor for Markdown	org.kde.ghostwriter	25.04.2	stable	flathub
+gedit	Text editor	org.gnome.gedit	48.1	stable	flathub
+Tau	GTK frontend for the xi text editor	org.gnome.Tau	0.12.0	stable	flathub
+FontForge	An outline font editor	org.fontforge.FontForge	20230101	stable	flathub
+Setzer	Simple yet full-featured LaTeX editor	org.cvfosammmm.Setzer	66	stable	flathub
+Bluefish	Code and text editor with many web and software development extras	nl.openoffice.bluefish	2.2.16	stable	flathub
+Texmaker	Latex editor	net.xm1math.Texmaker	6.0.0	stable	flathub
+ReText	Simple text editor for Markdown and reStructuredText	me.mitya57.ReText	8.1.0	stable	flathub
+Photoflare	Simple but powerful Cross Platform Image Editor	io.photoflare.photoflare	1.6.13	stable	flathub
+Black Chocobo	Save editor for Final Fantasy VII	io.github.sithlord48.blackchocobo	1.16.0	stable	flathub
+Makou Reactor	A Field Editor for Final Fantasy VII	io.github.myst6re.makoureactor	2.1.0	stable	flathub
+WebkitWord	Rich text editor using WebKit	io.github.fastrizwaan.WebkitWord	0.2	stable	flathub
+LazPaint	Fast raster image editor	io.github.bgrabitmap.LazPaint	7.3.0	stable	flathub
+CoinKiller	A level editor for NSMB2	io.github.Arisotura.CoinKiller	2024-06-03	stable	flathub
+Formiko	reStructuredText and MarkDown editor	cz.zeropage.Formiko	1.5.0	stable	flathub
+Pinegrow	Visual web editor for professionals	com.pinegrow.Pinegrow	8.4	stable	flathub
+Notepadqq	An advanced text editor	com.notepadqq.Notepadqq	1.4.8	stable	flathub
+TrenchBroom	Level editor for Quake-engine based games	com.kristianduske.TrenchBroom	2025.3	stable	flathub
+NTag (audio file tag editor)	NTag is a cross platform-graphical tag editor focused on everyday life use cases.	com.github.nrittsti.NTag	1.2.15	stable	flathub
+ThiefMD	The markdown editor worth stealing.	com.github.kmwallio.thiefmd	0.2.7	stable	flathub
+Gummi	The simple LaTeX editor	app.gummi.gummi	0.8.3	stable	flathub
+wxHexEditor	Advanced large file hex editor	org.wxhexeditor.wxHexEditor	0.24	stable	flathub
+CorePad	A simple lightweight but powerful text editor	org.cubocore.CorePad	4.5.0	stable	flathub
+Black Fennec	Semi-structured Data Editor	org.blackfennec.app	0.12.0	stable	flathub
+A Photo Tool (Libre)	Photo editor for Linux	me.ahola.aphototoollibre	1.0.6	stable	flathub
+LPub3D	LPub3D - An LDraw Building Instruction Editor	io.github.trevorsandy.LPub3D	2.4.9.4133	stable	flathub
+GtkRadiant	Level editor for ID Tech based games including Quake series	io.github.TTimo.GtkRadiant	1.6.7	stable	flathub
+Pixelorama	2D sprite editor with animation support	com.orama_interactive.Pixelorama	1.1.1	stable	flathub
+Marker	Powerful markdown editor for the GNOME desktop.	com.github.fabiocolacio.marker	2023.05.02	stable	flathub
+Boxy SVG	Scalable Vector Graphics editor	com.boxy_svg.BoxySVG	4.70.0	stable	flathub
+Sly	Edit your images easily	page.kramo.Sly	1.0.0	stable	flathub
+Zim	Write notes in a desktop wiki	org.zim_wiki.Zim	0.76.1	stable	flathub
+TeXworks	Editing TeX documents made simple	org.tug.texworks	0.6.10	stable	flathub
+Tenacity	Record and edit audio files	org.tenacityaudio.Tenacity	1.3.4	stable	flathub
+Pitivi	Create and edit your own movies	org.pitivi.Pitivi	2023.03	stable	flathub
+GSequencer	Advanced Gtk+ Sequencer	org.nongnu.gsequencer.gsequencer	7.7.0	stable	flathub
+Kid3	Edit audio file metadata	org.kde.kid3	3.9.6	stable	flathub
+Apostrophe	Edit Markdown in style	org.gnome.gitlab.somas.Apostrophe	3.2	stable	flathub
+Iotas	Simple note taking	org.gnome.World.Iotas	0.11.1	stable	flathub
+Frescobaldi	Write LilyPond music sheets	org.frescobaldi.Frescobaldi	4.0.2	stable	flathub
+Audiveris	Optical Music Recognition (OMR) Application	org.audiveris.audiveris	5.3.1	stable	flathub
+LazFuck	Simple BrainFuck IDE	net.zdechov.app.LazFuck	1.3.0	stable	flathub
+Liri Text	Edit text files	io.liri.Text	0.5.0	stable	flathub
+Polyphone	Turn any sound into a musical instrument.	com.polyphone_soundfonts.polyphone	2.5	stable	flathub
+Main Menu	Customize the menu	page.codeberg.libre_menu_editor.LibreMenuEditor	1.9.2	stable	flathub
+Trelby	Libre wxpython screenwriting application	org.trelby.Trelby	2.4.15	stable	flathub
+TeXstudio	Craft beautiful LaTeX documents	org.texstudio.TeXstudio	4.8.7	stable	flathub
+Tagger	Tag your music	org.nickvision.tagger	2024.6.0	stable	flathub
+LyX	Document Processor	org.lyx.LyX	2.4.3	stable	flathub
+FocusWriter	Fullscreen word processor	org.gottcode.FocusWriter	1.8.12	stable	flathub
+Buffer	Embrace ephemeral text	org.gnome.gitlab.cheywood.Buffer	0.10.0	stable	flathub
+Audacity	Audacity is the world's most popular audio editing and recording app	org.audacityteam.Audacity	3.7.3	stable	flathub
+MOV MetaEdit	Embed and edit Universal Ad ID metadata in MOV or MP4 files	net.mediaarea.MOVMetaEdit	24.06	stable	flathub
+AVI MetaEdit	Embed, validate, and export AVI files metadata	net.mediaarea.AVIMetaEdit	1.0.2	stable	flathub
+CherryTree	Hierarchical Note Taking	net.giuspen.cherrytree	b'1.5.0'	stable	flathub
+neovide	Advanced graphical interface for Neovim	dev.neovide.neovide	0.15.0	stable	flathub
+OpenShot Video Editor	An easy to use, quick to learn, and surprisingly powerful video editor	org.openshot.OpenShot	3.3.0	stable	flathub
+VapourSynth Editor	Editor for VapourSynth scripts	org.bitbucket.mystery_keeper.VapourSynthEditor	r20	stable	flathub
+e2 SAT Editor	Satellite channel lists editor for Enigma2, Neutrino, dreambox	io.github.ctlcltd.e2se	1.8.0	stable	flathub
+PopcornFX Editor	Realtime visual effects editor	com.popcornfx.PopcornFXEditor	2.21.4.23704	stable	flathub
+Master PDF Editor	Master PDF Editor is a full solutions for work with PDF documents	net.code_industry.MasterPDFEditor	5.9.90	stable	flathub
+010 Editor	Hex editor	com.sweetscape.ZeroOneZeroEditor	15.0.2	stable	flathub
+adventure-editor	Classic point and click adventure game engine and editor	com.bladecoder.adventure-editor	4.3.1	stable	flathub
+ONLYOFFICE Desktop Editors	Office productivity suite	org.onlyoffice.desktopeditors	8.3.3	stable	flathub
+Text Editor	Edit text files	org.gnome.TextEditor	48.3	stable	flathub
+Pdf Metadata Editor	Edit PDF metadata	me.broken_by.PdfMetadataEditor	3.1.1	stable	flathub
+Wick Editor	A tool for creating games, animations and everything in-between!	com.wickeditor.WickEditor	1.19	stable	flathub
+Power Tab Editor	View and edit guitar tablature	com.github.powertab.powertabeditor	2.0.21	stable	flathub
+Dynamic Wallpaper Editor	Create or edit XML dynamic wallpapers ("background slideshows") for the GNOME desktop	com.github.maoschanz.DynamicWallpaperEditor	2.7	stable	flathub
+Dconf Editor	A graphical tool for editing the dconf database	ca.desrt.dconf-editor	45.0.1	stable	flathub
+SSH Host Editor	Edit SSH hosts and aliases	org.mintguide.ssh-host-editor	1.0.0	stable	flathub
+Torrent File Editor	Edit and create .torrent files	io.github.torrent_file_editor.Torrent-file-editor	1.0.0	stable	flathub
+bittorrent-tracker-editor	Add or remove tracker from torrent files.	io.github.gerryferdinandus.bittorrent-tracker-editor	1.33.1	stable	flathub
+Photo Editor	Easily edit and share all of your favorite photos	com.endlessm.photos	1.0.2	stable	flathub
+FFMS2 Plugin	Source wrapper library around FFmpeg	org.bitbucket.mystery_keeper.VapourSynthEditor.Plugin.FFMS2		1-5.15	flathub
+FFMS2 Plugin	Source wrapper library around FFmpeg	org.bitbucket.mystery_keeper.VapourSynthEditor.Plugin.FFMS2		1-5.14	flathub
+FFMS2 Plugin	Source wrapper library around FFmpeg	org.bitbucket.mystery_keeper.VapourSynthEditor.Plugin.FFMS2		1-5.13	flathub
+FFMS2 Plugin	Source wrapper library around FFmpeg	org.bitbucket.mystery_keeper.VapourSynthEditor.Plugin.FFMS2		1-5.12	flathub
+jdAnimatedImageEditor	A simple program for creating animated Images	page.codeberg.JakobDev.jdAnimatedImageEditor	1.4	stable	flathub
+Paper Clip	Edit PDF document metadata	io.github.diegoivan.pdf_metadata_editor	5.0	stable	flathub
+AppEditor	Edit application menu	com.github.donadigo.appeditor	1.1.1	stable	flathub
+Commit	Commit message editor	re.sonny.Commit	4.3	stable	flathub
+jdTextEdit	An advanced text editor	page.codeberg.JakobDev.jdTextEdit	11.3	stable	flathub
+Mousepad	Mousepad is a simple text editor for the Xfce desktop environment	org.xfce.mousepad	0.6.5	stable	flathub
+SkyTemple	ROM Editor for Pok?mon Mystery Dungeon Explorers of Sky	org.skytemple.SkyTemple	1.8.4	stable	flathub
+SciTE	A SCIntilla based Text Editor	org.scintilla.SciTE	5.5.4	stable	flathub
+QXmlEdit	XML editor	org.qxmledit.QXmlEdit	0.9.18	stable	flathub
+QElectroTech	Electrical diagram editor	org.qelectrotech.QElectroTech	0.9-dev	stable	flathub
+Ipe	The Ipe extensible drawing editor	org.otfried.Ipe	7.2.30	stable	flathub
+JOSM	Java OpenStreetMap Editor	org.openstreetmap.josm	19412	stable	flathub
+Avogadro	Free and open source molecular editor	org.openchemistry.Avogadro2	1.100.0	stable	flathub
+Olive	Non-linear video editor	org.olivevideoeditor.Olive	0.1.2	stable	flathub
+MFEKglif	Glyph editor for the Modular Font Editor K project	org.mfek.MFEKglif	v2.0.1-revision-1	stable	flathub
+Subtitle Composer	Video subtitle editor that supports basic and advanced editing operations	org.kde.subtitlecomposer	0.8.1	stable	flathub
+Okteta	Hex editor	org.kde.okteta	0.26.22	stable	flathub
+Kwave	Sound editor	org.kde.kwave	25.04.2	stable	flathub
+KImageMapEditor	HTML Image Map Editor	org.kde.kimagemapeditor	25.04.2	stable	flathub
+Kile	TeX/LaTeX Editor	org.kde.kile	3.0b4	stable	flathub
+Inkscape	Vector Graphics Editor	org.inkscape.Inkscape	1.4.2	stable	flathub
+GNU Emacs	An extensible text editor	org.gnu.emacs	30.1	stable	flathub
+BinEd	Binary/Hex Editor	org.exbin.BinEd	0.2.4	stable	flathub
+MenuLibre	An advanced FreeDesktop.org compliant menu editor	org.bluesabre.MenuLibre	2.3.2	stable	flathub
+ImHex	Modern REing Hex Editor	net.werwolv.ImHex	1.37.4	stable	flathub
+PDFedit	PDF editor with ability to browse/edit the tree of raw pdf objects	net.sourceforge.Pdfedit	0.4.5.fl2	stable	flathub
+Red Eclipse	First-person shooter with agile gameplay and built-in editor	net.redeclipse.RedEclipse	2.0.0	stable	flathub
+Red Eclipse Legacy	First-person shooter with agile gameplay and built-in editor	net.redeclipse.RedEclipse-Legacy	1.6.0	stable	flathub
+Puddletag	A powerful ID3 tag editor	net.puddletag.puddletag	2.4.0	stable	flathub
+Poedit	Simple translation editor	net.poedit.Poedit	3.6.3	stable	flathub
+SLADE	It's a Doom editor	net.mancubus.SLADE	3.2.7	stable	flathub
+DarkRadiant	3D level editor for The Dark Mod	net.darkradiant.DarkRadiant	3.9.0	stable	flathub
+Blockbench	Blockbench - A boxy 3D model editor	net.blockbench.Blockbench	4.12.1	stable	flathub
+Svgvi	SVG viewer and editor using XML declarations	mx.pwmc.Svgvi	2.0.2	stable	flathub
+Maverick Model 3D	3D model editor and animator for games	moe.clover.mm3d	1.3.15	stable	flathub
+Daty	Free Wikidata editor	ml.prevete.Daty	1.0b	stable	flathub
+Pixelitor	Open source image editor	io.sourceforge.Pixelitor	4.3.1	stable	flathub
+Gaupol	Editor for text-based subtitles	io.otsaloma.gaupol	1.15	stable	flathub
+Near Infinity	An Infinity Engine Resource Browser and Editor	io.github.nearinfinitybrowser.nearinfinity	v2.4-20250303	stable	flathub
+vengi VoxEdit	voxel editor	io.github.mgerhardy.vengi.voxedit	v0.0.32	stable	flathub
+Jottr	A simple text editor mainly intended for writers, journalists and researchers	io.github.mfat.jottr	1.4.3	stable	flathub
+Textosaurus	Simple cross-platform text editor based on Qt and QScintilla	io.github.martinrotter.textosaurus	0.9.12	stable	flathub
+Needly	an openQA needle editor written in Python	io.github.lruzicka.Needly	2.5.61	stable	flathub
+Flowblade	Video Editor - Fast, Precise, Stable	io.github.jliljebl.Flowblade	2.22	stable	flathub
+JChemPaint	Chemical 2D structure editor	io.github.jchempaint.JChemPaint	3.94b	stable	flathub
+Porymap	A map editor for the Pok?mon generation 3 decompilation projects	io.github.huderlem.porymap	6.0.0	stable	flathub
+PpdEditor	2D paper doll editor	io.github.fralonra.PpdEditor	0.1.2	stable	flathub
+CudaText	Open source and cross-platform text editor	io.github.cudatext.CudaText-Qt	1.224.0.0	stable	flathub
+CuteMarkEd	Qt Markdown Editor	io.github.cloose.CuteMarkEd	0.11.3	stable	flathub
+Tilemap Studio	A tilemap editor for Game Boy, Color, Advance, DS, and SNES projects	io.github.Rangi42.tilemap-studio	4.0.1	stable	flathub
+Fig	Sleek GIF editor	io.github.Q1CHENL.fig	1.0.7	stable	flathub
+PDF4QT	Open Source PDF Editor	io.github.JakubMelka.Pdf4qt	1.5.1.0	stable	flathub
+ImEditor	Simple & versatile image editor	io.github.ImEditor	0.9.8	stable	flathub
+Beekeeper Studio	The SQL Editor and Database Manager Of Your Dreams	io.beekeeperstudio.Studio	5.2.12	stable	flathub
+Atom	A hackable text editor for the 21st Century	io.atom.Atom	1.63.1	stable	flathub
+Zed	High-performance code editor	dev.zed.Zed	v0.189.5	stable	flathub
+Zed Preview	High-performance code editor	dev.zed.Zed-Preview	v0.190.3-pre	stable	flathub
+Pulsar	Modern, modifiable editor	dev.pulsar_edit.Pulsar	1.128.0	stable	flathub
+Lapce	Lightning-fast and powerful code editor written in Rust	dev.lapce.lapce	0.4.2	stable	flathub
+ecode	Lightweight multi-platform code editor designed for modern hardware with a focus on responsiveness and performance	dev.ensoft.ecode	0.7.1	stable	flathub
+Renew	Petri net editor and simulator	de.renew.Renew	4.1	stable	flathub
+KLayout	Viewer and editor for mask layouts	de.klayout.KLayout	0.30.2	stable	flathub
+Sublime Text	Sophisticated text editor for code, markup and prose	com.sublimetext.three	3.2.2	stable	flathub
+Sigil	Multi-platform EPUB ebook editor	com.sigil_ebook.Sigil	2.3.1	stable	flathub
+Sejda PDF Desktop	PDF editor	com.sejda.Sejda	7.7.0	stable	flathub
+Rosegarden	MIDI and Audio Sequencer and Notation Editor	com.rosegardenmusic.rosegarden	24.12	stable	flathub
+Lix	Lemmings-like game with puzzles, editor, multiplayer	com.lixgame.Lix	v0.10.30	stable	flathub
+NBTExplorer	A graphical NBT editor for all Minecraft NBT data sources	com.jaquadro.NBTExplorer	2.8.0	stable	flathub
+Helix	A post-modern text editor	com.helix_editor.Helix	25.01	stable	flathub
+Photocrea	Advanced image editor	com.github.vikdevelop.photopea_app	2.3.8	stable	flathub
+MarkText	Next generation markdown editor	com.github.marktext.marktext	0.17.1	stable	flathub
+Dust Racing 2D	Traditional top-down car racing game including a level editor	com.github.juzzlin.DustRacing2D	2.1.1	stable	flathub
+Kibi	A text editor in ?1024 lines of code, written in Rust	com.github.ilai_deutel.kibi	0.2.2	stable	flathub
+Bless	Gtk# Hex Editor	com.github.afrantzis.Bless	0.6.3	stable	flathub
+TuxGuitar	TuxGuitar is a free and open-source tablature editor.	ar.com.tuxguitar.TuxGuitar	1.6.6	stable	flathub
+Katvan	Editor for Typst files, with a bias for Right-to-Left	app.katvan.Katvan	0.10.0	stable	flathub
+Woxel	Minecraft Style Voxel Editor	xyz.woxel.Woxel	1.4	stable	flathub
+jdNBTExplorer	An Editor for Minecraft NBT files	page.codeberg.JakobDev.jdNBTExplorer	2.3	stable	flathub
+Viking	GPS Data Editor and Analyzer	org.viking.Viking	1.10.0	stable	flathub
+TeXmacs	Scientific Document Editor	org.texmacs.TeXmacs	2.1.4	stable	flathub
+DB Browser for SQLite	light GUI editor for SQLite databases	org.sqlitebrowser.sqlitebrowser	3.13.0-rc1	stable	flathub
+Shotcut	Video editor	org.shotcut.Shotcut	25.05.11	stable	flathub
+Glaxnimate	Vector Animation Editor	org.mattbas.Glaxnimate	0.5.4	stable	flathub
+Kdenlive	Video editor	org.kde.kdenlive	25.04.2	stable	flathub
+KColorChooser	Color selector and palette editor	org.kde.kcolorchooser	25.04.1	stable	flathub
+SymbolEditor	A cross stitch symbol editor	org.kde.SymbolEditor	2.1.0	stable	flathub
+FamiStudio	FamiStudio NES Music Editor	org.famistudio.FamiStudio	4.4.0	stable	flathub
+Eclipse IDE for Java Developers	The essential tools for any Java developer, including a Java IDE, a Git client, XML Editor, Maven and Gradle integration	org.eclipse.Java	4.34	stable	flathub
+Molsketch	2D Molecular Structures Editor	net.sourceforge.molsketch	0.8.1	stable	flathub
+Kino	Kino DV non-linear video editor for the GNU/Linux and BSD platforms	net.sourceforge.Kino	1.3.4	stable	flathub
+Qoobar	Qoobar is a simple tags editor for classical music	io.sourceforge.qoobar.Qoobar	1.7.0	stable	flathub
+Retro Sprite	Pixel Editor for Retro Consoles	io.github.xverizex.RetroSpriteEditor	0.2.46	stable	flathub
+Oculante	A fast and simple image viewer/editor	io.github.woelper.Oculante	0.9.1	stable	flathub
+Mapiah	User friendly multiplatform Therion map editor	io.github.rsevero.mapiah	0.1.0	stable	flathub
+Goxel	Open Source 3D voxel editor	io.github.guillaumechereau.Goxel	0.13.0	stable	flathub
+Zettlr	A Markdown editor for the 21st century	com.zettlr.Zettlr	3.5.0	stable	flathub
+NeoRegex	Regular expression editor and tester.	com.neoutils.NeoRegex	3.1.0	stable	flathub
+IntelliJ IDEA Ultimate	Leading Java and Kotlin editor	com.jetbrains.IntelliJ-IDEA-Ultimate	2025.1.2	stable	flathub
+IntelliJ IDEA Community	Leading Java and Kotlin editor	com.jetbrains.IntelliJ-IDEA-Community	2025.1.2	stable	flathub
+Norka	Continuous text editor	com.github.tenderowl.norka	1.1.0	stable	flathub
+LibreSprite	Animated sprite editor and pixel art tool	com.github.libresprite.LibreSprite	1.1-dev	stable	flathub
+UEFITool	UEFI firmware image viewer and editor	com.github.LongSoft.UEFITool	A71	stable	flathub
+Telyn	Visual editor for parametric sewing patterns	co.luoja.Telyn	1.0.6	stable	flathub
+WolfShaper	WolfShaper LV2/VST/VST3/CLAP plugin	org.freedesktop.LinuxAudio.Plugins.WolfShaper	1.0.2	24.08	flathub
+WolfShaper	WolfShaper LV2/VST/VST3/CLAP plugin	org.freedesktop.LinuxAudio.Plugins.WolfShaper	1.0.2	23.08	flathub
+WolfShaper	WolfShaper LV2/VST/VST2/CLAP plugin	org.freedesktop.LinuxAudio.Plugins.WolfShaper	1.0.2	22.08	flathub
+WolfShaper	WolfShaper LV2/VST plugin	org.freedesktop.LinuxAudio.Plugins.WolfShaper	0.1.8	21.08	flathub
+WolfShaper	WolfShaper LV2/VST plugin	org.freedesktop.LinuxAudio.Plugins.WolfShaper	0.1.8	20.08	flathub
+Deckr	Deckr Desktop App	surf.deckr.deckr	2.8.67	stable	flathub
+Insomnia	Open-source API client	rest.insomnia.Insomnia	1:10.3.1	stable	flathub
+Stunt Rally	Racing game with rally style of driving	org.tuxfamily.StuntRally	2.7	stable	flathub
+TurboWarp	Make games, animations, and stories	org.turbowarp.TurboWarp	1.14.2	stable	flathub
+SuperTux	A jump-and-run game starring Tux the Penguin	org.supertuxproject.SuperTux	0.6.3	stable	flathub
+Standard Notes	A simple and private place for your notes, thoughts, and life's work	org.standardnotes.standardnotes	3.196.8	stable	flathub
+Recoll	Full-text search for your desktop	org.recoll.recoll	1.43.2	stable	flathub
+Pyzo	A Python IDE aimed at simplicity and interactivity	org.pyzo.pyzo	4.9.0	stable	flathub
+MuseScore	Create, play and print beautiful sheet music	org.musescore.MuseScore	4.5.1	stable	flathub
+mMass	Open Source Mass Spectrometry Tool	org.mmass.mMass	5.5.0	stable	flathub
+LVNAuth	Create and play visual novels	org.lvnauth.LVNAuth	0.7	stable	flathub
+Rocs	Rocs Graph Theory	org.kde.rocs	25.04.1	stable	flathub
+Pix	Image Gallery	org.kde.pix	4.0.0	stable	flathub
+Parley	Vocabulary Trainer	org.kde.parley	25.04.2	stable	flathub
+WordQuiz	Flash card trainer	org.kde.kwordquiz	25.04.2	stable	flathub
+KTouch	Touch Typing Tutor	org.kde.ktouch	25.04.2	stable	flathub
+KStars	Desktop Planetarium	org.kde.kstars	3.7.3	stable	flathub
+KDiff3	A file and folder comparison and merge tool	org.kde.kdiff3	1.12.3	stable	flathub
+Kanagram	Letter Order Game	org.kde.kanagram	25.04.2	stable	flathub
+Kalzium	Periodic Table of Elements	org.kde.kalzium	25.04.2	stable	flathub
+digiKam	Photo Management Program	org.kde.digikam	8.6.0	stable	flathub
+Godot Engine (C#/.NET)	Easily create 2D and 3D games	org.godotengine.GodotSharp	4.3	stable	flathub
+Godot 3 (C#/.NET)	Easily create 2D and 3D games	org.godotengine.Godot3Sharp	3.6	stable	flathub
+Godot 3	Easily create 2D and 3D games	org.godotengine.Godot3	3.6	stable	flathub
+Godot Engine	Easily create 2D and 3D games	org.godotengine.Godot	4.4.1	stable	flathub
+gThumb Image Viewer	View and organize your images	org.gnome.gThumb	3.12.7	stable	flathub
+Shotwell	Digital photo organizer	org.gnome.Shotwell	0.32.9	stable	flathub
+Getting Things GNOME!	Personal tasks and TODO-list items organizer	org.gnome.GTG	0.6	stable	flathub
+GHex	Inspect and edit binary files	org.gnome.GHex	46.1	stable	flathub
+Devhelp	A developer tool for browsing and searching API documentation	org.gnome.Devhelp	43.0	stable	flathub
+Frozen Bubble	An addictive game about frozen bubbles	org.frozen_bubble.frozen-bubble	2.213	stable	flathub
+fre:ac	Audio converter and CD ripper	org.freac.freac	1.1.7	stable	flathub
+Flameshot	Powerful and simple to use screenshot software	org.flameshot.Flameshot	12.1.0	stable	flathub
+DuckStation	PlayStation Emulator	org.duckstation.DuckStation	0.1-9054-g09a1bfdde	stable	flathub
+BuhoCMS	A local CMS for static site generators	org.buhocms.BuhoCMS	0.9.0	stable	flathub
+Artisan	Visual scope for coffee roasters	org.artisan_scope.artisan	3.1.4	stable	flathub
+Ardour	Digital Audio Workstation	org.ardour.Ardour	8.12.0	stable	flathub
+Apache Directory Studio	A complete directory tooling platform	org.apache.directory.studio	2.0.0.v20210717-M17	stable	flathub
+Aegisub	Create and modify subtitles	org.aegisub.Aegisub	3.4.2	stable	flathub
+wxEDID	Read and edit EDID files	net.sourceforge.wxEDID	0.0.32	stable	flathub
+Frets on Fire	Frets on Fire is a game of musical skill and fast fingers. The aim of the game is to play guitar with the keyboard as accurately as possible.	net.sourceforge.fretsonfire	1.3.110	stable	flathub
+SDL-Ball	Brick-breaking game with pretty graphics	net.sourceforge.SDL-Ball	1.04	stable	flathub
+Lifeograph	Advanced personal note taking application	net.sourceforge.Lifeograph	3.0.2	stable	flathub
+Outwiker	Personal wiki and outliner.	net.jenyay.Outwiker	3.3.0.940	stable	flathub
+Joplin	open source note taking and to-do application	net.cozic.joplin_desktop	3.2.11	stable	flathub
+NFO Viewer	Viewer for NFO files	io.otsaloma.nfoview	2.1	stable	flathub
+Neovim	Vim-fork focused on extensibility and usability	io.neovim.nvim	0.11.2	stable	flathub
+S3Drive	Convert S3, SFTP, WebDAV or Rclone back-end into your encrypted storage	io.kapsa.drive	1.12.9	stable	flathub
+pxtone collab	Multiplayer Music Sequencer	io.github.yuxshao.ptcollab	v0.6.4.8	stable	flathub
+MagicSetEditor	A program used to make custom cards	io.github.twanvl.MagicSetEditor2	2.1.2	stable	flathub
+OpenDungeonsPlus	manage Creatures and Dungeons in the style of Dungeon Keeper	io.github.tomluchowski.OpenDungeonsPlus	0.8	stable	flathub
+ThemeGenerator	Generate Styles with Style.	io.github.thiefmd.themegenerator	0.1.3	stable	flathub
+HBud	Simple audio/video player and karaoke app written in Python and GTK4	io.github.swanux.hbud	0.4.2	stable	flathub
+Muon	Graphical SFTP client and terminal emulator with helpful utilities	io.github.subhra74.Muon	1.0.4	stable	flathub
+GitHub Desktop	Simple collaboration from your desktop	io.github.shiftey.Desktop	3.4.13-linux1	stable	flathub
+Ex Falso	Edit tags in your audio files	io.github.quodlibet.ExFalso	4.7.1	stable	flathub
+MQTTy	GUI for consuming MQTT topics	io.github.otaxhu.MQTTy	0.1.4	stable	flathub
+OpenHV	Futuristic strategy game	io.github.openhv.OpenHV	20250413	stable	flathub
+Chirurgien	Understand and manipulate binary file formats	io.github.leonardschardijn.Chirurgien	2.2	stable	flathub
+LightZone	Camera RAW image processor	io.github.ktgw0316.LightZone	4.2.5	stable	flathub
+Scriptorium	Design and write manuscripts	io.github.cgueret.Scriptorium	0.2.1	stable	flathub
+Polished Map	Edit pokecrystal maps and tilesets	io.github.Rangi42.polished-map	4.7.1	stable	flathub
+Polished Map++	Edit pokecrystal maps and tilesets	io.github.Rangi42.polished-map-plusplus	2.7.1	stable	flathub
+Tanks of Freedom	Indie Turn Based Strategy in Isometric Pixel Art	in.p1x.TanksOfFreedom	0.7.1-beta	stable	flathub
+Tsuki-tag	Anime imageboard browser, aggregator, downloader, tagger, converter, collection manager. Browse and create your own collections, configure workspaces for image downloads with templating support.	eu.ngdevelopment.tsukitag	0.9.5	stable	flathub
+Story Architect (STARC)	All-in-One Writing App	dev.storyapps.starc	0.7.7	stable	flathub
+Seabird	A simple Kubernetes IDE for GNOME	dev.skynomads.Seabird	v0.5.1	stable	flathub
+Pepys	A straightforward markdown journal	dev.lukebriggs.pepys	1.5.4	stable	flathub
+gta5view	Open and edit GTA V profiles	de.syping.gta5view	1.10.2	stable	flathub
+Rechnungs-Assistent	German invoice generator	de.linuxguides.RechnungsAssistent	v0.2.0	stable	flathub
+Gobby	Edit text files collaboratively	de._0x539.gobby	0.6	stable	flathub
+XnView MP	View and organize your images	com.xnview.XnViewMP	1.9.1	stable	flathub
+VSCodium	Telemetry-less code editing	com.vscodium.codium	1.100.33714	stable	flathub
+VSCodium - Insiders	Telemetry-less code editing	com.vscodium.codium-insiders	1.101.03463-insider	stable	flathub
+Visual Studio Code	Code editing. Redefined.	com.visualstudio.code	1.100.2	stable	flathub
+Code - OSS	Visual Studio Code. Code editing. Redefined.	com.visualstudio.code-oss	1.74.3	stable	flathub
+Focal	Organize tasks & notes in a tree.	com.vargary.focal	1.1.0	stable	flathub
+Unity Hub	Manage game engine installations	com.unity.UnityHub	3.12.1	stable	flathub
+WonderPen	Write novels and essays	com.tominlab.wonderpen	2.6.7	stable	flathub
+TIC-80	Fantasy computer for making, playing and sharing tiny games	com.tic80.TIC_80	v1.1.2837	stable	flathub
+TreeSheets	Free Form Data Organizer	com.strlen.TreeSheets	15478397467	stable	flathub
+StepMania	Rhythm and dance game	com.stepmania.StepMania	5.1.0-b2	stable	flathub
+SimulIDE	Circuit simulator	com.simulide.simulide	1.1.0	stable	flathub
+Sayonara	A fast and powerful audio player and library manager	com.sayonara_player.Sayonara	1.10.0-stable1	stable	flathub
+Thrive	An evolution simulation game. Take control of your species in the environment and edit your species as a whole. Compete with other evolving species for resources on an alien planet.	com.revolutionarygamesstudio.ThriveLauncher	2.2.0	stable	flathub
+Proton VPN	Secures your internet and protects your online privacy	com.protonvpn.www	4.9.5	stable	flathub
+JPEXS Free Flash Decompiler	Decompile and edit SWF files	com.jpexs.decompiler.flash	23.0.1	stable	flathub
+WebStorm	The smartest JavaScript IDE	com.jetbrains.WebStorm	2024.3.1.1	stable	flathub
+PhpStorm	PHP IDE for Professional Development	com.jetbrains.PhpStorm	2025.1.2	stable	flathub
+CLion	A cross-platform IDE for C and C++	com.jetbrains.CLion	2025.1.1	stable	flathub
+Inky	Write interactive narrative in inkle's markup language	com.inklestudios.Inky	0.15.1	stable	flathub
+Lunacy	Free graphic design tool for UX/UI	com.icons8.Lunacy	11.4	stable	flathub
+Android Studio	IDE for Android app development	com.google.AndroidStudio	2024.3.2.15	stable	flathub
+Xournal++	Take handwritten notes	com.github.xournalpp.xournalpp	1.2.7	stable	flathub
+Bada Bib!	View and edit BibTeX entries	com.github.rogercrocker.badabib	0.8.1	stable	flathub
+ChibiTracker	Portable Impulse Tracker clone	com.github.reduz.ChibiTracker	1.4.2	stable	flathub
+Spice-Up	Create simple and beautiful presentations	com.github.philip_scott.spice-up	1.9.1	stable	flathub
+Notes-Up	Your New Notebook	com.github.philip_scott.notes-up	2.0.2	stable	flathub
+Drawing	Edit screenshots or memes	com.github.maoschanz.drawing	1.0.2	stable	flathub
+IO Return to Castle Wolfenstein	Game engine for Return to Castle Wolfenstein	com.github.iortcw.iortcw	1.51c	stable	flathub
+Notepad Next	A cross-platform, reimplementation of Notepad++	com.github.dail8859.NotepadNext	v0.11	stable	flathub
+GraphUI	Graph Visualization	com.github.artemanufrij.graphui	1.1.1	stable	flathub
+EDuke32	EDuke32 is an awesome, free homebrew game engine	com.eduke32.EDuke32	20250411-10619-b87598471	stable	flathub
+Recipe Scribe	A program for writing recipes	com.cerebralnomad.recipescribe	2.0.2	stable	flathub
+calibre	The one stop solution to all your e-book needs	com.calibre_ebook.calibre	8.4.0	stable	flathub
+GitKraken	For repo management, in-app code editing & issue tracking.	com.axosoft.GitKraken	11.1.1	stable	flathub
+Arduino IDE v2	Open-source electronics prototyping platform	cc.arduino.IDE2	2.3.6	stable	flathub
+Polychromatic	RGB lighting management software for OpenRazer	app.polychromatic.controller	0.9.5	stable	flathub
+Midterm: Notes & Flashcards	A free note-taking app for studying.	app.midterm.MidtermDesktop	1.2.2	stable	flathub
+Multiplication Puzzle	Solve a math mystery	app.drey.MultiplicationPuzzle	15.0	stable	flathub
+Ear Tag	Edit audio file tags	app.drey.EarTag	0.6.5	stable	flathub
+Schemes	Create syntax highlighting schemes	app.devsuite.Schemes	46.0	stable	flathub

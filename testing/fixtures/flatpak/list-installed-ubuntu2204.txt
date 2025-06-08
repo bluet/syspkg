@@ -1,0 +1,7 @@
+shiftkey	3.4.13-linux1	flathub
+Freedesktop SDK	freedesktop-sdk-24.08.20	flathub
+Freedesktop SDK	25.1.1	flathub
+Freedesktop SDK	25.1.1	flathub
+Freedesktop SDK		flathub
+The GNOME Project	48.1	flathub
+GNOME Application Platform version 48		flathub

@@ -1,0 +1,20 @@
+
+The GNOME Project - Perform arithmetic, scientific or financial calculations
+
+          ID: org.gnome.Calculator
+         Ref: app/org.gnome.Calculator/x86_64/stable
+        Arch: x86_64
+      Branch: stable
+     Version: 48.1
+     License: GPL-3.0-or-later
+      Origin: flathub
+  Collection: org.flathub.Stable
+Installation: user
+   Installed: 4.7?MB
+     Runtime: org.gnome.Platform/x86_64/48
+         Sdk: org.gnome.Sdk/x86_64/48
+
+      Commit: 9b15860cf5f37ee81915c88da4c1edbf25367905c67d4c6323cf9a5bffcca82c
+      Parent: d5b112c2ba62ffa14fa336f654026a0f68337eac2dd0f7e20fbedb052522065c
+     Subject: Merge pull request #42 from flathub/update-38e6836 (19bbf48de725)
+        Date: 2025-05-06 17:00:11 +0000

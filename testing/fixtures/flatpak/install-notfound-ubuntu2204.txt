@@ -1,0 +1,2 @@
+Looking for matches?
+error: Nothing matches nonexistent.app.NotReal in remote flathub

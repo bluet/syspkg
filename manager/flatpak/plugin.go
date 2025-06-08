@@ -426,7 +426,7 @@ func (m *Manager) parseInfoOutput(output, packageName string) manager.PackageInf
 
 // listInstalled lists installed flatpak packages
 func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]manager.PackageInfo, error) {
-	result, err := m.GetRunner().Run(ctx, "flatpak", []string{"list", "--app"}, "LANG=C")
+	result, err := m.GetRunner().Run(ctx, "flatpak", []string{"list", "--user", "--columns=name,version,origin"}, "LANG=C")
 	if err != nil {
 		return nil, manager.WrapReturn(manager.StatusUnavailableError, "flatpak command failed", err)
 	}
@@ -445,22 +445,15 @@ func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]mana
 			continue
 		}
 
-		// Format: Name\tApplication ID\tVersion\tBranch\tInstallation
+		// Format: Name\tVersion\tOrigin (3 columns from --columns=name,version,origin)
 		parts := strings.Split(line, "\t")
 		if len(parts) >= 3 {
 			name := strings.TrimSpace(parts[0])
-			appId := strings.TrimSpace(parts[1])
-			version := strings.TrimSpace(parts[2])
+			version := strings.TrimSpace(parts[1])
+			origin := strings.TrimSpace(parts[2])
 
 			pkg := manager.NewPackageInfo(name, version, manager.StatusInstalled, "flatpak")
-			pkg.Metadata["app_id"] = appId
-
-			if len(parts) >= 4 {
-				pkg.Metadata["branch"] = strings.TrimSpace(parts[3])
-			}
-			if len(parts) >= 5 {
-				pkg.Metadata["installation"] = strings.TrimSpace(parts[4])
-			}
+			pkg.Metadata["origin"] = origin
 
 			packages = append(packages, pkg)
 		}
@@ -472,7 +465,7 @@ func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]mana
 // listUpgradable lists packages that can be upgraded
 func (m *Manager) listUpgradable(ctx context.Context, _ *manager.Options) ([]manager.PackageInfo, error) {
 	// Check for updates without applying them
-	result, err := m.GetRunner().Run(ctx, "flatpak", []string{"remote-ls", "--updates"}, "LANG=C")
+	result, err := m.GetRunner().Run(ctx, "flatpak", []string{"list", "--user", "--updates", "--columns=name,version,origin"}, "LANG=C")
 	if err != nil {
 		return nil, manager.WrapReturn(manager.StatusUnavailableError, "flatpak command failed", err)
 	}
@@ -502,22 +495,15 @@ func (m *Manager) parseUpdatesOutput(output string) []manager.PackageInfo {
 			continue
 		}
 
-		// Format: Application ID\tVersion\tBranch\tRemote
+		// Format: Name\tVersion\tOrigin (3 columns from --columns=name,version,origin)
 		parts := strings.Split(line, "\t")
-		if len(parts) >= 2 {
-			appId := strings.TrimSpace(parts[0])
+		if len(parts) >= 3 {
+			name := strings.TrimSpace(parts[0])
 			version := strings.TrimSpace(parts[1])
+			origin := strings.TrimSpace(parts[2])
 
-			pkg := manager.NewPackageInfo(appId, "", manager.StatusUpgradable, "flatpak")
-			pkg.NewVersion = version
-			pkg.Metadata["app_id"] = appId
-
-			if len(parts) >= 3 {
-				pkg.Metadata["branch"] = strings.TrimSpace(parts[2])
-			}
-			if len(parts) >= 4 {
-				pkg.Metadata["remote"] = strings.TrimSpace(parts[3])
-			}
+			pkg := manager.NewPackageInfo(name, version, manager.StatusUpgradable, "flatpak")
+			pkg.Metadata["origin"] = origin
 
 			packages = append(packages, pkg)
 		}
