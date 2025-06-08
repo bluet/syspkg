@@ -525,7 +525,12 @@ func (m *Manager) parseUpdateOutput(output string) []manager.PackageInfo {
 			// Look for lines indicating updates
 			parts := strings.Fields(line)
 			if len(parts) >= 2 {
-				name := parts[1] // Usually the second field is the app name
+				fullName := parts[1] // Usually format: "app.id/arch/branch"
+				// Extract just the app ID (before first slash)
+				name := fullName
+				if slashIndex := strings.Index(fullName, "/"); slashIndex != -1 {
+					name = fullName[:slashIndex]
+				}
 				pkg := manager.NewPackageInfo(name, "", "upgraded", ManagerName)
 				packages = append(packages, pkg)
 			}

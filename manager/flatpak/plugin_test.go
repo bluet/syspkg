@@ -257,7 +257,7 @@ func TestInstall(t *testing.T) {
 Required runtime for io.neovim.nvim/x86_64/stable (runtime/org.freedesktop.Platform/x86_64/24.08) found in remote flathub
 Installing 1 new application...`
 
-	runner.SetOutput("flatpak install --user -y io.neovim.nvim", installOutput)
+	runner.SetOutput("flatpak install -y io.neovim.nvim", installOutput)
 
 	mgr := NewManagerWithRunner(runner)
 	ctx := context.Background()
@@ -283,7 +283,10 @@ Installing 1 new application...`
 
 func TestInstallDryRun(t *testing.T) {
 	runner := NewMockCommandRunner()
-	// Dry run should not execute actual installation
+	// For dry run, the plugin calls GetInfo
+	infoFixture := loadFlatpakFixture(t, "info-calculator-ubuntu2204.txt")
+	runner.SetOutput("flatpak info test-package", infoFixture)
+
 	mgr := NewManagerWithRunner(runner)
 	ctx := context.Background()
 	opts := &manager.Options{DryRun: true}
@@ -293,9 +296,14 @@ func TestInstallDryRun(t *testing.T) {
 		t.Fatalf("Install dry run failed: %v", err)
 	}
 
-	// Should return empty results for dry run
-	if len(packages) != 0 {
-		t.Errorf("Expected no packages from dry run, got %d", len(packages))
+	// Should return the package info with would-install status
+	if len(packages) != 1 {
+		t.Fatalf("Expected 1 package from dry run, got %d", len(packages))
+	}
+
+	pkg := packages[0]
+	if pkg.Status != "would-install" {
+		t.Errorf("Expected status 'would-install', got '%s'", pkg.Status)
 	}
 }
 
@@ -304,7 +312,7 @@ func TestRemove(t *testing.T) {
 	removeOutput := `Uninstalling: io.neovim.nvim/x86_64/stable
 Uninstalling 1 application...`
 
-	runner.SetOutput("flatpak uninstall --user -y io.neovim.nvim", removeOutput)
+	runner.SetOutput("flatpak uninstall -y io.neovim.nvim", removeOutput)
 
 	mgr := NewManagerWithRunner(runner)
 	ctx := context.Background()
@@ -335,9 +343,17 @@ func TestRemoveDryRun(t *testing.T) {
 		t.Fatalf("Remove dry run failed: %v", err)
 	}
 
-	// Should return empty results for dry run
-	if len(packages) != 0 {
-		t.Errorf("Expected no packages from dry run, got %d", len(packages))
+	// Should return packages with would-remove status for dry run
+	if len(packages) != 1 {
+		t.Fatalf("Expected 1 package from dry run, got %d", len(packages))
+	}
+
+	pkg := packages[0]
+	if pkg.Name != "test-package" {
+		t.Errorf("Expected name 'test-package', got '%s'", pkg.Name)
+	}
+	if pkg.Status != "would-remove" {
+		t.Errorf("Expected status 'would-remove', got '%s'", pkg.Status)
 	}
 }
 
@@ -359,7 +375,7 @@ func TestUpgrade(t *testing.T) {
 	upgradeOutput := `Looking for updates...
 Nothing to do.`
 
-	runner.SetOutput("flatpak update --user -y", upgradeOutput)
+	runner.SetOutput("flatpak update -y", upgradeOutput)
 
 	mgr := NewManagerWithRunner(runner)
 	ctx := context.Background()
@@ -378,10 +394,10 @@ Nothing to do.`
 func TestUpgradeSpecificPackages(t *testing.T) {
 	runner := NewMockCommandRunner()
 	upgradeOutput := `Looking for updates...
-Updating: io.neovim.nvim/x86_64/stable from flathub
+Updated: io.neovim.nvim/x86_64/stable from flathub
 1 application updated.`
 
-	runner.SetOutput("flatpak update --user -y io.neovim.nvim", upgradeOutput)
+	runner.SetOutput("flatpak update -y io.neovim.nvim", upgradeOutput)
 
 	mgr := NewManagerWithRunner(runner)
 	ctx := context.Background()
@@ -452,6 +468,9 @@ Nothing unused to uninstall`
 
 func TestAutoRemoveDryRun(t *testing.T) {
 	runner := NewMockCommandRunner()
+	// Mock the dry run command (without -y)
+	runner.SetOutput("flatpak uninstall --unused", "Nothing unused to uninstall")
+
 	mgr := NewManagerWithRunner(runner)
 	ctx := context.Background()
 	opts := &manager.Options{DryRun: true}
@@ -469,8 +488,19 @@ func TestAutoRemoveDryRun(t *testing.T) {
 
 func TestVerify(t *testing.T) {
 	runner := NewMockCommandRunner()
-	// Mock verification output - assume package is installed and verified
-	runner.SetOutput("flatpak list --columns=name,version,origin", "Neovim\t0.11.2\tflathub")
+	// Mock verification output - Verify runs 'flatpak info package_name'
+	infoOutput := `Neovim - Vim-fork focused on extensibility and usability
+
+         ID: io.neovim.nvim
+    Version: 0.11.2
+     Branch: stable
+       Arch: x86_64
+     Origin: flathub
+Collection: org.flathub.Stable
+Installation: system
+   Installed: 128.4 MB
+    Runtime: org.freedesktop.Platform/x86_64/24.08`
+	runner.SetOutput("flatpak info io.neovim.nvim", infoOutput)
 
 	mgr := NewManagerWithRunner(runner)
 	ctx := context.Background()
@@ -485,8 +515,8 @@ func TestVerify(t *testing.T) {
 	}
 
 	pkg := packages[0]
-	if pkg.Name != "Neovim" {
-		t.Errorf("Expected name 'Neovim', got '%s'", pkg.Name)
+	if pkg.Name != "io.neovim.nvim" {
+		t.Errorf("Expected name 'io.neovim.nvim', got '%s'", pkg.Name)
 	}
 
 	if pkg.Status != manager.StatusInstalled {
@@ -513,8 +543,8 @@ Helix	A post-modern text editor	com.helix_editor.Helix	25.01	stable	flathub`
 	if pkg.Name != "Neovim" {
 		t.Errorf("Expected name 'Neovim', got '%s'", pkg.Name)
 	}
-	if pkg.NewVersion != "0.11.2" {
-		t.Errorf("Expected version '0.11.2', got '%s'", pkg.NewVersion)
+	if pkg.Version != "0.11.2" {
+		t.Errorf("Expected version '0.11.2', got '%s'", pkg.Version)
 	}
 	if pkg.Metadata["app_id"] != "io.neovim.nvim" {
 		t.Errorf("Expected app_id 'io.neovim.nvim', got '%v'", pkg.Metadata["app_id"])
