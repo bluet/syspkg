@@ -378,6 +378,11 @@ func (m *Manager) parseSearchOutput(output string) []manager.PackageInfo {
 			appId := strings.TrimSpace(parts[2])
 			version := strings.TrimSpace(parts[3])
 
+			// Skip entries with empty package names
+			if name == "" {
+				continue
+			}
+
 			pkg := manager.NewPackageInfo(name, version, manager.StatusAvailable, ManagerName)
 			pkg.Description = description
 			pkg.Metadata["app_id"] = appId

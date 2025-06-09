@@ -13,7 +13,8 @@ import (
 var epochRegex = regexp.MustCompile(`-(\d+):`)
 
 // packageLineRegex matches package lines in yum search output (name.arch format)
-var packageLineRegex = regexp.MustCompile(`^[\w\d-]+\.[\w\d_]+`)
+// Updated to support Unicode package names for international users
+var packageLineRegex = regexp.MustCompile(`^[\p{L}\p{N}\-_]+\.[\w\d_]+`)
 
 // parseSearchOutput parses the output of `yum search packageName` command
 // and returns a list of packages that match the search query.
@@ -45,14 +46,45 @@ func parseSearchOutput(output string) []manager.PackageInfo {
 			descriptionPart := strings.TrimSpace(line[colonIndex+3:])
 
 			// Find the last dot to separate name and architecture
+			// YUM packages typically end with known architectures like x86_64, i686, noarch
 			lastDotIndex := strings.LastIndex(packagePart, ".")
 			if lastDotIndex == -1 {
 				// No dot found, skip this line
 				continue
 			}
 
-			packageName := packagePart[:lastDotIndex]
-			arch := packagePart[lastDotIndex+1:]
+			potentialArch := packagePart[lastDotIndex+1:]
+			// Check if this looks like a valid architecture
+			validArchitectures := map[string]bool{
+				"x86_64": true, "i686": true, "i386": true, "i586": true,
+				"noarch": true, "src": true, "aarch64": true, "armv7hl": true,
+				"ppc64": true, "ppc64le": true, "s390x": true,
+			}
+
+			var packageName, arch string
+			if validArchitectures[potentialArch] {
+				// Standard case: package.arch format
+				packageName = packagePart[:lastDotIndex]
+				arch = potentialArch
+			} else {
+				// Edge case: the last segment might not be an arch
+				// Try to find a valid arch by checking segments from right to left
+				parts := strings.Split(packagePart, ".")
+				archFound := false
+				for i := len(parts) - 1; i > 0; i-- {
+					if validArchitectures[parts[i]] {
+						packageName = strings.Join(parts[:i], ".")
+						arch = parts[i]
+						archFound = true
+						break
+					}
+				}
+				if !archFound {
+					// No valid architecture found, treat last segment as arch anyway
+					packageName = packagePart[:lastDotIndex]
+					arch = potentialArch
+				}
+			}
 
 			packageInfo := manager.NewPackageInfo(
 				packageName,             // name
