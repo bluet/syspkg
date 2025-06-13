@@ -10,7 +10,7 @@
 
 SysPkg provides a consistent CLI and Go library interface across different package managers, making it easy to manage packages regardless of your Linux distribution or containerized environment.
 
-## ✨ Features
+## Features
 
 - **🔧 Unified Interface**: Same commands work with APT, YUM, Snap, and Flatpak
 - **⚡ Concurrent Operations**: 3x faster multi-manager operations with automatic parallelization
@@ -20,21 +20,20 @@ SysPkg provides a consistent CLI and Go library interface across different packa
 - **🚀 Production Ready**: Thread-safe concurrent execution with comprehensive error handling
 - **🔍 Smart Search**: Automatically searches across available package managers
 
-## 📦 Supported Package Managers
+**Supported Package Managers:**
 
 | Package Manager | Status | Distributions |
 |-----------------|--------|---------------|
 | **APT** | ✅ Production | Ubuntu, Debian, derivatives |
 | **YUM** | ✅ Production | RHEL, CentOS, Rocky Linux 8 |
-| **APK** | ✅ Registered | Alpine Linux |
+| **APK** | ✅ Production | Alpine Linux |
 | **Snap** | 🚧 Beta | Universal Linux packages |
 | **Flatpak** | 🚧 Beta | Universal Linux applications |
+| **DNF** | 🚧 Planned | Fedora, RHEL 9+ |
 
-*More package managers coming soon: DNF, Pacman, and more.*
+*More package managers coming soon: Pacman, Zypper, and more.*
 
-## 📋 Quick Reference
-
-Need specific documentation? Find it quickly:
+**Quick Documentation Reference:**
 
 - **👥 New users?** → Continue reading this README
 - **🔧 Want to contribute?** → [CONTRIBUTING.md](CONTRIBUTING.md)
@@ -46,33 +45,21 @@ Need specific documentation? Find it quickly:
 
 ## Getting Started
 
-### Prerequisites
+**Prerequisites:** Go 1.23 or later
 
-- Go 1.23 or later
-
-### Installation (as CLI tool)
-
-Install the CLI tool using the `go install` command:
-
+**Install CLI tool:**
 ```bash
 go install github.com/bluet/syspkg/cmd/syspkg@latest
 ```
 
-### Installation (as Go library)
-
-Install the library using the `go get` command:
-
+**Install Go library:**
 ```bash
 go get github.com/bluet/syspkg
 ```
 
 ## Usage
 
-### CLI Tool
-
-SysPkg provides a unified CLI tool for managing system packages across different package managers. It simplifies the process of working with various package managers by providing a consistent interface through an abstraction layer.
-
-Here's an example demonstrating how to use SysPkg as a CLI tool:
+**CLI Tool Examples:**
 
 ```bash
 # Use specific package managers
@@ -84,16 +71,9 @@ syspkg -m yum install vim       # Install using YUM
 # Use by manager category
 syspkg -c system install vim    # Use system package manager (apt/yum/apk)
 syspkg -c app search vim        # Use app managers (snap/flatpak)
-
-# Specific manager operations
-syspkg -m apt install vim
-syspkg -m snap search vim
-syspkg -m flatpak list upgradable
 ```
 
-### Multi-Manager Operations (--all flag)
-
-Use `--all` to perform operations across **all available package managers** with **concurrent execution for 3x performance**:
+**Multi-Manager Operations** (use `--all` for 3x performance with concurrent execution):
 
 ```bash
 # Read-only operations (concurrent, safe, fast)
@@ -115,9 +95,7 @@ syspkg upgrade --all --yes          # Skip confirmation prompt
 syspkg clean --all --dry-run        # See what would be done
 ```
 
-### Single Manager Operations (auto-selection)
-
-Without `--all` or `-m`, syspkg automatically selects the best available system package manager:
+**Auto-Selection:** Without `--all` or `-m`, syspkg automatically selects the best available system package manager:
 
 ```bash
 syspkg install vim                  # Uses best system manager (apt/yum/apk)
@@ -126,18 +104,16 @@ syspkg list installed               # Uses best system manager
 syspkg upgrade                      # Uses best system manager
 ```
 
-### Manager Selection Logic
+**Manager Selection Logic** - SysPkg uses priority-based automatic selection:
 
-SysPkg automatically selects the best available package manager using a priority-based system:
+| Manager | Priority | Use Case |
+|---------|----------|----------|
+| **APT** | 90 | Ubuntu/Debian systems |
+| **YUM** | 80 | RHEL/CentOS systems |
+| **Snap** | 80 | Universal packages |
+| **Flatpak** | 70 | Universal applications |
+| **APK** | 60 | Alpine Linux |
 
-**Priority Rankings:**
-- **APT**: 90 (highest priority - Ubuntu/Debian systems)
-- **YUM**: 80 (high priority - RHEL/CentOS systems)
-- **Snap**: 80 (high priority - universal packages)
-- **Flatpak**: 70 (medium priority - universal applications)
-- **APK**: 60 (lower priority - Alpine Linux only)
-
-**Selection Examples:**
 ```bash
 # Automatic selection (no flags)
 syspkg install vim                  # Uses APT on Ubuntu, YUM on RHEL, etc.
@@ -151,17 +127,7 @@ syspkg install discord -c app       # Uses highest priority app manager (Snap > 
 syspkg install vim -m yum           # Force specific manager regardless of priority
 ```
 
-**How It Works:**
-1. When no manager is specified, SysPkg uses `GetBestMatch()` for the operation type
-2. System operations default to the highest-priority system manager available
-3. Multi-manager operations (`--all`) run across all available managers concurrently
-4. Priority ensures consistent behavior across different Linux distributions
-
-For implementation details, see [`manager.GetBestMatch()`](manager/registry.go).
-
-### Pipeline Support
-
-Use `-` to read package names from stdin:
+**Pipeline Support** - Use `-` to read package names from stdin:
 
 ```bash
 # Install packages from a file
@@ -177,9 +143,7 @@ syspkg list installed -q | cut -f1 | syspkg verify -
 syspkg list installed --all -q | awk '$2=="apt"' | cut -f1 | syspkg verify -
 ```
 
-### Output Formats
-
-SysPkg supports multiple output formats optimized for different use cases:
+**Output Formats** - Multiple formats optimized for different use cases:
 
 ```bash
 # Human-readable format (default)
@@ -199,9 +163,7 @@ syspkg search vim --status
 # Shows real installation status across managers
 ```
 
-### Go Library
-
-Here's an example demonstrating how to use SysPkg as a Go library with concurrent operations:
+**Go Library** - Use SysPkg programmatically with concurrent operations:
 
 ```go
 package main
@@ -251,7 +213,7 @@ func main() {
 }
 ```
 
-**📚 Learning Resources:**
+**Learning Resources:**
 - **New to the API?** → Start with [examples/](examples/) for clean integration patterns
 - **Building production services?** → See [docs/INTEGRATION_GUIDE.md](docs/INTEGRATION_GUIDE.md) for advanced patterns
 - **Need CLI reference?** → Check [cmd/syspkg/](cmd/syspkg/) for complete implementation
@@ -276,34 +238,26 @@ Please open an issue (or PR ❤️) if you'd like to see support for any unliste
 
 ## Development
 
-### Documentation
+**Documentation by Audience:**
 
-### For Users 👥
+**For Users 👥**
 - **[README.md](README.md)** (you are here) - Project overview and quick start
 - **[Go Reference](https://pkg.go.dev/github.com/bluet/syspkg)** - Complete API documentation
 - **[CHANGELOG.md](CHANGELOG.md)** - Recent achievements and version history
 
-### For Developers 🛠️
+**For Developers 🛠️**
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development workflow and testing guide
 - **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Technical design and interfaces
 - **[docs/EXIT_CODES.md](docs/EXIT_CODES.md)** - Package manager exit code behaviors
 - **[testing/fixtures/README.md](testing/fixtures/README.md)** - Comprehensive fixture generation with Docker entrypoints
 - **[testing/docker/README.md](testing/docker/README.md)** - Multi-OS testing strategy
 
-### For AI Assistants 🤖
+**For AI Assistants 🤖**
 - **[CLAUDE.md](CLAUDE.md)** - Development guidelines and project rules
 
-## Project Status
+**Project Status:** [Latest Release](https://github.com/bluet/syspkg/releases) • Production ready with unified interface architecture and comprehensive fixture-based testing across multiple OS distributions • V2.0 unified interface with plugin system - APT implementation complete, legacy managers in transition • Active development at [Issues](https://github.com/bluet/syspkg/issues)
 
-**Current Version**: [Latest Release](https://github.com/bluet/syspkg/releases)
-
-**Stability**: Production ready with unified interface architecture and comprehensive fixture-based testing across multiple OS distributions
-
-**Architecture**: V2.0 unified interface with plugin system - APT implementation complete, legacy managers in transition
-
-**Active Development**: See [Issues](https://github.com/bluet/syspkg/issues) for roadmap and current work
-
-### Current Priorities
+**Current Priorities:**
 - **Branch Integration**: Merge refactor-unified-interface to main
 - **Legacy Cleanup**: Resolve backup directory compilation issues
 - **Security Enhancement**: Add Snyk security scanning to CI/CD
