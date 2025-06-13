@@ -72,7 +72,16 @@ func (m *Manager) Search(ctx context.Context, query []string, opts *manager.Opti
 	}
 
 	args := append([]string{"search"}, query...)
-	result, err := m.GetRunner().Run(ctx, "apt", args)
+	if opts != nil && opts.Verbose {
+		args = append(args, "-v")
+	}
+	var result *manager.CommandResult
+	var err error
+	if opts != nil && opts.Verbose {
+		result, err = m.GetRunner().RunVerbose(ctx, "apt", args)
+	} else {
+		result, err = m.GetRunner().Run(ctx, "apt", args)
+	}
 	if err != nil {
 		// Command execution failed (e.g., apt not found)
 		return nil, manager.WrapReturn(manager.StatusUnavailableError, "apt command failed", err)
@@ -179,8 +188,17 @@ func (m *Manager) Install(ctx context.Context, packages []string, opts *manager.
 	if opts.DryRun {
 		args = append(args, "--dry-run")
 	}
+	if opts != nil && opts.Verbose {
+		args = append(args, "-v")
+	}
 
-	result, err := m.GetRunner().Run(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+	var result *manager.CommandResult
+	var err error
+	if opts != nil && opts.Verbose {
+		result, err = m.GetRunner().RunVerbose(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+	} else {
+		result, err = m.GetRunner().Run(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+	}
 	if err != nil {
 		return nil, manager.WrapReturn(manager.StatusUnavailableError, "apt command failed", err)
 	}
@@ -225,8 +243,17 @@ func (m *Manager) Remove(ctx context.Context, packages []string, opts *manager.O
 	if opts.DryRun {
 		args = append(args, "--dry-run")
 	}
+	if opts != nil && opts.Verbose {
+		args = append(args, "-v")
+	}
 
-	result, err := m.GetRunner().Run(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+	var result *manager.CommandResult
+	var err error
+	if opts != nil && opts.Verbose {
+		result, err = m.GetRunner().RunVerbose(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+	} else {
+		result, err = m.GetRunner().Run(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+	}
 	if err != nil {
 		return nil, manager.WrapReturn(manager.StatusUnavailableError, "apt command failed", err)
 	}
@@ -287,7 +314,18 @@ func (m *Manager) GetInfo(ctx context.Context, packageName string, opts *manager
 
 // Refresh updates package lists
 func (m *Manager) Refresh(ctx context.Context, opts *manager.Options) error {
-	result, err := m.GetRunner().Run(ctx, "apt", []string{"update"}, "DEBIAN_FRONTEND=noninteractive")
+	args := []string{"update"}
+	if opts != nil && opts.Verbose {
+		args = append(args, "-v")
+	}
+
+	var result *manager.CommandResult
+	var err error
+	if opts != nil && opts.Verbose {
+		result, err = m.GetRunner().RunVerbose(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+	} else {
+		result, err = m.GetRunner().Run(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+	}
 	if err != nil {
 		return manager.WrapReturn(manager.StatusUnavailableError, "apt command failed", err)
 	}
@@ -327,8 +365,17 @@ func (m *Manager) Upgrade(ctx context.Context, packages []string, opts *manager.
 	if opts != nil && opts.DryRun {
 		args = append(args, "--dry-run")
 	}
+	if opts != nil && opts.Verbose {
+		args = append(args, "-v")
+	}
 
-	result, err := m.GetRunner().Run(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+	var result *manager.CommandResult
+	var err error
+	if opts != nil && opts.Verbose {
+		result, err = m.GetRunner().RunVerbose(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+	} else {
+		result, err = m.GetRunner().Run(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+	}
 	if err != nil {
 		return nil, manager.WrapReturn(manager.StatusUnavailableError, "apt command failed", err)
 	}
@@ -353,7 +400,17 @@ func (m *Manager) Upgrade(ctx context.Context, packages []string, opts *manager.
 
 // Clean removes cached packages
 func (m *Manager) Clean(ctx context.Context, opts *manager.Options) error {
-	result, err := m.GetRunner().Run(ctx, "apt", []string{"autoclean"}, "DEBIAN_FRONTEND=noninteractive")
+	args := []string{"autoclean"}
+	if opts != nil && opts.Verbose {
+		args = append(args, "-v")
+	}
+	var result *manager.CommandResult
+	var err error
+	if opts != nil && opts.Verbose {
+		result, err = m.GetRunner().RunVerbose(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+	} else {
+		result, err = m.GetRunner().Run(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+	}
 	if err != nil {
 		return manager.WrapReturn(manager.StatusUnavailableError, "apt command failed", err)
 	}
@@ -379,8 +436,17 @@ func (m *Manager) AutoRemove(ctx context.Context, opts *manager.Options) ([]mana
 	if opts != nil && opts.DryRun {
 		args = append(args, "--dry-run")
 	}
+	if opts != nil && opts.Verbose {
+		args = append(args, "-v")
+	}
 
-	result, err := m.GetRunner().Run(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+	var result *manager.CommandResult
+	var err error
+	if opts != nil && opts.Verbose {
+		result, err = m.GetRunner().RunVerbose(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+	} else {
+		result, err = m.GetRunner().Run(ctx, "apt", args, "DEBIAN_FRONTEND=noninteractive")
+	}
 	if err != nil {
 		return nil, manager.WrapReturn(manager.StatusUnavailableError, "apt command failed", err)
 	}
@@ -464,8 +530,18 @@ func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]mana
 	return packages, nil
 }
 
-func (m *Manager) listUpgradable(ctx context.Context, _ *manager.Options) ([]manager.PackageInfo, error) {
-	result, err := m.GetRunner().Run(ctx, "apt", []string{"list", "--upgradable"})
+func (m *Manager) listUpgradable(ctx context.Context, opts *manager.Options) ([]manager.PackageInfo, error) {
+	args := []string{"list", "--upgradable"}
+	if opts != nil && opts.Verbose {
+		args = append(args, "-v")
+	}
+	var result *manager.CommandResult
+	var err error
+	if opts != nil && opts.Verbose {
+		result, err = m.GetRunner().RunVerbose(ctx, "apt", args)
+	} else {
+		result, err = m.GetRunner().Run(ctx, "apt", args)
+	}
 	if err != nil {
 		return nil, manager.WrapReturn(manager.StatusUnavailableError, "apt command failed", err)
 	}

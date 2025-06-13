@@ -2,10 +2,15 @@
 package manager
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"fmt"
+	"io"
 	"os"
 	"os/exec"
+	"strings"
+	"time"
 )
 
 // CommandResult holds the complete result of command execution
@@ -29,6 +34,10 @@ type CommandRunner interface {
 	// Example: Run(ctx, "apt", []string{"update"}, "DEBIAN_FRONTEND=noninteractive")
 	// Example: Run(ctx, "yum", []string{"info", "vim"}, "LC_ALL=zh_TW.UTF-8") // Overrides default LC_ALL=C
 	Run(ctx context.Context, name string, args []string, env ...string) (*CommandResult, error)
+
+	// RunVerbose executes a command like Run() but shows command and output in real-time for verbose mode.
+	// Returns the same CommandResult but displays execution details to stderr during execution.
+	RunVerbose(ctx context.Context, name string, args []string, env ...string) (*CommandResult, error)
 
 	// RunInteractive executes in interactive mode with stdin/stdout/stderr passthrough.
 	// Does NOT prepend LC_ALL=C (preserves user's locale for interaction).
@@ -70,6 +79,59 @@ func (r *DefaultCommandRunner) Run(ctx context.Context, name string, args []stri
 			// Non-exit error (e.g., command not found) - return the error
 			return result, err
 		}
+	}
+
+	return result, nil
+}
+
+// RunVerbose executes with verbose output showing command and real-time output
+func (r *DefaultCommandRunner) RunVerbose(ctx context.Context, name string, args []string, env ...string) (*CommandResult, error) {
+	cmd := exec.CommandContext(ctx, name, args...)
+
+	// Prepend LC_ALL=C, then append any additional env vars
+	allEnv := append([]string{"LC_ALL=C"}, env...)
+	cmd.Env = append(os.Environ(), allEnv...)
+
+	// Show command being executed
+	fmt.Fprintf(os.Stderr, "🔧 Executing: %s %s\n", name, strings.Join(args, " "))
+	if len(env) > 0 {
+		fmt.Fprintf(os.Stderr, "   Environment: %s\n", strings.Join(env, " "))
+	}
+
+	startTime := time.Now()
+
+	// Capture stdout and stderr while also displaying to user
+	var outputBuf, stderrBuf bytes.Buffer
+
+	// Create multi-writers to capture AND display output
+	cmd.Stdout = io.MultiWriter(&outputBuf, os.Stderr)
+	cmd.Stderr = io.MultiWriter(&stderrBuf, os.Stderr)
+
+	err := cmd.Run()
+	duration := time.Since(startTime)
+
+	result := &CommandResult{
+		Output:   outputBuf.Bytes(),
+		Stderr:   stderrBuf.Bytes(),
+		ExitCode: 0, // Default to success
+	}
+
+	// Extract exit code from error
+	if err != nil {
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			result.ExitCode = exitErr.ExitCode()
+		} else {
+			// Non-exit error (e.g., command not found)
+			fmt.Fprintf(os.Stderr, "❌ Command failed: %v\n", err)
+			return result, err
+		}
+	}
+
+	// Show completion status
+	if result.ExitCode == 0 {
+		fmt.Fprintf(os.Stderr, "✅ Completed in %v (exit code %d)\n", duration, result.ExitCode)
+	} else {
+		fmt.Fprintf(os.Stderr, "❌ Failed in %v (exit code %d)\n", duration, result.ExitCode)
 	}
 
 	return result, nil
@@ -138,6 +200,12 @@ func (m *MockCommandRunner) Run(ctx context.Context, name string, args []string,
 
 	// Default: return error when no mock is found (catches missing mocks in tests)
 	return nil, errors.New("no mock found for command: " + cmdKey)
+}
+
+// RunVerbose returns mocked output like Run() but simulates verbose mode
+func (m *MockCommandRunner) RunVerbose(ctx context.Context, name string, args []string, env ...string) (*CommandResult, error) {
+	// For testing, RunVerbose behaves the same as Run()
+	return m.Run(ctx, name, args, env...)
 }
 
 // RunInteractive simulates interactive command execution

@@ -79,8 +79,17 @@ func (m *Manager) Search(ctx context.Context, query []string, opts *manager.Opti
 
 	args := []string{"search"}
 	args = append(args, query...)
+	if opts != nil && opts.Verbose {
+		args = append(args, "--verbose")
+	}
 
-	result, err := m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
+	var result *manager.CommandResult
+	var err error
+	if opts != nil && opts.Verbose {
+		result, err = m.GetRunner().RunVerbose(ctx, "flatpak", args, "LANG=C")
+	} else {
+		result, err = m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
+	}
 	if err != nil {
 		return nil, manager.WrapReturn(manager.StatusUnavailableError, "flatpak command failed", err)
 	}
@@ -121,7 +130,17 @@ func (m *Manager) GetInfo(ctx context.Context, packageName string, opts *manager
 		return manager.PackageInfo{}, err
 	}
 
-	result, err := m.GetRunner().Run(ctx, "flatpak", []string{"info", packageName}, "LANG=C")
+	args := []string{"info", packageName}
+	if opts != nil && opts.Verbose {
+		args = append(args, "--verbose")
+	}
+	var result *manager.CommandResult
+	var err error
+	if opts != nil && opts.Verbose {
+		result, err = m.GetRunner().RunVerbose(ctx, "flatpak", args, "LANG=C")
+	} else {
+		result, err = m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
+	}
 	if err != nil {
 		return manager.PackageInfo{}, manager.WrapReturn(manager.StatusUnavailableError, "flatpak command failed", err)
 	}
@@ -179,7 +198,17 @@ func (m *Manager) Install(ctx context.Context, packages []string, opts *manager.
 		}
 
 		args = append(args, pkg)
-		result, err := m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
+		if opts != nil && opts.Verbose {
+			args = append(args, "--verbose")
+		}
+
+		var result *manager.CommandResult
+		var err error
+		if opts != nil && opts.Verbose {
+			result, err = m.GetRunner().RunVerbose(ctx, "flatpak", args, "LANG=C")
+		} else {
+			result, err = m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
+		}
 		if err != nil {
 			return nil, manager.WrapReturn(manager.StatusUnavailableError, "flatpak command failed", err)
 		}
@@ -226,7 +255,16 @@ func (m *Manager) Remove(ctx context.Context, packages []string, opts *manager.O
 		}
 
 		args = append(args, pkg)
-		_, err := m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
+		if opts != nil && opts.Verbose {
+			args = append(args, "--verbose")
+		}
+
+		var err error
+		if opts != nil && opts.Verbose {
+			_, err = m.GetRunner().RunVerbose(ctx, "flatpak", args, "LANG=C")
+		} else {
+			_, err = m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
+		}
 		if err != nil {
 			return nil, manager.WrapCommandError(fmt.Sprintf("flatpak uninstall %s failed", pkg), err)
 		}
@@ -239,7 +277,17 @@ func (m *Manager) Remove(ctx context.Context, packages []string, opts *manager.O
 
 // Refresh refreshes package lists (equivalent to update)
 func (m *Manager) Refresh(ctx context.Context, opts *manager.Options) error {
-	_, err := m.GetRunner().Run(ctx, "flatpak", []string{"update", "--appstream"}, "LANG=C")
+	args := []string{"update", "--appstream"}
+	if opts != nil && opts.Verbose {
+		args = append(args, "--verbose")
+	}
+
+	var err error
+	if opts != nil && opts.Verbose {
+		_, err = m.GetRunner().RunVerbose(ctx, "flatpak", args, "LANG=C")
+	} else {
+		_, err = m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
+	}
 	if err != nil {
 		return manager.WrapCommandError("flatpak update --appstream failed", err)
 	}
@@ -273,7 +321,17 @@ func (m *Manager) Upgrade(ctx context.Context, packages []string, opts *manager.
 		return results, nil
 	}
 
-	result, err := m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
+	if opts != nil && opts.Verbose {
+		args = append(args, "--verbose")
+	}
+
+	var result *manager.CommandResult
+	var err error
+	if opts != nil && opts.Verbose {
+		result, err = m.GetRunner().RunVerbose(ctx, "flatpak", args, "LANG=C")
+	} else {
+		result, err = m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
+	}
 	if err != nil {
 		return nil, manager.WrapReturn(manager.StatusUnavailableError, "flatpak command failed", err)
 	}
@@ -301,7 +359,17 @@ func (m *Manager) Clean(ctx context.Context, opts *manager.Options) error {
 	}
 
 	// Clean unused runtimes
-	_, err := m.GetRunner().Run(ctx, "flatpak", []string{"uninstall", "--unused", "-y"}, "LANG=C")
+	args := []string{"uninstall", "--unused", "-y"}
+	if opts != nil && opts.Verbose {
+		args = append(args, "--verbose")
+	}
+
+	var err error
+	if opts != nil && opts.Verbose {
+		_, err = m.GetRunner().RunVerbose(ctx, "flatpak", args, "LANG=C")
+	} else {
+		_, err = m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
+	}
 	if err != nil {
 		return manager.WrapCommandError("flatpak uninstall --unused failed", err)
 	}
@@ -314,8 +382,17 @@ func (m *Manager) AutoRemove(ctx context.Context, opts *manager.Options) ([]mana
 	if opts != nil && !opts.DryRun {
 		args = append(args, "-y")
 	}
+	if opts != nil && opts.Verbose {
+		args = append(args, "--verbose")
+	}
 
-	result, err := m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
+	var result *manager.CommandResult
+	var err error
+	if opts != nil && opts.Verbose {
+		result, err = m.GetRunner().RunVerbose(ctx, "flatpak", args, "LANG=C")
+	} else {
+		result, err = m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
+	}
 	if err != nil {
 		return nil, manager.WrapReturn(manager.StatusUnavailableError, "flatpak command failed", err)
 	}
@@ -348,7 +425,17 @@ func (m *Manager) Verify(ctx context.Context, packages []string, opts *manager.O
 	var results []manager.PackageInfo
 	for _, pkg := range packages {
 		// Check if package is installed
-		_, err := m.GetRunner().Run(ctx, "flatpak", []string{"info", pkg}, "LANG=C")
+		args := []string{"info", pkg}
+		if opts != nil && opts.Verbose {
+			args = append(args, "--verbose")
+		}
+
+		var err error
+		if opts != nil && opts.Verbose {
+			_, err = m.GetRunner().RunVerbose(ctx, "flatpak", args, "LANG=C")
+		} else {
+			_, err = m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
+		}
 		status := manager.StatusInstalled
 		if err != nil {
 			status = "not-installed"
@@ -433,8 +520,19 @@ func (m *Manager) parseInfoOutput(output, packageName string) manager.PackageInf
 }
 
 // listInstalled lists installed flatpak packages
-func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]manager.PackageInfo, error) {
-	result, err := m.GetRunner().Run(ctx, "flatpak", []string{"list", "--user", "--columns=name,version,origin"}, "LANG=C")
+func (m *Manager) listInstalled(ctx context.Context, opts *manager.Options) ([]manager.PackageInfo, error) {
+	args := []string{"list", "--user", "--columns=name,version,origin"}
+	if opts != nil && opts.Verbose {
+		args = append(args, "--verbose")
+	}
+
+	var result *manager.CommandResult
+	var err error
+	if opts != nil && opts.Verbose {
+		result, err = m.GetRunner().RunVerbose(ctx, "flatpak", args, "LANG=C")
+	} else {
+		result, err = m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
+	}
 	if err != nil {
 		return nil, manager.WrapReturn(manager.StatusUnavailableError, "flatpak command failed", err)
 	}
@@ -471,9 +569,20 @@ func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]mana
 }
 
 // listUpgradable lists packages that can be upgraded
-func (m *Manager) listUpgradable(ctx context.Context, _ *manager.Options) ([]manager.PackageInfo, error) {
+func (m *Manager) listUpgradable(ctx context.Context, opts *manager.Options) ([]manager.PackageInfo, error) {
 	// Check for updates without applying them
-	result, err := m.GetRunner().Run(ctx, "flatpak", []string{"list", "--user", "--updates", "--columns=name,version,origin"}, "LANG=C")
+	args := []string{"list", "--user", "--updates", "--columns=name,version,origin"}
+	if opts != nil && opts.Verbose {
+		args = append(args, "--verbose")
+	}
+
+	var result *manager.CommandResult
+	var err error
+	if opts != nil && opts.Verbose {
+		result, err = m.GetRunner().RunVerbose(ctx, "flatpak", args, "LANG=C")
+	} else {
+		result, err = m.GetRunner().Run(ctx, "flatpak", args, "LANG=C")
+	}
 	if err != nil {
 		return nil, manager.WrapReturn(manager.StatusUnavailableError, "flatpak command failed", err)
 	}

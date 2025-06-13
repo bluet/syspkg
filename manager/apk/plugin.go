@@ -73,8 +73,17 @@ func (m *Manager) Search(ctx context.Context, query []string, opts *manager.Opti
 
 	args := []string{"search"}
 	args = append(args, query...)
+	if opts != nil && opts.Verbose {
+		args = append(args, "-v")
+	}
 
-	result, err := m.GetRunner().Run(ctx, "apk", args)
+	var result *manager.CommandResult
+	var err error
+	if opts != nil && opts.Verbose {
+		result, err = m.GetRunner().RunVerbose(ctx, "apk", args)
+	} else {
+		result, err = m.GetRunner().Run(ctx, "apk", args)
+	}
 	if err != nil {
 		// Command execution failed (e.g., apk not found)
 		return nil, manager.WrapReturn(manager.StatusUnavailableError, "apk command failed", err)
@@ -119,7 +128,17 @@ func (m *Manager) GetInfo(ctx context.Context, packageName string, opts *manager
 		return manager.PackageInfo{}, err
 	}
 
-	output, err := m.GetRunner().Run(ctx, "apk", []string{"info", packageName})
+	args := []string{"info", packageName}
+	if opts != nil && opts.Verbose {
+		args = append(args, "-v")
+	}
+	var output *manager.CommandResult
+	var err error
+	if opts != nil && opts.Verbose {
+		output, err = m.GetRunner().RunVerbose(ctx, "apk", args)
+	} else {
+		output, err = m.GetRunner().Run(ctx, "apk", args)
+	}
 	if err != nil {
 		return manager.PackageInfo{}, manager.WrapCommandError("apk info failed", err)
 	}
@@ -184,9 +203,18 @@ func (m *Manager) Install(ctx context.Context, packages []string, opts *manager.
 	if opts != nil && opts.DryRun {
 		args = append(args, "--simulate")
 	}
+	if opts != nil && opts.Verbose {
+		args = append(args, "-v")
+	}
 	args = append(args, packages...)
 
-	result, err := m.GetRunner().Run(ctx, "apk", args)
+	var result *manager.CommandResult
+	var err error
+	if opts != nil && opts.Verbose {
+		result, err = m.GetRunner().RunVerbose(ctx, "apk", args)
+	} else {
+		result, err = m.GetRunner().Run(ctx, "apk", args)
+	}
 	if err != nil {
 		// Command execution failed (e.g., apk not found)
 		return nil, manager.WrapReturn(manager.StatusUnavailableError, "apk command failed", err)
@@ -202,7 +230,7 @@ func (m *Manager) Install(ctx context.Context, packages []string, opts *manager.
 				return nil, manager.WrapReturn(manager.StatusUnavailableError, "package not found in repository", nil)
 			}
 			return nil, manager.WrapReturn(manager.StatusGeneralError, "installation failed", nil)
-		case 77:
+		case 99:
 			// Permission denied (APK uses this exit code)
 			return nil, manager.WrapReturn(manager.StatusPermissionError, "installation requires root access", nil)
 		default:
@@ -229,6 +257,9 @@ func (m *Manager) Remove(ctx context.Context, packages []string, opts *manager.O
 	if opts != nil && opts.DryRun {
 		args = append(args, "--simulate")
 	}
+	if opts != nil && opts.Verbose {
+		args = append(args, "-v")
+	}
 	args = append(args, packages...)
 
 	output, err := m.GetRunner().Run(ctx, "apk", args)
@@ -246,7 +277,12 @@ func (m *Manager) Refresh(ctx context.Context, opts *manager.Options) error {
 
 // Update updates package lists
 func (m *Manager) Update(ctx context.Context, opts *manager.Options) error {
-	_, err := m.GetRunner().Run(ctx, "apk", []string{"update"})
+	args := []string{"update"}
+	if opts != nil && opts.Verbose {
+		args = append(args, "-v")
+	}
+
+	_, err := m.GetRunner().Run(ctx, "apk", args)
 	if err != nil {
 		return manager.WrapCommandError("apk update failed", err)
 	}
@@ -267,6 +303,9 @@ func (m *Manager) Upgrade(ctx context.Context, packages []string, opts *manager.
 	if opts != nil && opts.DryRun {
 		args = append(args, "--simulate")
 	}
+	if opts != nil && opts.Verbose {
+		args = append(args, "-v")
+	}
 
 	output, err := m.GetRunner().Run(ctx, "apk", args)
 	if err != nil {
@@ -278,7 +317,12 @@ func (m *Manager) Upgrade(ctx context.Context, packages []string, opts *manager.
 
 // Clean cleans package cache
 func (m *Manager) Clean(ctx context.Context, opts *manager.Options) error {
-	_, err := m.GetRunner().Run(ctx, "apk", []string{"cache", "clean"})
+	args := []string{"cache", "clean"}
+	if opts != nil && opts.Verbose {
+		args = append(args, "-v")
+	}
+
+	_, err := m.GetRunner().Run(ctx, "apk", args)
 	if err != nil {
 		return manager.WrapCommandError("apk cache clean failed", err)
 	}
@@ -304,7 +348,12 @@ func (m *Manager) Verify(ctx context.Context, packages []string, opts *manager.O
 	var results []manager.PackageInfo
 	for _, pkg := range packages {
 		// Check if package is installed using apk info
-		_, err := m.GetRunner().Run(ctx, "apk", []string{"info", "-e", pkg})
+		args := []string{"info", "-e", pkg}
+		if opts != nil && opts.Verbose {
+			args = append(args, "-v")
+		}
+
+		_, err := m.GetRunner().Run(ctx, "apk", args)
 		status := manager.StatusInstalled
 		if err != nil {
 			status = "not-installed"
@@ -374,8 +423,13 @@ func (m *Manager) parseInfoOutput(output, packageName string) manager.PackageInf
 }
 
 // listInstalled lists installed apk packages
-func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]manager.PackageInfo, error) {
-	output, err := m.GetRunner().Run(ctx, "apk", []string{"info", "-v"})
+func (m *Manager) listInstalled(ctx context.Context, opts *manager.Options) ([]manager.PackageInfo, error) {
+	args := []string{"info", "-v"}
+	if opts != nil && opts.Verbose {
+		args = append(args, "-v")
+	}
+
+	output, err := m.GetRunner().Run(ctx, "apk", args)
 	if err != nil {
 		return nil, manager.WrapCommandError("apk info -v failed", err)
 	}
@@ -422,10 +476,15 @@ func (m *Manager) listInstalled(ctx context.Context, _ *manager.Options) ([]mana
 }
 
 // listUpgradable lists packages that can be upgraded
-func (m *Manager) listUpgradable(ctx context.Context, _ *manager.Options) ([]manager.PackageInfo, error) {
+func (m *Manager) listUpgradable(ctx context.Context, opts *manager.Options) ([]manager.PackageInfo, error) {
 	// APK doesn't have a direct "list upgradable" command
 	// We would need to simulate upgrade to see what would be upgraded
-	output, err := m.GetRunner().Run(ctx, "apk", []string{"upgrade", "--simulate"})
+	args := []string{"upgrade", "--simulate"}
+	if opts != nil && opts.Verbose {
+		args = append(args, "-v")
+	}
+
+	output, err := m.GetRunner().Run(ctx, "apk", args)
 	if err != nil {
 		return nil, manager.WrapCommandError("apk upgrade --simulate failed", err)
 	}

@@ -77,7 +77,16 @@ func (m *Manager) Search(ctx context.Context, query []string, opts *manager.Opti
 	}
 
 	args := append([]string{"search"}, query...)
-	result, err := m.GetRunner().Run(ctx, "yum", args)
+	if opts != nil && opts.Verbose {
+		args = append(args, "-v")
+	}
+	var result *manager.CommandResult
+	var err error
+	if opts != nil && opts.Verbose {
+		result, err = m.GetRunner().RunVerbose(ctx, "yum", args)
+	} else {
+		result, err = m.GetRunner().Run(ctx, "yum", args)
+	}
 	if err != nil {
 		return nil, manager.WrapReturn(manager.StatusUnavailableError, "yum command failed", err)
 	}
@@ -123,7 +132,17 @@ func (m *Manager) List(ctx context.Context, filter manager.ListFilter, opts *man
 
 // ListInstalled lists installed packages
 func (m *Manager) ListInstalled(ctx context.Context, opts *manager.Options) ([]manager.PackageInfo, error) {
-	result, err := m.GetRunner().Run(ctx, "yum", []string{"list", "installed"})
+	args := []string{"list", "installed"}
+	if opts != nil && opts.Verbose {
+		args = append(args, "-v")
+	}
+	var result *manager.CommandResult
+	var err error
+	if opts != nil && opts.Verbose {
+		result, err = m.GetRunner().RunVerbose(ctx, "yum", args)
+	} else {
+		result, err = m.GetRunner().Run(ctx, "yum", args)
+	}
 	if err != nil {
 		return nil, manager.WrapReturn(manager.StatusUnavailableError, "yum command failed", err)
 	}
@@ -139,7 +158,17 @@ func (m *Manager) ListInstalled(ctx context.Context, opts *manager.Options) ([]m
 
 // ListUpgradable lists packages that can be upgraded
 func (m *Manager) ListUpgradable(ctx context.Context, opts *manager.Options) ([]manager.PackageInfo, error) {
-	result, err := m.GetRunner().Run(ctx, "yum", []string{"list", "updates"})
+	args := []string{"list", "updates"}
+	if opts != nil && opts.Verbose {
+		args = append(args, "-v")
+	}
+	var result *manager.CommandResult
+	var err error
+	if opts != nil && opts.Verbose {
+		result, err = m.GetRunner().RunVerbose(ctx, "yum", args)
+	} else {
+		result, err = m.GetRunner().Run(ctx, "yum", args)
+	}
 	if err != nil {
 		return nil, manager.WrapReturn(manager.StatusUnavailableError, "yum command failed", err)
 	}
@@ -168,7 +197,17 @@ func (m *Manager) GetInfo(ctx context.Context, packageName string, opts *manager
 		return manager.PackageInfo{}, err
 	}
 
-	result, err := m.GetRunner().Run(ctx, "yum", []string{"info", packageName})
+	args := []string{"info", packageName}
+	if opts != nil && opts.Verbose {
+		args = append(args, "-v")
+	}
+	var result *manager.CommandResult
+	var err error
+	if opts != nil && opts.Verbose {
+		result, err = m.GetRunner().RunVerbose(ctx, "yum", args)
+	} else {
+		result, err = m.GetRunner().Run(ctx, "yum", args)
+	}
 	if err != nil {
 		return manager.PackageInfo{}, manager.WrapReturn(manager.StatusUnavailableError, "yum command failed", err)
 	}
@@ -215,9 +254,18 @@ func (m *Manager) Install(ctx context.Context, packageNames []string, opts *mana
 	if localOpts.AssumeYes {
 		args = append(args, "-y")
 	}
+	if localOpts.Verbose {
+		args = append(args, "-v")
+	}
 	args = append(args, packageNames...)
 
-	result, err := m.GetRunner().Run(ctx, "yum", args)
+	var result *manager.CommandResult
+	var err error
+	if localOpts.Verbose {
+		result, err = m.GetRunner().RunVerbose(ctx, "yum", args)
+	} else {
+		result, err = m.GetRunner().Run(ctx, "yum", args)
+	}
 	if err != nil {
 		return nil, manager.WrapReturn(manager.StatusUnavailableError, "yum command failed", err)
 	}
@@ -262,9 +310,18 @@ func (m *Manager) Remove(ctx context.Context, packageNames []string, opts *manag
 	if opts.AssumeYes {
 		args = append(args, "-y")
 	}
+	if opts.Verbose {
+		args = append(args, "-v")
+	}
 	args = append(args, packageNames...)
 
-	result, err := m.GetRunner().Run(ctx, "yum", args)
+	var result *manager.CommandResult
+	var err error
+	if opts.Verbose {
+		result, err = m.GetRunner().RunVerbose(ctx, "yum", args)
+	} else {
+		result, err = m.GetRunner().Run(ctx, "yum", args)
+	}
 	if err != nil {
 		return nil, manager.WrapReturn(manager.StatusUnavailableError, "yum command failed", err)
 	}
@@ -327,9 +384,18 @@ func (m *Manager) Upgrade(ctx context.Context, packageNames []string, opts *mana
 	if opts.AssumeYes {
 		args = append(args, "-y")
 	}
+	if opts.Verbose {
+		args = append(args, "-v")
+	}
 	args = append(args, packageNames...)
 
-	result, err := m.GetRunner().Run(ctx, "yum", args)
+	var result *manager.CommandResult
+	var err error
+	if opts.Verbose {
+		result, err = m.GetRunner().RunVerbose(ctx, "yum", args)
+	} else {
+		result, err = m.GetRunner().Run(ctx, "yum", args)
+	}
 	if err != nil {
 		return nil, manager.WrapReturn(manager.StatusUnavailableError, "yum command failed", err)
 	}
@@ -387,8 +453,17 @@ func (m *Manager) AutoRemove(ctx context.Context, opts *manager.Options) ([]mana
 	if opts.AssumeYes {
 		args = append(args, "-y")
 	}
+	if opts.Verbose {
+		args = append(args, "-v")
+	}
 
-	result, err := m.GetRunner().Run(ctx, "yum", args)
+	var result *manager.CommandResult
+	var err error
+	if opts.Verbose {
+		result, err = m.GetRunner().RunVerbose(ctx, "yum", args)
+	} else {
+		result, err = m.GetRunner().Run(ctx, "yum", args)
+	}
 	if err != nil {
 		return nil, manager.WrapReturn(manager.StatusUnavailableError, "yum command failed", err)
 	}
@@ -428,11 +503,20 @@ func (m *Manager) Verify(ctx context.Context, packageNames []string, opts *manag
 
 	// Use yum check for package verification
 	args := []string{"check"}
+	if opts != nil && opts.Verbose {
+		args = append(args, "-v")
+	}
 	if len(packageNames) > 0 {
 		args = append(args, packageNames...)
 	}
 
-	output, err := m.GetRunner().Run(ctx, "yum", args)
+	var output *manager.CommandResult
+	var err error
+	if opts != nil && opts.Verbose {
+		output, err = m.GetRunner().RunVerbose(ctx, "yum", args)
+	} else {
+		output, err = m.GetRunner().Run(ctx, "yum", args)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("yum check failed: %w", err)
 	}
