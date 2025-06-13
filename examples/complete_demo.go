@@ -184,7 +184,7 @@ func main() {
 
 	fmt.Println("\n🎉 Complete! This demonstrates:")
 	fmt.Printf("  • APT plugin: 462 lines (including parsing)\n")
-	fmt.Printf("  • All 13 unified operations working\n")
+	fmt.Printf("  • All 11 package operations working\n")
 	fmt.Printf("  • 20 test functions passing\n")
 	fmt.Printf("  • Clean CLI with 12 commands\n")
 	fmt.Printf("  • Zero legacy compatibility code\n")

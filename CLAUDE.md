@@ -8,7 +8,7 @@ Follow all universal principles there, plus these project-specific rules.
 **go-syspkg**: Universal interface for system package managers (apt, yum, snap, flatpak, etc.)
 
 **Philosophy**: Tool-focused, not OS-focused. If apt works in a container or on macOS, we support it.
-**Architecture**: Unified interface with 13 operations, plugin system, CommandRunner pattern.
+**Architecture**: Unified interface with 11 package operations, plugin system, CommandRunner pattern.
 
 **Cross-Package Manager Compatibility**: SysPkg normalizes package states for consistent behavior across different package managers. For example, APT's "config-files" state (packages removed but with configuration files remaining) is normalized to "available" status to match the semantics used by other package managers like YUM and Snap.
 
@@ -135,7 +135,7 @@ Each package manager has unique exit codes. Never assume:
 ## Current Development Focus
 
 **Active Branch**: `refactor-unified-interface`
-- APT ✅ Complete with all 13 operations
+- APT ✅ Complete with all 11 package operations
 - YUM ✅ Complete with fixtures
 - Snap/Flatpak 🚧 Need migration to unified interface
 

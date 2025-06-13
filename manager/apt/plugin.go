@@ -185,7 +185,7 @@ func (m *Manager) Install(ctx context.Context, packages []string, opts *manager.
 	args := []string{"install", "-y"}
 	args = append(args, packages...)
 
-	if opts.DryRun {
+	if opts != nil && opts.DryRun {
 		args = append(args, "--dry-run")
 	}
 	if opts != nil && opts.Verbose {
@@ -240,7 +240,7 @@ func (m *Manager) Remove(ctx context.Context, packages []string, opts *manager.O
 	args := []string{"remove", "-y", "--autoremove"}
 	args = append(args, packages...)
 
-	if opts.DryRun {
+	if opts != nil && opts.DryRun {
 		args = append(args, "--dry-run")
 	}
 	if opts != nil && opts.Verbose {

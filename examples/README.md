@@ -42,7 +42,7 @@ go run examples/complete_demo.go
 ```
 
 **What you'll learn:**
-- ✅ All 13 unified operations (Search, List, Install, Remove, etc.)
+- ✅ All 11 package operations (Search, List, Install, Remove, etc.)
 - ✅ Advanced error handling and graceful degradation
 - ✅ Dry-run operations and safety patterns
 - ✅ Metadata handling and package information
