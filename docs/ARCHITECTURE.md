@@ -115,8 +115,8 @@ func init() {
 }
 
 // Thread-safe registry with priority-based selection
-func GetBestManager(managerType string) PackageManager
-func GetAvailableManagers() map[string]PackageManager
+func GetBestMatch(managerType string) PackageManager
+func GetAvailable() map[string]PackageManager
 
 // Concurrent multi-manager operations (3x performance improvement)
 func (r *Registry) SearchAllConcurrent(ctx context.Context, query []string, opts *Options) map[string][]PackageInfo
