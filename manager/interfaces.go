@@ -214,6 +214,12 @@ const (
 	CategoryApp        = "app"        // flatpak, snap, appimage, etc.
 )
 
+// OperationResult represents the result of a package operation with both packages and error
+type OperationResult struct {
+	Packages []PackageInfo `json:"packages"` // Successfully processed packages
+	Error    error         `json:"error"`    // Error that occurred, if any
+}
+
 // Logger interface allows integrators to control logging output
 type Logger interface {
 	// Printf logs a formatted message

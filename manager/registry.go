@@ -520,8 +520,55 @@ func (r *Registry) RefreshAllConcurrent(ctx context.Context, opts *Options) map[
 	return refreshResults
 }
 
+// UpgradeAllConcurrentWithErrors performs concurrent package upgrades across all available managers.
+// Returns a map of manager name to operation results (including errors).
+func (r *Registry) UpgradeAllConcurrentWithErrors(ctx context.Context, packages []string, opts *Options) map[string]OperationResult {
+	managers := r.GetAvailable()
+	if len(managers) == 0 {
+		return make(map[string]OperationResult)
+	}
+
+	type upgradeResult struct {
+		managerName string
+		result      OperationResult
+	}
+
+	results := make(chan upgradeResult, len(managers))
+	var wg sync.WaitGroup
+
+	// Start concurrent upgrade operations
+	for name, manager := range managers {
+		wg.Add(1)
+		go func(name string, manager PackageManager) {
+			defer wg.Done()
+			packages, err := manager.Upgrade(ctx, packages, opts)
+			result := OperationResult{
+				Packages: packages,
+				Error:    err,
+			}
+			// Don't set empty packages on error - preserve the actual result
+			results <- upgradeResult{name, result}
+		}(name, manager)
+	}
+
+	// Wait for all operations to complete
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	// Collect results
+	upgradeResults := make(map[string]OperationResult)
+	for result := range results {
+		upgradeResults[result.managerName] = result.result
+	}
+
+	return upgradeResults
+}
+
 // UpgradeAllConcurrent performs concurrent package upgrades across all available managers.
 // Returns a map of manager name to upgrade results.
+// DEPRECATED: Use UpgradeAllConcurrentWithErrors for proper error handling.
 func (r *Registry) UpgradeAllConcurrent(ctx context.Context, packages []string, opts *Options) map[string][]PackageInfo {
 	managers := r.GetAvailable()
 	if len(managers) == 0 {
