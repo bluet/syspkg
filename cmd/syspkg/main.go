@@ -622,13 +622,13 @@ func handleUpgradeUnified(ctx context.Context, managers map[string]manager.Packa
 	formatter := NewOutputFormatter(config)
 	formatter.FormatOperationHeader("upgrade", target, managers, config.DryRun)
 
-	// Use Registry concurrent operations for performance
+	// Use Registry concurrent operations for performance with proper error handling
 	registry := manager.GetGlobalRegistry()
-	upgradeResults := registry.UpgradeAllConcurrent(ctx, packages, opts)
+	upgradeResults := registry.UpgradeAllConcurrentWithErrors(ctx, packages, opts)
 
-	// Process results using new result processor
+	// Process results using new result processor with error handling
 	processor := NewResultProcessor(formatter, config)
-	return processor.ProcessPackageOperationResults(upgradeResults, managers, "upgrade", "upgraded")
+	return processor.ProcessPackageOperationResultsWithErrors(upgradeResults, managers, "upgrade", "upgraded")
 }
 
 // handleCleanUnified implements unified clean for multi-manager scenarios
