@@ -28,7 +28,7 @@ When developing plugins, follow these testing guidelines:
 ### **Docker for Safety**
 - ALWAYS use Docker for fixture generation
 - ALWAYS use Docker for integration testing
-- NEVER run package manager operations on the development system // WRONG: dev system operations
+- NEVER run package manager operations on the development system
 - Use `make test-docker-*` commands for safe testing
 
 ### **Testing Hierarchy**
