@@ -11,6 +11,8 @@
 
 SysPkg is a unified CLI tool and Golang library for managing system packages across different package managers. Currently, it supports APT, YUM, Snap, and Flatpak, with plans for more. It simplifies package management by providing a consistent interface and API through an abstraction layer that focuses on package manager tools rather than specific operating systems.
 
+Also useful for generating SBOM (installed versions of packages in operating systems).
+
 ## Key Features
 
 - **Cross-Package Manager Compatibility**: Normalized status reporting (e.g., APT's config-files state maps to available)
