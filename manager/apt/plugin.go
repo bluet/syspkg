@@ -72,9 +72,6 @@ func (m *Manager) Search(ctx context.Context, query []string, opts *manager.Opti
 	}
 
 	args := append([]string{"search"}, query...)
-	if opts != nil && opts.Verbose {
-		args = append(args, "-v")
-	}
 	var result *manager.CommandResult
 	var err error
 	if opts != nil && opts.Verbose {
