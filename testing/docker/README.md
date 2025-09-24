@@ -40,6 +40,9 @@ This directory contains Docker configurations for testing go-syspkg across multi
 - **Fedora 39**: DNF testing (implementation in progress)
 - **Alpine Linux**: APK testing (implementation in progress)
 
+**Architecture Support:**
+- **AMD64 (x86_64), ARM64 (aarch64/Apple Silicon)**
+
 ## Usage
 
 ### Run All Container Tests

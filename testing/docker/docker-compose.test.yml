@@ -48,7 +48,7 @@ services:
         go test -v -tags='unit integration yum' ./manager/yum ./osinfo &&
         echo 'Generating YUM fixtures...' &&
         yum search vim > testing/fixtures/yum/search-vim-rocky8.txt 2>/dev/null || true &&
-        yum info vim > testing/fixtures/yum/info-vim-rocky8.txt 2>/dev/null || true &&
+        yum info vim-enhanced > testing/fixtures/yum/info-vim-rocky8.txt 2>/dev/null || true &&
         yum list --installed > testing/fixtures/yum/list-installed-rocky8.txt 2>/dev/null || true
       "
 
@@ -72,7 +72,7 @@ services:
         go test -v -tags='unit integration yum' ./manager/yum ./osinfo &&
         echo 'Generating YUM fixtures...' &&
         yum search vim > testing/fixtures/yum/search-vim-alma8.txt 2>/dev/null || true &&
-        yum info vim > testing/fixtures/yum/info-vim-alma8.txt 2>/dev/null || true
+        yum info vim-enhanced > testing/fixtures/yum/info-vim-alma8.txt 2>/dev/null || true
       "
 
   # TODO: Enable when DNF support is implemented

@@ -10,8 +10,15 @@ RUN apk add --no-cache \
     alpine-sdk \
     bash
 
-# Install Go 1.23.4 directly (Alpine package manager has older version)
-RUN curl -L https://go.dev/dl/go1.23.4.linux-amd64.tar.gz | tar -C /usr/local -xz
+# Install Go using Docker's TARGETARCH ARG for platform detection
+ARG GO_VERSION=1.23.4
+ARG TARGETARCH
+SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
+RUN if [ -z "${TARGETARCH}" ]; then \
+        echo "Error: TARGETARCH is not set. Use a BuildKit-enabled builder." >&2; \
+        exit 1; \
+    fi && \
+    curl -L "https://go.dev/dl/go${GO_VERSION}.linux-${TARGETARCH}.tar.gz" | tar -C /usr/local -xz
 ENV PATH="/usr/local/go/bin:${PATH}"
 
 # Set working directory
