@@ -196,8 +196,6 @@ func (a *PackageManager) Delete(pkgs []string, opts *manager.Options) ([]manager
 		return nil, err
 	}
 
-	// args := append([]string{"remove", ArgsFixBroken, ArgsPurge, ArgsAutoRemove}, pkgs...)
-	args := append([]string{"remove", ArgsFixBroken, ArgsAutoRemove}, pkgs...)
 	if opts == nil {
 		opts = &manager.Options{
 			DryRun:      false,
@@ -206,12 +204,32 @@ func (a *PackageManager) Delete(pkgs []string, opts *manager.Options) ([]manager
 		}
 	}
 
+	// Start with base remove command
+	args := []string{"remove"}
+
+	// always fix broken and auto-remove unused dependencies
+	args = append(args, ArgsFixBroken, ArgsAutoRemove)
+
+	// Add dry-run if requested
 	if opts.DryRun {
 		args = append(args, ArgsDryRun)
 	}
+
+	// assume yes if not interactive, to avoid hanging
 	if !opts.Interactive {
 		args = append(args, ArgsAssumeYes)
 	}
+
+	// Check if purge is requested in CustomCommandArgs
+	for _, arg := range opts.CustomCommandArgs {
+		if arg == ArgsPurge {
+			args = append(args, ArgsPurge)
+			break
+		}
+	}
+
+	// Append package names to the command arguments
+	args = append(args, pkgs...)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	defer cancel()
