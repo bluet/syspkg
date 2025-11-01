@@ -76,11 +76,13 @@ After the release is published:
 
 ## What's New in v0.1.6
 
-### Major Features
-- **YUM Package Manager Support**: Full implementation for RHEL/CentOS/Rocky Linux/AlmaLinux
-- **ARM64 Architecture Support**: Docker testing on Apple Silicon
-- **Enhanced Testing Infrastructure**: Multi-OS Docker testing
-- **Comprehensive Documentation**: Architecture, exit codes, and contributing guides
+See the [CHANGELOG.md](CHANGELOG.md) for detailed release notes.
+
+**Highlights:**
+- ✅ YUM Package Manager Support (RHEL/CentOS/Rocky/AlmaLinux) - **NEW**
+- ✅ ARM64 Architecture Support for Docker testing
+- ✅ Enhanced Testing Infrastructure with multi-OS Docker support
+- ✅ Comprehensive Documentation improvements
 
 ### Package Manager Support Status
 - ✅ APT (Debian/Ubuntu)
