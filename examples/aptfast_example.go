@@ -10,10 +10,10 @@ import (
 )
 
 func main() {
-	// Example 1: Using apt-fast via the SysPkg interface
-	fmt.Println("=== Example 1: Using apt-fast via SysPkg ===")
+	// Example 1: Using apt-fast via GetPackageManagerWithOptions
+	fmt.Println("=== Example 1: Using apt-fast via GetPackageManagerWithOptions ===")
 	includeOptions := syspkg.IncludeOptions{
-		AptFast: true, // Enable apt-fast
+		Apt: true, // Enable apt
 	}
 
 	sysPkg, err := syspkg.New(includeOptions)
@@ -21,8 +21,10 @@ func main() {
 		log.Fatalf("Failed to create SysPkg: %v", err)
 	}
 
-	// Get the apt-fast package manager
-	aptFastManager, err := sysPkg.GetPackageManager("apt-fast")
+	// Get apt manager with apt-fast binary
+	aptFastManager, err := sysPkg.GetPackageManagerWithOptions("apt", &syspkg.ManagerCreationOptions{
+		BinaryPath: "apt-fast",
+	})
 	if err != nil {
 		log.Fatalf("Failed to get apt-fast manager: %v", err)
 	}
@@ -80,10 +82,10 @@ func main() {
 		}
 	}
 
-	// Example 3: Auto-detection - prefer apt-fast over apt
-	fmt.Println("\n=== Example 3: Auto-detection ===")
+	// Example 3: Fallback pattern - prefer apt-fast, fallback to apt
+	fmt.Println("\n=== Example 3: Fallback pattern ===")
 	autoOptions := syspkg.IncludeOptions{
-		AllAvailable: true, // This will detect both apt and apt-fast if available
+		Apt: true,
 	}
 
 	autoSysPkg, err := syspkg.New(autoOptions)
@@ -93,37 +95,30 @@ func main() {
 
 	// Try to get apt-fast first, fall back to apt
 	var pkgManager syspkg.PackageManager
-	pkgManager, err = autoSysPkg.GetPackageManager("apt-fast")
-	if err != nil {
-		fmt.Println("apt-fast not available, using apt")
+	pkgManager, err = autoSysPkg.GetPackageManagerWithOptions("apt", &syspkg.ManagerCreationOptions{
+		BinaryPath: "apt-fast",
+	})
+	if err != nil || !pkgManager.IsAvailable() {
+		fmt.Println("apt-fast not available, using standard apt")
 		pkgManager, err = autoSysPkg.GetPackageManager("apt")
 		if err != nil {
-			log.Fatalf("Neither apt-fast nor apt is available: %v", err)
+			log.Fatalf("apt is not available: %v", err)
 		}
+	} else {
+		fmt.Println("Using apt-fast for faster downloads")
 	}
 
 	fmt.Printf("Using package manager: %s\n", pkgManager.GetPackageManager())
 
-	// Example 4: Using apt-fast for package installation (requires root)
-	fmt.Println("\n=== Example 4: Package Installation (demonstration only) ===")
-	fmt.Println("Note: The following operations require root privileges")
-
-	// Refresh package list
-	fmt.Println("Refreshing package list...")
-	// err = aptFastDirect.Refresh(&manager.Options{})
-	// if err != nil {
-	//     log.Fatalf("Failed to refresh: %v", err)
-	// }
-
-	// Install a package (commented out to prevent actual installation)
-	fmt.Println("To install a package:")
-	fmt.Println("  packages, err := aptFastDirect.Install([]string{\"package-name\"}, &manager.Options{})")
-
-	// Upgrade packages
-	fmt.Println("To upgrade packages:")
-	fmt.Println("  packages, err := aptFastDirect.Upgrade([]string{\"package-name\"}, &manager.Options{})")
-
-	// Upgrade all packages
-	fmt.Println("To upgrade all packages:")
-	fmt.Println("  packages, err := aptFastDirect.UpgradeAll(&manager.Options{})")
+	// Example 4: Using custom binary path (not just name)
+	fmt.Println("\n=== Example 4: Custom binary path ===")
+	fmt.Println("To use a custom binary path:")
+	fmt.Println("  customApt, _ := syspkg.GetPackageManagerWithOptions(\"apt\", &syspkg.ManagerCreationOptions{")
+	fmt.Println("      BinaryPath: \"/usr/local/bin/custom-apt\",")
+	fmt.Println("  })")
+	fmt.Println()
+	fmt.Println("Or for development/testing:")
+	fmt.Println("  devApt, _ := syspkg.GetPackageManagerWithOptions(\"apt\", &syspkg.ManagerCreationOptions{")
+	fmt.Println("      BinaryPath: \"./my-test-apt\",")
+	fmt.Println("  })")
 }

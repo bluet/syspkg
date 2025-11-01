@@ -71,6 +71,15 @@ type PackageManager interface {
 	AutoRemove(opts *manager.Options) ([]manager.PackageInfo, error)
 }
 
+// ManagerCreationOptions specifies options for creating a package manager instance.
+type ManagerCreationOptions struct {
+	// BinaryPath specifies a custom binary path or name to use for the package manager.
+	// This can be either just a binary name (e.g., "apt-fast") which will be searched in PATH,
+	// or a full path (e.g., "/usr/local/bin/apt-fast").
+	// If empty, the default binary for the package manager will be used.
+	BinaryPath string
+}
+
 // SysPkg is the interface that defines the methods for interacting with the SysPkg library.
 type SysPkg interface {
 	// FindPackageManagers returns a map of available package managers based on the specified IncludeOptions.
@@ -89,7 +98,24 @@ type SysPkg interface {
 	// If the name is empty, the first available package manager will be returned.
 	// If no suitable package manager is found, an error is returned.
 	// Note: only package managers that are specified in the IncludeOptions when creating the SysPkg instance (with New() method) will be returned. If you want to use package managers that are not specified in the IncludeOptions, you should use the FindPackageManagers() method to get a list of all available package managers, or use RefreshPackageManagers() with the IncludeOptions parameter to refresh the package manager list.
+	// For custom binary paths, use GetPackageManagerWithOptions.
 	GetPackageManager(name string) (PackageManager, error)
+
+	// GetPackageManagerWithOptions returns a PackageManager instance with custom configuration options.
+	// This allows specifying custom binary paths (e.g., "apt-fast" instead of "apt") and other creation-time options.
+	// The returned manager instance will use the specified options for all operations.
+	//
+	// Example usage:
+	//   // Use apt-fast instead of apt
+	//   apt, _ := syspkg.GetPackageManagerWithOptions("apt", &ManagerCreationOptions{
+	//       BinaryPath: "apt-fast",
+	//   })
+	//
+	//   // Use custom yum path
+	//   yum, _ := syspkg.GetPackageManagerWithOptions("yum", &ManagerCreationOptions{
+	//       BinaryPath: "/opt/custom/yum",
+	//   })
+	GetPackageManagerWithOptions(name string, opts *ManagerCreationOptions) (PackageManager, error)
 
 	// Install(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error)
 	// Delete(pkgs []string, opts *manager.Options) ([]manager.PackageInfo, error)

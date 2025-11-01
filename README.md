@@ -9,7 +9,7 @@
 [![Go Version](https://img.shields.io/github/go-mod/go-version/bluet/syspkg)](https://github.com/bluet/syspkg)
 [![GitHub release](https://img.shields.io/github/v/release/bluet/syspkg)](https://github.com/bluet/syspkg/releases)
 
-SysPkg is a unified CLI tool and Golang library for managing system packages across different package managers. Currently, it supports APT, APT-Fast, YUM, Snap, and Flatpak, with plans for more. It simplifies package management by providing a consistent interface and API through an abstraction layer that focuses on package manager tools rather than specific operating systems.
+SysPkg is a unified CLI tool and Golang library for managing system packages across different package managers. Currently, it supports APT, YUM, Snap, and Flatpak, with plans for more. It simplifies package management by providing a consistent interface and API through an abstraction layer that focuses on package manager tools rather than specific operating systems.
 
 Also useful for generating SBOM (installed versions of packages in operating systems).
 
@@ -17,6 +17,7 @@ Also useful for generating SBOM (installed versions of packages in operating sys
 
 - **Cross-Package Manager Compatibility**: Normalized status reporting (e.g., APT's config-files state maps to available)
 - **Consistent API**: Same interface across all supported package managers
+- **Custom Binary Support**: Use binary variants (e.g., apt-fast) or custom paths via `GetPackageManagerWithOptions`
 - **Tool-Focused**: Works wherever package manager tools work (containers, cross-platform, etc.)
 - **Production Ready**: Comprehensive testing across multiple OS distributions
 - **Performance Optimized**: Efficient parsing with compiled regexes and robust error handling
@@ -25,8 +26,9 @@ Also useful for generating SBOM (installed versions of packages in operating sys
 ## Features
 
 - A unified package management interface for various package managers
-- Supports popular package managers such as APT, APT-Fast, YUM, Snap, Flatpak, and more
-- APT-Fast integration for faster parallel package downloads on Debian-based systems
+- Supports popular package managers such as APT, YUM, Snap, Flatpak, and more
+- Custom binary support for package manager variants (e.g., apt-fast for faster parallel downloads)
+- Full path support for custom installations and development binaries
 - Easy-to-use API for package installation, removal, search, listing, and system upgrades
 - Expandable architecture to support more package managers in the future
 
@@ -123,11 +125,16 @@ syspkg show upgradable
 
 For more examples and real use cases, see the [cmd/syspkg/](cmd/syspkg/) directory.
 
-### Using APT-Fast
+### Using Custom Binaries (e.g., APT-Fast)
 
-APT-Fast is a shellscript wrapper for apt-get that can dramatically improve download speeds by downloading packages in parallel using aria2c. SysPkg provides full support for apt-fast as a drop-in replacement for apt.
+SysPkg supports using custom binaries for any package manager through the `GetPackageManagerWithOptions` method. This is useful for:
+- Binary variants like `apt-fast` (faster parallel downloads)
+- Custom installations at non-standard paths
+- Development and testing with mock binaries
 
-#### Using APT-Fast via SysPkg
+APT-Fast is a shellscript wrapper for apt-get that dramatically improves download speeds by downloading packages in parallel using aria2c.
+
+#### Using APT-Fast via GetPackageManagerWithOptions
 
 ```go
 package main
@@ -139,9 +146,9 @@ import (
 )
 
 func main() {
-    // Enable apt-fast in SysPkg
+    // Initialize SysPkg with apt
     includeOptions := syspkg.IncludeOptions{
-        AptFast: true,
+        Apt: true,
     }
     
     syspkgManager, err := syspkg.New(includeOptions)
@@ -150,10 +157,12 @@ func main() {
         return
     }
     
-    // Get apt-fast package manager
-    aptFast, err := syspkgManager.GetPackageManager("apt-fast")
+    // Get apt manager with apt-fast binary
+    aptFast, err := syspkgManager.GetPackageManagerWithOptions("apt", &syspkg.ManagerCreationOptions{
+        BinaryPath: "apt-fast",
+    })
     if err != nil {
-        fmt.Printf("apt-fast not available: %v\n", err)
+        fmt.Printf("Error: %v\n", err)
         return
     }
     
@@ -166,6 +175,20 @@ func main() {
     
     fmt.Printf("Found %d packages\n", len(packages))
 }
+```
+
+#### Using Custom Binary Paths
+
+```go
+// Use custom binary path (not in $PATH)
+customApt, err := syspkgManager.GetPackageManagerWithOptions("apt", &syspkg.ManagerCreationOptions{
+    BinaryPath: "/usr/local/bin/custom-apt",
+})
+
+// Use development binary
+devApt, err := syspkgManager.GetPackageManagerWithOptions("apt", &syspkg.ManagerCreationOptions{
+    BinaryPath: "./my-test-apt",
+})
 ```
 
 #### Using APT-Fast directly
@@ -210,9 +233,8 @@ import (
 )
 
 func main() {
-    // Detect all available package managers
     includeOptions := syspkg.IncludeOptions{
-        AllAvailable: true,
+        Apt: true,
     }
     
     syspkgManager, err := syspkg.New(includeOptions)
@@ -222,14 +244,16 @@ func main() {
     }
     
     // Try apt-fast first, fallback to apt
-    pm, err := syspkgManager.GetPackageManager("apt-fast")
-    if err != nil {
+    pm, err := syspkgManager.GetPackageManagerWithOptions("apt", &syspkg.ManagerCreationOptions{
+        BinaryPath: "apt-fast",
+    })
+    if err != nil || !pm.IsAvailable() {
+        fmt.Println("apt-fast not available, using standard apt")
         pm, err = syspkgManager.GetPackageManager("apt")
         if err != nil {
-            fmt.Println("Neither apt-fast nor apt is available")
+            fmt.Println("apt is not available")
             return
         }
-        fmt.Println("Using apt")
     } else {
         fmt.Println("Using apt-fast for faster downloads")
     }
@@ -292,7 +316,6 @@ For more examples and real use cases, see the [cmd/syspkg/](cmd/syspkg/) directo
 | Package Manager | Install | Remove | Search | Upgrade | List Installed | List Upgradable | Get Package Info | AutoRemove | Clean | Refresh |
 | --------------- | ------- | ------ | ------ | ------- | -------------- | --------------- | ---------------- | ---------- | ----- | ------- |
 | APT             | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               | ✅         | ✅    | ✅      |
-| APT-Fast        | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               | ✅         | ✅    | ✅      |
 | YUM             | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               | ✅         | ✅    | ✅      |
 | SNAP            | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               | ✅         | ✅    | ✅      |
 | Flatpak         | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               | ✅         | ✅    | ✅      |
@@ -302,7 +325,7 @@ For more examples and real use cases, see the [cmd/syspkg/](cmd/syspkg/) directo
 
 **Legend:** ✅ Implemented, 🚧 Planned, ❌ Not supported
 
-**APT-Fast:** A shellscript wrapper for apt that accelerates download speeds using parallel connections via aria2c. Fully compatible with all APT operations.
+**Custom Binaries:** APT supports custom binaries via `GetPackageManagerWithOptions` (e.g., apt-fast for faster parallel downloads). This feature will be extended to other package managers in future releases.
 
 **Philosophy:** SysPkg focuses on supporting package manager tools wherever they work, regardless of the underlying operating system. If you have apt+dpkg working on macOS via Homebrew, or in a container, SysPkg will support it.
 
