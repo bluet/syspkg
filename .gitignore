@@ -52,6 +52,10 @@ bin/
 tmp/
 **/*.log.dccache
 
+# Example binaries (from examples/ directory)
+examples/*_example
+aptfast_example
+
 # Vim swap files
 *.swp
 *.swo
