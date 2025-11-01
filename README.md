@@ -9,7 +9,7 @@
 [![Go Version](https://img.shields.io/github/go-mod/go-version/bluet/syspkg)](https://github.com/bluet/syspkg)
 [![GitHub release](https://img.shields.io/github/v/release/bluet/syspkg)](https://github.com/bluet/syspkg/releases)
 
-SysPkg is a unified CLI tool and Golang library for managing system packages across different package managers. Currently, it supports APT, YUM, Snap, and Flatpak, with plans for more. It simplifies package management by providing a consistent interface and API through an abstraction layer that focuses on package manager tools rather than specific operating systems.
+SysPkg is a unified CLI tool and Golang library for managing system packages across different package managers. Currently, it supports APT, APT-Fast, YUM, Snap, and Flatpak, with plans for more. It simplifies package management by providing a consistent interface and API through an abstraction layer that focuses on package manager tools rather than specific operating systems.
 
 Also useful for generating SBOM (installed versions of packages in operating systems).
 
@@ -25,7 +25,8 @@ Also useful for generating SBOM (installed versions of packages in operating sys
 ## Features
 
 - A unified package management interface for various package managers
-- Supports popular package managers such as APT, YUM, Snap, Flatpak, and more
+- Supports popular package managers such as APT, APT-Fast, YUM, Snap, Flatpak, and more
+- APT-Fast integration for faster parallel package downloads on Debian-based systems
 - Easy-to-use API for package installation, removal, search, listing, and system upgrades
 - Expandable architecture to support more package managers in the future
 
@@ -66,6 +67,9 @@ Here's an example demonstrating how to use SysPkg as a CLI tool:
 ```bash
 # Install a package using APT
 syspkg --apt install vim
+
+# Install a package using APT-Fast (faster parallel downloads)
+syspkg --apt-fast install vim
 
 # Remove a package using APT
 syspkg --apt remove vim
@@ -119,6 +123,124 @@ syspkg show upgradable
 
 For more examples and real use cases, see the [cmd/syspkg/](cmd/syspkg/) directory.
 
+### Using APT-Fast
+
+APT-Fast is a shellscript wrapper for apt-get that can dramatically improve download speeds by downloading packages in parallel using aria2c. SysPkg provides full support for apt-fast as a drop-in replacement for apt.
+
+#### Using APT-Fast via SysPkg
+
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/bluet/syspkg"
+    "github.com/bluet/syspkg/manager"
+)
+
+func main() {
+    // Enable apt-fast in SysPkg
+    includeOptions := syspkg.IncludeOptions{
+        AptFast: true,
+    }
+    
+    syspkgManager, err := syspkg.New(includeOptions)
+    if err != nil {
+        fmt.Printf("Error: %v\n", err)
+        return
+    }
+    
+    // Get apt-fast package manager
+    aptFast, err := syspkgManager.GetPackageManager("apt-fast")
+    if err != nil {
+        fmt.Printf("apt-fast not available: %v\n", err)
+        return
+    }
+    
+    // Use apt-fast just like apt
+    packages, err := aptFast.Find([]string{"vim"}, &manager.Options{})
+    if err != nil {
+        fmt.Printf("Error: %v\n", err)
+        return
+    }
+    
+    fmt.Printf("Found %d packages\n", len(packages))
+}
+```
+
+#### Using APT-Fast directly
+
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/bluet/syspkg/manager/apt"
+    "github.com/bluet/syspkg/manager"
+)
+
+func main() {
+    // Create apt-fast manager directly
+    aptFast := apt.NewPackageManagerWithBinary("apt-fast")
+    
+    if !aptFast.IsAvailable() {
+        fmt.Println("apt-fast is not installed")
+        return
+    }
+    
+    // List upgradable packages
+    upgradable, err := aptFast.ListUpgradable(&manager.Options{})
+    if err != nil {
+        fmt.Printf("Error: %v\n", err)
+        return
+    }
+    
+    fmt.Printf("Upgradable packages: %d\n", len(upgradable))
+}
+```
+
+#### Fallback Pattern: Prefer apt-fast, fallback to apt
+
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/bluet/syspkg"
+)
+
+func main() {
+    // Detect all available package managers
+    includeOptions := syspkg.IncludeOptions{
+        AllAvailable: true,
+    }
+    
+    syspkgManager, err := syspkg.New(includeOptions)
+    if err != nil {
+        fmt.Printf("Error: %v\n", err)
+        return
+    }
+    
+    // Try apt-fast first, fallback to apt
+    pm, err := syspkgManager.GetPackageManager("apt-fast")
+    if err != nil {
+        pm, err = syspkgManager.GetPackageManager("apt")
+        if err != nil {
+            fmt.Println("Neither apt-fast nor apt is available")
+            return
+        }
+        fmt.Println("Using apt")
+    } else {
+        fmt.Println("Using apt-fast for faster downloads")
+    }
+    
+    // Use the package manager
+    fmt.Printf("Package manager: %s\n", pm.GetPackageManager())
+}
+```
+
+For a complete example, see [examples/aptfast_example.go](examples/aptfast_example.go).
+
 ### Go Library
 
 Here's an example demonstrating how to use SysPkg as a Go library:
@@ -170,6 +292,7 @@ For more examples and real use cases, see the [cmd/syspkg/](cmd/syspkg/) directo
 | Package Manager | Install | Remove | Search | Upgrade | List Installed | List Upgradable | Get Package Info | AutoRemove | Clean | Refresh |
 | --------------- | ------- | ------ | ------ | ------- | -------------- | --------------- | ---------------- | ---------- | ----- | ------- |
 | APT             | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               | ✅         | ✅    | ✅      |
+| APT-Fast        | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               | ✅         | ✅    | ✅      |
 | YUM             | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               | ✅         | ✅    | ✅      |
 | SNAP            | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               | ✅         | ✅    | ✅      |
 | Flatpak         | ✅      | ✅    | ✅     | ✅     | ✅             | ✅             | ✅               | ✅         | ✅    | ✅      |
@@ -178,6 +301,8 @@ For more examples and real use cases, see the [cmd/syspkg/](cmd/syspkg/) directo
 | Zypper (openSUSE) | 🚧   | 🚧    | 🚧     | 🚧     | 🚧             | 🚧             | 🚧               | 🚧         | 🚧    | 🚧      |
 
 **Legend:** ✅ Implemented, 🚧 Planned, ❌ Not supported
+
+**APT-Fast:** A shellscript wrapper for apt that accelerates download speeds using parallel connections via aria2c. Fully compatible with all APT operations.
 
 **Philosophy:** SysPkg focuses on supporting package manager tools wherever they work, regardless of the underlying operating system. If you have apt+dpkg working on macOS via Homebrew, or in a container, SysPkg will support it.
 
