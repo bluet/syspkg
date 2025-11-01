@@ -7,12 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.6] - 2025-11-01
+
 ### Added
-- Technical debt cleanup and APT Upgrade method fix
-- Comprehensive documentation reorganization with proper cross-references
+- **YUM Package Manager Support**: Full support for YUM package manager (RHEL/CentOS/Rocky Linux/AlmaLinux)
+  - Complete YUM implementation with all package operations (install, remove, upgrade, search, list)
+  - Comprehensive test suite including unit, integration, and mock tests
+  - YUM-specific exit code documentation and handling
+  - Real-world fixture-based testing with Rocky Linux outputs
+- **ARM64 Architecture Support**: Docker testing now supports both AMD64 and ARM64 (Apple Silicon)
+  - Automatic architecture detection in all Dockerfiles
+  - Cross-platform development support for ARM64 machines
+- **Enhanced Testing Infrastructure**:
+  - Multi-OS Docker testing support for Rocky Linux, AlmaLinux, Fedora, and Alpine
+  - Comprehensive fixture-based testing framework
+  - CommandRunner architecture for better testability
+- **Improved Documentation**:
+  - Complete architecture documentation (ARCHITECTURE.md)
+  - Exit code documentation for all package managers
+  - Contributing guidelines (CONTRIBUTING.md)
+  - Enhanced development workflows and CI/CD documentation
+
+### Changed
+- Upgraded to Go 1.23/1.24 for CI/CD workflows
+- Enhanced CI/CD pipeline with multi-OS testing
+- Improved project structure and organization
 
 ### Fixed
-- **CRITICAL**: APT Upgrade method now correctly uses `apt install` for specific packages instead of upgrading all packages
+- Technical debt cleanup and APT Upgrade method fix
+- APT Upgrade method now correctly uses `apt install` for specific packages
 
 ## Recent Achievements ✅ 
 
