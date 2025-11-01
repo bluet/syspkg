@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.6] - TBD
+## [0.1.6] - 2025-11-01
 
 ### Added
 - **YUM Package Manager Support**: Full support for YUM package manager (RHEL/CentOS/Rocky Linux/AlmaLinux)
