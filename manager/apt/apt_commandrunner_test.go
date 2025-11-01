@@ -214,6 +214,80 @@ curl 7.81.0-1ubuntu1.4
 			t.Errorf("Expected %d environment variables, got %d", len(expectedEnv), len(env))
 		}
 	})
+
+	t.Run("Delete with purge flag", func(t *testing.T) {
+		// Create mock command runner
+		mockRunner := manager.NewMockCommandRunner()
+
+		removeOutputWithPurge := `Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following packages will be REMOVED:
+  ebtables*
+0 upgraded, 0 newly installed, 1 to remove and 0 not upgraded.
+After this operation, 123 kB disk space will be freed.
+Do you want to continue? [Y/n] 
+(Reading database ... 1234 files and directories currently installed.)
+Removing ebtables (2.0.11-4ubuntu1) ...
+Purging configuration files for ebtables (2.0.11-4ubuntu1) ...
+`
+		expectedArgs := []string{"remove", "-f", "--autoremove", "-y", "--purge", "ebtables"}
+		mockRunner.AddCommand("apt", expectedArgs, []byte(removeOutputWithPurge), nil)
+
+		// Create APT package manager with mocked runner
+		pm := apt.NewPackageManagerWithCustomRunner(mockRunner)
+
+		// Execute Delete operation with purge flag
+		opts := &manager.Options{
+			AssumeYes:         true,
+			CustomCommandArgs: []string{apt.ArgsPurge},
+		}
+		packages, err := pm.Delete([]string{"ebtables"}, opts)
+		if err != nil {
+			t.Fatalf("Delete with purge flag failed: %v", err)
+		}
+
+		// Verify return value
+		if packages == nil {
+			t.Error("Delete should return package info, got nil")
+		}
+	})
+
+	t.Run("Delete without purge flag", func(t *testing.T) {
+		// Create mock command runner
+		mockRunner := manager.NewMockCommandRunner()
+
+		removeOutputWithoutPurge := `Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following packages will be REMOVED:
+  ebtables
+0 upgraded, 0 newly installed, 1 to remove and 0 not upgraded.
+After this operation, 123 kB disk space will be freed.
+Do you want to continue? [Y/n] 
+(Reading database ... 1234 files and directories currently installed.)
+Removing ebtables (2.0.11-4ubuntu1) ...
+`
+		expectedArgs := []string{"remove", "-f", "--autoremove", "-y", "ebtables"}
+		mockRunner.AddCommand("apt", expectedArgs, []byte(removeOutputWithoutPurge), nil)
+
+		// Create APT package manager with mocked runner
+		pm := apt.NewPackageManagerWithCustomRunner(mockRunner)
+
+		// Execute Delete operation without purge flag
+		opts := &manager.Options{
+			AssumeYes: true,
+		}
+		packages, err := pm.Delete([]string{"ebtables"}, opts)
+		if err != nil {
+			t.Fatalf("Delete without purge flag failed: %v", err)
+		}
+
+		// Verify return value
+		if packages == nil {
+			t.Error("Delete should return package info, got nil")
+		}
+	})
 }
 
 // TestAPTCommandRunnerMigration verifies that the migration from CommandBuilder to CommandRunner works correctly
