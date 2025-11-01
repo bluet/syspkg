@@ -64,12 +64,27 @@ type PackageManager struct {
 	// runnerOnce protects lazy initialization for zero-value struct usage (e.g., &PackageManager{})
 	// This enables defensive programming and backward compatibility with existing test patterns
 	runnerOnce sync.Once
+	// binaryName is the name of the binary to use (e.g., "apt", "apt-fast")
+	// Defaults to "apt" if not specified
+	binaryName string
+	// binaryOnce protects lazy initialization of binaryName
+	binaryOnce sync.Once
 }
 
 // NewPackageManager creates a new APT package manager with default command runner
 func NewPackageManager() *PackageManager {
 	return &PackageManager{
-		runner: manager.NewDefaultCommandRunner(),
+		runner:     manager.NewDefaultCommandRunner(),
+		binaryName: pm,
+	}
+}
+
+// NewPackageManagerWithBinary creates a new APT package manager with a custom binary name
+// This allows using apt-compatible binaries like apt-fast as a drop-in replacement
+func NewPackageManagerWithBinary(binaryName string) *PackageManager {
+	return &PackageManager{
+		runner:     manager.NewDefaultCommandRunner(),
+		binaryName: binaryName,
 	}
 }
 
@@ -77,7 +92,17 @@ func NewPackageManager() *PackageManager {
 // This is primarily used for testing with mocked commands
 func NewPackageManagerWithCustomRunner(runner manager.CommandRunner) *PackageManager {
 	return &PackageManager{
-		runner: runner,
+		runner:     runner,
+		binaryName: pm,
+	}
+}
+
+// NewPackageManagerWithCustomRunnerAndBinary creates a new APT package manager with custom command runner and binary name
+// This is primarily used for testing apt-fast or other apt-compatible binaries with mocked commands
+func NewPackageManagerWithCustomRunnerAndBinary(runner manager.CommandRunner, binaryName string) *PackageManager {
+	return &PackageManager{
+		runner:     runner,
+		binaryName: binaryName,
 	}
 }
 
@@ -96,26 +121,39 @@ func (a *PackageManager) getRunner() manager.CommandRunner {
 	return a.runner
 }
 
+// getBinaryName returns the binary name, defaulting to "apt" if not set.
+// Uses sync.Once for thread-safe lazy initialization to support zero-value struct usage.
+func (a *PackageManager) getBinaryName() string {
+	a.binaryOnce.Do(func() {
+		if a.binaryName == "" {
+			a.binaryName = pm
+		}
+	})
+	return a.binaryName
+}
+
 // executeCommand handles command execution with support for both interactive and non-interactive modes
 // For interactive mode, it uses RunInteractive to handle stdin/stdout/stderr
 // For non-interactive mode, it uses RunContext for testability
 func (a *PackageManager) executeCommand(ctx context.Context, args []string, opts *manager.Options) ([]byte, error) {
 	if opts != nil && opts.Interactive {
 		// Interactive mode uses RunInteractive for stdin/stdout/stderr handling
-		err := a.getRunner().RunInteractive(ctx, pm, args, aptNonInteractiveEnv...)
+		err := a.getRunner().RunInteractive(ctx, a.getBinaryName(), args, aptNonInteractiveEnv...)
 		return nil, err
 	}
 
 	// Use RunContext for non-interactive execution (automatically includes LC_ALL=C)
-	return a.getRunner().RunContext(ctx, pm, args, aptNonInteractiveEnv...)
+	return a.getRunner().RunContext(ctx, a.getBinaryName(), args, aptNonInteractiveEnv...)
 }
 
 // IsAvailable checks if the apt package manager is available on the system.
 // It verifies both that apt exists and that it's the Debian apt package manager
 // (not the Java Annotation Processing Tool with the same name on some systems).
 func (a *PackageManager) IsAvailable() bool {
+	binary := a.getBinaryName()
+
 	// First check if apt command exists
-	_, err := exec.LookPath(pm)
+	_, err := exec.LookPath(binary)
 	if err != nil {
 		return false
 	}
@@ -128,7 +166,7 @@ func (a *PackageManager) IsAvailable() bool {
 
 	// Test if this is actually functional Debian apt by trying a safe command
 	// This approach: if apt+dpkg work together, support them regardless of platform
-	output, err := a.getRunner().Run("apt", "--version")
+	output, err := a.getRunner().Run(binary, "--version")
 	if err != nil {
 		return false
 	}
@@ -144,7 +182,7 @@ func (a *PackageManager) IsAvailable() bool {
 
 // GetPackageManager returns the name of the apt package manager.
 func (a *PackageManager) GetPackageManager() string {
-	return pm
+	return a.getBinaryName()
 }
 
 // Install installs the provided packages using the apt package manager.
@@ -287,7 +325,7 @@ func (a *PackageManager) Find(keywords []string, opts *manager.Options) ([]manag
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer cancel()
 
-	out, err := a.getRunner().RunContext(ctx, pm, args, aptNonInteractiveEnv...)
+	out, err := a.getRunner().RunContext(ctx, a.getBinaryName(), args, aptNonInteractiveEnv...)
 	if err != nil {
 		return nil, err
 	}
@@ -313,7 +351,7 @@ func (a *PackageManager) ListUpgradable(opts *manager.Options) ([]manager.Packag
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer cancel()
 
-	out, err := a.getRunner().RunContext(ctx, pm, []string{"list", "--upgradable"}, aptNonInteractiveEnv...)
+	out, err := a.getRunner().RunContext(ctx, a.getBinaryName(), []string{"list", "--upgradable"}, aptNonInteractiveEnv...)
 	if err != nil {
 		return nil, err
 	}
@@ -356,7 +394,7 @@ func (a *PackageManager) Upgrade(pkgs []string, opts *manager.Options) ([]manage
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
 	defer cancel()
 
-	log.Printf("Running command: %s %s", pm, args)
+	log.Printf("Running command: %s %s", a.getBinaryName(), args)
 
 	out, err := a.executeCommand(ctx, args, opts)
 	if err != nil {

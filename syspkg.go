@@ -40,6 +40,7 @@ type IncludeOptions struct {
 	AllAvailable bool
 	Apk          bool
 	Apt          bool
+	AptFast      bool
 	Dnf          bool
 	Flatpak      bool
 	Snap         bool
@@ -75,7 +76,8 @@ func (s *sysPkgImpl) FindPackageManagers(include IncludeOptions) (map[string]Pac
 		manager     PackageManager
 		include     bool
 	}{
-		{"apt", &apt.PackageManager{}, include.Apt},
+		{"apt", apt.NewPackageManager(), include.Apt},
+		{"apt-fast", apt.NewPackageManagerWithBinary("apt-fast"), include.AptFast},
 		{"flatpak", &flatpak.PackageManager{}, include.Flatpak},
 		{"snap", &snap.PackageManager{}, include.Snap},
 		{"yum", yum.NewPackageManager(), include.Yum},
