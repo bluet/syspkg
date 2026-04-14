@@ -1,5 +1,5 @@
 # Rocky Linux test container for go-syspkg (YUM testing)
-FROM rockylinux:8
+FROM rockylinux:9
 
 # Install build dependencies and YUM
 RUN yum update -y && yum install -y \
