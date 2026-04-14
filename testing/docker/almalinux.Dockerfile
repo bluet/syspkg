@@ -1,6 +1,6 @@
 # AlmaLinux test container for go-syspkg (YUM testing)
 
-FROM almalinux:8
+FROM almalinux:10
 
 # Install build dependencies and YUM
 RUN yum update -y && yum install -y \
