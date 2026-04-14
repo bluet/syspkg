@@ -1,5 +1,5 @@
 # Alpine test container for go-syspkg
-FROM alpine:3.18
+FROM alpine:3.23
 
 # Install build dependencies and apk package manager
 RUN apk add --no-cache \
