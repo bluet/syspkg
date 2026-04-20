@@ -1,5 +1,5 @@
 # Fedora test container for go-syspkg (DNF testing)
-FROM fedora:39
+FROM fedora:45
 
 # Install build dependencies and DNF
 RUN dnf update -y && dnf install -y \
