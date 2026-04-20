@@ -52,38 +52,38 @@ const (
 //	unknown:     Version="", NewVersion may contain repo_version
 type PackageInfo struct {
 	// Name is the package name.
-	Name string
+	Name string `json:"name"`
 
 	// Version is the currently installed version of the package.
 	// Empty if package is not installed (Status=available).
 	// Contains removed version for Delete operations.
-	Version string
+	Version string `json:"version,omitempty"`
 
 	// NewVersion is the latest available version from repositories.
 	// Used for available versions in Find operations and upgrade targets.
 	// Empty for ListInstalled operations.
 	// Same as Version for Install operations.
-	NewVersion string
+	NewVersion string `json:"new_version,omitempty"`
 
 	// Status indicates the current PackageStatus of the package.
 	// See PackageStatus constants for detailed descriptions.
-	Status PackageStatus
+	Status PackageStatus `json:"status"`
 
 	// Category is the category/section the package belongs to.
 	// Examples: "utilities", "development", "web", "jammy", "main"
 	// May represent repository sections or package categories depending on package manager.
-	Category string
+	Category string `json:"category,omitempty"`
 
 	// Arch is the architecture the package is built for.
 	// Examples: "amd64", "arm64", "i386", "all"
 	// Empty if architecture is not specified or not applicable.
-	Arch string
+	Arch string `json:"arch,omitempty"`
 
 	// PackageManager is the name of the package manager used to manage this package.
 	// Examples: "apt", "yum", "dnf", "snap", "flatpak"
-	PackageManager string
+	PackageManager string `json:"package_manager"`
 
 	// AdditionalData is a map of key-value pairs for additional package-specific metadata.
 	// Used for package manager specific information that doesn't fit standard fields.
-	AdditionalData map[string]string
+	AdditionalData map[string]string `json:"additional_data,omitempty"`
 }
