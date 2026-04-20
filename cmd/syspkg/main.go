@@ -2,13 +2,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"strings"
 
 	// "github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"github.com/bluet/syspkg"
 	"github.com/bluet/syspkg/manager"
@@ -64,15 +65,15 @@ func main() {
 	}
 
 	// Set up the CLI application.
-	app := &cli.App{
+	app := &cli.Command{
 		Name:                   "syspkg",
 		Usage:                  "A universal system package manager",
-		EnableBashCompletion:   true,
+		EnableShellCompletion:  true,
 		UseShortOptionHandling: true,
 		Suggest:                true,
-		// Action: func(c *cli.Context) error {
-		// 	var opts = getOptions(c)
-		// 	pms = filterPackageManager(pms, c)
+		// Action: func(ctx context.Context, cmd *cli.Command) error {
+		// 	var opts = getOptions(cmd)
+		// 	pms = filterPackageManager(pms, cmd)
 
 		// 	log.Printf("Listing upgradable packages for %T...\n", pms)
 		// 	listUpgradablePackages(pms, opts)
@@ -84,13 +85,13 @@ func main() {
 				Name:    "install",
 				Aliases: []string{"i"},
 				Usage:   "Install packages",
-				Action: func(c *cli.Context) error {
-					var opts = getOptions(c)
-					pms = filterPackageManager(pms, c)
+				Action: func(_ context.Context, cmd *cli.Command) error {
+					var opts = getOptions(cmd)
+					pms = filterPackageManager(pms, cmd)
 
 					log.Printf("Installing packages for %T...\n", pms)
 
-					pkgNames := c.Args().Slice()
+					pkgNames := cmd.Args().Slice()
 					for _, pm := range pms {
 						log.Printf("Installing packages for %T...\n", pm)
 						packages, err := pm.Install(pkgNames, opts)
@@ -107,10 +108,10 @@ func main() {
 				Name:    "delete",
 				Aliases: []string{"remove", "uninstall", "d", "rm", "un"},
 				Usage:   "Delete packages",
-				Action: func(c *cli.Context) error {
-					var opts = getOptions(c)
-					pms = filterPackageManager(pms, c)
-					pkgNames := c.Args().Slice()
+				Action: func(_ context.Context, cmd *cli.Command) error {
+					var opts = getOptions(cmd)
+					pms = filterPackageManager(pms, cmd)
+					pkgNames := cmd.Args().Slice()
 
 					log.Printf("Deleting packages... for %T\n", pms)
 
@@ -130,9 +131,9 @@ func main() {
 				Name:    "refresh",
 				Aliases: []string{"update", "r", "re", "u", "up"},
 				Usage:   "Refresh package list",
-				Action: func(c *cli.Context) error {
-					var opts = getOptions(c)
-					pms = filterPackageManager(pms, c)
+				Action: func(_ context.Context, cmd *cli.Command) error {
+					var opts = getOptions(cmd)
+					pms = filterPackageManager(pms, cmd)
 
 					log.Printf("Refreshing package list... for %T\n", pms)
 					for _, pm := range pms {
@@ -151,9 +152,9 @@ func main() {
 				Name:    "upgrade",
 				Aliases: []string{"U", "ug"},
 				Usage:   "Upgrade packages",
-				Action: func(c *cli.Context) error {
-					var opts = getOptions(c)
-					pms = filterPackageManager(pms, c)
+				Action: func(_ context.Context, cmd *cli.Command) error {
+					var opts = getOptions(cmd)
+					pms = filterPackageManager(pms, cmd)
 
 					log.Printf("Upgrading packages... for %T\n", pms)
 
@@ -178,10 +179,10 @@ func main() {
 				Name:    "find",
 				Aliases: []string{"search", "f"},
 				Usage:   "Find matching packages",
-				Action: func(c *cli.Context) error {
-					var opts = getOptions(c)
-					pms = filterPackageManager(pms, c)
-					keywords := c.Args().Slice()
+				Action: func(_ context.Context, cmd *cli.Command) error {
+					var opts = getOptions(cmd)
+					pms = filterPackageManager(pms, cmd)
+					keywords := cmd.Args().Slice()
 
 					if len(keywords) == 0 {
 						fmt.Println("Please specify keywords to search.")
@@ -209,14 +210,14 @@ func main() {
 				Aliases:     []string{"s"},
 				Usage:       "Please specify a subcommand. " + "Use `syspkg show --help` to see the subcommands.",
 				Description: `Show information. Please specify a subcommand. Use ` + "`syspkg show --help`" + ` to see the subcommands. Usage: ` + "`syspkg show [subcommand]`",
-				Subcommands: []*cli.Command{
+				Commands: []*cli.Command{
 					{
 						Name:    "upgradable",
 						Aliases: []string{"u"},
 						Usage:   "Show upgradable packages",
-						Action: func(c *cli.Context) error {
-							var opts = getOptions(c)
-							pms = filterPackageManager(pms, c)
+						Action: func(_ context.Context, cmd *cli.Command) error {
+							var opts = getOptions(cmd)
+							pms = filterPackageManager(pms, cmd)
 
 							log.Println("Showing upgradable packages...")
 
@@ -228,10 +229,10 @@ func main() {
 						Name:    "package",
 						Aliases: []string{"p"},
 						Usage:   "Show package information",
-						Action: func(c *cli.Context) error {
-							var opts = getOptions(c)
-							pms = filterPackageManager(pms, c)
-							pkgNames := c.Args().Slice()
+						Action: func(_ context.Context, cmd *cli.Command) error {
+							var opts = getOptions(cmd)
+							pms = filterPackageManager(pms, cmd)
+							pkgNames := cmd.Args().Slice()
 
 							if len(pkgNames) != 1 {
 								fmt.Println("Please specify one and only one package name.")
@@ -258,9 +259,9 @@ func main() {
 						Name:    "installed",
 						Aliases: []string{"i"},
 						Usage:   "Show installed packages",
-						Action: func(c *cli.Context) error {
-							var opts = getOptions(c)
-							pms = filterPackageManager(pms, c)
+						Action: func(_ context.Context, cmd *cli.Command) error {
+							var opts = getOptions(cmd)
+							pms = filterPackageManager(pms, cmd)
 
 							log.Println("Showing installed packages...")
 
@@ -358,20 +359,20 @@ func main() {
 	}
 
 	// Run the CLI application.
-	err = app.Run(os.Args)
+	err = app.Run(context.Background(), os.Args)
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
 }
 
-// getOptions extracts options from the CLI context and returns a manager.Options struct.
-func getOptions(c *cli.Context) *manager.Options {
+// getOptions extracts options from the CLI command and returns a manager.Options struct.
+func getOptions(cmd *cli.Command) *manager.Options {
 	var opts manager.Options
-	opts.Verbose = c.Bool("verbose")
-	opts.DryRun = c.Bool("dry-run")
-	opts.Interactive = c.Bool("interactive")
-	opts.Debug = c.Bool("debug")
+	opts.Verbose = cmd.Bool("verbose")
+	opts.DryRun = cmd.Bool("dry-run")
+	opts.Interactive = cmd.Bool("interactive")
+	opts.Debug = cmd.Bool("debug")
 
 	if !opts.Interactive {
 		opts.AssumeYes = true
@@ -381,19 +382,19 @@ func getOptions(c *cli.Context) *manager.Options {
 }
 
 // filterPackageManager filters the available package managers based on user input.
-func filterPackageManager(availablePMs map[string]syspkg.PackageManager, c *cli.Context) map[string]syspkg.PackageManager {
+func filterPackageManager(availablePMs map[string]syspkg.PackageManager, cmd *cli.Command) map[string]syspkg.PackageManager {
 	if len(availablePMs) == 0 {
 		log.Fatal("No package managers available!")
 	}
 
 	// if no specific package manager is specified, use all available
-	if !c.Bool("apt") && !c.Bool("flatpak") && !c.Bool("snap") && !c.Bool("yum") && !c.Bool("dnf") && !c.Bool("pacman") && !c.Bool("apk") && !c.Bool("zypper") {
+	if !cmd.Bool("apt") && !cmd.Bool("flatpak") && !cmd.Bool("snap") && !cmd.Bool("yum") && !cmd.Bool("dnf") && !cmd.Bool("pacman") && !cmd.Bool("apk") && !cmd.Bool("zypper") {
 		return availablePMs
 	}
 
 	var wantedPMs = make(map[string]syspkg.PackageManager)
 	for name, pm := range availablePMs {
-		if c.Bool(name) {
+		if cmd.Bool(name) {
 			wantedPMs[name] = pm
 		}
 	}
