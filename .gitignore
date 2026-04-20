@@ -13,6 +13,9 @@
 *.so
 *.dylib
 
+# Binary output at root (build output should be in bin/)
+syspkg
+
 # Test binary, built with `go test -c`
 *.test
 
