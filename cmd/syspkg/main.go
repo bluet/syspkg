@@ -66,9 +66,9 @@ func main() {
 
 	// Set up the CLI application.
 	app := &cli.Command{
-		Name:                  "syspkg",
-		Usage:                 "A universal system package manager",
-		EnableShellCompletion: true,
+		Name:                   "syspkg",
+		Usage:                  "A universal system package manager",
+		EnableShellCompletion:  true,
 		UseShortOptionHandling: true,
 		Suggest:                true,
 		// Action: func(ctx context.Context, cmd *cli.Command) error {
