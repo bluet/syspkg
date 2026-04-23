@@ -64,6 +64,11 @@ type PackageManager struct {
 	// runnerOnce protects lazy initialization for zero-value struct usage (e.g., &PackageManager{})
 	// This enables defensive programming and backward compatibility with existing test patterns
 	runnerOnce sync.Once
+	// binaryName is the name of the binary to use (e.g., "apt", "apt-fast")
+	// Defaults to "apt" if not specified
+	binaryName string
+	// binaryOnce protects lazy initialization of binaryName
+	binaryOnce sync.Once
 }
 
 // NewPackageManager creates a new APT package manager with default command runner
@@ -77,8 +82,29 @@ func NewPackageManager() *PackageManager {
 // This is primarily used for testing with mocked commands
 func NewPackageManagerWithCustomRunner(runner manager.CommandRunner) *PackageManager {
 	return &PackageManager{
-		runner: runner,
+		runner:     runner,
+		binaryName: pm,
 	}
+}
+
+// NewPackageManagerWithBinary creates a new APT package manager with a custom binary name
+// This allows using apt-compatible binaries like apt-fast as a drop-in replacement
+func NewPackageManagerWithBinary(binaryName string) *PackageManager {
+	return &PackageManager{
+		runner:     manager.NewDefaultCommandRunner(),
+		binaryName: binaryName,
+	}
+}
+
+// getBinaryName returns the binary name, defaulting to "apt" if not set.
+// Uses sync.Once for thread-safe lazy initialization to support zero-value struct usage.
+func (a *PackageManager) getBinaryName() string {
+	a.binaryOnce.Do(func() {
+		if a.binaryName == "" {
+			a.binaryName = pm
+		}
+	})
+	return a.binaryName
 }
 
 // getRunner returns the command runner, creating a default one if not set.
@@ -102,12 +128,12 @@ func (a *PackageManager) getRunner() manager.CommandRunner {
 func (a *PackageManager) executeCommand(ctx context.Context, args []string, opts *manager.Options) ([]byte, error) {
 	if opts != nil && opts.Interactive {
 		// Interactive mode uses RunInteractive for stdin/stdout/stderr handling
-		err := a.getRunner().RunInteractive(ctx, pm, args, aptNonInteractiveEnv...)
+		err := a.getRunner().RunInteractive(ctx, a.getBinaryName(), args, aptNonInteractiveEnv...)
 		return nil, err
 	}
 
 	// Use RunContext for non-interactive execution (automatically includes LC_ALL=C)
-	return a.getRunner().RunContext(ctx, pm, args, aptNonInteractiveEnv...)
+	return a.getRunner().RunContext(ctx, a.getBinaryName(), args, aptNonInteractiveEnv...)
 }
 
 // IsAvailable checks if the apt package manager is available on the system.
@@ -115,7 +141,7 @@ func (a *PackageManager) executeCommand(ctx context.Context, args []string, opts
 // (not the Java Annotation Processing Tool with the same name on some systems).
 func (a *PackageManager) IsAvailable() bool {
 	// First check if apt command exists
-	_, err := exec.LookPath(pm)
+	_, err := exec.LookPath(a.getBinaryName())
 	if err != nil {
 		return false
 	}
@@ -128,7 +154,7 @@ func (a *PackageManager) IsAvailable() bool {
 
 	// Test if this is actually functional Debian apt by trying a safe command
 	// This approach: if apt+dpkg work together, support them regardless of platform
-	output, err := a.getRunner().Run("apt", "--version")
+	output, err := a.getRunner().Run(a.getBinaryName(), "--version")
 	if err != nil {
 		return false
 	}
@@ -144,7 +170,7 @@ func (a *PackageManager) IsAvailable() bool {
 
 // GetPackageManager returns the name of the apt package manager.
 func (a *PackageManager) GetPackageManager() string {
-	return pm
+	return a.getBinaryName()
 }
 
 // Install installs the provided packages using the apt package manager.

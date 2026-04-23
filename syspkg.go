@@ -102,27 +102,89 @@ func (s *sysPkgImpl) FindPackageManagers(include IncludeOptions) (map[string]Pac
 
 // GetPackageManager returns a PackageManager instance by its name (e.g., "apt", "snap", "flatpak", etc.).
 // if name is empty, return the first available
+// For custom binary paths, use GetPackageManagerWithOptions.
 func (s *sysPkgImpl) GetPackageManager(name string) (PackageManager, error) {
+	return s.GetPackageManagerWithOptions(name, nil)
+}
+
+// GetPackageManagerWithOptions returns a PackageManager instance with custom configuration options.
+// This method provides a flexible way to create package manager instances with custom binaries.
+//
+// Parameters:
+//   - name: The package manager name (e.g., "apt", "yum", "snap", "flatpak")
+//   - opts: Optional configuration. If nil, default configuration is used.
+//
+// When opts.BinaryPath is specified:
+//   - A new manager instance is created with the custom binary
+//   - The custom binary can be a name (searched in PATH) or full path
+//   - This is useful for binary variants like "apt-fast" or custom installations
+//
+// When opts is nil or opts.BinaryPath is empty:
+//   - Returns the manager from the pre-registered list (created via New())
+//   - This is the standard case for default package managers
+//
+// Example usage:
+//
+//	// Get default apt
+//	apt, _ := syspkg.GetPackageManager("apt")
+//
+//	// Get apt with apt-fast binary
+//	aptFast, _ := syspkg.GetPackageManagerWithOptions("apt", &ManagerCreationOptions{
+//	    BinaryPath: "apt-fast",
+//	})
+//
+//	// Get yum with custom path
+//	customYum, _ := syspkg.GetPackageManagerWithOptions("yum", &ManagerCreationOptions{
+//	    BinaryPath: "/opt/custom/yum",
+//	})
+func (s *sysPkgImpl) GetPackageManagerWithOptions(name string, opts *ManagerCreationOptions) (PackageManager, error) {
 	// if there are no package managers, return before accessing non existing properties
 	if len(s.pms) == 0 {
 		return nil, errors.New("no supported package manager detected")
 	}
 
-	if name == "" {
-		// get first pm available, lexicographically sorted
-		keys := make([]string, 0, len(s.pms))
-		for k := range s.pms {
-			keys = append(keys, k)
-		}
-		sort.Strings(keys)
-		return s.pms[keys[0]], nil
+	// Extract binary path from options
+	var binaryPath string
+	if opts != nil && opts.BinaryPath != "" {
+		binaryPath = opts.BinaryPath
 	}
 
-	pm, found := s.pms[name]
-	if !found {
+	// If no custom binary path, use standard lookup
+	if binaryPath == "" {
+		if name == "" {
+			// get first pm available, lexicographically sorted
+			keys := make([]string, 0, len(s.pms))
+			for k := range s.pms {
+				keys = append(keys, k)
+			}
+			sort.Strings(keys)
+			return s.pms[keys[0]], nil
+		}
+
+		pm, found := s.pms[name]
+		if !found {
+			return nil, errors.New("no such package manager")
+		}
+		return pm, nil
+	}
+
+	// Custom binary path specified - create new instance
+	switch name {
+	case "apt":
+		return apt.NewPackageManagerWithBinary(binaryPath), nil
+	case "yum":
+		// YUM doesn't have NewPackageManagerWithBinary yet, but structure is ready
+		// For now, return error - will be implemented when YUM supports it
+		return nil, errors.New("custom binary path not yet supported for yum")
+	case "snap":
+		// Snap doesn't have NewPackageManagerWithBinary yet
+		return nil, errors.New("custom binary path not yet supported for snap")
+	case "flatpak":
+		// Flatpak doesn't have NewPackageManagerWithBinary yet
+		return nil, errors.New("custom binary path not yet supported for flatpak")
+	default:
 		return nil, errors.New("no such package manager")
 	}
-	return pm, nil
 }
 
 // RefreshPackageManagers refreshes the internal list of available package managers, and returns the new list.
