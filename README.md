@@ -8,6 +8,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/bluet/syspkg/blob/main/LICENSE)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/bluet/syspkg)](https://github.com/bluet/syspkg)
 [![GitHub release](https://img.shields.io/github/v/release/bluet/syspkg)](https://github.com/bluet/syspkg/releases)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fbluet%2Fsyspkg.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fbluet%2Fsyspkg?ref=badge_shield)
 
 SysPkg is a unified CLI tool and Golang library for managing system packages across different package managers. Currently, it supports APT, YUM, Snap, and Flatpak, with plans for more. It simplifies package management by providing a consistent interface and API through an abstraction layer that focuses on package manager tools rather than specific operating systems.
 
@@ -241,3 +242,5 @@ For advanced testing across multiple OS, see [CONTRIBUTING.md](CONTRIBUTING.md).
 ## License
 
 This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fbluet%2Fsyspkg.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fbluet%2Fsyspkg?ref=badge_large)
