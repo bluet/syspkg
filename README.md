@@ -243,5 +243,4 @@ For advanced testing across multiple OS, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
 
-
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fbluet%2Fsyspkg.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fbluet%2Fsyspkg?ref=badge_large)
