@@ -18,13 +18,19 @@ services:
     volumes:
       - ../..:/workspace
     working_dir: /workspace
+    # NOTE: bash -ec ensures any failed required command (test, apt update)
+    # exits immediately. The `|| true` on fixture-generation lines is the
+    # explicit opt-out — those steps are allowed to fail without failing the
+    # build. Previously this used `&&` chaining which silently masked test
+    # failures because trailing `|| true` caught failures from earlier in the
+    # chain.
     command: >
-      bash -c "
-        echo 'Running Ubuntu APT tests...' &&
-        go test -v -tags='unit integration apt' ./manager/apt ./osinfo &&
-        echo 'Generating APT fixtures...' &&
-        apt update &&
-        apt search vim > testing/fixtures/apt/search-vim-ubuntu22.txt 2>/dev/null || true &&
+      bash -ec "
+        echo 'Running Ubuntu APT tests...';
+        go test -v -tags='unit integration apt' ./manager/apt ./osinfo;
+        echo 'Generating APT fixtures...';
+        apt update;
+        apt search vim > testing/fixtures/apt/search-vim-ubuntu22.txt 2>/dev/null || true;
         apt show vim > testing/fixtures/apt/show-vim-ubuntu22.txt 2>/dev/null || true
       "
 
@@ -42,13 +48,14 @@ services:
     volumes:
       - ../..:/workspace
     working_dir: /workspace
+    # See ubuntu-apt-test for rationale on bash -ec + ; separators.
     command: >
-      bash -c "
-        echo 'Running Rocky Linux YUM tests...' &&
-        go test -v -tags='unit integration yum' ./manager/yum ./osinfo &&
-        echo 'Generating YUM fixtures...' &&
-        yum search vim > testing/fixtures/yum/search-vim-rocky8.txt 2>/dev/null || true &&
-        yum info vim-enhanced > testing/fixtures/yum/info-vim-rocky8.txt 2>/dev/null || true &&
+      bash -ec "
+        echo 'Running Rocky Linux YUM tests...';
+        go test -v -tags='unit integration yum' ./manager/yum ./osinfo;
+        echo 'Generating YUM fixtures...';
+        yum search vim > testing/fixtures/yum/search-vim-rocky8.txt 2>/dev/null || true;
+        yum info vim-enhanced > testing/fixtures/yum/info-vim-rocky8.txt 2>/dev/null || true;
         yum list --installed > testing/fixtures/yum/list-installed-rocky8.txt 2>/dev/null || true
       "
 
@@ -66,12 +73,13 @@ services:
     volumes:
       - ../..:/workspace
     working_dir: /workspace
+    # See ubuntu-apt-test for rationale on bash -ec + ; separators.
     command: >
-      bash -c "
-        echo 'Running AlmaLinux YUM tests...' &&
-        go test -v -tags='unit integration yum' ./manager/yum ./osinfo &&
-        echo 'Generating YUM fixtures...' &&
-        yum search vim > testing/fixtures/yum/search-vim-alma8.txt 2>/dev/null || true &&
+      bash -ec "
+        echo 'Running AlmaLinux YUM tests...';
+        go test -v -tags='unit integration yum' ./manager/yum ./osinfo;
+        echo 'Generating YUM fixtures...';
+        yum search vim > testing/fixtures/yum/search-vim-alma8.txt 2>/dev/null || true;
         yum info vim-enhanced > testing/fixtures/yum/info-vim-alma8.txt 2>/dev/null || true
       "
 
@@ -131,6 +139,13 @@ services:
       - almalinux-yum-test
       # - fedora-dnf-test  # TODO: Enable when DNF support is implemented
       # - alpine-apk-test  # TODO: Enable when APK support is implemented
+    # Defense-in-depth: this aggregator service only runs an echo, so it can
+    # safely use a read-only root and no-new-privileges. Required services
+    # (ubuntu/rocky/alma) need write access for fixture generation, so they
+    # don't get these constraints.
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
     volumes:
       - ../..:/workspace
     working_dir: /workspace
