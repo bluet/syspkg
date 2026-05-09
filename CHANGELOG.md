@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.7] - 2026-05-10
+
+### Security
+- **APT `Clean()` now respects `DryRun`**. Previously, `apt autoclean` executed regardless of the `DryRun` option, silently defeating the safety mechanism users expect from dry-run mode. The YUM/Snap/Flatpak Clean implementations already honored DryRun; APT now matches that behavior. Regression tests added in `manager/apt/apt_clean_dryrun_test.go`.
+- **Docker test runners no longer mask test failures**. The compose entrypoints used `bash -c` with `&&` chains and trailing `|| true` on fixture-generation steps; due to bash operator precedence, the `|| true` caught failures from earlier in the chain (including `go test`), letting failed tests pass CI silently. Switched to `bash -ec` with explicit `;` separators so test failures abort immediately while fixture-generation steps remain individually allowed to fail.
+- Added `read_only: true` and `no-new-privileges:true` to the `test-all` aggregator service for defense-in-depth.
+
+### Changed
+- **`PackageInfo` JSON output now uses snake_case field names** (e.g. `package_manager`, `new_version`, `additional_data`) instead of Go's default PascalCase. Required fields (`name`, `status`, `package_manager`) are always emitted; optional fields use `omitempty`. Consumers parsing JSON output must update field names. (#40, thanks @aijanai)
+
+### Fixed
+- `go.mod` now declares `go 1.23.0` (full version) instead of `go 1.23`, resolving Go toolchain download failures in some environments. (#40)
+
 ## [0.1.6] - 2025-11-01
 
 ### Added
@@ -37,14 +50,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Technical debt cleanup and APT Upgrade method fix
 - APT Upgrade method now correctly uses `apt install` for specific packages
 
-## Recent Achievements ✅ 
+## Recent Achievements ✅
 
 ### Architecture & Code Quality
 - ✅ **CommandRunner Architecture**: Complete architectural consistency (Issue #20, PR #26)
 - ✅ **APT & YUM executeCommand Pattern**: Centralized command execution, eliminated code duplication
 - ✅ **Technical Debt Cleanup**: Fixed APT Upgrade method bug, removed misleading TODOs, verified no resource leaks
 
-### Security Enhancements  
+### Security Enhancements
 - ✅ **Security Enhancements**: Input validation for package names (Issue #23, PR #25)
 - ✅ **Command Injection Prevention**: Comprehensive ValidatePackageName implementation across all package managers
 
@@ -77,7 +90,7 @@ Current development focus areas (see [GitHub Issues](https://github.com/bluet/sy
 - **Security scanning with Snyk** - Add to CI/CD pipeline
 - **CommandRunner migration** - Complete Snap and Flatpak integration (Issues #28, #29)
 
-### Medium Priority Pending  
+### Medium Priority Pending
 - **Test coverage improvements** - YUM gaps (Issue #32), Snap & Flatpak comprehensive suites
 - **CLI improvements** - Upgrade display (Issue #3), macOS apt conflict (Issue #2)
 - **Code quality** - Context support, custom error types, DRY principle improvements
@@ -90,7 +103,7 @@ Current development focus areas (see [GitHub Issues](https://github.com/bluet/sy
 
 ### Currently Supported ✅
 - **APT** (Ubuntu/Debian) - Full feature support
-- **YUM** (Rocky Linux/AlmaLinux/RHEL) - Full feature support  
+- **YUM** (Rocky Linux/AlmaLinux/RHEL) - Full feature support
 - **Snap** (Universal packages) - Full feature support
 - **Flatpak** (Universal packages) - Full feature support
 
