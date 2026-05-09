@@ -133,21 +133,34 @@ services:
 # Test runner that runs all tests in parallel
   test-all:
     image: ubuntu:24.04
+    # Long-form depends_on with service_completed_successfully so test-all
+    # waits for the actual tests to complete before running. With short-form,
+    # test-all's `echo` could finish in milliseconds and abort the compose
+    # run (--abort-on-container-exit) before the real tests had a chance to
+    # report failure — exactly the same class of CI-honesty bug the bash -ec
+    # change in this same release fixes one layer up.
     depends_on:
-      - ubuntu-apt-test
-      - rockylinux-yum-test
-      - almalinux-yum-test
-      # - fedora-dnf-test  # TODO: Enable when DNF support is implemented
-      # - alpine-apk-test  # TODO: Enable when APK support is implemented
+      ubuntu-apt-test:
+        condition: service_completed_successfully
+      rockylinux-yum-test:
+        condition: service_completed_successfully
+      almalinux-yum-test:
+        condition: service_completed_successfully
+      # fedora-dnf-test:    # TODO: Enable when DNF support is implemented
+      #   condition: service_completed_successfully
+      # alpine-apk-test:    # TODO: Enable when APK support is implemented
+      #   condition: service_completed_successfully
     # Defense-in-depth: this aggregator service only runs an echo, so it can
-    # safely use a read-only root and no-new-privileges. Required services
-    # (ubuntu/rocky/alma) need write access for fixture generation, so they
-    # don't get these constraints.
+    # safely use a read-only root, no-new-privileges, and a read-only bind
+    # mount. Required services (ubuntu/rocky/alma) need write access for
+    # fixture generation, so they don't get these constraints.
     read_only: true
     security_opt:
-      - no-new-privileges:true
+      # Quoted to avoid YAML parser ambiguity around `key:value` parsing
+      # while preserving Docker's documented `no-new-privileges:true` form.
+      - "no-new-privileges:true"
     volumes:
-      - ../..:/workspace
+      - ../..:/workspace:ro
     working_dir: /workspace
     command: >
       bash -c "
