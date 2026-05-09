@@ -378,9 +378,6 @@ func (a *PackageManager) UpgradeAll(opts *manager.Options) ([]manager.PackageInf
 
 // Clean cleans the local package cache used by the apt package manager.
 func (a *PackageManager) Clean(opts *manager.Options) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-	defer cancel()
-
 	if opts == nil {
 		opts = &manager.Options{
 			DryRun:      false,
@@ -388,6 +385,16 @@ func (a *PackageManager) Clean(opts *manager.Options) error {
 			Verbose:     false,
 		}
 	}
+
+	// Handle dry run mode
+	if opts.DryRun {
+		log.Println("Dry run mode: would execute 'apt autoclean'")
+		return nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+
 	args := []string{"autoclean"}
 	out, err := a.executeCommand(ctx, args, opts)
 	if err != nil {
