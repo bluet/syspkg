@@ -88,29 +88,29 @@ install-tools:
 # Docker testing targets
 test-docker:
 	@echo "Running tests in Docker containers..."
-	docker-compose -f testing/docker/docker-compose.test.yml up --abort-on-container-failure --remove-orphans
+	docker compose -f testing/docker/docker-compose.test.yml up --abort-on-container-failure --remove-orphans
 
 test-docker-ubuntu:
 	@echo "Running Ubuntu APT tests..."
-	docker-compose -f testing/docker/docker-compose.test.yml up ubuntu-apt-test --abort-on-container-failure
+	docker compose -f testing/docker/docker-compose.test.yml up ubuntu-apt-test --abort-on-container-failure
 
 test-docker-rocky:
 	@echo "Running Rocky Linux YUM tests..."
-	docker-compose -f testing/docker/docker-compose.test.yml up rockylinux-yum-test --abort-on-container-failure
+	docker compose -f testing/docker/docker-compose.test.yml up rockylinux-yum-test --abort-on-container-failure
 
 test-docker-alma:
 	@echo "Running AlmaLinux YUM tests..."
-	docker-compose -f testing/docker/docker-compose.test.yml up almalinux-yum-test --abort-on-container-failure
+	docker compose -f testing/docker/docker-compose.test.yml up almalinux-yum-test --abort-on-container-failure
 
 # TODO: Enable when DNF support is implemented
 # test-docker-fedora:
 # 	@echo "Running Fedora DNF tests..."
-# 	docker-compose -f testing/docker/docker-compose.test.yml up fedora-dnf-test --abort-on-container-failure
+# 	docker compose -f testing/docker/docker-compose.test.yml up fedora-dnf-test --abort-on-container-failure
 
 # TODO: Enable when APK support is implemented
 # test-docker-alpine:
 # 	@echo "Running Alpine APK tests..."
-# 	docker-compose -f testing/docker/docker-compose.test.yml up alpine-apk-test --abort-on-container-failure
+# 	docker compose -f testing/docker/docker-compose.test.yml up alpine-apk-test --abort-on-container-failure
 
 test-docker-all: test-docker
 
@@ -118,13 +118,13 @@ test-docker-all: test-docker
 test-fixtures:
 	@echo "Generating test fixtures from multiple OS..."
 	@mkdir -p testing/fixtures/{apt,yum,dnf,apk}
-	docker-compose -f testing/docker/docker-compose.test.yml up --abort-on-container-failure
+	docker compose -f testing/docker/docker-compose.test.yml up --abort-on-container-failure
 	@echo "Test fixtures generated in testing/fixtures/"
 
 # Clean up Docker resources
 test-docker-clean:
 	@echo "Cleaning up Docker test resources..."
-	docker-compose -f testing/docker/docker-compose.test.yml down --volumes --remove-orphans
+	docker compose -f testing/docker/docker-compose.test.yml down --volumes --remove-orphans
 	docker system prune -f --filter "label=com.docker.compose.project=syspkg-test"
 
 # Unit tests only (no integration/system tests)
