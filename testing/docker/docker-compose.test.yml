@@ -132,7 +132,7 @@ services:
 
 # Test runner that runs all tests in parallel
   test-all:
-    image: ubuntu:24.04
+    image: ubuntu:26.04
     # Long-form depends_on with service_completed_successfully so test-all
     # waits for the actual tests to complete before running. With short-form,
     # test-all's `echo` could finish in milliseconds and abort the compose
